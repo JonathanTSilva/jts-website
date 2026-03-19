@@ -13,6 +13,7 @@ The site must:
 - present a professional portfolio and CV
 - publish blog posts
 - publish short-form notes
+- publish a now page
 - support English and Brazilian Portuguese from the start
 - remain maintainable, stable, and inexpensive to operate
 - use a modern, clean, simple, direct visual language
@@ -25,10 +26,13 @@ The site is content-heavy and should be engineered as a static-first system with
 - Make the portfolio page the authoritative professional profile, including downloadable PDF CV.
 - Publish blog content from a private Obsidian repository folder at `08-Publish/Blog`.
 - Publish notes content from a private Obsidian repository folder at `08-Publish/Notes`.
+- Publish a now page from `08-Publish/now.md`.
 - Keep published content versioned inside the website repository after sync.
 - Support bilingual navigation and content presentation with English as default and Portuguese (Brazil) as second locale.
 - Preserve a strong writing and reading experience across desktop and mobile.
 - Minimize long-term maintenance burden and framework churn.
+- Provide quick global search across site writing surfaces.
+- Provide RSS feeds for blog content and optionally for notes if the implementation cost remains low.
 
 ## Non-Goals
 
@@ -63,6 +67,7 @@ Astro is the preferred choice because it balances current ecosystem maturity wit
 - `/blog/[slug]` blog post
 - `/notes` notes index
 - `/notes/[slug]` note detail
+- `/now` current focus and status page
 - locale-prefixed equivalents for Portuguese, with English as default and Portuguese under a distinct locale route strategy
 
 ### Homepage
@@ -81,7 +86,10 @@ Recommended homepage sections:
 - selected publications or credentials
 - latest blog posts
 - latest notes
+- contact section with direct contact methods
 - call-to-action to full portfolio and CV download
+
+The contact surface should be a section, not a dedicated page. It should remain lightweight and should not require a complex form in the initial version.
 
 ### Portfolio Page
 
@@ -114,6 +122,16 @@ The notes index should:
 
 The notes page is intentionally less formal than the blog, but it must remain legible and fast to navigate.
 
+### Now Page
+
+The now page should present a concise snapshot of current focus, work, learning, and active directions. It is not a blog post and should not be grouped into the blog or notes indexes.
+
+This page should read from:
+
+- `08-Publish/now.md`
+
+The page should feel more personal and current than the portfolio page while staying concise and easy to update.
+
 ## Content Sources and Content Model
 
 ### Source of Truth
@@ -124,6 +142,7 @@ Published content will live under:
 
 - `08-Publish/Blog`
 - `08-Publish/Notes`
+- `08-Publish/now.md`
 
 ### Website Repository Storage
 
@@ -186,6 +205,22 @@ Optional metadata may include:
 - color token or display accent
 - summary
 
+### Now Content Model
+
+The now page is a single Markdown-based content entry synced from `08-Publish/now.md`.
+
+Required metadata should include:
+
+- title
+- language
+- updated date
+
+Optional metadata may include:
+
+- summary
+- translation key
+- status label
+
 ## Bilingual Strategy
 
 ### Locales
@@ -218,6 +253,8 @@ The initial version should use one canonical PDF CV file stored in the website r
 
 Blog and notes indexes should be locale-scoped by default. Search and filtering should operate within the active locale view. Entries that exist only in the opposite locale may still appear in indexes when useful, but they must be clearly labeled and route to the original-language version.
 
+The now page should follow the same bilingual rules as other content. If only one locale exists, the opposite locale should link clearly to the original-language version rather than generating a synthetic translated page.
+
 ## Sync and Publishing Workflow
 
 ### Sync Model
@@ -230,6 +267,7 @@ The site must support both:
 ### Recommended Flow
 
 1. Author edits content in the private Obsidian repository under `08-Publish/Blog` or `08-Publish/Notes`.
+1. Author edits now content in the private Obsidian repository at `08-Publish/now.md`.
 2. A GitHub Action in the private repository detects relevant changes.
 3. The automation opens a pull request in the website repository containing the synced content updates.
 4. The website repository validates content shape and builds preview checks.
@@ -277,6 +315,32 @@ The notes section can carry more visual personality than the blog. It should enc
 - search
 - responsive adaptation to simpler list-style views where needed
 
+### Search Experience
+
+The site should include global search that is quick, useful, and intelligent enough to handle growth in blog and notes content over time.
+
+Initial search requirements:
+
+- search across blog and notes
+- fast client-side interaction for a static site
+- good ranking for title, tags, categories, and content excerpts
+- keyboard-friendly interaction
+- locale-aware results
+
+Search does not need a backend service in the initial version. The preferred direction is a static-index or generated-index approach compatible with static hosting.
+
+### RSS Experience
+
+The site should provide RSS feeds as a first-class publishing feature.
+
+Required:
+
+- RSS feed for the blog
+
+Preferred if implementation remains low-complexity:
+
+- RSS feed for notes
+
 ## Engineering Principles
 
 - static-first architecture
@@ -289,6 +353,7 @@ The notes section can carry more visual personality than the blog. It should enc
 - image and asset optimization
 - automated validation in CI
 - avoid unnecessary backend services
+- no search backend in the initial version unless static indexing proves insufficient
 
 ## Performance and Quality Requirements
 
@@ -298,6 +363,8 @@ The notes section can carry more visual personality than the blog. It should enc
 - clear visual contrast and readable typography
 - validation failures for malformed content metadata
 - previewable PRs for content and design changes
+- fast and relevant global search
+- valid RSS feed generation for supported content types
 
 ## Maintainability Requirements
 
@@ -307,6 +374,7 @@ The notes section can carry more visual personality than the blog. It should enc
 - no runtime coupling to private sources
 - straightforward local development flow
 - low hosting and operational burden
+- lightweight enough that search and feeds do not create operational drag
 
 ## Risks and Mitigations
 
@@ -349,7 +417,10 @@ The design is successful if the implemented site:
 - provides a detailed portfolio page and downloadable CV
 - publishes blog posts from `08-Publish/Blog`
 - publishes notes from `08-Publish/Notes`
+- publishes a now page from `08-Publish/now.md`
 - supports English and Brazilian Portuguese cleanly
 - keeps content sync safe, reviewable, and easy to operate
+- provides quick global search across blog and notes
+- exposes RSS for blog and, if adopted in implementation, notes
 - feels modern, clean, simple, and direct
 - remains maintainable without server complexity
