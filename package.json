@@ -12,7 +12,7 @@
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install --with-deps chromium",
     "test": "pnpm test:unit && pnpm test:e2e",
-    "lint:content": "node scripts/validate-content.mjs",
+    "lint:content": "tsx scripts/validate-content.ts",
     "check": "astro check"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.50.1",
+    "tsx": "^4.19.2",
     "vitest": "^3.0.7"
   }
 }

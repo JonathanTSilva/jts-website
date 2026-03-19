@@ -4,6 +4,8 @@ import type { z } from "zod";
 
 export type CollectionType = "blog" | "notes" | "now";
 
+export const COLLECTIONS: CollectionType[] = ["blog", "notes", "now"];
+
 const CONTRACTS: Record<CollectionType, string[]> = {
   blog: ["Conclusion"],
   notes: [],
