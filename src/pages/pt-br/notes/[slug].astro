@@ -1,0 +1,144 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { contentLocalePath } from '../../../lib/content/locale';
+
+export async function getStaticPaths() {
+  const allNotes = await getCollection('notes');
+  const locale = 'pt-br';
+  
+  return allNotes.map(note => ({
+    params: { slug: note.data.slug },
+    props: { note, isTranslationFallback: note.data.language !== locale },
+  }));
+}
+
+const { note, isTranslationFallback } = Astro.props;
+const { Content } = await render(note);
+
+const locale = 'pt-br';
+
+const t = {
+  fallbackNotice: 'Esta nota não está disponível em Português. Mostrando a versão original.',
+  publishedAt: 'Publicado em',
+  category: 'Categoria',
+  tags: 'Tags',
+  back: '← Voltar para notas',
+};
+---
+
+<BaseLayout 
+  locale={locale} 
+  title={note.data.title} 
+  description={note.data.summary ?? undefined}
+>
+  <article class="container">
+    <header class="note-header" style={note.data.colorToken ? `--note-accent: ${note.data.colorToken}` : ''}>
+      {note.data.category && <span class="note-category">{note.data.category}</span>}
+      <h1 class="note-title">{note.data.title}</h1>
+      <div class="note-meta">
+        <time datetime={note.data.publishedAt.toISOString()}>
+          {t.publishedAt} {note.data.publishedAt.toLocaleDateString(locale, { dateStyle: 'long' })}
+        </time>
+        {note.data.tags && note.data.tags.length > 0 && (
+          <div class="note-tags">
+             {note.data.tags.map(tag => (
+               <span class="note-tag">#{tag}</span>
+             ))}
+          </div>
+        )}
+      </div>
+    </header>
+
+    {isTranslationFallback && (
+      <div class="fallback-notice">
+        <p>{t.fallbackNotice}</p>
+      </div>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="note-footer">
+      <a href={contentLocalePath(locale, '/notes')} class="back-link">
+        {t.back}
+      </a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-8) 0;
+  }
+  .note-header {
+    --note-accent: var(--color-accent);
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-4);
+    border-bottom: 2px solid var(--note-accent);
+  }
+  .note-category {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--note-accent);
+    display: block;
+    margin-bottom: var(--space-2);
+  }
+  .note-title {
+    font-size: var(--text-4xl);
+    margin: 0 0 var(--space-2) 0;
+  }
+  .note-meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: center;
+  }
+  .note-tags {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .note-tag {
+    font-family: var(--font-mono);
+  }
+  .fallback-notice {
+    background-color: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: var(--space-4);
+    margin-bottom: var(--space-8);
+    color: #92400e;
+  }
+  .prose {
+    line-height: 1.6;
+  }
+  .prose :global(h2) {
+    font-size: var(--text-2xl);
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-4);
+  }
+  .prose :global(p) {
+    margin-bottom: var(--space-4);
+  }
+  .prose :global(ul) {
+    margin-bottom: var(--space-4);
+    padding-left: var(--space-6);
+  }
+  .note-footer {
+    margin-top: var(--space-12);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+  .back-link {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>

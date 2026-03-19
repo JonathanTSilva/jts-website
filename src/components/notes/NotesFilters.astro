@@ -1,0 +1,209 @@
+---
+import type { Locale } from '../../lib/content/locale';
+
+interface Props {
+  categories: string[];
+  tags: string[];
+  locale: Locale;
+}
+
+const { categories, tags, locale } = Astro.props;
+
+const labels = {
+  en: {
+    all: 'All',
+    categories: 'Categories',
+    tags: 'Tags',
+    clear: 'Clear Filters'
+  },
+  'pt-br': {
+    all: 'Tudo',
+    categories: 'Categorias',
+    tags: 'Tags',
+    clear: 'Limpar Filtros'
+  }
+}[locale];
+---
+
+<div class="notes-filters" id="notes-filters">
+  <div class="filter-group">
+    <h3 class="filter-label">{labels.categories}</h3>
+    <div class="filter-options">
+      <button class="filter-btn active" data-filter="category" data-value="all">{labels.all}</button>
+      {categories.map(category => (
+        <button class="filter-btn" data-filter="category" data-value={category}>{category}</button>
+      ))}
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <h3 class="filter-label">{labels.tags}</h3>
+    <div class="filter-options">
+      {tags.map(tag => (
+        <button class="filter-btn" data-filter="tag" data-value={tag}>#{tag}</button>
+      ))}
+    </div>
+  </div>
+  
+  <button id="clear-filters" class="clear-filters" style="display: none;">{labels.clear}</button>
+</div>
+
+<script>
+  function initFilters() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const clearBtn = document.getElementById('clear-filters');
+    const notesGrid = document.getElementById('notes-grid');
+    const noNotesMessage = document.getElementById('no-notes-message');
+    
+    if (!notesGrid) return;
+    
+    const notes = Array.from(notesGrid.querySelectorAll('.note-card')) as HTMLElement[];
+    
+    let activeCategory = 'all';
+    let activeTags = new Set<string>();
+    
+    function updateFilters() {
+      let visibleCount = 0;
+      
+      notes.forEach(note => {
+        const category = note.dataset.category;
+        const noteTags = note.dataset.tags?.split(',') || [];
+        
+        const categoryMatch = activeCategory === 'all' || category === activeCategory;
+        const tagsMatch = activeTags.size === 0 || Array.from(activeTags).every(tag => noteTags.includes(tag));
+        
+        if (categoryMatch && tagsMatch) {
+          note.style.display = 'block';
+          visibleCount++;
+        } else {
+          note.style.display = 'none';
+        }
+      });
+      
+      if (noNotesMessage) {
+        noNotesMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+      }
+      
+      if (clearBtn) {
+        clearBtn.style.display = (activeCategory !== 'all' || activeTags.size > 0) ? 'block' : 'none';
+      }
+    }
+    
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = (btn as HTMLElement).dataset.filter;
+        const value = (btn as HTMLElement).dataset.value;
+        
+        if (type === 'category') {
+          if (value === 'all') {
+            activeCategory = 'all';
+          } else {
+            activeCategory = value!;
+          }
+          
+          // Update visual state for category buttons
+          document.querySelectorAll('.filter-btn[data-filter="category"]').forEach(b => {
+            b.classList.toggle('active', (b as HTMLElement).dataset.value === activeCategory);
+          });
+        } else if (type === 'tag') {
+          if (activeTags.has(value!)) {
+            activeTags.delete(value!);
+            btn.classList.remove('active');
+          } else {
+            activeTags.add(value!);
+            btn.classList.add('active');
+          }
+        }
+        
+        updateFilters();
+      });
+    });
+    
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        activeCategory = 'all';
+        activeTags.clear();
+        
+        filterButtons.forEach(btn => {
+          const type = (btn as HTMLElement).dataset.filter;
+          const value = (btn as HTMLElement).dataset.value;
+          btn.classList.toggle('active', type === 'category' && value === 'all');
+        });
+        
+        updateFilters();
+      });
+    }
+  }
+
+  // Initialize on page load
+  initFilters();
+  
+  // Re-initialize when Astro swaps pages (if using View Transitions)
+  document.addEventListener('astro:page-load', initFilters);
+</script>
+
+<style>
+  .notes-filters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    margin-bottom: var(--space-8);
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .filter-label {
+    font-size: var(--text-sm);
+    font-weight: bold;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+  
+  .filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  
+  .filter-btn {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--color-text);
+  }
+  
+  .filter-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  
+  .filter-btn.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+  }
+  
+  .clear-filters {
+    align-self: flex-start;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--color-accent);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: var(--space-2);
+  }
+</style>

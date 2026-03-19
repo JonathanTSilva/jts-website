@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build:search": "tsx scripts/build-search-index.ts",
+    "build": "pnpm build:search && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "test:unit": "vitest run",

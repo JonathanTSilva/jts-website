@@ -6,8 +6,225 @@ interface Props {
 }
 
 const { locale } = Astro.props;
+
+const t = {
+  en: {
+    placeholder: 'Search blog and notes...',
+    noResults: 'No results found.',
+    close: 'Close (Esc)',
+    shortcut: 'Press / to search',
+  },
+  'pt-br': {
+    placeholder: 'Buscar blog e notas...',
+    noResults: 'Nenhum resultado encontrado.',
+    close: 'Fechar (Esc)',
+    shortcut: 'Pressione / para buscar',
+  }
+}[locale];
 ---
 
-<div class="search-dialog-placeholder" data-locale={locale}>
-  <!-- Placeholder for search dialog -->
+<div id="search-dialog" class="search-dialog" role="dialog" aria-labelledby="search-label" aria-modal="true" style="display: none;">
+  <div class="search-backdrop" id="search-backdrop"></div>
+  <div class="search-content">
+    <header class="search-header">
+      <label id="search-label" for="search-input" class="sr-only">{t.placeholder}</label>
+      <input 
+        type="search" 
+        id="search-input" 
+        placeholder={t.placeholder}
+        autocomplete="off"
+      />
+      <button id="close-search" class="close-btn" aria-label={t.close}>×</button>
+    </header>
+    
+    <div id="search-results" class="search-results">
+      <!-- Results populated by JS -->
+    </div>
+    
+    <footer class="search-footer">
+      <span class="shortcut-tip">{t.shortcut}</span>
+    </footer>
+  </div>
 </div>
+
+<script is:inline define:vars={{ locale, t }}>
+  let searchIndex = null;
+  const dialog = document.getElementById('search-dialog');
+  const backdrop = document.getElementById('search-backdrop');
+  const input = document.getElementById('search-input');
+  const resultsContainer = document.getElementById('search-results');
+  const closeBtn = document.getElementById('close-search');
+
+  async function openSearch() {
+    dialog.style.display = 'flex';
+    input.focus();
+    
+    if (!searchIndex) {
+      try {
+        const response = await fetch(`/api/${locale}\/search-index.json`);
+        searchIndex = await response.json();
+      } catch (e) {
+        console.error('Failed to load search index', e);
+      }
+    }
+  }
+
+  function closeSearch() {
+    dialog.style.display = 'none';
+    input.value = '';
+    resultsContainer.innerHTML = '';
+  }
+
+  function performSearch(query) {
+    if (!searchIndex || !query) {
+      resultsContainer.innerHTML = '';
+      return;
+    }
+
+    const q = query.toLowerCase();
+    const results = searchIndex.filter(item => 
+      item.title.toLowerCase().includes(q) || 
+      item.summary.toLowerCase().includes(q) ||
+      item.tags.some(tag => tag.toLowerCase().includes(q))
+    ).slice(0, 10);
+
+    if (results.length === 0) {
+      resultsContainer.innerHTML = `<p class="no-results">${t.noResults}</p>`;
+      return;
+    }
+
+    resultsContainer.innerHTML = results.map(item => `
+      <a href="${item.url}" class="search-result-item">
+        <span class="result-type">${item.type}</span>
+        <h4 class="result-title">${item.title}</h4>
+        <p class="result-summary">${item.summary}</p>
+      </a>
+    `).join('');
+  }
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      openSearch();
+    }
+    if (e.key === 'Escape' && dialog.style.display === 'flex') {
+      closeSearch();
+    }
+  });
+
+  input.addEventListener('input', (e) => performSearch(e.target.value));
+  closeBtn.addEventListener('click', closeSearch);
+  backdrop.addEventListener('click', closeSearch);
+
+  // Expose to other components if needed
+  window.openSearch = openSearch;
+</script>
+
+<style>
+  .search-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 10vh;
+  }
+
+  .search-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .search-content {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+  }
+
+  .search-header {
+    display: flex;
+    align-items: center;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: var(--text-lg);
+    color: var(--color-text);
+    outline: none;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: var(--text-2xl);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0 var(--space-2);
+  }
+
+  .search-results {
+    padding: var(--space-2);
+    overflow-y: auto;
+  }
+
+  .search-result-item {
+    display: block;
+    padding: var(--space-4);
+    text-decoration: none;
+    color: inherit;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+
+  .search-result-item:hover {
+    background: var(--color-surface);
+  }
+
+  .result-type {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    color: var(--color-accent);
+    font-weight: bold;
+  }
+
+  .result-title {
+    margin: var(--space-1) 0;
+    font-size: var(--text-base);
+  }
+
+  .result-summary {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .search-footer {
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  .no-results {
+    padding: var(--space-8);
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import NotesGrid from '../../../components/notes/NotesGrid.astro';
+import NotesFilters from '../../../components/notes/NotesFilters.astro';
+
+const locale = 'pt-br';
+
+const t = {
+  title: 'Notas',
+  description: 'Uma coleção de notas técnicas, dicas e pedaços de conhecimento.',
+};
+
+const allNotes = await getCollection('notes');
+
+// Get all notes for the current locale, and all notes missing a translation in the current locale
+const uniqueTranslationKeys = Array.from(new Set(allNotes.map(p => p.data.translationKey)));
+
+const notesToShow = uniqueTranslationKeys.map(key => {
+  const translations = allNotes.filter(p => p.data.translationKey === key);
+  const currentLocaleNote = translations.find(p => p.data.language === locale);
+  if (currentLocaleNote) {
+    return { ...currentLocaleNote, isTranslationMissing: false };
+  } else {
+    // Return the default locale post (or the first one available if default is not there)
+    const fallbackNote = translations.find(p => p.data.language === 'en') || translations[0];
+    if (!fallbackNote) return null;
+    return { ...fallbackNote, isTranslationMissing: true };
+  }
+}).filter((p): p is NonNullable<typeof p> => p !== null)
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+const categories = Array.from(new Set(notesToShow.map(note => note.data.category).filter((c): c is string => !!c))).sort();
+const tags = Array.from(new Set(notesToShow.flatMap(note => note.data.tags))).sort();
+---
+
+<BaseLayout locale={locale} title={t.title} description={t.description}>
+  <div class="container">
+    <header class="page-header">
+      <h1 class="page-title">{t.title}</h1>
+      <p class="page-description">{t.description}</p>
+    </header>
+
+    <NotesFilters categories={categories} tags={tags} locale={locale} />
+    <NotesGrid notes={notesToShow} locale={locale} />
+  </div>
+</BaseLayout>
+
+<style>
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-8) 0;
+  }
+  .page-header {
+    margin-bottom: var(--space-12);
+  }
+  .page-title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-4);
+  }
+  .page-description {
+    font-size: var(--text-lg);
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,0 +1,47 @@
+[
+  {
+    "title": "Continuous Integration for Firmware",
+    "summary": "How to apply modern CI/CD practices to embedded development.",
+    "tags": [
+      "CI/CD",
+      "Firmware",
+      "Automation"
+    ],
+    "url": "/blog/2026-03-ci-firmware.en",
+    "type": "blog"
+  },
+  {
+    "title": "Hello Embedded Systems",
+    "summary": "Introduction to embedded programming with C and Rust.",
+    "tags": [
+      "C",
+      "Rust",
+      "Embedded"
+    ],
+    "url": "/blog/2026-03-hello-embedded-systems.en",
+    "type": "blog"
+  },
+  {
+    "title": "Good Debugging Habits",
+    "summary": "",
+    "tags": [
+      "Debugging",
+      "Productivity"
+    ],
+    "category": "Engineering",
+    "url": "/notes/debugging-habits.en",
+    "type": "notes"
+  },
+  {
+    "title": "Understanding RTOS Scheduling",
+    "summary": "",
+    "tags": [
+      "RTOS",
+      "Scheduling",
+      "FreeRTOS"
+    ],
+    "category": "Real-Time Systems",
+    "url": "/notes/rtos-scheduling.en",
+    "type": "notes"
+  }
+]

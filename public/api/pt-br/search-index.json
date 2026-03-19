@@ -1,0 +1,24 @@
+[
+  {
+    "title": "Olá Sistemas Embarcados",
+    "summary": "Introdução a sistemas embarcados com C e Rust.",
+    "tags": [
+      "C",
+      "Rust",
+      "Embarcados"
+    ],
+    "url": "/pt-br/blog/2026-03-hello-embedded-systems.pt-br",
+    "type": "blog"
+  },
+  {
+    "title": "Bons Hábitos de Depuração",
+    "summary": "",
+    "tags": [
+      "Depuração",
+      "Produtividade"
+    ],
+    "category": "Engenharia",
+    "url": "/pt-br/notes/debugging-habits.pt-br",
+    "type": "notes"
+  }
+]
