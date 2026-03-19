@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  # Consider workflow_run if explicit dependency is needed:
+  # workflow_run:
+  #   workflows: ["CI"]
+  #   types: [completed]
+  #   branches: [main]
+
+jobs:
+  deploy:
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build
+        run: pnpm build
+        
+      - name: Deploy
+        run: |
+          echo "Placeholder for deployment step (e.g., Vercel, Netlify, or GH Pages)"
+          # Example for GH Pages:
+          # uses: peaceiris/actions-gh-pages@v3
+          # with:
+          #   github_token: ${{ secrets.GITHUB_TOKEN }}
+          #   publish_dir: ./dist

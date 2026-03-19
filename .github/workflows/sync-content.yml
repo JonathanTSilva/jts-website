@@ -1,0 +1,57 @@
+name: Sync Content
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [ sync_content ]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout website repo
+        uses: actions/checkout@v4
+        with:
+          path: website-repo
+
+      - name: Checkout private content repo
+        uses: actions/checkout@v4
+        with:
+          repository: jts/personal-vault # Assumed path
+          token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}
+          path: content-repo
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: website-repo/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: website-repo
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync Content
+        working-directory: website-repo
+        env:
+          SYNC_SOURCE_DIR: ${{ github.workspace }}/content-repo
+        run: pnpm sync:content
+
+      - name: Validate Content
+        working-directory: website-repo
+        run: pnpm lint:content
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          path: website-repo
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: sync content from vault"
+          title: "chore: sync content from vault"
+          body: "This PR was automatically created to sync content from the private vault."
+          branch: "sync/content"
+          delete-branch: true
