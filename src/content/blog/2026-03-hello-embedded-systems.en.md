@@ -9,3 +9,7 @@ tags: ["C", "Rust", "Embedded"]
 ---
 
 Welcome to the world of low-level programming!
+
+## Conclusion
+
+Hope this helps!

@@ -9,3 +9,7 @@ tags: ["C", "Rust", "Embarcados"]
 ---
 
 Bem-vindo ao mundo da programação de baixo nível!
+
+## Conclusion
+
+Hope this helps!

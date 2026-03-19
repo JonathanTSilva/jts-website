@@ -9,3 +9,7 @@ tags: ["CI/CD", "Firmware", "Automation"]
 ---
 
 Firmware development often lags behind web development in terms of automation...
+
+## Conclusion
+
+Hope this helps!
