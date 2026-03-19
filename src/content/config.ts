@@ -25,8 +25,9 @@ const notes = defineCollection({
     language: languageEnum,
     translationKey: z.string().min(1),
     publishedAt: z.coerce.date(),
+    summary: z.string().optional(),
     category: z.string().optional(),
-    tags: z.array(z.string()).default([]).optional(),
+    tags: z.array(z.string()).default([]),
     colorToken: z.string().optional(),
   }),
 });
@@ -38,6 +39,7 @@ const now = defineCollection({
     language: languageEnum,
     translationKey: z.string().min(1).optional(),
     updatedAt: z.coerce.date(),
+    summary: z.string().optional(),
     status: z.string().optional(),
   }),
 });
