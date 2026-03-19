@@ -323,6 +323,7 @@ Manual sync should remain available as a fallback workflow so the automation pat
 - simple
 - direct
 - technical without being sterile
+- theme-aware across light and dark environments
 
 ### Visual Personality
 
@@ -333,6 +334,27 @@ The site should use a modern technical visual language rather than a loud portfo
 - restrained but intentional color system
 - subtle motion and transitions
 - data/system-inspired accents where useful, not decorative overload
+
+### Theme Behavior
+
+The site must support both light mode and dark mode.
+
+Theme requirements:
+
+- follow the user's system theme preference by default
+- provide a manual theme toggle so the user can override the system preference
+- preserve the user's explicit theme choice across visits
+- ensure both themes are first-class and not a degraded afterthought
+
+The design system should define tokens for both themes from the start, including:
+
+- background and surface colors
+- text and muted text colors
+- border and separator colors
+- accent and category colors
+- code and syntax presentation colors where relevant
+
+Both themes must preserve readability, contrast, and the intended visual identity of the site.
 
 ### Blog Experience
 
@@ -395,6 +417,7 @@ Preferred if implementation remains low-complexity:
 - responsive experience on desktop and mobile
 - accessible semantic markup and keyboard navigation
 - clear visual contrast and readable typography
+- correct light and dark theme behavior with system-theme support
 - validation failures for malformed content metadata
 - previewable PRs for content and design changes
 - fast and relevant global search
@@ -410,6 +433,7 @@ Preferred if implementation remains low-complexity:
 - straightforward local development flow
 - low hosting and operational burden
 - lightweight enough that search and feeds do not create operational drag
+- theme tokens and components should be organized so both light and dark mode remain easy to evolve over time
 
 ## Risks and Mitigations
 
@@ -457,5 +481,6 @@ The design is successful if the implemented site:
 - keeps content sync safe, reviewable, and easy to operate
 - provides quick global search across blog and notes
 - exposes RSS for blog and, if adopted in implementation, notes
+- supports light and dark mode while following system theme by default
 - feels modern, clean, simple, and direct
 - remains maintainable without server complexity
