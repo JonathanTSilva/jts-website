@@ -140,6 +140,29 @@ a:hover {
   border-width: 0;
 }
 
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: var(--space-4);
+  background: var(--color-accent);
+  color: white !important;
+  padding: var(--space-2) var(--space-4);
+  z-index: 10000;
+  border-radius: 0 0 4px 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
 main {
   flex: 1;
 }
