@@ -33,6 +33,7 @@ The site is content-heavy and should be engineered as a static-first system with
 - Minimize long-term maintenance burden and framework churn.
 - Provide quick global search across site writing surfaces.
 - Provide RSS feeds for blog content and optionally for notes if the implementation cost remains low.
+- Validate synced Markdown content against required templates and publishing rules before it can be merged or deployed.
 
 ## Non-Goals
 
@@ -138,6 +139,8 @@ The page should feel more personal and current than the portfolio page while sta
 
 The private Obsidian repository remains the authoring source for published writing.
 
+Published Markdown files are expected to follow explicit Obsidian templates for each content type. Those templates define the required properties, metadata, and expected section structure for blog posts, notes, and the now page.
+
 Published content will live under:
 
 - `08-Publish/Blog`
@@ -166,6 +169,8 @@ This keeps authoring ergonomic while preserving consistency and type safety for 
 
 Blog posts are Markdown-based content entries synced from `08-Publish/Blog`.
 
+Blog posts are expected to follow a blog-specific template from the Obsidian vault. The website pipeline must validate both required metadata and any required content structure defined for blog entries.
+
 Required blog metadata should include:
 
 - title
@@ -190,6 +195,8 @@ Notes should support a mixed categorization model:
 - folder structure provides a default section or grouping
 - frontmatter provides categories, tags, and presentation metadata
 
+Notes are expected to follow a note-specific template from the Obsidian vault. The website pipeline must validate both required metadata and any required content structure defined for notes.
+
 Required note metadata should include:
 
 - title
@@ -209,6 +216,8 @@ Optional metadata may include:
 
 The now page is a single Markdown-based content entry synced from `08-Publish/now.md`.
 
+The now page is expected to follow a now-specific template from the Obsidian vault. The website pipeline must validate both required metadata and any required content structure defined for the now page.
+
 Required metadata should include:
 
 - title
@@ -220,6 +229,29 @@ Optional metadata may include:
 - summary
 - translation key
 - status label
+
+### Content Contracts and Validation
+
+Published Markdown content must be treated as contract-driven input rather than best-effort input.
+
+The system must support validation for:
+
+- required frontmatter fields per content type
+- field types and allowed values
+- required locale and translation-linking fields
+- required section presence when a content type template defines mandatory sections
+- slug and path rules
+- date format rules
+
+Validation should happen automatically in the website repository during sync and CI checks.
+
+If a synced file is invalid:
+
+- the sync PR must fail validation
+- the site build must not proceed to a deployable state
+- the error output should identify the file and the broken rule clearly enough to fix it quickly
+
+This is a strict-fail publishing model. Malformed blog posts, notes, or now content must not be silently skipped or partially published.
 
 ## Bilingual Strategy
 
@@ -270,8 +302,9 @@ The site must support both:
 1. Author edits now content in the private Obsidian repository at `08-Publish/now.md`.
 2. A GitHub Action in the private repository detects relevant changes.
 3. The automation opens a pull request in the website repository containing the synced content updates.
-4. The website repository validates content shape and builds preview checks.
-5. After merge, the site is deployed by CI/CD.
+4. The website repository validates frontmatter, content contracts, and template requirements for all synced content.
+5. The website repository builds preview checks only if validation passes.
+6. After merge, the site is deployed by CI/CD.
 
 Manual sync should remain available as a fallback workflow so the automation path is not the only recovery mechanism.
 
@@ -354,6 +387,7 @@ Preferred if implementation remains low-complexity:
 - automated validation in CI
 - avoid unnecessary backend services
 - no search backend in the initial version unless static indexing proves insufficient
+- content contract validation must be explicit, typed where possible, and enforced before deploy
 
 ## Performance and Quality Requirements
 
@@ -365,6 +399,7 @@ Preferred if implementation remains low-complexity:
 - previewable PRs for content and design changes
 - fast and relevant global search
 - valid RSS feed generation for supported content types
+- publish-blocking validation for malformed Markdown content or template violations
 
 ## Maintainability Requirements
 
