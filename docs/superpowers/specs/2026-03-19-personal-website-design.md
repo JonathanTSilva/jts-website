@@ -151,6 +151,7 @@ Required blog metadata should include:
 
 - title
 - slug
+- translation key
 - publication date
 - language
 - summary or description
@@ -174,6 +175,7 @@ Required note metadata should include:
 
 - title
 - slug
+- translation key
 - publication date
 - language
 
@@ -197,14 +199,24 @@ Strict parity is not required.
 
 If content exists in only one language:
 
-- the missing locale route or entry state should clearly indicate that the content is available only in the other language
-- the user should be directed to the original version
+- the content pair must still be related through a shared translation key
+- no synthetic detail page should be generated for a translation that does not exist
+- locale-specific indexes should show the item with a clear availability label such as "available only in English" or "available only in Portuguese"
+- if a user switches locale while viewing a detail page whose counterpart does not exist, the site should direct the user to the original-language page with a clear notice
 
 This keeps the publishing workflow lightweight while preserving a coherent bilingual site structure.
 
 ### Portfolio Translation
 
 Portfolio pages and navigation should be fully localized. Structured data and narrative content should be modeled to allow locale-specific values without hacks or duplicated layout logic.
+
+### CV Localization
+
+The initial version should use one canonical PDF CV file stored in the website repository. Locale-specific page copy may describe the CV in the active language, but the downloadable asset itself does not need separate localized versions in the first release.
+
+### Locale Scope for Listing and Search
+
+Blog and notes indexes should be locale-scoped by default. Search and filtering should operate within the active locale view. Entries that exist only in the opposite locale may still appear in indexes when useful, but they must be clearly labeled and route to the original-language version.
 
 ## Sync and Publishing Workflow
 
