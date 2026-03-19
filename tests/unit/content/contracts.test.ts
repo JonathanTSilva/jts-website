@@ -42,7 +42,7 @@ describe('validateContent', () => {
 
   it('should fail if frontmatter is missing required fields', () => {
     const invalidFrontmatter = { ...validBlogFrontmatter };
-    delete invalidFrontmatter.title;
+    (invalidFrontmatter as any).title = undefined;
     const body = '## Conclusion\nBye';
     const result = validateContent('blog', invalidFrontmatter, body);
     expect(result.success).toBe(false);
