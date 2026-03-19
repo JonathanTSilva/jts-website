@@ -1,0 +1,60 @@
+---
+---
+<button id="theme-toggle" aria-label="Toggle theme" type="button">
+  <span class="sr-only">Toggle theme</span>
+  <span class="theme-label-light">Light</span>
+  <span class="theme-label-dark">Dark</span>
+</button>
+
+<script>
+  import { toggleTheme, getTheme } from '../../lib/theme/theme';
+  
+  const button = document.getElementById('theme-toggle');
+  
+  // Set initial aria-pressed or data attributes if needed
+  const currentTheme = getTheme();
+  document.documentElement.setAttribute('data-theme', currentTheme);
+
+  button?.addEventListener('click', () => {
+    toggleTheme();
+  });
+</script>
+
+<style>
+  button {
+    background: none;
+    border: 1px solid var(--color-border);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--space-2);
+    cursor: pointer;
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.5rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  
+  button:hover {
+    background-color: var(--color-surface);
+    border-color: var(--color-text-muted);
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .theme-label-light, .theme-label-dark {
+    display: none;
+  }
+
+  :global([data-theme='light']) .theme-label-dark {
+    display: inline;
+  }
+
+  :global([data-theme='dark']) .theme-label-light {
+    display: inline;
+  }
+</style>

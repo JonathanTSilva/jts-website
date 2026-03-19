@@ -1,0 +1,54 @@
+---
+import { themeInlineScript } from '../lib/theme/theme-inline-script';
+import SeoHead from '../components/site/SeoHead.astro';
+import Header from '../components/site/Header.astro';
+import Footer from '../components/site/Footer.astro';
+import SearchDialog from '../components/search/SearchDialog.astro';
+import '../styles/tokens.css';
+import '../styles/global.css';
+import { type Locale } from '../lib/content/locale';
+
+interface Props {
+  title?: string;
+  description?: string;
+  locale?: Locale;
+}
+
+const { title, description, locale = 'en' } = Astro.props;
+---
+
+<!doctype html>
+<html lang={locale} data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <script is:inline set:html={themeInlineScript} />
+    <SeoHead title={title} description={description} locale={locale} />
+  </head>
+  <body>
+    <Header locale={locale} />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+    <SearchDialog locale={locale} />
+  </body>
+</html>
+
+<style is:global>
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: var(--container-max-width);
+    margin-inline: auto;
+    padding-inline: var(--space-4);
+    padding-block: var(--space-12);
+  }
+</style>

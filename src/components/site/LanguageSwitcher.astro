@@ -1,0 +1,61 @@
+---
+import { type Locale, LOCALES } from '../../lib/content/locale';
+
+interface Props {
+  currentLocale: Locale;
+}
+
+const { currentLocale } = Astro.props;
+
+const labels: Record<Locale, string> = {
+  en: 'English',
+  'pt-br': 'Português'
+};
+---
+
+<div class="lang-switcher">
+  <span class="sr-only">Language switcher</span>
+  {LOCALES.map((locale) => (
+    <a 
+      href={locale === 'en' ? '/' : `/${locale}`} 
+      class:list={[{ active: locale === currentLocale }]}
+      aria-current={locale === currentLocale ? 'page' : undefined}
+      lang={locale}
+    >
+      {labels[locale]}
+    </a>
+  ))}
+</div>
+
+<style>
+  .lang-switcher {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+  }
+  
+  a {
+    font-size: var(--text-sm);
+    text-decoration: none;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--space-1);
+    color: var(--color-text-muted);
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  
+  a:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+  }
+
+  a.active {
+    color: var(--color-text);
+    font-weight: 600;
+    pointer-events: none;
+  }
+
+  a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+</style>

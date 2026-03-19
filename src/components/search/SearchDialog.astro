@@ -1,0 +1,13 @@
+---
+import { type Locale } from '../../lib/content/locale';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<div class="search-dialog-placeholder" data-locale={locale}>
+  <!-- Placeholder for search dialog -->
+</div>

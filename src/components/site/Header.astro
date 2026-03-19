@@ -1,0 +1,89 @@
+---
+import { getNavigation } from '../../lib/navigation';
+import { type Locale } from '../../lib/content/locale';
+import ThemeToggle from './ThemeToggle.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const navItems = getNavigation(locale);
+---
+
+<header class="site-header">
+  <div class="container header-container">
+    <a href={locale === 'en' ? '/' : `/${locale}`} class="logo" aria-label="Home">
+      Jonathan
+    </a>
+    
+    <nav aria-label="Main navigation">
+      <ul class="nav-list list-none">
+        {navItems.map((item) => (
+          <li>
+            <a href={item.href}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <LanguageSwitcher currentLocale={locale} />
+      <ThemeToggle />
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .logo {
+    font-weight: 700;
+    font-size: var(--text-lg);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .nav-list {
+    display: none;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 48rem) {
+    .nav-list {
+      display: flex;
+    }
+  }
+
+  .nav-list a {
+    color: var(--color-text-muted);
+    font-weight: 500;
+    font-size: var(--text-sm);
+  }
+
+  .nav-list a:hover {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+  }
+</style>
