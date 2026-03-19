@@ -1,0 +1,30 @@
+{
+  "name": "jts-website",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "lint:content": "node scripts/validate-content.mjs",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "astro": "^5.4.1",
+    "@astrojs/mdx": "^4.0.8",
+    "@astrojs/sitemap": "^3.2.1",
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.7.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.7",
+    "@playwright/test": "^1.50.1"
+  }
+}
