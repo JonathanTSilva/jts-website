@@ -1,0 +1,126 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contentLocalePath } from '../../lib/content/locale';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog');
+  const locale = 'en';
+
+  // For English index, we want to show all posts.
+  // If a post is in EN, we show it.
+  // If a post is NOT in EN (e.g. only PT), we still want to show it here (maybe?)
+  // The requirement says: "If a translation is missing for the current locale, show a notice and link to the original-language post."
+  
+  // So for each unique translationKey, we want a path in each locale.
+  const uniqueTranslationKeys = Array.from(new Set(allPosts.map(p => p.data.translationKey)));
+  
+  return uniqueTranslationKeys.flatMap(key => {
+    const translations = allPosts.filter(p => p.data.translationKey === key);
+    
+    // We generate a path for each translation's slug
+    return translations.map(post => ({
+      params: { slug: post.data.slug },
+      props: { post, isTranslationFallback: post.data.language !== locale },
+    }));
+  });
+}
+
+const { post, isTranslationFallback } = Astro.props;
+const { Content } = await render(post);
+
+const locale = 'en';
+
+const t = {
+  fallbackNotice: 'This post is not available in English. Showing the original version.',
+  viewOriginal: 'View original version',
+  publishedAt: 'Published on',
+};
+---
+
+<BaseLayout 
+  locale={locale} 
+  title={post.data.title} 
+  description={post.data.summary}
+>
+  <article class="container">
+    <header class="post-header">
+      <h1 class="post-title">{post.data.title}</h1>
+      <div class="post-meta">
+        <time datetime={post.data.publishedAt.toISOString()}>
+          {t.publishedAt} {post.data.publishedAt.toLocaleDateString(locale, { dateStyle: 'long' })}
+        </time>
+        {post.data.tags && post.data.tags.length > 0 && (
+          <span class="post-tags">
+            • {post.data.tags.join(', ')}
+          </span>
+        )}
+      </div>
+    </header>
+
+    {isTranslationFallback && (
+      <div class="fallback-notice">
+        <p>{t.fallbackNotice}</p>
+      </div>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="post-footer">
+      <a href={contentLocalePath(locale, '/blog')} class="back-link">
+        ← Back to blog
+      </a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-8) 0;
+  }
+  .post-header {
+    margin-bottom: var(--space-8);
+  }
+  .post-title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-2);
+  }
+  .post-meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+  .fallback-notice {
+    background-color: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: var(--space-4);
+    margin-bottom: var(--space-8);
+    color: #92400e;
+  }
+  .prose {
+    line-height: 1.6;
+  }
+  .prose :global(h2) {
+    font-size: var(--text-2xl);
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-4);
+  }
+  .prose :global(p) {
+    margin-bottom: var(--space-4);
+  }
+  .post-footer {
+    margin-top: var(--space-12);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+  .back-link {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>

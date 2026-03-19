@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogList from '../../../components/blog/BlogList.astro';
+
+const locale = 'pt-br';
+
+const t = {
+  title: 'Blog',
+  description: 'Textos sobre firmware, sistemas embarcados e automação.',
+};
+---
+
+<BaseLayout locale={locale} title={t.title} description={t.description}>
+  <div class="container">
+    <header class="page-header">
+      <h1 class="page-title">{t.title}</h1>
+      <p class="page-description">{t.description}</p>
+    </header>
+
+    <BlogList locale={locale} />
+  </div>
+</BaseLayout>
+
+<style>
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-8) 0;
+  }
+  .page-header {
+    margin-bottom: var(--space-12);
+  }
+  .page-title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-4);
+  }
+  .page-description {
+    font-size: var(--text-lg);
+    color: var(--color-text-muted);
+  }
+</style>
