@@ -1,0 +1,107 @@
+---
+import type { ExperienceEntry } from '../../content/portfolio/types';
+
+interface Props {
+  entry: ExperienceEntry;
+  locale: 'en' | 'pt-br';
+  t: {
+    present: string;
+    at: string;
+  };
+}
+
+const { entry, locale, t } = Astro.props;
+---
+
+<div class="timeline-item">
+  <div class="timeline-meta">
+    <span class="timeline-date">
+      {entry.startDate} — {entry.endDate || t.present}
+    </span>
+    <span class="timeline-location">{entry.location[locale]}</span>
+  </div>
+  <div class="timeline-content">
+    <h3>
+      {entry.title[locale]} <span class="company">{t.at} {entry.company}</span>
+    </h3>
+    <ul class="description">
+      {entry.description.map((desc) => (
+        <li>{desc[locale]}</li>
+      ))}
+    </ul>
+    <div class="tags">
+      {entry.tags.map((tag) => <span class="tag">{tag}</span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-8);
+  }
+
+  .timeline-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .timeline-date {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .timeline-location {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .timeline-content h3 {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-xl);
+    line-height: 1.2;
+  }
+
+  .company {
+    color: var(--color-accent);
+    font-size: var(--text-lg);
+    font-weight: 400;
+  }
+
+  .description {
+    padding-left: var(--space-4);
+    margin-bottom: var(--space-4);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  .description li {
+    margin-bottom: var(--space-2);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .tag {
+    font-size: var(--text-xs);
+    background: var(--color-accent-muted);
+    color: var(--color-accent);
+    padding: var(--space-1) var(--space-2);
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .timeline-item {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+    }
+  }
+</style>

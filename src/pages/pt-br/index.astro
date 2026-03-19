@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/home/Hero.astro';
+import ContactSection from '../../components/home/ContactSection.astro';
+import HomeSections from '../../components/home/HomeSections.astro';
+
+const locale = 'pt-br';
+
+const t = {
+  projects: 'Projetos',
+  publications: 'Publicações',
+  blog: 'Últimos Posts',
+  notes: 'Últimas Notas',
+  seeAllPortfolio: 'Ver portfólio completo',
+  downloadCv: 'Baixar CV (PDF)',
+  viewAllBlog: 'Ver todos os posts →',
+  viewAllNotes: 'Ver todas as notas →',
+  at: 'em',
+};
+---
+
+<BaseLayout locale={locale} title="Início">
+  <Hero locale={locale} />
+  <HomeSections locale={locale} t={t} />
+  <ContactSection locale={locale} />
+</BaseLayout>

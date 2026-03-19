@@ -1,0 +1,92 @@
+---
+import { getNavigation } from '../../lib/navigation';
+import type { Locale } from '../../lib/content/locale';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const t = {
+  en: {
+    name: 'Jonathan',
+    role: 'Senior Embedded Software Engineer',
+    positioning: 'Building robust, maintainable systems for the next decade of embedded engineering.',
+  },
+  'pt-br': {
+    name: 'Jonathan',
+    role: 'Engenheiro Sênior de Software Embarcado',
+    positioning: 'Construindo sistemas robustos e sustentáveis para a próxima década da engenharia embarcada.',
+  },
+}[locale];
+
+const navLinks = getNavigation(locale);
+---
+
+<section class="hero">
+  <h1>{t.name}</h1>
+  <p class="role">{t.role}</p>
+  <p class="positioning">{t.positioning}</p>
+  
+  <nav class="hero-nav">
+    <ul>
+      {navLinks.map((link) => (
+        <li>
+          <a href={link.href}>{link.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</section>
+
+<style>
+  .hero {
+    padding-block: var(--space-12);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  h1 {
+    font-size: var(--text-4xl);
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  .role {
+    font-size: var(--text-xl);
+    font-weight: 500;
+    color: var(--color-accent);
+    margin: 0;
+  }
+
+  .positioning {
+    font-size: var(--text-lg);
+    color: var(--color-text-muted);
+    max-width: 40rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .hero-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-8) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+  }
+
+  .hero-nav a {
+    text-decoration: none;
+    color: var(--color-link);
+    font-weight: 500;
+    font-size: var(--text-base);
+  }
+
+  .hero-nav a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+</style>

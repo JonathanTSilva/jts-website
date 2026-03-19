@@ -62,6 +62,55 @@ a:hover {
   padding-inline: var(--space-4);
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+}
+
+.primary-button {
+  display: inline-block;
+  background: var(--color-accent);
+  color: white !important;
+  padding: var(--space-2) var(--space-6);
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.primary-button:hover {
+  background: var(--color-link-hover);
+  text-decoration: none;
+}
+
+.secondary-button {
+  display: inline-block;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent) !important;
+  padding: var(--space-2) var(--space-6);
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.secondary-button:hover {
+  background: var(--color-accent-muted);
+  text-decoration: none;
+}
+
+.link-button {
+  color: var(--color-link);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: var(--text-sm);
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

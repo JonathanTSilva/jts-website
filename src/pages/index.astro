@@ -1,7 +1,26 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import ContactSection from '../components/home/ContactSection.astro';
+import HomeSections from '../components/home/HomeSections.astro';
+
+const locale = 'en';
+
+const t = {
+  projects: 'Projects',
+  publications: 'Publications',
+  blog: 'Latest Blog Posts',
+  notes: 'Latest Notes',
+  seeAllPortfolio: 'See full portfolio',
+  downloadCv: 'Download CV (PDF)',
+  viewAllBlog: 'View all blog posts →',
+  viewAllNotes: 'View all notes →',
+  at: 'at',
+};
 ---
 
-<BaseLayout title="Home">
-  <h1>Welcome to my personal website</h1>
+<BaseLayout locale={locale} title="Home">
+  <Hero locale={locale} />
+  <HomeSections locale={locale} t={t} />
+  <ContactSection locale={locale} />
 </BaseLayout>

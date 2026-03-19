@@ -1,0 +1,123 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { experience } from '../../content/portfolio/experience';
+import { projects } from '../../content/portfolio/projects';
+import { publications } from '../../content/portfolio/publications';
+import ProjectCard from '../../components/portfolio/ProjectCard.astro';
+import PublicationItem from '../../components/portfolio/PublicationItem.astro';
+import ExperienceItem from '../../components/portfolio/ExperienceItem.astro';
+
+const locale = 'en';
+
+const aboutModule = await import(`../../content/portfolio/about.${locale}.md`);
+const { Content: AboutContent } = aboutModule;
+
+const t = {
+  title: 'Portfolio',
+  about: 'Biography',
+  experience: 'Experience',
+  projects: 'Projects',
+  publications: 'Publications',
+  downloadCv: 'Download CV (PDF)',
+  present: 'Present',
+  at: 'at',
+};
+
+---
+
+<BaseLayout locale={locale} title={t.title}>
+  <div class="portfolio-header">
+    <h1>{t.title}</h1>
+    <a href="/assets/cv/jonathan-cv.pdf" download class="primary-button">{t.downloadCv}</a>
+  </div>
+
+  <section class="portfolio-section">
+    <h2>{t.about}</h2>
+    <div class="prose">
+      <AboutContent />
+    </div>
+  </section>
+
+  <section class="portfolio-section">
+    <h2>{t.experience}</h2>
+    <div class="timeline">
+      {experience.map((entry) => (
+        <ExperienceItem entry={entry} locale={locale} t={{ present: t.present, at: t.at }} />
+      ))}
+    </div>
+  </section>
+
+  <section class="portfolio-section">
+    <h2>{t.projects}</h2>
+    <div class="grid portfolio-grid">
+      {projects.map((project) => (
+        <ProjectCard project={project} locale={locale} />
+      ))}
+    </div>
+  </section>
+
+  <section class="portfolio-section">
+    <h2>{t.publications}</h2>
+    <div class="pub-list">
+      {publications.map((pub) => (
+        <PublicationItem publication={pub} locale={locale} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .portfolio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-12);
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  h1 {
+    font-size: var(--text-4xl);
+    margin: 0;
+  }
+
+  .portfolio-section {
+    margin-bottom: var(--space-16);
+  }
+
+  h2 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-2);
+    color: var(--color-text);
+  }
+
+  .prose {
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+
+  .portfolio-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-8);
+  }
+
+  .pub-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  @media (max-width: 768px) {
+    .portfolio-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

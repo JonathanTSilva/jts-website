@@ -1,0 +1,157 @@
+---
+import { getCollection } from 'astro:content';
+import ProjectCard from '../portfolio/ProjectCard.astro';
+import { projects } from '../../content/portfolio/projects';
+import { publications } from '../../content/portfolio/publications';
+import { contentLocalePath } from '../../lib/content/locale';
+
+interface Props {
+  locale: 'en' | 'pt-br';
+  t: {
+    projects: string;
+    publications: string;
+    blog: string;
+    notes: string;
+    seeAllPortfolio: string;
+    downloadCv: string;
+    viewAllBlog: string;
+    viewAllNotes: string;
+    at: string;
+  };
+}
+
+const { locale, t } = Astro.props;
+
+// Fetch latest blog posts
+const blogPosts = await getCollection('blog', ({ data }) => {
+  return data.language === locale;
+});
+const latestBlogPosts = blogPosts
+  .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
+  .slice(0, 3);
+
+// Fetch latest notes
+const notes = await getCollection('notes', ({ data }) => {
+  return data.language === locale;
+});
+const latestNotes = notes
+  .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
+  .slice(0, 3);
+
+const selectedProjects = projects.slice(0, 2);
+---
+
+<section class="home-section">
+  <h2>{t.projects}</h2>
+  <div class="grid">
+    {selectedProjects.map((project) => (
+      <ProjectCard project={project} locale={locale} />
+    ))}
+  </div>
+  <div class="cta">
+    <a href={contentLocalePath(locale, '/portfolio')} class="primary-button">{t.seeAllPortfolio}</a>
+    <a href="/assets/cv/jonathan-cv.pdf" download class="secondary-button">{t.downloadCv}</a>
+  </div>
+</section>
+
+<section class="home-section">
+  <h2>{t.publications}</h2>
+  <ul class="list list-none">
+    {publications.slice(0, 3).map((pub) => (
+      <li class="pub-list-item">
+        <span class="pub-date">{pub.date}</span>
+        <span class="pub-title">
+          {pub.link ? <a href={pub.link}>{pub.title[locale]}</a> : pub.title[locale]}
+        </span>
+        <span class="pub-publisher">{t.at} {pub.publisher}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<section class="home-section">
+  <h2>{t.blog}</h2>
+  <ul class="list list-none">
+    {latestBlogPosts.map((post) => (
+      <li class="content-list-item">
+        <span class="post-date">{new Date(post.data.publishedAt).toLocaleDateString(locale)}</span>
+        <span class="post-title">
+          <a href={contentLocalePath(locale, `/blog/${post.id}`)}>{post.data.title}</a>
+        </span>
+      </li>
+    ))}
+  </ul>
+  <div class="cta">
+    <a href={contentLocalePath(locale, '/blog')} class="link-button">{t.viewAllBlog}</a>
+  </div>
+</section>
+
+<section class="home-section">
+  <h2>{t.notes}</h2>
+  <ul class="list list-none">
+    {latestNotes.map((note) => (
+      <li class="content-list-item">
+        <span class="note-date">{new Date(note.data.publishedAt).toLocaleDateString(locale)}</span>
+        <span class="note-title">
+          <a href={contentLocalePath(locale, `/notes/${note.id}`)}>{note.data.title}</a>
+        </span>
+      </li>
+    ))}
+  </ul>
+  <div class="cta">
+    <a href={contentLocalePath(locale, '/notes')} class="link-button">{t.viewAllNotes}</a>
+  </div>
+</section>
+
+<style>
+  .home-section {
+    padding-block: var(--space-12);
+  }
+
+  h2 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-2);
+  }
+
+  .cta {
+    margin-top: var(--space-8);
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .pub-list-item, .content-list-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
+  }
+
+  .pub-date, .post-date, .note-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .pub-publisher {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    margin-left: var(--space-2);
+  }
+
+  @media (max-width: 600px) {
+    .pub-list-item, .content-list-item {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+  }
+</style>

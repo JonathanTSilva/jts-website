@@ -1,0 +1,76 @@
+---
+import type { Publication } from '../../content/portfolio/types';
+
+interface Props {
+  publication: Publication;
+  locale: 'en' | 'pt-br';
+}
+
+const { publication, locale } = Astro.props;
+---
+
+<div class="pub-item">
+  <span class="pub-date">{publication.date}</span>
+  <div class="pub-info">
+    <span class="pub-type">{publication.type}</span>
+    <h3>
+      {publication.link ? (
+        <a href={publication.link}>{publication.title[locale]}</a>
+      ) : (
+        publication.title[locale]
+      )}
+    </h3>
+    <span class="pub-publisher">{publication.publisher}</span>
+  </div>
+</div>
+
+<style>
+  .pub-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: var(--space-4);
+  }
+
+  .pub-date {
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .pub-type {
+    display: inline-block;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent);
+    margin-bottom: var(--space-1);
+    font-weight: 500;
+  }
+
+  .pub-info h3 {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-lg);
+    line-height: 1.3;
+  }
+
+  .pub-info a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+
+  .pub-info a:hover {
+    text-decoration: underline;
+  }
+
+  .pub-publisher {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 600px) {
+    .pub-item {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+  }
+</style>
