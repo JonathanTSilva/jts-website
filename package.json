@@ -23,6 +23,7 @@
     "@astrojs/rss": "^4.0.17",
     "@astrojs/sitemap": "^3.2.1",
     "astro": "^5.4.1",
+    "geist": "^1.7.0",
     "gray-matter": "^4.0.3",
     "typescript": "^5.7.3",
     "zod": "^3.24.2"
