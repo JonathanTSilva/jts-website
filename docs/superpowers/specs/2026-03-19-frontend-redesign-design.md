@@ -204,7 +204,7 @@ If `colorToken` is absent, fall back to `--accent`.
 - Scrolled state (`.scrolled` class added via JS `IntersectionObserver` or `scroll` event): `--surface-high` background, `backdrop-filter: blur(12px)`, `border-bottom: 1px solid var(--border)`
 - Left: logo — name in Geist Sans weight 600, `--text` color, `--accent` on hover
 - Center: nav links — `--text-sm` weight 500, `--text-muted` default, `--text` on hover, `--accent` for active route
-- **Active nav indicator (tubelight concept):** a `<span class="nav-indicator">` is absolutely positioned behind the active link. On page load and on any nav interaction, it translates to sit under the active link via `transform: translateX()`. Transition: `--duration-base` `--ease-out`. The indicator is `--surface-high` background with `--radius-full`, giving a floating pill behind the active item. A second pseudo-element above the indicator (`:before`, `position: absolute`, top `-4px`, centered) renders a narrow highlight bar in `--accent` with a subtle `box-shadow: 0 0 8px 1px var(--accent)` glow — the "tubelight" lamp above the active pill. Both animate together when switching routes. Indicator position is calculated in vanilla JS on `DOMContentLoaded` by measuring the active `<a>` element's `offsetLeft` and `offsetWidth`.
+- **Active nav indicator (tubelight concept):** a `<span class="nav-indicator">` is a child of `<nav>`, which has `position: relative`. The indicator is `position: absolute`, `z-index: -1`, with `--surface-high` background, `--radius-full`, and a fixed height matching the nav link height (`~32px`). It is initially hidden and snaps to the active link's position on `DOMContentLoaded`. Position calculation: `indicator.style.left = activeLink.offsetLeft + 'px'` and `indicator.style.width = activeLink.offsetWidth + 'px'` — `offsetLeft` is relative to `offsetParent`, and `<nav>` is explicitly `position: relative` so it becomes the `offsetParent`, making the measurement correct. A hover interaction slides the indicator to preview hovered links (`mouseover` → translate to target, `mouseleave` → return to active link). Transition on the indicator: `left --duration-base --ease-out, width --duration-base --ease-out`. The indicator has `::before { content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%); width: 40%; height: 2px; border-radius: 1px; background: var(--accent); box-shadow: 0 0 8px 2px var(--accent); opacity: 0.8; }` — the glow lamp. On a standard Astro multi-page build there is no cross-route slide animation; each page load positions the indicator on its active link immediately (no transition on load). The hover preview animation is the only motion.
 - Right (left to right): search icon button → language switcher → theme toggle — 20px icons/controls, `--text-muted` → `--text` on hover
 - **Search icon:** calls `window.openSearch()` on click; `aria-label="Open search"`
 - Transition: `--duration-base` on background and border
@@ -228,15 +228,21 @@ If `colorToken` is absent, fall back to `--accent`.
 
 Pill/track design (iOS-style) — replaces the previous icon-only button.
 
-- Outer track: `width: 3.5rem`, `height: 1.75rem`, `border-radius: var(--radius-full)`, `padding: 2px`
-- Dark state: track background `--surface-high`, border `1px solid var(--border)`
-- Light state: track background `--surface`, border `1px solid var(--border)`
-- Inner thumb: `width: 1.35rem`, `height: 1.35rem`, `border-radius: 50%`, slides left/right via `transform: translateX()` at `--duration-base` `--ease-in-out`
-- Dark state: thumb at `translateX(0)`, thumb background `var(--surface-high)` with Moon SVG icon (16px, `--text` color)
-- Light state: thumb at `translateX(1.75rem)`, thumb background `var(--surface-high)` with Sun SVG icon (16px, `--text` color)
-- The inactive side shows the opposite icon at reduced opacity (`0.35`) — moon visible on the right in light mode, sun visible on the left in dark mode
-- Implemented in Astro with vanilla JS toggling `data-theme` via the existing `toggleTheme()` function
-- `role="switch"`, `aria-checked="true/false"`, `aria-label="Toggle theme"`
+**DOM structure:**
+```html
+<button class="theme-toggle" role="switch" aria-checked="true" aria-label="Toggle theme">
+  <span class="toggle-thumb"><!-- active icon SVG --></span>
+  <span class="toggle-inactive" aria-hidden="true"><!-- inactive icon SVG --></span>
+</button>
+```
+
+- Outer track (the `<button>` itself): `width: 3.5rem`, `height: 1.75rem`, `border-radius: var(--radius-full)`, `padding: 2px`, `display: flex`, `align-items: center`, `border: 1px solid var(--border)`, `position: relative`
+- Track background: `--surface-high` in both themes (the pill background)
+- `.toggle-thumb`: `width: 1.35rem`, `height: 1.35rem`, `border-radius: 50%`, `display: flex`, `align-items: center`, `justify-content: center`, `transition: transform --duration-base --ease-in-out`, `position: absolute`
+  - Dark state: `transform: translateX(2px)`, thumb background `#252538` (a distinct mid-dark, clearly lighter than `--surface-high` `#16161F`), Moon SVG 14px, `color: var(--text)`
+  - Light state: `transform: translateX(calc(3.5rem - 1.35rem - 4px))`, thumb background `#FFFFFF`, Sun SVG 14px, `color: var(--text)`
+- `.toggle-inactive`: absolutely positioned on the opposite side of the thumb; `opacity: 0.35`; contains the opposite icon (Sun in dark, Moon in light). Dark: right-aligned at `right: 4px`. Light: left-aligned at `left: 4px`. Width/height same as thumb.
+- Vanilla JS: on click calls existing `toggleTheme()`, then flips `aria-checked` and swaps the icon SVGs in both `.toggle-thumb` and `.toggle-inactive`
 - Focus ring on `:focus-visible`
 
 ### LanguageSwitcher
@@ -287,22 +293,24 @@ The existing `Hero.astro` renders navigation links inside the hero. This is remo
 - `src/pages/index.astro` and `src/pages/pt-br/index.astro` updated to remove nav-link props previously passed to Hero
 
 **Background paths effect:**
-- Inline `<svg>` inside the hero, `position: absolute`, `inset: 0`, `pointer-events: none`, `z-index: 0`. Hero content sits at `z-index: 1`.
-- 36 curved `<path>` elements animated with CSS `@keyframes` using `stroke-dashoffset` to create a flowing draw-and-reset loop.
-- Stroke color: `currentColor`, hero inherits `color: var(--border)` — adapts to both themes automatically.
-- Stroke opacity: `0.04`–`0.18` range across paths (very subtle — decoration only).
-- Stroke width: `0.5px`–`1.5px` graduating across the 36 paths.
-- Each path gets a different `animation-duration` (20–35s) and `animation-delay` (0–8s) so motion is never synchronised. Easing: `linear`, `infinite`.
-- `@media (prefers-reduced-motion: reduce)`: paths render statically at base opacity, no animation.
+- Inline `<svg viewBox="0 0 1200 500" fill="none">` inside the hero, `position: absolute`, `inset: 0`, `width: 100%`, `height: 100%`, `pointer-events: none`, `z-index: 0`. Hero content sits at `z-index: 1`.
+- 36 cubic-bezier `<path>` elements. Path geometry: each path `i` (0–35) uses the formula `M${-380 - i*5} ${-189 + i*6} C${-380 - i*5} ${-189 + i*6} ${-312 - i*5} ${216 - i*6} ${152 - i*5} ${343 - i*6} C${616 - i*5} ${470 - i*6} ${684 - i*5} ${875 - i*6} ${684 - i*5} ${875 - i*6}` — this produces 36 sweeping parallel curves that cross the viewport diagonally.
+- Animation: each path has `stroke-dasharray: 2000; stroke-dashoffset: 2000` and animates via `@keyframes flow { to { stroke-dashoffset: 0; } }` — the draw-on effect. After completing it loops back via `animation-direction: alternate`. Duration and delay assigned linearly: `duration = 20s + i * 0.42s` (index 0 → 20s, index 35 → 34.7s); `delay = -(i * 0.22s)` (negative delays ensure all paths are mid-animation on load rather than starting cold).
+- Stroke color: `currentColor`, hero wrapper `color: var(--border)` — adapts to both themes automatically.
+- Stroke opacity: linear across index — `opacity = 0.04 + i * 0.004` (index 0 → 0.04, index 35 → 0.18).
+- Stroke width: linear across index — `width = 0.5 + i * 0.029` (index 0 → 0.5px, index 35 → 1.5px).
+- Easing: `linear`, `infinite`, `alternate`.
+- `@media (prefers-reduced-motion: reduce)`: `animation: none` on all paths; they render at their computed base opacity statically.
 
 **Typewriter effect:**
 - Vanilla JS in the component's `<script>` tag — no library.
-- A `<span id="typewriter-text">` gets its `textContent` updated character-by-character via `setTimeout`.
-- Phrases cycle (localized per locale). English examples: `"born to build reliable systems"`, `"born to write clean code"`, `"born to solve hard problems"`, `"born to ship things that last"`.
+- DOM structure: `<p class="typewriter-line"><span class="typewriter-prefix">born to </span><span class="typewriter-text"></span><span class="typewriter-cursor" aria-hidden="true">|</span></p>`
+- The static prefix (`"born to "` in English, `"nascido para "` in PT-BR) is hardcoded in markup as a prop passed from the page: `<Hero typewriterPrefix="born to " typewriterPhrases={[...]} />`. The component renders the prefix in the markup and only the dynamic suffix is typed.
+- `typewriterPhrases` in English: `["build reliable systems", "write clean code", "solve hard problems", "ship things that last"]`. PT-BR phrases prop is passed from the PT-BR page variant.
 - Timing: type forward ~60ms/char → pause 2s at full phrase → delete ~35ms/char → pause 300ms → next phrase → loop.
-- Blinking cursor: a sibling `<span class="typewriter-cursor">|</span>` — CSS `animation: blink 0.8s step-end infinite`.
-- Style: `--text-lg`, weight 400. Typed text in `--accent`. Any static prefix (e.g. `"I was "`) in `--text-muted`.
-- `@media (prefers-reduced-motion: reduce)`: first phrase shown statically, cursor hidden.
+- Blinking cursor: CSS `@keyframes blink { 0%, 100% { opacity: 1 } 50% { opacity: 0 } }`, `animation: blink 0.8s step-end infinite` on `.typewriter-cursor`.
+- Style: `--text-lg`, weight 400. `.typewriter-prefix` in `--text-muted`. `.typewriter-text` in `--accent`.
+- `@media (prefers-reduced-motion: reduce)`: `typewriterPhrases[0]` set statically on `.typewriter-text` via JS before returning; cursor hidden via CSS.
 
 ### Homepage Sections Pattern
 
@@ -380,7 +388,8 @@ A single vertical timeline component covers both experience and education. They 
   - Location in `--text-sm --text-muted`
   - Description in `--text-sm`, `--leading-relaxed`
   - Tags as small pills (`--surface-high`, `--radius-sm`, `--text-xs --text-muted`)
-- Education entries must be added to `src/content/portfolio/experience.ts` with a `type: 'education'` field alongside the existing `type: 'work'` entries
+- `type: 'work' | 'education'` is a **required** field added to the entry type in `src/content/portfolio/experience.ts`. All existing work entries must be backfilled with `type: 'work'` at the same time new education entries are added — do not leave existing entries without the field.
+- Entries are sorted **descending by start date** (most recent first) — both work and education interleaved chronologically.
 - Mobile: dots and line remain; layout collapses to single column
 
 **Projects (Bento Grid):**
@@ -388,7 +397,7 @@ A single vertical timeline component covers both experience and education. They 
 Inspired by the bento grid pattern — variable-width cards on a 3-column CSS grid.
 
 - Grid: `display: grid`, `grid-template-columns: repeat(3, 1fr)`, `gap: var(--space-3)`, responsive to 2-col tablet and 1-col mobile
-- Featured projects can span 2 columns via a `featured: true` flag in project data (renders as `grid-column: span 2`)
+- Featured projects can span 2 columns via a `featured?: boolean` field added to the project type in `src/content/portfolio/projects.ts` (renders as `grid-column: span 2`). This field is optional; existing projects without it default to single column.
 - Card anatomy:
   - Background: `--surface`, border: `1px solid var(--border)`, `--radius-md`, `--card-padding`
   - Top row: project icon/emoji in a small `--surface-high` square + status badge (`Active` / `Archived` / `Featured`) in `--text-xs` Geist Mono
@@ -396,8 +405,8 @@ Inspired by the bento grid pattern — variable-width cards on a 3-column CSS gr
   - Description in `--text-sm --leading-relaxed`
   - Tags row: `--radius-sm` pills
   - Bottom row: GitHub / live links as icon+text anchors; `→` CTA label fades in on hover
-- **Hover state:** subtle dot-pattern overlay appears (`radial-gradient` of 1px dots at 4px spacing, very low opacity `0.04`) — CSS only via a pseudo-element on the card. Card lifts with `--shadow-md` and `translateY(-2px)`. Border transitions to `--accent`. All at `--duration-base`.
-- Featured card (2-col span) gets the hover state applied persistently (`always-active` class) as a hero item
+- **Hover state:** subtle dot-pattern overlay appears — CSS only via `::after` pseudo-element on the card: `background-image: radial-gradient(circle, currentColor 1px, transparent 1px); background-size: 4px 4px; opacity: 0.04; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;`. The card sets `color: var(--text)` so the dots use the text foreground color (neutral in both themes). Card lifts with `--shadow-md` and `translateY(-2px)`. Border transitions to `--accent`. All at `--duration-base`.
+- Featured card (2-col span) gets the hover state applied persistently via an `.always-active` class. CSS rule: `.project-card.always-active { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--accent); } .project-card.always-active::after { opacity: 0.04; }` — the same properties triggered by `:hover` on normal cards are unconditionally applied.
 
 **Publications:** simple list — title + publisher + date + type badge
 
