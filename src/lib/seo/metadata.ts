@@ -15,7 +15,7 @@ export interface SeoProps {
 
 export function generateSeo(props: SeoProps) {
   const { title, description, canonical, ogType = 'website', image, locale, currentPath = '/' } = props;
-  const baseUrl = 'https://example.com'; // Match astro.config.mjs
+  const baseUrl = 'https://www.jontobias.com';
   
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const fullDescription = description || SITE_DESCRIPTION;

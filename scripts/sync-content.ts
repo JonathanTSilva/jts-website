@@ -12,12 +12,14 @@ const DEST_DIR = path.join(REPO_ROOT, 'src/content');
 interface SyncMapping {
   source: string;
   dest: string;
+  isDir: boolean;
 }
 
 const MAPPINGS: SyncMapping[] = [
-  { source: '08-Publish/Blog', dest: 'blog' },
-  { source: '08-Publish/Notes', dest: 'notes' },
-  { source: '08-Publish/Now', dest: 'now' },
+  { source: '08-Publish/Blog', dest: 'blog', isDir: true },
+  { source: '08-Publish/Notes', dest: 'notes', isDir: true },
+  // Mapping now.md to now/index.en.md specifically
+  { source: '08-Publish/now.md', dest: 'now/index.en.md', isDir: false },
 ];
 
 export async function syncContent(sourceDir: string, destDir: string) {
@@ -37,31 +39,25 @@ export async function syncContent(sourceDir: string, destDir: string) {
       continue;
     }
 
-    console.log(`Syncing ${srcPath} to ${destPath}`);
+    if (mapping.isDir) {
+      console.log(`Syncing directory ${srcPath} to ${destPath}`);
+      fs.ensureDirSync(destPath);
+      const srcFiles = fs.readdirSync(srcPath).filter(f => f.endsWith('.md') || f.endsWith('.mdx'));
+      const destFiles = fs.readdirSync(destPath).filter(f => f.endsWith('.md') || f.endsWith('.mdx'));
 
-    // Ensure destination exists
-    fs.ensureDirSync(destPath);
-
-    // Get files in source and destination
-    const srcFiles = fs.readdirSync(srcPath).filter(f => f.endsWith('.md'));
-    const destFiles = fs.readdirSync(destPath).filter(f => f.endsWith('.md'));
-
-    // Copy/Update files from source to destination
-    for (const file of srcFiles) {
-      const srcFile = path.join(srcPath, file);
-      const destFile = path.join(destPath, file);
-      
-      console.log(`  Copying ${file}`);
-      fs.copySync(srcFile, destFile, { overwrite: true });
-    }
-
-    // Remove files in destination that are no longer in source
-    for (const file of destFiles) {
-      if (!srcFiles.includes(file)) {
-        const fileToRemove = path.join(destPath, file);
-        console.log(`  Removing obsolete ${file}`);
-        fs.removeSync(fileToRemove);
+      for (const file of srcFiles) {
+        fs.copySync(path.join(srcPath, file), path.join(destPath, file), { overwrite: true });
       }
+
+      for (const file of destFiles) {
+        if (!srcFiles.includes(file)) {
+          fs.removeSync(path.join(destPath, file));
+        }
+      }
+    } else {
+      console.log(`Syncing file ${srcPath} to ${destPath}`);
+      fs.ensureDirSync(path.dirname(destPath));
+      fs.copySync(srcPath, destPath, { overwrite: true });
     }
   }
 
