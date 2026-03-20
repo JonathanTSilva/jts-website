@@ -28,8 +28,8 @@ const { project, locale } = Astro.props;
 <style>
   .card {
     padding: var(--space-6);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 4px;
     display: flex;
     flex-direction: column;
@@ -52,19 +52,19 @@ const { project, locale } = Astro.props;
   .year {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
-    color: var(--color-text-muted);
+    color: var(--text-muted);
   }
 
   .role {
     font-size: var(--text-sm);
     font-weight: 500;
-    color: var(--color-accent);
+    color: var(--accent);
     margin: 0;
   }
 
   .card p {
     margin: 0;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     font-size: var(--text-sm);
     line-height: 1.5;
   }
@@ -77,8 +77,8 @@ const { project, locale } = Astro.props;
 
   .tag {
     font-size: var(--text-xs);
-    background: var(--color-accent-muted);
-    color: var(--color-accent);
+    background: var(--accent-dim);
+    color: var(--accent);
     padding: var(--space-1) var(--space-2);
     border-radius: 4px;
     font-weight: 500;

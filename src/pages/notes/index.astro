@@ -48,7 +48,7 @@ const tags = Array.from(new Set(notesToShow.flatMap(note => note.data.tags))).so
 
 <style>
   .container {
-    max-width: var(--max-width);
+    max-width: var(--container-max);
     margin: 0 auto;
     padding: var(--space-8) 0;
   }
@@ -61,6 +61,6 @@ const tags = Array.from(new Set(notesToShow.flatMap(note => note.data.tags))).so
   }
   .page-description {
     font-size: var(--text-lg);
-    color: var(--color-text-muted);
+    color: var(--text-muted);
   }
 </style>
