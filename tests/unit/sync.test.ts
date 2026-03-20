@@ -27,9 +27,8 @@ describe('syncContent script', () => {
     fs.ensureDirSync(notesSrc);
     fs.writeFileSync(path.join(notesSrc, 'note1.md'), 'Content of note 1');
 
-    const nowSrc = path.join(SOURCE_DIR, '08-Publish/Now');
-    fs.ensureDirSync(nowSrc);
-    fs.writeFileSync(path.join(nowSrc, 'index.en.md'), 'Now index');
+    const nowSrc = path.join(SOURCE_DIR, '08-Publish/now.md');
+    fs.writeFileSync(nowSrc, 'Now index');
 
     // Run sync
     await syncContent(SOURCE_DIR, DEST_DIR);
