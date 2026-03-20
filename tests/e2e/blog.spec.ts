@@ -50,3 +50,19 @@ test.describe('Blog', () => {
     expect(text).toContain('Continuous Integration for Firmware');
   });
 });
+
+test('blog list uses two-column year/entry layout', async ({ page }) => {
+  await page.goto('/blog');
+  // Year column rendered with monospace font class
+  const yearLabel = page.locator('.blog-year').first();
+  await expect(yearLabel).toBeVisible();
+});
+
+test('blog post applies prose class', async ({ page }) => {
+  // Navigate to the first available post
+  await page.goto('/blog');
+  const firstLink = page.locator('a[href^="/blog/"]').first();
+  await firstLink.click();
+  const prose = page.locator('.prose');
+  await expect(prose).toBeVisible();
+});
