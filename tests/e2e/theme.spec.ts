@@ -48,3 +48,22 @@ test.describe('Theme management', () => {
     await expect(html).toHaveAttribute('data-theme', targetTheme);
   });
 });
+
+test('header gains scrolled class after page scroll', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo(0, 200));
+  await page.waitForFunction(() => document.getElementById('site-header')?.classList.contains('scrolled'));
+  await expect(page.locator('.site-header')).toHaveClass(/scrolled/);
+});
+
+test('mobile drawer opens and closes via hamburger', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const hamburger = page.locator('#hamburger');
+  await expect(hamburger).toHaveRole('button');
+  await expect(page.locator('#mobile-nav')).not.toBeVisible();
+  await hamburger.click();
+  await expect(page.locator('#mobile-nav')).toBeVisible();
+  await hamburger.click();
+  await expect(page.locator('#mobile-nav')).not.toBeVisible();
+});
