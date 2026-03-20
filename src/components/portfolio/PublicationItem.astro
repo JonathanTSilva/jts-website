@@ -1,9 +1,11 @@
 ---
 import type { Publication } from '../../content/portfolio/types';
 
+import type { Locale } from '../../lib/content/locale';
+
 interface Props {
   publication: Publication;
-  locale: 'en' | 'pt-br';
+  locale: Locale;
 }
 
 const { publication, locale } = Astro.props;
@@ -15,7 +17,7 @@ const { publication, locale } = Astro.props;
     <span class="pub-type">{publication.type}</span>
     <h3>
       {publication.link ? (
-        <a href={publication.link}>{publication.title[locale]}</a>
+        <a href={publication.link} target="_blank" rel="noopener noreferrer">{publication.title[locale]}</a>
       ) : (
         publication.title[locale]
       )}
@@ -27,7 +29,7 @@ const { publication, locale } = Astro.props;
 <style>
   .pub-item {
     display: grid;
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: 7.5rem 1fr;
     gap: var(--space-4);
   }
 
@@ -39,18 +41,22 @@ const { publication, locale } = Astro.props;
 
   .pub-type {
     display: inline-block;
+    font-family: var(--font-mono);
     font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--accent);
+    background: var(--accent-dim);
+    padding: 1px var(--space-2);
+    border-radius: var(--radius-sm);
     margin-bottom: var(--space-1);
-    font-weight: 500;
+    font-weight: var(--weight-medium);
   }
 
   .pub-info h3 {
     margin: 0 0 var(--space-1);
     font-size: var(--text-lg);
-    line-height: 1.3;
+    line-height: var(--leading-tight);
   }
 
   .pub-info a {

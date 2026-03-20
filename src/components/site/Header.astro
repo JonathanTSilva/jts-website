@@ -82,6 +82,7 @@ const navItems = getNavigation(locale);
   document.body.prepend(sentinel);
 
   const io = new IntersectionObserver(([entry]) => {
+    if (!entry) return;
     header?.classList.toggle('scrolled', !entry.isIntersecting);
   }, { threshold: 1 });
   io.observe(sentinel);
