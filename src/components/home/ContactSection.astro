@@ -10,12 +10,14 @@ const { locale } = Astro.props;
 const t = {
   en: {
     title: 'Contact',
+    label: '// contact',
     email: 'Email',
     linkedin: 'LinkedIn',
     github: 'GitHub',
   },
   'pt-br': {
     title: 'Contato',
+    label: '// contato',
     email: 'Email',
     linkedin: 'LinkedIn',
     github: 'GitHub',
@@ -30,10 +32,13 @@ const contacts = [
 ---
 
 <section class="contact" id="contact">
-  <h2>{t.title}</h2>
+  <header class="section-header">
+    <p class="section-label">{t.label}</p>
+    <h2 class="section-heading">{t.title}</h2>
+  </header>
   <div class="contact-links">
     {contacts.map((contact) => (
-      <a href={contact.href} target="_blank" rel="noopener noreferrer">
+      <a href={contact.href} class="btn-secondary" target="_blank" rel="noopener noreferrer">
         {contact.label}
       </a>
     ))}
@@ -46,25 +51,29 @@ const contacts = [
     border-top: 1px solid var(--border);
   }
 
-  h2 {
-    font-size: var(--text-2xl);
+  .section-header {
     margin-bottom: var(--space-6);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--space-1) 0;
+  }
+
+  .section-heading {
+    font-size: var(--text-2xl);
+    margin: 0;
   }
 
   .contact-links {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-6);
-  }
-
-  .contact-links a {
-    text-decoration: none;
-    color: var(--accent);
-    font-weight: 500;
-  }
-
-  .contact-links a:hover {
-    color: var(--accent-hover);
-    text-decoration: underline;
+    gap: var(--space-4);
   }
 </style>
