@@ -14,7 +14,7 @@ The redesign is structured as three stable layers executed in sequence:
 2. **Shell layer** — site-wide layout and chrome
 3. **Page layer** — page-level components and surfaces
 
-No architectural changes to the Astro structure, content collections, routing, or CI/CD pipelines. This is a pure visual and UX improvement.
+No architectural changes to the Astro structure, content collections, routing, or CI/CD pipelines. This is a pure visual and UX improvement. No new runtime dependencies (no React, no framer-motion, no Tailwind). All interactive effects are implemented with vanilla JS and CSS.
 
 ## Design Principles
 
@@ -204,8 +204,9 @@ If `colorToken` is absent, fall back to `--accent`.
 - Scrolled state (`.scrolled` class added via JS `IntersectionObserver` or `scroll` event): `--surface-high` background, `backdrop-filter: blur(12px)`, `border-bottom: 1px solid var(--border)`
 - Left: logo — name in Geist Sans weight 600, `--text` color, `--accent` on hover
 - Center: nav links — `--text-sm` weight 500, `--text-muted` default, `--text` on hover, `--accent` for active route
+- **Active nav indicator (tubelight concept):** a `<span class="nav-indicator">` is absolutely positioned behind the active link. On page load and on any nav interaction, it translates to sit under the active link via `transform: translateX()`. Transition: `--duration-base` `--ease-out`. The indicator is `--surface-high` background with `--radius-full`, giving a floating pill behind the active item. A second pseudo-element above the indicator (`:before`, `position: absolute`, top `-4px`, centered) renders a narrow highlight bar in `--accent` with a subtle `box-shadow: 0 0 8px 1px var(--accent)` glow — the "tubelight" lamp above the active pill. Both animate together when switching routes. Indicator position is calculated in vanilla JS on `DOMContentLoaded` by measuring the active `<a>` element's `offsetLeft` and `offsetWidth`.
 - Right (left to right): search icon button → language switcher → theme toggle — 20px icons/controls, `--text-muted` → `--text` on hover
-- **Search icon:** calls `window.openSearch()` on click (the existing `SearchDialog` already exposes this global); `aria-label="Open search"`
+- **Search icon:** calls `window.openSearch()` on click; `aria-label="Open search"`
 - Transition: `--duration-base` on background and border
 
 **Mobile (below 48rem):**
@@ -225,10 +226,18 @@ If `colorToken` is absent, fall back to `--accent`.
 
 ### ThemeToggle
 
-- Icon-only button with `aria-label`
-- Sun icon visible in dark mode (click → switch to light), moon icon in light mode
-- `--accent-dim` background on hover/active
-- Icon swap: cross-fade at `--duration-fast`
+Pill/track design (iOS-style) — replaces the previous icon-only button.
+
+- Outer track: `width: 3.5rem`, `height: 1.75rem`, `border-radius: var(--radius-full)`, `padding: 2px`
+- Dark state: track background `--surface-high`, border `1px solid var(--border)`
+- Light state: track background `--surface`, border `1px solid var(--border)`
+- Inner thumb: `width: 1.35rem`, `height: 1.35rem`, `border-radius: 50%`, slides left/right via `transform: translateX()` at `--duration-base` `--ease-in-out`
+- Dark state: thumb at `translateX(0)`, thumb background `var(--surface-high)` with Moon SVG icon (16px, `--text` color)
+- Light state: thumb at `translateX(1.75rem)`, thumb background `var(--surface-high)` with Sun SVG icon (16px, `--text` color)
+- The inactive side shows the opposite icon at reduced opacity (`0.35`) — moon visible on the right in light mode, sun visible on the left in dark mode
+- Implemented in Astro with vanilla JS toggling `data-theme` via the existing `toggleTheme()` function
+- `role="switch"`, `aria-checked="true/false"`, `aria-label="Toggle theme"`
+- Focus ring on `:focus-visible`
 
 ### LanguageSwitcher
 
@@ -243,16 +252,18 @@ If `colorToken` is absent, fall back to `--accent`.
 
 ### Files
 
-- `src/components/home/Hero.astro`
+- `src/components/home/Hero.astro` (+ background paths SVG + typewriter script)
 - `src/components/home/HomeSections.astro`
 - `src/components/home/ContactSection.astro`
 - `src/components/blog/BlogList.astro`
 - `src/components/notes/NotesGrid.astro`
 - `src/components/notes/NotesFilters.astro`
-- `src/components/portfolio/ProjectCard.astro`
-- `src/components/portfolio/ExperienceItem.astro`
+- `src/components/portfolio/ProjectCard.astro` (bento grid card)
+- `src/components/portfolio/TimelineItem.astro` (unified experience + education)
 - `src/components/portfolio/PublicationItem.astro`
+- `src/components/site/Toast.astro` (new)
 - `src/components/search/SearchDialog.astro`
+- `src/content/portfolio/experience.ts` (add `type: 'work' | 'education'` field + education entries)
 - `src/pages/index.astro`
 - `src/pages/portfolio/index.astro`
 - `src/pages/blog/index.astro`
@@ -264,16 +275,34 @@ If `colorToken` is absent, fall back to `--accent`.
 
 ### Hero
 
-The existing `Hero.astro` renders navigation links inside the hero. This is removed. The hero becomes a pure identity/CTA block.
+The existing `Hero.astro` renders navigation links inside the hero. This is removed. The hero becomes a pure identity/CTA block with two visual enrichments: animated background paths and a typewriter phrase below the name.
 
-- Left-aligned layout, `--section-gap` top padding
+**Layout:**
+- Left-aligned, `--section-gap` top padding, `position: relative` to contain the background layer
 - Stack (top to bottom):
   1. Monospace label: `// embedded systems engineer` — Geist Mono, `--text-sm`, `--text-muted`
   2. Name: `--text-4xl`, weight 700, `--text`
-  3. Positioning statement: `--text-lg`, weight 400, `--text-muted`, 1–2 lines
+  3. Typewriter line (see below)
   4. Two CTA buttons: primary (filled `--accent`, links to `/portfolio`) + secondary (outlined `--border`, links to `/blog`)
-- No background images, gradients, or decorative elements — typography leads
 - `src/pages/index.astro` and `src/pages/pt-br/index.astro` updated to remove nav-link props previously passed to Hero
+
+**Background paths effect:**
+- Inline `<svg>` inside the hero, `position: absolute`, `inset: 0`, `pointer-events: none`, `z-index: 0`. Hero content sits at `z-index: 1`.
+- 36 curved `<path>` elements animated with CSS `@keyframes` using `stroke-dashoffset` to create a flowing draw-and-reset loop.
+- Stroke color: `currentColor`, hero inherits `color: var(--border)` — adapts to both themes automatically.
+- Stroke opacity: `0.04`–`0.18` range across paths (very subtle — decoration only).
+- Stroke width: `0.5px`–`1.5px` graduating across the 36 paths.
+- Each path gets a different `animation-duration` (20–35s) and `animation-delay` (0–8s) so motion is never synchronised. Easing: `linear`, `infinite`.
+- `@media (prefers-reduced-motion: reduce)`: paths render statically at base opacity, no animation.
+
+**Typewriter effect:**
+- Vanilla JS in the component's `<script>` tag — no library.
+- A `<span id="typewriter-text">` gets its `textContent` updated character-by-character via `setTimeout`.
+- Phrases cycle (localized per locale). English examples: `"born to build reliable systems"`, `"born to write clean code"`, `"born to solve hard problems"`, `"born to ship things that last"`.
+- Timing: type forward ~60ms/char → pause 2s at full phrase → delete ~35ms/char → pause 300ms → next phrase → loop.
+- Blinking cursor: a sibling `<span class="typewriter-cursor">|</span>` — CSS `animation: blink 0.8s step-end infinite`.
+- Style: `--text-lg`, weight 400. Typed text in `--accent`. Any static prefix (e.g. `"I was "`) in `--text-muted`.
+- `@media (prefers-reduced-motion: reduce)`: first phrase shown statically, cursor hidden.
 
 ### Homepage Sections Pattern
 
@@ -300,8 +329,8 @@ Each section uses a consistent structure:
 - Hover: `--shadow-md` + border → `--accent`
 
 **Projects preview (2 items):**
-- Cards same structure as notes but with tag chips and role label
-- Tags: `--radius-sm` pills, `--surface-high` background, `--text-sm --text-muted`
+- Bento-style cards (see Portfolio Page — Projects section for full spec)
+- Homepage shows 2 items, one spanning 2 columns when viewport allows
 
 ### Blog Index
 
@@ -334,12 +363,44 @@ Same prose styling as blog post detail.
 
 ### Portfolio Page
 
-- Layout uses `--wide-max` (72rem) for wider sections (projects grid, experience) and `--container-max` for prose (about, publications)
+- Layout uses `--wide-max` (72rem) for wider sections (projects grid, timeline) and `--container-max` for prose (about, publications)
 - **About:** prose block, `--container-max`
-- **Experience:** vertical timeline — `1px solid var(--border)` line, `--accent` dot marker, role/company/dates in monospace
-- **Projects:** full cards with description, tags, GitHub/live links, role label
-- **Publications:** simple list — title + publisher + date + type badge
 - **CV download:** prominent button near the top of the page
+
+**Timeline (Experience + Education):**
+
+A single vertical timeline component covers both experience and education. They are visually unified as one chronological story rather than two separate lists.
+
+- Vertical `2px solid var(--border)` line running down the left side
+- Each entry has a circular dot marker (`10px`, `--accent` fill, `--surface` ring) on the line
+- Entry types are visually distinguished by a small badge: `WORK` (in `--accent-dim` background) or `EDUCATION` (in a neutral `--surface-high` background) in Geist Mono `--text-xs`
+- Entry layout:
+  - Top row: badge + company/institution + date range in Geist Mono `--text-sm --text-muted`
+  - Title row: role/degree in `--text-base` weight 600
+  - Location in `--text-sm --text-muted`
+  - Description in `--text-sm`, `--leading-relaxed`
+  - Tags as small pills (`--surface-high`, `--radius-sm`, `--text-xs --text-muted`)
+- Education entries must be added to `src/content/portfolio/experience.ts` with a `type: 'education'` field alongside the existing `type: 'work'` entries
+- Mobile: dots and line remain; layout collapses to single column
+
+**Projects (Bento Grid):**
+
+Inspired by the bento grid pattern — variable-width cards on a 3-column CSS grid.
+
+- Grid: `display: grid`, `grid-template-columns: repeat(3, 1fr)`, `gap: var(--space-3)`, responsive to 2-col tablet and 1-col mobile
+- Featured projects can span 2 columns via a `featured: true` flag in project data (renders as `grid-column: span 2`)
+- Card anatomy:
+  - Background: `--surface`, border: `1px solid var(--border)`, `--radius-md`, `--card-padding`
+  - Top row: project icon/emoji in a small `--surface-high` square + status badge (`Active` / `Archived` / `Featured`) in `--text-xs` Geist Mono
+  - Title + `meta` (year) in `--text-base` weight 600 and `--text-sm --text-muted`
+  - Description in `--text-sm --leading-relaxed`
+  - Tags row: `--radius-sm` pills
+  - Bottom row: GitHub / live links as icon+text anchors; `→` CTA label fades in on hover
+- **Hover state:** subtle dot-pattern overlay appears (`radial-gradient` of 1px dots at 4px spacing, very low opacity `0.04`) — CSS only via a pseudo-element on the card. Card lifts with `--shadow-md` and `translateY(-2px)`. Border transitions to `--accent`. All at `--duration-base`.
+- Featured card (2-col span) gets the hover state applied persistently (`always-active` class) as a hero item
+
+**Publications:** simple list — title + publisher + date + type badge
+
 
 ### Now Page
 
@@ -347,6 +408,30 @@ Same prose styling as blog post detail.
 - "Last updated" in Geist Mono `--text-sm --text-muted` below the title
 - Status badge if present: pill with `--accent-dim` background
 - Body prose identical to blog post
+
+### Toast Notifications
+
+A lightweight vanilla JS + CSS toast system. No external library.
+
+- New file: `src/components/site/Toast.astro`
+- Mounted once in `BaseLayout.astro` as a fixed-position container `#toast-container` (`position: fixed`, `bottom: var(--space-6)`, `right: var(--space-6)`, `z-index: 200`, `display: flex`, `flex-direction: column-reverse`, `gap: var(--space-2)`)
+- Global API: `window.showToast({ message, variant, title?, duration? })` exposed from a `<script>` block in `Toast.astro`
+- **4 variants** with token-mapped styles:
+
+| Variant | Background | Border left | Icon color | Title color |
+|---------|-----------|-------------|------------|-------------|
+| `default` | `--surface` | `--border` | `--text-muted` | `--text` |
+| `success` | `--surface` | `#22c55e` | `#22c55e` | `#22c55e` |
+| `error` | `--surface` | `#ef4444` | `#ef4444` | `#ef4444` |
+| `warning` | `--surface` | `#f59e0b` | `#f59e0b` | `#f59e0b` |
+
+- Toast card: `max-width: 320px`, `--radius-md`, `--shadow-md`, `--card-padding`, `border: 1px solid var(--border)`, thick `4px` left border in variant color
+- Icon: inline SVG (Info / CheckCircle / AlertCircle / AlertTriangle), 16px
+- Layout: icon + text block (title optional, `--text-xs` weight 600 + message `--text-xs --text-muted`) + dismiss `×` button
+- Entry animation: `translateY(8px) opacity(0)` → `translateY(0) opacity(1)` at `--duration-base`
+- Exit animation: `opacity(1)` → `opacity(0) translateY(4px)`, then removed from DOM
+- Auto-dismiss after `duration` ms (default 4000). Dismiss button also available.
+- Used for: CV download confirmation, search no-results notice, lang-switch notice when translation is missing
 
 ### Search Dialog
 
@@ -374,20 +459,25 @@ Execute in three sequential layers. Each layer is independently reviewable befor
 
 ### Layer 2: Shell
 
-1. Update `BaseLayout.astro`: apply new font, layout structure
-2. Redesign `Header.astro`: scroll behavior, nav styles, right-side controls, mobile drawer
+1. Update `BaseLayout.astro`: apply new font, layout structure; mount `<Toast />` once
+2. Redesign `Header.astro`: scroll behavior, nav styles + tubelight active indicator (JS position calc), right-side controls, mobile drawer
 3. Redesign `Footer.astro`: new layout, social links
-4. Update `ThemeToggle.astro`: icon swap, new hover styles
-5. Update `LanguageSwitcher.astro`: monospace labels, new active/inactive styles
-6. Run E2E theme tests to confirm no regressions
+4. Update `ThemeToggle.astro`: pill/track design with Moon/Sun SVGs, vanilla JS toggle
+5. Update `LanguageSwitcher.astro`: Geist Mono labels, new active/inactive styles
+6. Create `Toast.astro`: 4-variant toast system, `window.showToast()` global
+7. Run E2E theme tests to confirm no regressions
 
 ### Layer 3: Pages
 
-1. Hero component (remove nav links, add CTA buttons)
-2. HomeSections component
+1. Hero component: remove nav links, add CTA buttons, background paths SVG, typewriter script
+2. HomeSections component: bento preview cards for projects
 3. Blog index + blog post detail
 4. Notes index (grid + filters) + note detail
-5. Portfolio page components (ProjectCard, ExperienceItem, PublicationItem)
+5. Portfolio page:
+   a. `ProjectCard.astro` → bento grid card with dot-pattern hover, variable col-span
+   b. `TimelineItem.astro` → unified Experience + Education timeline (rename/replace `ExperienceItem.astro`)
+   c. `PublicationItem.astro`
+   d. Update `src/content/portfolio/experience.ts` with `type` field + education entries
 6. Now page
 7. Search dialog
 8. Portuguese route equivalents (inherit styles — verify locale-specific copy renders correctly)
@@ -438,10 +528,15 @@ Key tokens:
 Notes support an optional `colorToken` frontmatter field — a raw CSS color string. Use directly as a CSS value; fall back to `var(--accent)` when absent.
 
 ## Interactive Components
-- **ThemeToggle:** icon-only, `aria-label`, cross-fade icon swap
+- **ThemeToggle:** pill/track with Moon+Sun SVGs, `role="switch"`, `aria-checked`, vanilla JS
 - **LanguageSwitcher:** `EN` / `PT` in Geist Mono, active locale weight 600
 - **SearchDialog:** opened via `window.openSearch()` or pressing `/`; focus trap; Esc closes
 - **Header mobile drawer:** `aria-expanded`, `aria-controls`, closes on link click and Escape
+- **Nav active indicator:** tubelight pill + glow, position calculated in vanilla JS on load
+- **Toast:** `window.showToast({ message, variant, title?, duration? })`; 4 variants; auto-dismiss
+- **Hero typewriter:** vanilla JS, cycles phrases, `prefers-reduced-motion` respected
+- **Hero background paths:** CSS-animated SVG, `prefers-reduced-motion` respected
+- **Bento project cards:** pure CSS hover (dot pattern, lift, border accent), no JS needed
 
 ## Plan Mode Protocol
 Before any code changes, review:
@@ -462,11 +557,19 @@ The redesign is successful if:
 - The token system is the single source of truth for all colors, spacing, and motion
 - Typography is set in Geist Sans / Geist Mono consistently across all surfaces
 - The header scroll behavior works correctly (transparent → blurred surface on scroll)
+- The tubelight active indicator animates correctly when navigating between routes
 - The mobile hamburger drawer opens, closes, and is keyboard-accessible
+- The ThemeToggle pill slides between Moon and Sun states at `--duration-base`
 - The search icon in the header opens the search dialog via `window.openSearch()`
+- Hero background paths animate subtly and respect `prefers-reduced-motion`
+- Hero typewriter cycles through phrases and respects `prefers-reduced-motion`
 - Notes cards render with their `colorToken` top border, falling back to `--accent`
 - The notes grid filters work with the new card styles
+- Portfolio page shows a unified Experience + Education timeline with `WORK` / `EDUCATION` badges
+- Portfolio projects render as a bento grid with dot-pattern hover and variable col-spans
+- `window.showToast()` fires correctly for all 4 variants (default, success, error, warning)
 - The portfolio page uses `--wide-max` for wider sections and `--container-max` for prose
 - The search dialog matches the new design and remains accessible
 - All existing E2E tests still pass
+- No new runtime dependencies added (no React, framer-motion, Tailwind, or shadcn)
 - The site reads as modern, clean, and technically credible on desktop and mobile
