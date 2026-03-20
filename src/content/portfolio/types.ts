@@ -11,6 +11,9 @@ export interface Project {
   github?: string;
   role?: LocalizedString;
   year: number;
+  featured?: boolean;           // spans 2 columns in bento grid
+  icon?: string;                // emoji or single character, e.g. "⚙️"
+  status?: 'Active' | 'Archived' | 'Featured';
 }
 
 export interface Publication {
@@ -22,11 +25,12 @@ export interface Publication {
 }
 
 export interface ExperienceEntry {
+  type: 'work' | 'education';   // required — backfill all work entries
   title: LocalizedString;
-  company: string;
+  company: string;              // company name for work, institution name for education
   location: LocalizedString;
-  startDate: string;
-  endDate?: string; // empty means Present
+  startDate: string;            // YYYY-MM
+  endDate?: string;             // YYYY-MM or undefined = Present
   description: LocalizedString[];
   tags: string[];
 }

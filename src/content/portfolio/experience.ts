@@ -2,6 +2,7 @@ import type { ExperienceEntry } from "./types";
 
 export const experience: ExperienceEntry[] = [
   {
+    type: 'work',
     title: {
       en: "Senior Embedded Software Engineer",
       "pt-br": "Engenheiro Sênior de Software Embarcado",
@@ -25,6 +26,7 @@ export const experience: ExperienceEntry[] = [
     tags: ["Embedded C", "RTOS", "ARM", "Automation"],
   },
   {
+    type: 'work',
     title: {
       en: "Embedded Software Developer",
       "pt-br": "Desenvolvedor de Software Embarcado",
@@ -43,5 +45,26 @@ export const experience: ExperienceEntry[] = [
       },
     ],
     tags: ["C++", "FreeRTOS", "Bluetooth Low Energy"],
+  },
+  {
+    type: 'education',
+    title: {
+      en: "B.Sc. Computer Engineering",
+      "pt-br": "Bacharelado em Engenharia de Computação",
+    },
+    company: "Federal University of Technology",
+    location: {
+      en: "Brazil",
+      "pt-br": "Brasil",
+    },
+    startDate: "2013-02",
+    endDate: "2017-12",
+    description: [
+      {
+        en: "Focus on embedded systems, digital electronics, and real-time operating systems.",
+        "pt-br": "Foco em sistemas embarcados, eletrônica digital e sistemas operacionais de tempo real.",
+      },
+    ],
+    tags: ["Embedded Systems", "Digital Electronics", "RTOS"],
   },
 ];
