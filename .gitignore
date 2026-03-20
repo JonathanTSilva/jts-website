@@ -18,6 +18,9 @@ pnpm-debug.log*
 playwright-report/
 test-results/
 
+# Worktrees
+.worktrees/
+
 # Environment
 .env
 .env.local
