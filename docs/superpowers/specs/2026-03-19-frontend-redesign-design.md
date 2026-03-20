@@ -515,7 +515,7 @@ Create `CLAUDE.md` at the repository root as the first deliverable of Layer 1. C
 ## Design System
 
 ### Token Conventions
-All visual values come from `src/styles/tokens.css`. Never use hardcoded hex values, px values, or inline styles in components.
+All visual values come from `src/styles/tokens.css`. Prefer CSS tokens over hardcoded values. Intentional exceptions: toast status-semantic colors (`#22c55e`, `#ef4444`, `#f59e0b`) and ThemeToggle thumb backgrounds (`#252538`, `#FFFFFF`) are hardcoded because no semantic token maps to them.
 
 Key tokens:
 - Colors: `--bg`, `--surface`, `--surface-high`, `--border`, `--text`, `--text-muted`, `--accent`, `--accent-hover`, `--accent-dim`
@@ -566,7 +566,7 @@ The redesign is successful if:
 - The token system is the single source of truth for all colors, spacing, and motion
 - Typography is set in Geist Sans / Geist Mono consistently across all surfaces
 - The header scroll behavior works correctly (transparent → blurred surface on scroll)
-- The tubelight active indicator animates correctly when navigating between routes
+- The tubelight active indicator is correctly positioned on the active link on page load; hover preview slides it to hovered links
 - The mobile hamburger drawer opens, closes, and is keyboard-accessible
 - The ThemeToggle pill slides between Moon and Sun states at `--duration-base`
 - The search icon in the header opens the search dialog via `window.openSearch()`
