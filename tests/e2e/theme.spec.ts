@@ -10,7 +10,7 @@ test.describe('Theme management', () => {
 
   test('toggles theme and persists choice', async ({ page }) => {
     await page.goto('/');
-    const toggle = page.getByRole('button', { name: /toggle theme/i });
+    const toggle = page.locator('.theme-toggle').first();
     const html = page.locator('html');
 
     const initialTheme = await html.getAttribute('data-theme');
@@ -23,9 +23,23 @@ test.describe('Theme management', () => {
     await expect(html).toHaveAttribute('data-theme', targetTheme);
   });
 
+  test('theme toggle pill switches theme and persists on reload', async ({ page }) => {
+    await page.goto('/');
+    const toggle = page.locator('.theme-toggle').first();
+    await expect(toggle).toBeVisible();
+    // get initial theme
+    const initialTheme = await page.locator('html').getAttribute('data-theme');
+    await toggle.click();
+    const newTheme = await page.locator('html').getAttribute('data-theme');
+    expect(newTheme).not.toBe(initialTheme);
+    // persists
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', newTheme!);
+  });
+
   test('theme toggle is keyboard accessible', async ({ page }) => {
     await page.goto('/');
-    const toggle = page.getByRole('button', { name: /toggle theme/i });
+    const toggle = page.locator('.theme-toggle').first();
     const html = page.locator('html');
     
     await page.keyboard.press('Tab');
@@ -47,4 +61,23 @@ test.describe('Theme management', () => {
     await page.keyboard.press('Enter');
     await expect(html).toHaveAttribute('data-theme', targetTheme);
   });
+});
+
+test('header gains scrolled class after page scroll', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo(0, 200));
+  await page.waitForFunction(() => document.getElementById('site-header')?.classList.contains('scrolled'));
+  await expect(page.locator('.site-header')).toHaveClass(/scrolled/);
+});
+
+test('mobile drawer opens and closes via hamburger', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const hamburger = page.locator('#hamburger');
+  await expect(hamburger).toHaveRole('button');
+  await expect(page.locator('#mobile-nav')).not.toBeVisible();
+  await hamburger.click();
+  await expect(page.locator('#mobile-nav')).toBeVisible();
+  await hamburger.click();
+  await expect(page.locator('#mobile-nav')).not.toBeVisible();
 });

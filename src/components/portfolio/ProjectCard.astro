@@ -1,93 +1,179 @@
 ---
 import type { Project } from '../../content/portfolio/types';
+import { type Locale } from '../../lib/content/locale';
 
 interface Props {
   project: Project;
-  locale: 'en' | 'pt-br';
+  locale: Locale;
 }
 
 const { project, locale } = Astro.props;
+const title = project.title[locale];
+const description = project.description[locale];
 ---
 
-<article class="card">
-  <div class="card-header">
-    <h3>{project.title[locale]}</h3>
-    <span class="year">{project.year}</span>
+<article
+  class:list={['project-card', project.featured && 'always-active']}
+  style={project.featured ? 'grid-column: span 2;' : ''}
+>
+  <div class="card-top">
+    {project.icon && <span class="card-icon" aria-hidden="true">{project.icon}</span>}
+    <span class="card-status">{project.status ?? 'Active'}</span>
   </div>
-  {project.role && <p class="role">{project.role[locale]}</p>}
-  <p>{project.description[locale]}</p>
-  <div class="tags">
-    {project.tags.map((tag) => <span class="tag">{tag}</span>)}
+
+  <div class="card-body">
+    <h3 class="card-title">
+      {title}
+      <span class="card-meta">{project.year}</span>
+    </h3>
+    <p class="card-description">{description}</p>
   </div>
-  <div class="card-links">
-    {project.github && <a href={project.github} class="link-button">GitHub</a>}
-    {project.link && <a href={project.link} class="link-button">Website</a>}
+
+  <div class="card-footer">
+    <div class="card-tags">
+      {project.tags.map(tag => <span class="tag">{tag}</span>)}
+    </div>
+    <div class="card-links">
+      {project.github && (
+        <a href={project.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/></svg>
+        </a>
+      )}
+      {project.link && (
+        <a href={project.link} target="_blank" rel="noopener noreferrer" aria-label="Live">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      )}
+      <span class="card-cta" aria-hidden="true">→</span>
+    </div>
   </div>
 </article>
 
 <style>
-  .card {
-    padding: var(--space-6);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
+  .project-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    height: 100%;
+    gap: var(--space-3);
+    overflow: hidden;
+    color: var(--text);
+    transition: transform var(--duration-base) var(--ease-out),
+                box-shadow var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out);
   }
 
-  .card-header {
+  /* Dot pattern overlay */
+  .project-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+    background-size: 4px 4px;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  .project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent);
+  }
+  .project-card:hover::after { opacity: 0.04; }
+
+  /* Always-active (featured) */
+  .project-card.always-active {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent);
+  }
+  .project-card.always-active::after { opacity: 0.04; }
+
+  .card-top {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-start;
   }
 
-  .card h3 {
-    margin: 0;
-    font-size: var(--text-lg);
-    line-height: 1.2;
-  }
-
-  .year {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-  }
-
-  .role {
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--color-accent);
-    margin: 0;
-  }
-
-  .card p {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    line-height: 1.5;
-  }
-
-  .tags {
+  .card-icon {
+    width: 2rem;
+    height: 2rem;
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-high);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-base);
   }
 
-  .tag {
+  .card-status {
+    font-family: var(--font-mono);
     font-size: var(--text-xs);
-    background: var(--color-accent-muted);
-    color: var(--color-accent);
-    padding: var(--space-1) var(--space-2);
-    border-radius: 4px;
-    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface-high);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
   }
+
+  .card-body { flex: 1; }
+
+  .card-title {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--text);
+    margin: 0 0 var(--space-2);
+    line-height: var(--leading-normal);
+  }
+
+  .card-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    font-weight: var(--weight-normal);
+    margin-left: var(--space-2);
+  }
+
+  .card-description {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: auto;
+  }
+
+  .card-tags { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 
   .card-links {
-    margin-top: auto;
     display: flex;
-    gap: var(--space-4);
-    padding-top: var(--space-2);
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
   }
+  .card-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    transition: color var(--duration-fast);
+  }
+  .card-links a:hover { color: var(--accent); }
+
+  .card-cta {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity var(--duration-fast);
+  }
+  .project-card:hover .card-cta { opacity: 1; }
 </style>

@@ -52,80 +52,105 @@ const translationMissingLabel = {
 }[locale];
 ---
 
-<div class="blog-list">
-  {years.map(year => {
-    const months = groupedPosts[year] ? Object.keys(groupedPosts[year]!).map(Number).sort((a, b) => b - a) : [];
-    return (
-      <section class="year-group">
-        <h2 class="year-title">{year}</h2>
-        {months.map(month => (
-          <div class="month-group">
-            <h3 class="month-title">{monthNames[month]}</h3>
-            <ul class="posts-list">
-              {groupedPosts[year]?.[month]?.map(post => (
-                <li class="post-item">
-                  <a href={contentLocalePath(locale, `/blog/${post.data.slug}`)} class="post-link">
-                    <span class="post-title">{post.data.title}</span>
-                    {post.isTranslationMissing && (
-                      <span class="translation-missing-tag">({translationMissingLabel})</span>
-                    )}
+{postsToShow.length === 0 ? (
+  <p class="empty-state">
+    {locale === 'en' ? 'No posts yet. Check back soon.' : 'Nenhum post ainda. Volte em breve.'}
+  </p>
+) : (
+  <div class="blog-list">
+    {years.map(year => {
+      const months = groupedPosts[year] ? Object.keys(groupedPosts[year]!).map(Number).sort((a, b) => b - a) : [];
+      return (
+        <>
+          <h2 class="blog-year">{year}</h2>
+          <div class="blog-entries">
+            {months.map(month => (
+              <div class="blog-month-group">
+                <h3 class="blog-month">{monthNames[month]}</h3>
+                {groupedPosts[year]?.[month]?.map(post => (
+                  <a
+                    href={contentLocalePath(locale, `/blog/${post.data.slug}`)}
+                    class="blog-entry"
+                  >
+                    <span class="blog-entry-title">
+                      {post.data.title}
+                      {post.isTranslationMissing && (
+                        <span class="translation-missing-tag">({translationMissingLabel})</span>
+                      )}
+                    </span>
+                    <time datetime={post.data.publishedAt.toISOString()} class="blog-entry-date">
+                      {post.data.publishedAt.toLocaleDateString(locale, { month: 'short', day: '2-digit' })}
+                    </time>
                   </a>
-                  <time datetime={post.data.publishedAt.toISOString()} class="post-date">
-                    {post.data.publishedAt.toLocaleDateString(locale, { day: '2-digit' })}
-                  </time>
-                </li>
-              ))}
-            </ul>
+                ))}
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
-    );
-  })}
-</div>
+        </>
+      );
+    })}
+  </div>
+)}
 
 <style>
-  .year-group {
-    margin-bottom: var(--space-8);
+  .empty-state {
+    color: var(--text-muted);
+    font-style: italic;
   }
-  .year-title {
-    font-size: var(--text-2xl);
-    border-bottom: 1px solid var(--color-border);
+
+  /* Two-column grid: 5rem year | 1fr entries */
+  .blog-list {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: var(--space-2) var(--space-8);
+  }
+  @media (max-width: 48rem) {
+    .blog-list { grid-template-columns: 1fr; }
+  }
+
+  .blog-year {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    position: sticky;
+    top: 5rem;
+    padding-top: var(--space-2);
+    align-self: start;
+    font-weight: normal;
+    margin: 0;
+  }
+
+  .blog-entries { display: flex; flex-direction: column; }
+
+  .blog-month-group {
     margin-bottom: var(--space-4);
-    padding-bottom: var(--space-2);
   }
-  .month-group {
-    margin-left: var(--space-4);
-    margin-bottom: var(--space-6);
+
+  .blog-month {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-2) 0;
+    padding-top: var(--space-2);
   }
-  .month-title {
-    font-size: var(--text-lg);
-    margin-bottom: var(--space-2);
-    color: var(--color-text-muted);
-    font-weight: 500;
-  }
-  .posts-list {
-    list-style: none;
-    padding: 0;
-  }
-  .post-item {
+
+  .blog-entry {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    padding: var(--space-2) 0;
-    border-bottom: 1px dashed var(--color-border);
     gap: var(--space-4);
-  }
-  .post-link {
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border);
     text-decoration: none;
-    color: var(--color-link);
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+    color: var(--text);
+    transition: color var(--duration-fast) var(--ease-out);
   }
-  .post-link:hover {
-    color: var(--color-link-hover);
-    text-decoration: underline;
+  .blog-entry:hover { color: var(--accent); text-decoration: none; }
+
+  .blog-entry-title {
+    flex: 1;
   }
+
   .translation-missing-tag {
     font-size: var(--text-xs);
     color: #f59e0b;
@@ -133,10 +158,12 @@ const translationMissingLabel = {
     font-style: italic;
     white-space: nowrap;
   }
-  .post-date {
-    font-variant-numeric: tabular-nums;
-    color: var(--color-text-muted);
+
+  .blog-entry-date {
     font-family: var(--font-mono);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 </style>

@@ -1,0 +1,110 @@
+---
+import type { ExperienceEntry } from '../../content/portfolio/types';
+import type { Locale } from '../../lib/content/locale';
+
+interface Props {
+  entry: ExperienceEntry;
+  locale: Locale;
+}
+
+const { entry, locale } = Astro.props;
+const title = entry.title[locale];
+const location = entry.location[locale];
+const descriptions = entry.description.map(d => d[locale]);
+
+const startLabel = entry.startDate.replace('-', '/');
+const endLabel = entry.endDate ? entry.endDate.replace('-', '/') : (locale === 'en' ? 'Present' : 'Atual');
+const dateRange = `${startLabel} – ${endLabel}`;
+---
+
+<div class="timeline-item">
+  <div class="timeline-dot" aria-hidden="true"></div>
+  <div class="timeline-content">
+    <div class="timeline-header">
+      <span class:list={['timeline-badge', entry.type === 'work' ? 'badge-work' : 'badge-edu']}>
+        {entry.type === 'work' ? 'WORK' : 'EDUCATION'}
+      </span>
+      <span class="timeline-company">{entry.company}</span>
+      <span class="timeline-date">{dateRange}</span>
+    </div>
+    <h3 class="timeline-title">{title}</h3>
+    <p class="timeline-location">{location}</p>
+    {descriptions.map(desc => <p class="timeline-desc">{desc}</p>)}
+    <div class="timeline-tags">
+      {entry.tags.map(tag => <span class="tag">{tag}</span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: var(--space-4);
+    position: relative;
+  }
+
+  .timeline-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    outline: 3px solid var(--surface);
+    outline-offset: 1px;
+    margin-top: 4px;
+    justify-self: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .timeline-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-bottom: var(--space-8);
+  }
+
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .timeline-badge {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    padding: 1px var(--space-2);
+    border-radius: var(--radius-sm);
+  }
+  .badge-work { background: var(--accent-dim); color: var(--accent); }
+  .badge-edu  { background: var(--surface-high); color: var(--text-muted); }
+
+  .timeline-company { font-weight: var(--weight-medium); color: var(--text); }
+  .timeline-date    { margin-left: auto; }
+
+  .timeline-title {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--text);
+    margin: 0;
+  }
+
+  .timeline-location {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .timeline-desc {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+  }
+
+  .timeline-tags { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+</style>

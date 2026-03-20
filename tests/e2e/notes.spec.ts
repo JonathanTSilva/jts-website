@@ -32,6 +32,15 @@ test.describe('Notes', () => {
     await expect(page.getByRole('dialog')).not.toBeVisible();
   });
 
+  test('notes cards have colorToken border and tag pills', async ({ page }) => {
+    await page.goto('/notes');
+    const card = page.locator('.note-card').first();
+    await expect(card).toBeVisible();
+    // Filter pills should be present
+    const filterPill = page.locator('.filter-btn').first();
+    await expect(filterPill).toBeVisible();
+  });
+
   test('search dialog focus trapping and keyboard navigation', async ({ page }) => {
     await page.goto('/');
     

@@ -39,23 +39,34 @@ const latestNotes = notes
   .slice(0, 3);
 
 const selectedProjects = projects.slice(0, 2);
+
+const projectsLabel = locale === 'pt-br' ? '// portfólio' : '// portfolio';
+const publicationsLabel = locale === 'pt-br' ? '// publicações' : '// publications';
+const blogLabel = locale === 'pt-br' ? '// blog' : '// blog';
+const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
 ---
 
 <section class="home-section">
-  <h2>{t.projects}</h2>
+  <header class="section-header">
+    <p class="section-label">{projectsLabel}</p>
+    <h2 class="section-heading">{t.projects}</h2>
+  </header>
   <div class="grid">
     {selectedProjects.map((project) => (
       <ProjectCard project={project} locale={locale} />
     ))}
   </div>
   <div class="cta">
-    <a href={contentLocalePath(locale, '/portfolio')} class="primary-button">{t.seeAllPortfolio}</a>
-    <a href="/assets/cv/jonathan-cv.pdf" download class="secondary-button">{t.downloadCv}</a>
+    <a href={contentLocalePath(locale, '/portfolio')} class="btn-primary">{t.seeAllPortfolio}</a>
+    <a href="/assets/cv/jonathan-cv.pdf" download class="btn-secondary">{t.downloadCv}</a>
   </div>
 </section>
 
 <section class="home-section">
-  <h2>{t.publications}</h2>
+  <header class="section-header">
+    <p class="section-label">{publicationsLabel}</p>
+    <h2 class="section-heading">{t.publications}</h2>
+  </header>
   <ul class="list list-none">
     {publications.slice(0, 3).map((pub) => (
       <li class="pub-list-item">
@@ -70,37 +81,45 @@ const selectedProjects = projects.slice(0, 2);
 </section>
 
 <section class="home-section">
-  <h2>{t.blog}</h2>
-  <ul class="list list-none">
+  <header class="section-header">
+    <p class="section-label">{blogLabel}</p>
+    <h2 class="section-heading">{t.blog}</h2>
+  </header>
+  <div class="blog-list">
     {latestBlogPosts.map((post) => (
-      <li class="content-list-item">
-        <span class="post-date">{new Date(post.data.publishedAt).toLocaleDateString(locale)}</span>
-        <span class="post-title">
-          <a href={contentLocalePath(locale, `/blog/${post.id}`)}>{post.data.title}</a>
+      <a
+        href={contentLocalePath(locale, `/blog/${post.id}`)}
+        class="blog-preview-row"
+      >
+        <span class="blog-preview-title">{post.data.title}</span>
+        <span class="blog-preview-date">
+          {new Date(post.data.publishedAt).toLocaleDateString(locale)}
         </span>
-      </li>
+      </a>
     ))}
-  </ul>
-  <div class="cta">
-    <a href={contentLocalePath(locale, '/blog')} class="link-button">{t.viewAllBlog}</a>
   </div>
+  <a href={contentLocalePath(locale, '/blog')} class="section-viewall">{t.viewAllBlog} →</a>
 </section>
 
 <section class="home-section">
-  <h2>{t.notes}</h2>
-  <ul class="list list-none">
+  <header class="section-header">
+    <p class="section-label">{notesLabel}</p>
+    <h2 class="section-heading">{t.notes}</h2>
+  </header>
+  <div class="notes-grid">
     {latestNotes.map((note) => (
-      <li class="content-list-item">
-        <span class="note-date">{new Date(note.data.publishedAt).toLocaleDateString(locale)}</span>
-        <span class="note-title">
-          <a href={contentLocalePath(locale, `/notes/${note.id}`)}>{note.data.title}</a>
+      <a
+        href={contentLocalePath(locale, `/notes/${note.id}`)}
+        class="note-preview-card"
+      >
+        <span class="note-preview-date">
+          {new Date(note.data.publishedAt).toLocaleDateString(locale)}
         </span>
-      </li>
+        <span class="note-preview-title">{note.data.title}</span>
+      </a>
     ))}
-  </ul>
-  <div class="cta">
-    <a href={contentLocalePath(locale, '/notes')} class="link-button">{t.viewAllNotes}</a>
   </div>
+  <a href={contentLocalePath(locale, '/notes')} class="section-viewall">{t.viewAllNotes} →</a>
 </section>
 
 <style>
@@ -108,11 +127,24 @@ const selectedProjects = projects.slice(0, 2);
     padding-block: var(--space-12);
   }
 
-  h2 {
-    font-size: var(--text-2xl);
+  .section-header {
     margin-bottom: var(--space-6);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--border);
     padding-bottom: var(--space-2);
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--space-1) 0;
+  }
+
+  .section-heading {
+    font-size: var(--text-2xl);
+    margin: 0;
   }
 
   .cta {
@@ -129,29 +161,120 @@ const selectedProjects = projects.slice(0, 2);
     gap: var(--space-4);
   }
 
-  .pub-list-item, .content-list-item {
+  .pub-list-item {
     display: grid;
     grid-template-columns: 120px 1fr;
     gap: var(--space-4);
     align-items: baseline;
   }
 
-  .pub-date, .post-date, .note-date {
+  .pub-date {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
-    color: var(--color-text-muted);
+    color: var(--text-muted);
   }
 
   .pub-publisher {
     font-size: var(--text-sm);
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     margin-left: var(--space-2);
   }
 
+  /* Blog preview rows */
+  .blog-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .blog-preview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding-block: var(--space-2);
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .blog-preview-row:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .blog-preview-title {
+    flex: 1;
+  }
+
+  .blog-preview-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Notes preview cards */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .note-preview-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    transition: box-shadow var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out);
+  }
+
+  .note-preview-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent);
+    text-decoration: none;
+  }
+
+  .note-preview-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .note-preview-title {
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  /* View all link */
+  .section-viewall {
+    display: inline-block;
+    margin-top: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .section-viewall:hover {
+    text-decoration: underline;
+  }
+
   @media (max-width: 600px) {
-    .pub-list-item, .content-list-item {
+    .pub-list-item {
       grid-template-columns: 1fr;
       gap: var(--space-1);
+    }
+
+    .notes-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

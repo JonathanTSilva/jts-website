@@ -4,6 +4,7 @@ import SeoHead from '../components/site/SeoHead.astro';
 import Header from '../components/site/Header.astro';
 import Footer from '../components/site/Footer.astro';
 import SearchDialog from '../components/search/SearchDialog.astro';
+import Toast from '../components/site/Toast.astro';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import { type Locale } from '../lib/content/locale';
@@ -35,6 +36,7 @@ const { title, description, locale = 'en' } = Astro.props;
     </main>
     <Footer locale={locale} />
     <SearchDialog locale={locale} />
+    <Toast />
   </body>
 </html>
 
@@ -47,7 +49,7 @@ const { title, description, locale = 'en' } = Astro.props;
   main {
     flex: 1;
     width: 100%;
-    max-width: var(--container-max-width);
+    max-width: var(--container-max);
     margin-inline: auto;
     padding-inline: var(--space-4);
     padding-block: var(--space-12);

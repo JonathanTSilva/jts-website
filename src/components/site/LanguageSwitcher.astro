@@ -1,56 +1,40 @@
 ---
-import { type Locale, LOCALES } from '../../lib/content/locale';
+import { type Locale } from '../../lib/content/locale';
 
 interface Props {
   currentLocale: Locale;
+  currentPath?: string;
 }
 
 const { currentLocale } = Astro.props;
-
-const labels: Record<Locale, string> = {
-  en: 'English',
-  'pt-br': 'Português'
-};
+const enHref = '/';
+const ptHref = '/pt-br';
 ---
 
-<div class="lang-switcher">
-  <span class="sr-only">Language switcher</span>
-  {LOCALES.map((locale) => (
-    <a 
-      href={locale === 'en' ? '/' : `/${locale}`} 
-      class:list={[{ active: locale === currentLocale }]}
-      aria-current={locale === currentLocale ? 'page' : undefined}
-      lang={locale}
-    >
-      {labels[locale]}
-    </a>
-  ))}
+<div class="lang-switcher" aria-label="Language switcher">
+  <a href={enHref} class={currentLocale === 'en' ? 'active' : ''} hreflang="en">EN</a>
+  <span class="sep" aria-hidden="true">/</span>
+  <a href={ptHref} class={currentLocale === 'pt-br' ? 'active' : ''} hreflang="pt-BR">PT</a>
 </div>
 
 <style>
   .lang-switcher {
     display: flex;
-    gap: var(--space-4);
     align-items: center;
-  }
-  
-  a {
+    gap: var(--space-1);
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
-    text-decoration: none;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--space-1);
-    color: var(--color-text-muted);
-    transition: color 0.2s ease, background-color 0.2s ease;
-  }
-  
-  a:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface);
   }
 
-  a.active {
-    color: var(--color-text);
-    font-weight: 600;
-    pointer-events: none;
+  .lang-switcher a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: var(--weight-normal);
+    transition: color var(--duration-fast);
+    padding: 2px 4px;
   }
+  .lang-switcher a:hover { color: var(--text); text-decoration: none; }
+  .lang-switcher a.active { color: var(--text); font-weight: var(--weight-semibold); }
+
+  .sep { color: var(--text-muted); }
 </style>

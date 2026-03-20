@@ -6,84 +6,319 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
 
 interface Props {
   locale: Locale;
+  currentPath?: string;
 }
 
-const { locale } = Astro.props;
+const { locale, currentPath = Astro.url.pathname } = Astro.props;
 const navItems = getNavigation(locale);
 ---
 
-<header class="site-header">
-  <div class="container header-container">
+<header class="site-header" id="site-header">
+  <div class="header-inner">
     <a href={locale === 'en' ? '/' : `/${locale}`} class="logo" aria-label="Home">
       Jonathan
     </a>
-    
-    <nav aria-label="Main navigation">
-      <ul class="nav-list list-none">
+
+    <nav class="main-nav" aria-label="Main navigation" id="main-nav">
+      <span class="nav-indicator" aria-hidden="true"></span>
+      <ul class="nav-list">
         {navItems.map((item) => (
           <li>
-            <a href={item.href}>{item.label}</a>
+            <a
+              href={item.href}
+              class={currentPath === item.href || (item.href !== '/' && item.href !== '/pt-br' && currentPath.startsWith(item.href)) ? 'active' : ''}
+            >
+              {item.label}
+            </a>
           </li>
         ))}
       </ul>
     </nav>
 
-    <div class="actions">
-      <LanguageSwitcher currentLocale={locale} />
+    <div class="header-actions">
+      <button class="search-btn" aria-label="Open search" onclick="window.openSearch?.()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+          <circle cx="8" cy="8" r="5"/><path d="m13 13 3 3"/>
+        </svg>
+      </button>
+      <LanguageSwitcher currentLocale={locale} currentPath={currentPath} />
+      <ThemeToggle />
+    </div>
+
+    <button
+      class="hamburger"
+      id="hamburger"
+      aria-label="Open menu"
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+      type="button"
+    >
+      <span class="ham-icon ham-open" aria-hidden="true">☰</span>
+      <span class="ham-icon ham-close" aria-hidden="true">✕</span>
+    </button>
+  </div>
+
+  <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
+    <ul class="mobile-nav-list">
+      {navItems.map((item) => (
+        <li><a href={item.href}>{item.label}</a></li>
+      ))}
+    </ul>
+    <div class="mobile-actions">
+      <LanguageSwitcher currentLocale={locale} currentPath={currentPath} />
       <ThemeToggle />
     </div>
   </div>
 </header>
 
-<style>
-  .site-header {
-    padding-block: var(--space-6);
-    border-bottom: 1px solid var(--color-border);
-    background-color: var(--color-bg);
-    position: sticky;
-    top: 0;
-    z-index: 10;
+<script>
+  const header = document.getElementById('site-header');
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobile-nav');
+
+  // ── Scroll blur ──────────────────────────────────────────
+  const sentinel = document.createElement('div');
+  sentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;pointer-events:none;';
+  document.body.prepend(sentinel);
+
+  const io = new IntersectionObserver(([entry]) => {
+    if (!entry) return;
+    header?.classList.toggle('scrolled', !entry.isIntersecting);
+  }, { threshold: 1 });
+  io.observe(sentinel);
+
+  // ── Mobile drawer ────────────────────────────────────────
+  function setDrawer(open: boolean) {
+    hamburger?.setAttribute('aria-expanded', String(open));
+    mobileNav?.setAttribute('aria-hidden', String(!open));
+    mobileNav?.classList.toggle('open', open);
+    hamburger?.querySelector('.ham-open')?.classList.toggle('hidden', open);
+    hamburger?.querySelector('.ham-close')?.classList.toggle('hidden', !open);
+    if (!open) hamburger?.setAttribute('aria-label', 'Open menu');
+    else hamburger?.setAttribute('aria-label', 'Close menu');
   }
 
-  .header-container {
+  hamburger?.addEventListener('click', () => {
+    const isOpen = mobileNav?.classList.contains('open');
+    setDrawer(!isOpen);
+  });
+
+  mobileNav?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => setDrawer(false));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileNav?.classList.contains('open')) setDrawer(false);
+  });
+
+  // ── Tubelight nav indicator ──────────────────────────────
+  const nav = document.querySelector('.main-nav') as HTMLElement | null;
+  const indicator = nav?.querySelector('.nav-indicator') as HTMLElement | null;
+  const activeLink = nav?.querySelector('a.active') as HTMLElement | null;
+
+  function moveIndicator(target: HTMLElement) {
+    if (!indicator || !nav) return;
+    indicator.style.left  = target.offsetLeft + 'px';
+    indicator.style.width = target.offsetWidth + 'px';
+    indicator.style.opacity = '1';
+  }
+
+  if (activeLink) {
+    // Snap without transition on load
+    indicator?.style.setProperty('transition', 'none');
+    moveIndicator(activeLink);
+    requestAnimationFrame(() => {
+      indicator?.style.removeProperty('transition');
+    });
+  }
+
+  nav?.querySelectorAll<HTMLAnchorElement>('a').forEach(link => {
+    link.addEventListener('mouseenter', () => moveIndicator(link));
+    link.addEventListener('mouseleave', () => { if (activeLink) moveIndicator(activeLink); });
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    background: transparent;
+    transition: background var(--duration-base) var(--ease-in-out),
+                border-color var(--duration-base) var(--ease-in-out),
+                backdrop-filter var(--duration-base) var(--ease-in-out);
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-header.scrolled {
+    background: var(--surface-high);
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--border);
+  }
+
+  .header-inner {
+    max-width: var(--wide-max);
+    margin-inline: auto;
+    padding-inline: var(--space-6);
+    height: 4rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: var(--space-6);
   }
 
   .logo {
-    font-weight: 700;
-    font-size: var(--text-lg);
-    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-base);
+    color: var(--text);
     text-decoration: none;
+    flex-shrink: 0;
   }
+  .logo:hover { color: var(--accent); text-decoration: none; }
+
+  /* ── Desktop nav ── */
+  .main-nav {
+    display: none;
+    position: relative;
+    flex: 1;
+    justify-content: center;
+  }
+  @media (min-width: 48rem) { .main-nav { display: flex; } }
 
   .nav-list {
-    display: none;
-    gap: var(--space-6);
-  }
-
-  @media (min-width: 48rem) {
-    .nav-list {
-      display: flex;
-    }
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    list-style: none;
+    padding: 0;
+    margin: 0;
   }
 
   .nav-list a {
-    color: var(--color-text-muted);
-    font-weight: 500;
+    display: block;
+    padding: var(--space-1) var(--space-3);
     font-size: var(--text-sm);
-  }
-
-  .nav-list a:hover {
-    color: var(--color-text);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
     text-decoration: none;
+    border-radius: var(--radius-full);
+    position: relative;
+    z-index: 1;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  .nav-list a:hover, .nav-list a.active { color: var(--text); text-decoration: none; }
+  .nav-list a.active { color: var(--accent); }
+
+  .nav-indicator {
+    position: absolute;
+    height: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface-high);
+    border-radius: var(--radius-full);
+    opacity: 0;
+    pointer-events: none;
+    transition: left var(--duration-base) var(--ease-out),
+                width var(--duration-base) var(--ease-out),
+                opacity var(--duration-fast);
   }
 
-  .actions {
+  .nav-indicator::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 8px 2px var(--accent);
+    opacity: 0.8;
+  }
+
+  /* ── Header actions ── */
+  .header-actions {
+    display: none;
+    align-items: center;
+    gap: var(--space-3);
+    margin-left: auto;
+  }
+  @media (min-width: 48rem) { .header-actions { display: flex; } }
+
+  .search-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: var(--space-1);
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    border-radius: var(--radius-sm);
+    transition: color var(--duration-fast);
+  }
+  .search-btn:hover { color: var(--text); }
+
+  /* ── Hamburger ── */
+  .hamburger {
+    display: flex;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: var(--space-1);
+    margin-left: auto;
+    font-size: var(--text-lg);
+    line-height: 1;
+  }
+  @media (min-width: 48rem) { .hamburger { display: none; } }
+
+  .ham-icon.hidden { display: none; }
+
+  /* ── Mobile drawer ── */
+  .mobile-nav {
+    display: block;
+    overflow: hidden;
+    max-height: 0;
+    visibility: hidden;
+    background: var(--surface-high);
+    border-top: 1px solid var(--border);
+    transition: max-height var(--duration-slow) var(--ease-out),
+                visibility 0s var(--duration-slow);
+  }
+  .mobile-nav.open {
+    max-height: 400px;
+    visibility: visible;
+    transition: max-height var(--duration-slow) var(--ease-out),
+                visibility 0s;
+  }
+
+  @media (min-width: 48rem) { .mobile-nav { display: none; } }
+
+  .mobile-nav-list {
+    list-style: none;
+    padding: var(--space-4) var(--space-6);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .mobile-nav-list a {
+    display: block;
+    padding: var(--space-2) 0;
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: var(--weight-medium);
+  }
+  .mobile-nav-list a:hover { color: var(--text); text-decoration: none; }
+
+  .mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-6) var(--space-6);
+    border-top: 1px solid var(--border);
   }
 </style>

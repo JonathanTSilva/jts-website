@@ -1,92 +1,207 @@
 ---
-import { getNavigation } from '../../lib/navigation';
 import type { Locale } from '../../lib/content/locale';
 
 interface Props {
   locale: Locale;
+  typewriterPrefix: string;
+  typewriterPhrases: string[];
 }
 
-const { locale } = Astro.props;
+const { locale, typewriterPrefix, typewriterPhrases } = Astro.props;
 
 const t = {
   en: {
+    label: '// embedded systems engineer',
     name: 'Jonathan',
-    role: 'Senior Embedded Software Engineer',
-    positioning: 'Building robust, maintainable systems for the next decade of embedded engineering.',
+    portfolioCta: 'View Portfolio',
+    blogCta: 'Read Blog',
   },
   'pt-br': {
+    label: '// engenheiro de software embarcado',
     name: 'Jonathan',
-    role: 'Engenheiro Sênior de Software Embarcado',
-    positioning: 'Construindo sistemas robustos e sustentáveis para a próxima década da engenharia embarcada.',
+    portfolioCta: 'Ver Portfólio',
+    blogCta: 'Ler Blog',
   },
 }[locale];
 
-const navLinks = getNavigation(locale);
+const portfolioHref = locale === 'en' ? '/portfolio' : '/pt-br/portfolio';
+const blogHref      = locale === 'en' ? '/blog'      : '/pt-br/blog';
+
+// Generate 36 SVG paths using the spec formula
+const paths = Array.from({ length: 36 }, (_, i) => {
+  const d = `M${-380 - i*5} ${-189 + i*6} C${-380 - i*5} ${-189 + i*6} ${-312 - i*5} ${216 - i*6} ${152 - i*5} ${343 - i*6} C${616 - i*5} ${470 - i*6} ${684 - i*5} ${875 - i*6} ${684 - i*5} ${875 - i*6}`;
+  const opacity = +(0.04 + i * 0.004).toFixed(3);
+  const strokeWidth = +(0.5 + i * 0.029).toFixed(2);
+  const duration = +(20 + i * 0.42).toFixed(1);
+  const delay = +(-i * 0.22).toFixed(2);
+  return { d, opacity, strokeWidth, duration, delay };
+});
 ---
 
-<section class="hero">
-  <h1>{t.name}</h1>
-  <p class="role">{t.role}</p>
-  <p class="positioning">{t.positioning}</p>
-  
-  <nav class="hero-nav">
-    <ul>
-      {navLinks.map((link) => (
-        <li>
-          <a href={link.href}>{link.label}</a>
-        </li>
-      ))}
-    </ul>
-  </nav>
+<section class="hero" aria-label="Introduction">
+  <!-- Background paths -->
+  <svg
+    class="hero-paths"
+    viewBox="0 0 1200 500"
+    fill="none"
+    aria-hidden="true"
+  >
+    {paths.map((p) => (
+      <path
+        d={p.d}
+        stroke="currentColor"
+        stroke-width={p.strokeWidth}
+        stroke-opacity={p.opacity}
+        stroke-dasharray="2000"
+        stroke-dashoffset="2000"
+        style={`animation: hero-flow ${p.duration}s ${p.delay}s linear infinite alternate;`}
+      />
+    ))}
+  </svg>
+
+  <!-- Content -->
+  <div class="hero-content">
+    <p class="hero-label">{t.label}</p>
+    <h1 class="hero-name">{t.name}</h1>
+
+    <p class="typewriter-line" aria-label={typewriterPrefix + typewriterPhrases[0]}>
+      <span class="typewriter-prefix">{typewriterPrefix}</span><span
+        class="typewriter-text"
+        id="typewriter-text"
+        aria-live="polite"
+      ></span><span class="typewriter-cursor" aria-hidden="true">|</span>
+    </p>
+
+    <div class="hero-cta">
+      <a href={portfolioHref} class="btn-primary">{t.portfolioCta}</a>
+      <a href={blogHref} class="btn-secondary">{t.blogCta}</a>
+    </div>
+  </div>
 </section>
+
+<script define:vars={{ typewriterPhrases }}>
+  const el = document.getElementById('typewriter-text');
+  if (!el) throw new Error('typewriter-text element not found');
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) {
+    el.textContent = typewriterPhrases[0];
+    const cursor = document.querySelector('.typewriter-cursor');
+    if (cursor) cursor.style.display = 'none';
+  } else {
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+
+    function tick() {
+      const phrase = typewriterPhrases[phraseIndex];
+      if (!deleting) {
+        el.textContent = phrase.slice(0, charIndex + 1);
+        charIndex++;
+        if (charIndex === phrase.length) {
+          deleting = true;
+          setTimeout(tick, 2000);
+          return;
+        }
+        setTimeout(tick, 60);
+      } else {
+        el.textContent = phrase.slice(0, charIndex - 1);
+        charIndex--;
+        if (charIndex === 0) {
+          deleting = false;
+          phraseIndex = (phraseIndex + 1) % typewriterPhrases.length;
+          setTimeout(tick, 300);
+          return;
+        }
+        setTimeout(tick, 35);
+      }
+    }
+    setTimeout(tick, 800);
+  }
+</script>
 
 <style>
   .hero {
-    padding-block: var(--space-12);
+    position: relative;
+    padding-block: var(--section-gap);
+    overflow: hidden;
+    color: var(--border); /* drives currentColor for SVG paths */
+  }
+
+  /* Background paths */
+  .hero-paths {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes hero-flow {
+    from { stroke-dashoffset: 2000; }
+    to   { stroke-dashoffset: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-paths path { animation: none !important; }
+  }
+
+  /* Content layer */
+  .hero-content {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-  }
-
-  h1 {
-    font-size: var(--text-4xl);
-    margin: 0;
-    color: var(--color-text);
-  }
-
-  .role {
-    font-size: var(--text-xl);
-    font-weight: 500;
-    color: var(--color-accent);
-    margin: 0;
-  }
-
-  .positioning {
-    font-size: var(--text-lg);
-    color: var(--color-text-muted);
     max-width: 40rem;
-    line-height: 1.6;
+  }
+
+  .hero-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
     margin: 0;
   }
 
-  .hero-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: var(--space-8) 0 0;
+  .hero-name {
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-bold);
+    color: var(--text);
+    line-height: var(--leading-tight);
+    margin: 0;
+  }
+
+  /* Typewriter */
+  .typewriter-line {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-normal);
+    margin: 0;
+    line-height: var(--leading-normal);
+  }
+
+  .typewriter-prefix { color: var(--text-muted); }
+  .typewriter-text   { color: var(--accent); }
+
+  .typewriter-cursor {
+    color: var(--accent);
+    animation: blink 0.8s step-end infinite;
+    margin-left: 1px;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .typewriter-cursor { display: none; }
+  }
+
+  /* CTAs */
+  .hero-cta {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-6);
-  }
-
-  .hero-nav a {
-    text-decoration: none;
-    color: var(--color-link);
-    font-weight: 500;
-    font-size: var(--text-base);
-  }
-
-  .hero-nav a:hover {
-    color: var(--color-link-hover);
-    text-decoration: underline;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
   }
 </style>

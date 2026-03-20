@@ -17,6 +17,9 @@ export const projects: Project[] = [
       en: "Lead Developer",
       "pt-br": "Desenvolvedor Principal",
     },
+    icon: "⚙️",
+    status: "Active",
+    featured: true,
   },
   {
     title: {
@@ -34,5 +37,7 @@ export const projects: Project[] = [
       en: "Architect",
       "pt-br": "Arquiteto",
     },
+    icon: "🧪",
+    status: "Active",
   },
 ];
