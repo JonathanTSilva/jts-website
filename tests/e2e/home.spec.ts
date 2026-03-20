@@ -64,6 +64,19 @@ test.describe('Homepage', () => {
   });
 });
 
+test('hero renders name, monospace label, CTA buttons, and typewriter', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.hero h1')).toBeVisible();
+  await expect(page.locator('.typewriter-prefix')).toBeVisible();
+  await expect(page.locator('a[href="/portfolio"]').first()).toBeVisible();
+  await expect(page.locator('a[href="/blog"]').first()).toBeVisible();
+});
+
+test('hero does not render a nav element', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.hero nav')).not.toBeAttached();
+});
+
 test.describe('Portfolio Page', () => {
   test('en: portfolio page renders all sections', async ({ page }) => {
     await page.goto('/portfolio');

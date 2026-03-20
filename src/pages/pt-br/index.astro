@@ -20,7 +20,11 @@ const t = {
 ---
 
 <BaseLayout locale={locale} title="Início">
-  <Hero locale={locale} />
+  <Hero
+    locale="pt-br"
+    typewriterPrefix="nascido para "
+    typewriterPhrases={["construir sistemas confiáveis", "escrever código limpo", "resolver problemas difíceis", "entregar coisas que durem"]}
+  />
   <HomeSections locale={locale} t={t} />
   <ContactSection locale={locale} />
 </BaseLayout>
