@@ -36,20 +36,16 @@ const t = {
   <main class="container">
     <header class="now-header">
       <h1 class="now-title">{entry.data.title}</h1>
-      <div class="now-meta">
-        {entry.data.updatedAt && (
-          <p class="updated-at">
-            {t.lastUpdated} <time datetime={entry.data.updatedAt.toISOString()}>
-              {entry.data.updatedAt.toLocaleDateString(locale, { dateStyle: 'long' })}
-            </time>
-          </p>
-        )}
-        {entry.data.status && (
-          <p class="status">
-            {t.status} <strong>{entry.data.status}</strong>
-          </p>
-        )}
-      </div>
+      {entry.data.status && (
+        <span class="now-status">{entry.data.status}</span>
+      )}
+      {entry.data.updatedAt && (
+        <p class="now-updated">
+          {t.lastUpdated} <time datetime={entry.data.updatedAt.toISOString()}>
+            {entry.data.updatedAt.toLocaleDateString(locale, { dateStyle: 'long' })}
+          </time>
+        </p>
+      )}
     </header>
 
     {isTranslationFallback && (
@@ -77,21 +73,28 @@ const t = {
     font-size: var(--text-4xl);
     margin-bottom: var(--space-4);
   }
-  .now-meta {
-    color: var(--text-muted);
-    font-size: var(--text-base);
-    border-left: 4px solid var(--border);
-    padding-left: var(--space-4);
+  .now-status {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 2px var(--space-3);
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-2);
   }
-  .now-meta p {
-    margin: 0;
+  .now-updated {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-6);
   }
   .fallback-notice {
-    background-color: #fef3c7;
-    border-left: 4px solid #f59e0b;
+    background-color: var(--surface-high);
+    border-left: 4px solid var(--border);
     padding: var(--space-4);
     margin-bottom: var(--space-8);
-    color: #92400e;
+    color: var(--text-muted);
   }
   .prose {
     line-height: 1.6;

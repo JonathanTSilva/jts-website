@@ -159,17 +159,16 @@ const t = {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
   }
 
   .search-content {
     position: relative;
-    width: 90%;
-    max-width: 600px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    width: 90vw;
+    max-width: 560px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -185,11 +184,16 @@ const t = {
 
   input {
     flex: 1;
-    border: none;
-    background: none;
     font-size: var(--text-lg);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
     color: var(--text);
     outline: none;
+  }
+
+  input::placeholder {
+    color: var(--text-muted);
   }
 
   .close-btn {
@@ -215,11 +219,14 @@ const t = {
     transition: background 0.2s;
   }
 
-  .search-result-item:hover {
-    background: var(--surface);
+  .search-result-item:hover,
+  .search-result-item:focus,
+  .search-result-item.active {
+    background: var(--accent-dim);
   }
 
   .result-type {
+    font-family: var(--font-mono);
     font-size: var(--text-xs);
     text-transform: uppercase;
     color: var(--accent);

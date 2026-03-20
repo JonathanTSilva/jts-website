@@ -15,4 +15,12 @@ test.describe('Now page', () => {
     await expect(page.getByText('Trabalhando no site pessoal')).toBeVisible();
   });
 
+  test('now page has status badge and prose class', async ({ page }) => {
+    await page.goto('/now');
+    const prose = page.locator('.prose');
+    await expect(prose).toBeVisible();
+    const status = page.locator('.now-status');
+    await expect(status).toBeVisible();
+  });
+
 });
