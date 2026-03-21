@@ -204,6 +204,40 @@ test.describe('LanguageSwitcher pill', () => {
   });
 });
 
+test.describe('Footer', () => {
+  test('footer has two rows: brand row and copyright row', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.footer-row-brand')).toBeVisible();
+    await expect(page.locator('.footer-row-legal')).toBeVisible();
+  });
+
+  test('footer brand row has logo, social icons, and lang switcher', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.footer-logo')).toBeVisible();
+    await expect(page.locator('.footer-social')).toBeVisible();
+    // LanguageSwitcher pill is inside footer
+    await expect(page.locator('.footer-row-brand .lang-pill')).toBeVisible();
+  });
+
+  test('footer legal row has copyright and privacy/terms links', async ({ page }) => {
+    await page.goto('/');
+    const legal = page.locator('.footer-row-legal');
+    await expect(legal).toBeVisible();
+    await expect(legal.locator('a[href="/privacy"]')).toBeVisible();
+    await expect(legal.locator('a[href="/terms"]')).toBeVisible();
+  });
+
+  test('footer uses container-max width (not wide-max)', async ({ page }) => {
+    await page.goto('/');
+    // Behavioral: at wide viewport inner should not fill full width
+    await page.setViewportSize({ width: 1400, height: 800 });
+    const inner = page.locator('.footer-inner');
+    const box = await inner.boundingBox();
+    // container-max = 52rem = 832px; inner must be narrower than 1400
+    expect(box!.width).toBeLessThan(1400);
+  });
+});
+
 test.describe('Portfolio Page', () => {
   test('en: portfolio page renders all sections', async ({ page }) => {
     await page.goto('/portfolio');
