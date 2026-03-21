@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '../../lib/content/locale';
 import { contentLocalePath } from '../../lib/content/locale';
+import { getNoteAccentColor } from '../../lib/notes';
 
 interface Props {
   notes: (CollectionEntry<'notes'> & { isTranslationMissing?: boolean })[];
@@ -22,7 +23,7 @@ const translationMissingLabel = {
       class="note-card"
       data-category={note.data.category || 'uncategorized'}
       data-tags={note.data.tags.join(',')}
-      style={`border-top: 3px solid ${note.data.colorToken ?? 'var(--accent)'}`}
+      style={`border-top: 3px solid ${getNoteAccentColor(note.data.colorToken, note.data.category)}`}
     >
       <a href={contentLocalePath(locale, `/notes/${note.data.slug}`)} class="note-link">
         <header class="note-header">
