@@ -179,7 +179,7 @@ const navItems = getNavigation(locale);
     max-width: var(--container-max);
     margin-inline: auto;
     padding-inline: var(--space-6);
-    height: 4rem;
+    height: var(--space-16);
     display: flex;
     align-items: center;
     gap: var(--space-6);
@@ -282,7 +282,7 @@ const navItems = getNavigation(locale);
     border-radius: var(--radius-full);
     padding: var(--space-1) var(--space-3);
     cursor: pointer;
-    width: 160px;
+    width: var(--search-field-width);
     transition: border-color var(--duration-fast);
   }
   .search-field:hover { border-color: var(--text-muted); }
@@ -309,7 +309,7 @@ const navItems = getNavigation(locale);
       gap: 0;
     }
     .header-actions > :not(.search-field) { display: none; }
-    .search-field { width: 120px; }
+    .search-field { width: var(--search-field-width-sm); }
     .main-nav { display: none; }
   }
 
