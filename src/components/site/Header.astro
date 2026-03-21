@@ -330,18 +330,16 @@ const navItems = getNavigation(locale);
     color: var(--text-muted);
     padding: var(--space-1);
     margin-left: auto;
-    font-size: var(--text-lg);
-    line-height: 1;
     flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
+    width: var(--space-8);
+    height: var(--space-8);
   }
   @media (min-width: 48rem) { .hamburger { display: none; } }
 
-  .ham-open  { display: inline-block; }
+  .ham-open  { display: block; }
   .ham-close { display: none; }
   #hamburger[aria-expanded="true"]  .ham-open  { display: none; }
-  #hamburger[aria-expanded="true"]  .ham-close { display: inline-block; }
+  #hamburger[aria-expanded="true"]  .ham-close { display: block; }
 
   /* ── Mobile drawer ── */
   .mobile-nav {
