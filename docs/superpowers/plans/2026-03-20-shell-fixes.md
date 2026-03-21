@@ -63,14 +63,18 @@ test.describe('Header', () => {
     expect(paddingTop).toBeGreaterThan(0);
   });
 
-  test('header inner content is centered at container-max width', async ({ page }) => {
+  test('header inner content is constrained by container-max', async ({ page }) => {
     await page.goto('/');
     const inner = page.locator('.header-inner');
+    // Verify max-width is set (any non-'none' value from the token is acceptable)
     const maxWidth = await inner.evaluate(el =>
       window.getComputedStyle(el).maxWidth
     );
-    // --container-max is 52rem = 832px
-    expect(maxWidth).toBe('832px');
+    expect(maxWidth).not.toBe('none');
+    // At viewport wider than 52rem, inner should not fill the full viewport
+    await page.setViewportSize({ width: 1400, height: 800 });
+    const innerBox = await inner.boundingBox();
+    expect(innerBox!.width).toBeLessThan(1400);
   });
 });
 ```
@@ -96,12 +100,19 @@ In `src/styles/tokens.css`, in the `:root` block after the `--wide-max` line:
 
 In the `<style>` block of `src/components/site/Header.astro`:
 
-Change `.site-header` from:
+Change the full `.site-header` rule from:
 ```css
   .site-header {
     position: sticky;
     top: 0;
     z-index: 50;
+    width: 100%;
+    background: transparent;
+    transition: background var(--duration-base) var(--ease-in-out),
+                border-color var(--duration-base) var(--ease-in-out),
+                backdrop-filter var(--duration-base) var(--ease-in-out);
+    border-bottom: 1px solid transparent;
+  }
 ```
 To:
 ```css
@@ -109,6 +120,13 @@ To:
     position: fixed;
     top: 0;
     z-index: var(--z-header);
+    width: 100%;
+    background: transparent;
+    transition: background var(--duration-base) var(--ease-in-out),
+                border-color var(--duration-base) var(--ease-in-out),
+                backdrop-filter var(--duration-base) var(--ease-in-out);
+    border-bottom: 1px solid transparent;
+  }
 ```
 
 Change `.header-inner` `max-width` from:
@@ -201,11 +219,31 @@ Add to `tests/e2e/header.spec.ts` (inside the `test.describe('Header', ...)` blo
     const links = page.locator('.nav-list a');
     const firstLink = links.first();
     await firstLink.hover();
-    // The hover pill is a ::before pseudo-element — verify the link has correct styles
     const hasHoverTransition = await firstLink.evaluate(el =>
       window.getComputedStyle(el).transition.includes('background')
     );
     expect(hasHoverTransition).toBe(true);
+  });
+
+  test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
+    await page.goto('/pt-br');
+    const indicator = page.locator('.nav-indicator');
+    const activeLink = page.locator('.nav-list a.active');
+
+    // Indicator must be visible (opacity: 1 set via JS)
+    const opacity = await indicator.evaluate(el =>
+      (el as HTMLElement).style.opacity
+    );
+    expect(opacity).toBe('1');
+
+    // Indicator left position must match the active link's offset
+    const indicatorLeft = await indicator.evaluate(el =>
+      (el as HTMLElement).style.left
+    );
+    const activeLinkLeft = await activeLink.evaluate(el =>
+      (el as HTMLElement).offsetLeft + 'px'
+    );
+    expect(indicatorLeft).toBe(activeLinkLeft);
   });
 ```
 
@@ -230,9 +268,16 @@ In `src/components/site/Header.astro`, in the `<script>` block, find and **delet
 
 The `moveIndicator` function and the initial `activeLink` positioning block remain — only the hover listeners are removed.
 
-- [ ] **Step 4: Add CSS hover pill for nav links**
+- [ ] **Step 4: Replace nav link CSS rules in `Header.astro`**
 
-In the `<style>` block of `Header.astro`, update `.nav-list a`:
+The existing CSS has these two rules that must be **replaced entirely**:
+```css
+  /* REMOVE THESE EXISTING RULES: */
+  .nav-list a:hover, .nav-list a.active { color: var(--text); text-decoration: none; }
+  .nav-list a.active { color: var(--accent); }
+```
+
+Replace the `.nav-list a` rule block (lines starting at `  .nav-list a {`) with the full updated version, and remove the two rules above:
 
 ```css
   .nav-list a {
@@ -253,7 +298,10 @@ In the `<style>` block of `Header.astro`, update `.nav-list a`:
     color: var(--text);
     text-decoration: none;
   }
-  .nav-list a.active { color: var(--accent); }
+  .nav-list a.active {
+    color: var(--accent);
+    text-decoration: none;
+  }
 ```
 
 - [ ] **Step 5: Run tests to verify they pass**
@@ -288,14 +336,11 @@ Add to `tests/e2e/header.spec.ts`:
     const searchField = page.locator('.search-field');
     await expect(searchField).toBeVisible();
 
-    let dialogOpened = false;
-    await page.exposeFunction('__testSearchOpened', () => { dialogOpened = true; });
-    await page.evaluate(() => {
-      (window as any).openSearch = () => (window as any).__testSearchOpened();
-    });
-
+    // Clicking the field should open the search dialog
     await searchField.click();
-    expect(dialogOpened).toBe(true);
+    // The search dialog uses role="dialog" when open
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 2000 });
   });
 
   test('search field is visible on mobile in header bar', async ({ page }) => {
@@ -599,37 +644,25 @@ In `src/components/site/ThemeToggle.astro`, replace the entire `<script>` block 
 
 - [ ] **Step 4: Fix the moon SVG in `ThemeToggle.astro`**
 
-The current moon path (`M13 9.5a6.5 6.5 0 1 1-8-6.285A5 5 0 0 0 13 9.5Z`) may clip. Replace both moon SVG instances (`.icon-moon` and `.icon-moon-dim`) with a clean crescent using `clipPath`:
+The current moon path may clip on some renderers. Replace both moon SVG instances (`.icon-moon` and `.icon-moon-dim`) with a single-path crescent. Using a path avoids the overlapping-circle approach (which would require knowing the exact thumb background color, which is a hardcoded exception `#252538`/`#ffffff` that varies by theme state).
+
+Use this clean crescent path for both instances:
 
 ```astro
     <!-- Moon SVG (dark mode active) -->
-    <svg class="icon-moon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
-      <defs>
-        <clipPath id="moon-clip-active">
-          <rect x="0" y="0" width="14" height="14"/>
-        </clipPath>
-      </defs>
-      <circle cx="7" cy="7" r="5" clip-path="url(#moon-clip-active)"/>
-      <circle cx="9.5" cy="4.5" r="3.8" fill="var(--surface-high)"/>
+    <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
 ```
-
-And for `.icon-moon-dim` (use a unique clip id):
 
 ```astro
     <!-- Moon SVG (inactive in light mode) -->
-    <svg class="icon-moon-dim" width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
-      <defs>
-        <clipPath id="moon-clip-dim">
-          <rect x="0" y="0" width="14" height="14"/>
-        </clipPath>
-      </defs>
-      <circle cx="7" cy="7" r="5" clip-path="url(#moon-clip-dim)"/>
-      <circle cx="9.5" cy="4.5" r="3.8" fill="var(--surface-high)"/>
+    <svg class="icon-moon-dim" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
 ```
 
-Note: The overlapping circle uses `fill="var(--surface-high)"` to match the toggle track background, creating the crescent cutout effect. This works correctly in both themes because `--surface-high` matches the toggle background.
+This is the standard Feather Icons crescent moon path — it is self-contained, renders cleanly in any context regardless of background color, and matches the size of the existing sun icon.
 
 - [ ] **Step 5: Run tests to verify they pass**
 
