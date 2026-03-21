@@ -48,6 +48,9 @@
   --container-max: 52rem;
   --wide-max:      72rem;
 
+  /* Z-index scale */
+  --z-header: 100;
+
   /* Radii */
   --radius-sm:   4px;
   --radius-md:   8px;
