@@ -18,3 +18,12 @@ test('portfolio unified timeline shows work and education entries', async ({ pag
   const timelineItems = page.locator('.timeline-item');
   await expect(timelineItems.first()).toBeVisible();
 });
+
+test('skills cloud renders at least one pill', async ({ page }) => {
+  await page.goto('/portfolio');
+  const cloud = page.locator('.skills-cloud');
+  await expect(cloud).toBeVisible();
+  const pills = cloud.locator('.skill-pill');
+  const count = await pills.count();
+  expect(count).toBeGreaterThan(0);
+});
