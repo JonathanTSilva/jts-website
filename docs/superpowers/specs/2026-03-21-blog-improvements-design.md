@@ -18,13 +18,14 @@ Builds on `feature/frontend-redesign`. CSS tokens, `BaseLayout`, and `BlogList` 
 Create `src/lib/readingTime.ts`:
 
 ```typescript
-export function getReadingTime(body: string): number {
+export function getReadingTime(body: string | undefined): number {
+  if (!body) return 1;
   const words = body.trim().split(/\s+/).length;
   return Math.max(1, Math.ceil(words / 238));
 }
 ```
 
-238 wpm is the median adult reading speed. `body` is the raw Markdown string from `entry.body`. Result is minutes, minimum 1.
+238 wpm is the median adult reading speed. `body` is the raw Markdown string from `entry.body`. Astro types `body` as `string | undefined` on collection entries — the guard returns 1 for empty/missing bodies. Result is minutes, minimum 1.
 
 ---
 
@@ -40,7 +41,7 @@ Call `getReadingTime(post.body)` for each post at build time. Display "N min" in
 Jan 05 · 3 min
 ```
 
-`post.body` is the raw string from the Astro content collection entry.
+`post.body` is a top-level property on the Astro content collection entry (not under `.data`). It survives the spread `{ ...post, isTranslationMissing: false }` used in `BlogList.astro` because `body` is an own enumerable property of the entry object.
 
 #### Tag filter pills
 
@@ -219,10 +220,21 @@ The prose column (`<div class="post-main">`) contains the header, fallback notic
 
 ### Reading time
 
+**EN** (`src/pages/blog/[slug].astro`):
 ```astro
 import { getReadingTime } from '../../lib/readingTime';
 const readingTime = getReadingTime(post.body);
 ```
+
+**PT-BR** (`src/pages/pt-br/blog/[slug].astro`) — path is one level deeper:
+```astro
+import { getReadingTime } from '../../../lib/readingTime';
+const readingTime = getReadingTime(post.body);
+```
+
+Add `readingMinutes` to the `t` object in each page:
+- EN: `readingMinutes: 'min read'`
+- PT-BR: `readingMinutes: 'min de leitura'`
 
 In the header:
 
@@ -232,7 +244,7 @@ In the header:
     {t.publishedAt} {post.data.publishedAt.toLocaleDateString(locale, { dateStyle: 'long' })}
   </time>
   <span class="post-meta-sep">·</span>
-  <span class="post-reading-time">{readingTime} min read</span>
+  <span class="post-reading-time">{readingTime} {t.readingMinutes}</span>
   {post.data.tags.length > 0 && (
     <div class="post-tag-pills">
       {post.data.tags.map(tag => <span class="post-tag">{tag}</span>)}
@@ -271,8 +283,6 @@ CSS:
 }
 ```
 
-PT-BR translation: `t.readingMinutes = 'min de leitura'` (replace `'min read'`).
-
 ---
 
 ## 5. Table of Contents Component
@@ -289,7 +299,14 @@ interface Props {
 }
 ```
 
-`headings` comes from `const { Content, headings } = await render(post)` in the page frontmatter.
+`headings` comes from `render(post)` in the page frontmatter. Change the existing line in both `[slug].astro` files from:
+```typescript
+const { Content } = await render(post);
+```
+to:
+```typescript
+const { Content, headings } = await render(post);
+```
 
 ### Filtering
 
@@ -498,6 +515,9 @@ interface Props {
 }
 
 const { locale, prev, next } = Astro.props;
+const labels = locale === 'pt-br'
+  ? { prev: '← Mais antigo', next: 'Mais recente →' }
+  : { prev: '← Older', next: 'Newer →' };
 ---
 
 {(prev || next) && (
@@ -505,7 +525,7 @@ const { locale, prev, next } = Astro.props;
     <div class="post-nav-prev">
       {prev && (
         <a href={contentLocalePath(locale, `/blog/${prev.slug}`)} class="post-nav-link">
-          <span class="post-nav-label">← Older</span>
+          <span class="post-nav-label">{labels.prev}</span>
           <span class="post-nav-title">{prev.title}</span>
         </a>
       )}
@@ -513,7 +533,7 @@ const { locale, prev, next } = Astro.props;
     <div class="post-nav-next">
       {next && (
         <a href={contentLocalePath(locale, `/blog/${next.slug}`)} class="post-nav-link post-nav-link--next">
-          <span class="post-nav-label">Newer →</span>
+          <span class="post-nav-label">{labels.next}</span>
           <span class="post-nav-title">{next.title}</span>
         </a>
       )}
@@ -521,8 +541,6 @@ const { locale, prev, next } = Astro.props;
   </nav>
 )}
 ```
-
-PT-BR labels: `'← Mais antigo'` / `'Mais recente →'`.
 
 ### CSS
 
@@ -570,11 +588,20 @@ PT-BR labels: `'← Mais antigo'` / `'Mais recente →'`.
 
 ### Computing prev/next in `getStaticPaths`
 
-In both `[slug].astro` pages, compute the ordered display list and pass prev/next as props:
+In both `[slug].astro` pages, add `const locale` inside `getStaticPaths` (the outer `const locale` is not in scope there) and compute the ordered display list:
+
+- EN file: `const locale = 'en';`
+- PT-BR file: `const locale = 'pt-br';`
 
 ```typescript
-// Resolve one post per translationKey for the current locale (same logic as BlogList)
-const displayPosts = uniqueTranslationKeys.map(key => {
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog');
+  const locale = 'en'; // 'pt-br' in the PT-BR file
+
+  const uniqueTranslationKeys = Array.from(new Set(allPosts.map(p => p.data.translationKey)));
+
+  // Resolve one post per translationKey for the current locale (same logic as BlogList)
+  const displayPosts = uniqueTranslationKeys.map(key => {
   const translations = allPosts.filter(p => p.data.translationKey === key);
   return translations.find(p => p.data.language === locale)
     || translations.find(p => p.data.language === 'en')
@@ -607,11 +634,13 @@ The `prev`/`next` slugs are always the locale-resolved display post slugs (what 
 
 The existing `.post-footer` with the back-link is removed; `PostNav` replaces it.
 
+**Note:** The existing `getStaticPaths` in both files already fetches `allPosts` and builds `uniqueTranslationKeys`. Replace the entire function with the updated version above — do not leave the old `return` statement alongside the new one.
+
 ---
 
 ## 8. E2E Tests
 
-Add to `tests/e2e/blog.spec.ts`:
+Add inside the existing `test.describe('Blog', () => { ... })` block in `tests/e2e/blog.spec.ts`:
 
 ```typescript
 test('blog list shows tag filter pills', async ({ page }) => {
@@ -680,7 +709,7 @@ test('blog post shows prev/next navigation', async ({ page }) => {
 - Tag pages (`/blog/tag/foo`)
 - Reading progress bar
 - Estimated reading time in RSS feed
-- PT-BR ToC title translation (always "Contents" for now)
+- PT-BR ToC title and `aria-label` translation (always "Contents" / "Table of contents" in English for now)
 
 ---
 
@@ -694,4 +723,4 @@ test('blog post shows prev/next navigation', async ({ page }) => {
 | Modify | `src/components/blog/BlogList.astro` — tag filters, reading time |
 | Modify | `src/pages/blog/[slug].astro` — wide layout, ToC, improved prose, PostNav, reading time, prev/next props |
 | Modify | `src/pages/pt-br/blog/[slug].astro` — same |
-| Modify | `tests/e2e/blog.spec.ts` — 6 new tests |
+| Modify | `tests/e2e/blog.spec.ts` — 6 new tests (inside existing `describe` block) |
