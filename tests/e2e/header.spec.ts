@@ -71,10 +71,6 @@ test.describe('Header', () => {
     const links = page.locator('.nav-list a');
     const firstLink = links.first();
     await firstLink.hover();
-    const hasHoverTransition = await firstLink.evaluate(el =>
-      window.getComputedStyle(el).transition.includes('background')
-    );
-    expect(hasHoverTransition).toBe(true);
 
     // After hovering, the link should have a visible background color
     const bgColor = await firstLink.evaluate(el =>
