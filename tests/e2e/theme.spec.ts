@@ -41,8 +41,9 @@ test.describe('Theme management', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/');
 
-    // Open mobile drawer
+    // Open mobile drawer and wait for it to be visible
     await page.locator('#hamburger').click();
+    await expect(page.locator('#mobile-nav')).toBeVisible();
 
     // Click the toggle inside the drawer
     const mobileToggle = page.locator('.mobile-actions .theme-toggle');
