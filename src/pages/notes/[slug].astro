@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { contentLocalePath } from '../../lib/content/locale';
+import { getNoteAccentColor } from '../../lib/notes';
 
 export async function getStaticPaths() {
   const allNotes = await getCollection('notes');
@@ -37,7 +38,7 @@ const t = {
   description={note.data.summary ?? undefined}
 >
   <article class="container">
-    <header class="note-header" style={note.data.colorToken ? `--note-accent: ${note.data.colorToken}` : ''}>
+    <header class="note-header" style={`--note-accent: ${getNoteAccentColor(note.data.colorToken, note.data.category)}`}>
       {note.data.category && <span class="note-category">{note.data.category}</span>}
       <h1 class="note-title">{note.data.title}</h1>
       <div class="note-meta">
