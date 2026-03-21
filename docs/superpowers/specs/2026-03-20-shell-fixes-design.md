@@ -70,6 +70,7 @@ The search trigger is an icon-only button that is invisible on mobile.
 - The field itself does not perform inline filtering — it is a styled trigger only.
 - The `<input>` element has `readonly` attribute to prevent native keyboard on mobile from appearing; `cursor: pointer` to signal it is clickable.
 - The click handler must guard against `window.openSearch` being undefined: `if (typeof window.openSearch === 'function') window.openSearch()`.
+- The magnifying glass icon is non-interactive (no separate click listener, `aria-hidden="true"`). Click events on the icon bubble naturally from the wrapper — no redundant listener needed.
 
 **Desktop:**
 - The search field sits in the nav controls area on the right side of the header, before the theme toggle.
@@ -125,7 +126,7 @@ The crescent moon SVG in `ThemeToggle.astro` renders as cut off or visually brok
 
 ### Design
 - Replace the existing moon SVG path with a correct, fully-visible crescent moon that renders cleanly within its `viewBox`.
-- Use a standard crescent moon path: a filled circle with a smaller circle subtracted using a clip or by using two overlapping circles in SVG.
+- Use a filled circle with a smaller circle subtracted via `clip-path` or SVG `<clipPath>` to produce the crescent shape.
 - The icon must look correct in both dark and light themes (it appears as the "activate dark mode" button in light theme, and the active state indicator in dark theme).
 - Size matches the existing sun icon dimensions.
 
