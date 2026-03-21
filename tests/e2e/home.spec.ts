@@ -96,6 +96,28 @@ test('hero has two-column layout with profile placeholder and achievement boxes'
   await expect(boxes.first().locator('.achievement-label')).toBeVisible();
 });
 
+test('hero social contact row has email, linkedin, github links', async ({ page }) => {
+  await page.goto('/');
+  const social = page.locator('.hero-social');
+  await expect(social).toBeVisible();
+  await expect(social.locator('a[href^="mailto:"]')).toBeVisible();
+  await expect(social.locator('a[href*="linkedin"]')).toBeVisible();
+  await expect(social.locator('a[href*="github"]')).toBeVisible();
+});
+
+test('hero CTA area has tagline text and three CTA buttons', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.hero-tagline')).toBeVisible();
+  await expect(page.locator('.hero-cta a')).toHaveCount(3);
+  await expect(page.locator('.hero-cta .btn-ghost')).toBeVisible();
+});
+
+test('pt-br hero tagline is in Portuguese', async ({ page }) => {
+  await page.goto('/pt-br');
+  const tagline = page.locator('.hero-tagline');
+  await expect(tagline).toContainText('Explore meu trabalho e insights');
+});
+
 test.describe('Portfolio Page', () => {
   test('en: portfolio page renders all sections', async ({ page }) => {
     await page.goto('/portfolio');
