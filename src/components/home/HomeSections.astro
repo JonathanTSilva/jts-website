@@ -38,7 +38,7 @@ const latestNotes = notes
   .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
   .slice(0, 3);
 
-const selectedProjects = projects.slice(0, 2);
+const selectedProjects = projects.slice(0, 3);
 
 const projectsLabel = locale === 'pt-br' ? '// portfólio' : '// portfolio';
 const publicationsLabel = locale === 'pt-br' ? '// publicações' : '// publications';
@@ -145,6 +145,18 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
   .section-heading {
     font-size: var(--text-2xl);
     margin: 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 48rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   .cta {

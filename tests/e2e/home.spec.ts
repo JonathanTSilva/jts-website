@@ -118,6 +118,21 @@ test('pt-br hero tagline is in Portuguese', async ({ page }) => {
   await expect(tagline).toContainText('Explore meu trabalho e insights');
 });
 
+test('projects section shows 3 project cards', async ({ page }) => {
+  await page.goto('/');
+  const cards = page.locator('.project-card');
+  await expect(cards).toHaveCount(3);
+});
+
+test('projects bento grid: first card spans full width on desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto('/');
+  const firstCard = page.locator('.project-card').first();
+  await expect(firstCard).toBeVisible();
+  const style = await firstCard.getAttribute('style');
+  expect(style).toContain('span 2');
+});
+
 test.describe('Portfolio Page', () => {
   test('en: portfolio page renders all sections', async ({ page }) => {
     await page.goto('/portfolio');
