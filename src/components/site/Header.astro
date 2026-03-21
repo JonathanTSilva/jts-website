@@ -2,7 +2,6 @@
 import { getNavigation } from '../../lib/navigation';
 import { type Locale } from '../../lib/content/locale';
 import ThemeToggle from './ThemeToggle.astro';
-import LanguageSwitcher from './LanguageSwitcher.astro';
 
 interface Props {
   locale: Locale;
@@ -53,7 +52,6 @@ const navItems = getNavigation(locale);
           <circle cx="8" cy="8" r="5"/><path d="m13 13 3 3"/>
         </svg>
       </div>
-      <LanguageSwitcher currentLocale={locale} currentPath={currentPath} />
       <ThemeToggle />
     </div>
 
@@ -84,7 +82,6 @@ const navItems = getNavigation(locale);
       ))}
     </ul>
     <div class="mobile-actions">
-      <LanguageSwitcher currentLocale={locale} currentPath={currentPath} />
       <ThemeToggle />
     </div>
   </div>

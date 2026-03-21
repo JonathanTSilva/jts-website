@@ -130,6 +130,18 @@ test.describe('Header', () => {
     await expect(closeIcon).toBeVisible();
   });
 
+  test('language switcher is not present in the header', async ({ page }) => {
+    await page.goto('/');
+    // The language switcher renders EN / PT links
+    const headerActions = page.locator('.header-actions');
+    await expect(headerActions.locator('.lang-switcher')).not.toBeVisible();
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.locator('#hamburger').click();
+    const mobileActions = page.locator('.mobile-actions');
+    await expect(mobileActions.locator('.lang-switcher')).not.toBeVisible();
+  });
+
   test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
     await page.goto('/pt-br');
     const indicator = page.locator('.nav-indicator');
