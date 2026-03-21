@@ -100,6 +100,12 @@ test.describe('Header', () => {
     await expect(searchField).toBeVisible();
   });
 
+  test('search input has readonly attribute to prevent mobile keyboard', async ({ page }) => {
+    await page.goto('/');
+    const input = page.locator('.search-field input');
+    await expect(input).toHaveAttribute('readonly', '');
+  });
+
   test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
     await page.goto('/pt-br');
     const indicator = page.locator('.nav-indicator');
