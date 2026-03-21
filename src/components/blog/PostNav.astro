@@ -1,0 +1,77 @@
+---
+import { contentLocalePath } from '../../lib/content/locale';
+
+interface Props {
+  locale: string;
+  prev?: { title: string; slug: string };
+  next?: { title: string; slug: string };
+}
+
+const { locale, prev, next } = Astro.props;
+const labels = locale === 'pt-br'
+  ? { prev: '← Mais antigo', next: 'Mais recente →' }
+  : { prev: '← Older', next: 'Newer →' };
+---
+
+{(prev || next) && (
+  <nav class="post-nav" aria-label="Post navigation">
+    <div class="post-nav-prev">
+      {prev && (
+        <a href={contentLocalePath(locale, `/blog/${prev.slug}`)} class="post-nav-link">
+          <span class="post-nav-label">{labels.prev}</span>
+          <span class="post-nav-title">{prev.title}</span>
+        </a>
+      )}
+    </div>
+    <div class="post-nav-next">
+      {next && (
+        <a href={contentLocalePath(locale, `/blog/${next.slug}`)} class="post-nav-link post-nav-link--next">
+          <span class="post-nav-label">{labels.next}</span>
+          <span class="post-nav-title">{next.title}</span>
+        </a>
+      )}
+    </div>
+  </nav>
+)}
+
+<style>
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin-top: var(--space-12);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .post-nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  .post-nav-link:hover { color: var(--accent); text-decoration: none; }
+
+  .post-nav-link--next {
+    text-align: right;
+  }
+
+  .post-nav-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+
+  .post-nav-title {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--text);
+  }
+  .post-nav-link:hover .post-nav-title { color: inherit; }
+
+  @media (max-width: 48rem) {
+    .post-nav { grid-template-columns: 1fr; }
+    .post-nav-link--next { text-align: left; }
+  }
+</style>
