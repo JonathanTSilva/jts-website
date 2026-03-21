@@ -1,0 +1,71 @@
+---
+import { getSkills } from '../../lib/skills';
+import { type Locale } from '../../lib/content/locale';
+
+interface Props {
+  locale: Locale;
+  skillsLabel: string;
+}
+
+const { skillsLabel } = Astro.props;
+const skills = getSkills();
+---
+
+<section class="portfolio-section">
+  <h2>{skillsLabel}</h2>
+  <div class="skills-cloud">
+    {skills.map((skill, index) => {
+      const isTop = index === 0;
+      const isHigh = !isTop && skill.count >= 3;
+      return (
+        <span class:list={['skill-pill', isTop ? 'skill-pill--top' : isHigh ? 'skill-pill--high' : 'skill-pill--normal']}>
+          {skill.tag}
+        </span>
+      );
+    })}
+  </div>
+</section>
+
+<style>
+  h2 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-8);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--space-2);
+    color: var(--text);
+  }
+
+  .skills-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .skill-pill {
+    font-family: var(--font-mono);
+    background: var(--surface);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+  }
+
+  .skill-pill--top {
+    font-size: var(--text-sm);
+    padding: var(--space-1) var(--space-3);
+    color: var(--accent);
+    border-color: var(--accent-dim);
+  }
+
+  .skill-pill--high {
+    font-size: var(--text-sm);
+    padding: var(--space-1) var(--space-3);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .skill-pill--normal {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+</style>

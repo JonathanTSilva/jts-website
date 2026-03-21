@@ -1,0 +1,93 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { headings } = Astro.props;
+const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+---
+
+{tocHeadings.length > 0 && (
+  <nav class="toc" aria-label="Table of contents">
+    <p class="toc-title">Contents</p>
+    <ol class="toc-list">
+      {tocHeadings.map(h => (
+        <li class:list={['toc-item', h.depth === 3 ? 'toc-item--sub' : '']}>
+          <a class="toc-link" href={`#${h.slug}`}>{h.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<script>
+  const links = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+  if (links.length && 'IntersectionObserver' in window) {
+    const headingIds = Array.from(links)
+      .map(l => l.getAttribute('href')?.slice(1))
+      .filter((id): id is string => Boolean(id));
+    const headingEls = headingIds
+      .map(id => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const id = entry.target.id;
+        const link = document.querySelector<HTMLElement>(`.toc-link[href="#${id}"]`);
+        if (link) link.classList.toggle('active', entry.isIntersecting);
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    headingEls.forEach(el => observer.observe(el));
+  }
+</script>
+
+<style>
+  .toc {
+    position: sticky;
+    top: calc(var(--space-16) + var(--space-4));
+    max-height: calc(100vh - var(--space-16) - var(--space-8));
+    overflow-y: auto;
+  }
+
+  .toc-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-3) 0;
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .toc-item {
+    line-height: 1.3;
+  }
+
+  .toc-item--sub {
+    padding-left: var(--space-3);
+  }
+
+  .toc-link {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
+    display: block;
+    padding-block: 2px;
+  }
+  .toc-link:hover { color: var(--text); text-decoration: none; }
+  .toc-link.active { color: var(--accent); }
+
+  @media (max-width: 64rem) {
+    .toc { display: none; }
+  }
+</style>

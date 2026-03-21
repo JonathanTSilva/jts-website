@@ -1,94 +1,158 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { contentLocalePath } from '../../../lib/content/locale';
+import TableOfContents from '../../../components/blog/TableOfContents.astro';
+import PostNav from '../../../components/blog/PostNav.astro';
+import { getReadingTime } from '../../../lib/readingTime';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('blog');
   const locale = 'pt-br';
 
   const uniqueTranslationKeys = Array.from(new Set(allPosts.map(p => p.data.translationKey)));
-  
+
+  // Resolve one post per translationKey for PT-BR locale — same logic as BlogList
+  const displayPosts = uniqueTranslationKeys.map(key => {
+    const translations = allPosts.filter(p => p.data.translationKey === key);
+    return translations.find(p => p.data.language === locale)
+      || translations.find(p => p.data.language === 'en')
+      || translations[0];
+  }).filter((p): p is NonNullable<typeof p> => p !== null && p !== undefined)
+    .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
   return uniqueTranslationKeys.flatMap(key => {
     const translations = allPosts.filter(p => p.data.translationKey === key);
-    
-    // We generate a path for each translation's slug
+    const displayPost = displayPosts.find(p => p.data.translationKey === key);
+    const idx = displayPost ? displayPosts.indexOf(displayPost) : -1;
+    const prevPost = idx >= 0 && idx < displayPosts.length - 1 ? displayPosts[idx + 1] : undefined;
+    const nextPost = idx > 0 ? displayPosts[idx - 1] : undefined;
+
     return translations.map(post => ({
       params: { slug: post.data.slug },
-      props: { post, isTranslationFallback: post.data.language !== locale },
+      props: {
+        post,
+        isTranslationFallback: post.data.language !== locale,
+        prev: prevPost ? { title: prevPost.data.title, slug: prevPost.data.slug } : undefined,
+        next: nextPost ? { title: nextPost.data.title, slug: nextPost.data.slug } : undefined,
+      },
     }));
   });
 }
 
-const { post, isTranslationFallback } = Astro.props;
-const { Content } = await render(post);
-
+const { post, isTranslationFallback, prev, next } = Astro.props;
+const { Content, headings } = await render(post);
 const locale = 'pt-br';
+const readingTime = getReadingTime(post.body);
 
 const t = {
-  fallbackNotice: 'Este post não está disponível em Português. Mostrando a versão original.',
+  fallbackNotice: 'Este post não está disponível em Português. Exibindo a versão original.',
   viewOriginal: 'Ver versão original',
   publishedAt: 'Publicado em',
-  backToBlog: '← Voltar para o blog',
+  readingMinutes: 'min de leitura',
 };
 ---
 
-<BaseLayout 
-  locale={locale} 
-  title={post.data.title} 
+<BaseLayout
+  locale={locale}
+  title={post.data.title}
   description={post.data.summary}
 >
-  <article class="container">
-    <header class="post-header">
-      <h1 class="post-title">{post.data.title}</h1>
-      <div class="post-meta">
-        <time datetime={post.data.publishedAt.toISOString()}>
-          {t.publishedAt} {post.data.publishedAt.toLocaleDateString(locale, { dateStyle: 'long' })}
-        </time>
-        {post.data.tags && post.data.tags.length > 0 && (
-          <span class="post-tags">
-            • {post.data.tags.join(', ')}
-          </span>
-        )}
-      </div>
-    </header>
+  <div class="post-wrapper">
+    <div class="post-main">
+      <header class="post-header">
+        <h1 class="post-title">{post.data.title}</h1>
+        <div class="post-meta">
+          <time datetime={post.data.publishedAt.toISOString()}>
+            {t.publishedAt} {post.data.publishedAt.toLocaleDateString(locale, { dateStyle: 'long' })}
+          </time>
+          <span class="post-meta-sep">·</span>
+          <span class="post-reading-time">{readingTime} {t.readingMinutes}</span>
+          {post.data.tags.length > 0 && (
+            <div class="post-tag-pills">
+              {post.data.tags.map(tag => <span class="post-tag">{tag}</span>)}
+            </div>
+          )}
+        </div>
+      </header>
 
-    {isTranslationFallback && (
-      <div class="fallback-notice">
-        <p>{t.fallbackNotice}</p>
-      </div>
-    )}
+      {isTranslationFallback && (
+        <div class="fallback-notice">
+          <p>{t.fallbackNotice}</p>
+        </div>
+      )}
 
-    <div class="prose">
-      <Content />
+      <div class="prose">
+        <Content />
+      </div>
+
+      <PostNav locale={locale} prev={prev} next={next} />
     </div>
 
-    <footer class="post-footer">
-      <a href={contentLocalePath(locale, '/blog')} class="back-link">
-        {t.backToBlog}
-      </a>
-    </footer>
-  </article>
+    <aside class="post-toc">
+      <TableOfContents headings={headings} />
+    </aside>
+  </div>
 </BaseLayout>
 
 <style>
-  .container {
-    max-width: var(--container-max);
+  .post-wrapper {
+    max-width: var(--wide-max);
     margin: 0 auto;
     padding: var(--space-8) 0;
+    display: grid;
+    grid-template-columns: 1fr 14rem;
+    gap: var(--space-12);
+    align-items: start;
   }
+
+  @media (max-width: 64rem) {
+    .post-wrapper {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .post-main {
+    min-width: 0;
+  }
+
   .post-header {
     margin-bottom: var(--space-8);
   }
+
   .post-title {
     font-size: var(--text-3xl);
     margin-bottom: var(--space-2);
   }
+
   .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
     color: var(--text-muted);
     font-size: var(--text-sm);
     font-family: var(--font-mono);
   }
+
+  .post-meta-sep {
+    color: var(--text-muted);
+  }
+
+  .post-tag-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .post-tag {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+  }
+
   .fallback-notice {
     background-color: #fef3c7;
     border-left: 4px solid #f59e0b;
@@ -96,27 +160,90 @@ const t = {
     margin-bottom: var(--space-8);
     color: #92400e;
   }
+
   .prose {
     line-height: 1.6;
   }
+
   .prose :global(h2) {
     font-size: var(--text-2xl);
     margin-top: var(--space-8);
     margin-bottom: var(--space-4);
   }
+
+  .prose :global(h3) {
+    font-size: var(--text-xl);
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-3);
+  }
+
   .prose :global(p) {
     margin-bottom: var(--space-4);
   }
-  .post-footer {
-    margin-top: var(--space-12);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border);
-  }
-  .back-link {
+
+  .prose :global(a) {
     color: var(--accent);
-    text-decoration: none;
-  }
-  .back-link:hover {
     text-decoration: underline;
+    text-decoration-color: var(--accent-dim);
+  }
+
+  .prose :global(a:hover) {
+    text-decoration-color: var(--accent);
+  }
+
+  .prose :global(strong) {
+    font-weight: var(--weight-semibold);
+    color: var(--text);
+  }
+
+  .prose :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: var(--surface-high);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.1em var(--space-1);
+  }
+
+  .prose :global(pre) {
+    background: var(--surface-high);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    overflow-x: auto;
+    margin-bottom: var(--space-6);
+  }
+
+  .prose :global(pre code) {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: var(--text-sm);
+    border-radius: 0;
+  }
+
+  .prose :global(blockquote) {
+    border-left: 2px solid var(--accent);
+    padding-left: var(--space-4);
+    margin-left: 0;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: var(--space-4);
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: var(--space-6);
+    margin-bottom: var(--space-4);
+  }
+
+  .prose :global(li) {
+    margin-bottom: var(--space-2);
+  }
+
+  .prose :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin-block: var(--space-8);
   }
 </style>

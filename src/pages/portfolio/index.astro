@@ -6,11 +6,10 @@ import { publications } from '../../content/portfolio/publications';
 import ProjectCard from '../../components/portfolio/ProjectCard.astro';
 import PublicationItem from '../../components/portfolio/PublicationItem.astro';
 import TimelineItem from '../../components/portfolio/TimelineItem.astro';
+import AboutSection from '../../components/portfolio/AboutSection.astro';
+import SkillsCloud from '../../components/portfolio/SkillsCloud.astro';
 
 const locale = 'en';
-
-const aboutModule = await import(`../../content/portfolio/about.${locale}.md`);
-const { Content: AboutContent } = aboutModule;
 
 const sortedExperience = [...experience].sort((a, b) =>
   b.startDate.localeCompare(a.startDate)
@@ -19,6 +18,7 @@ const sortedExperience = [...experience].sort((a, b) =>
 const t = {
   title: 'Portfolio',
   about: 'Biography',
+  skills: 'Skills',
   experience: 'Experience',
   projects: 'Projects',
   publications: 'Publications',
@@ -40,14 +40,8 @@ const t = {
       </a>
     </div>
 
-    <section class="portfolio-section">
-      <h2>{t.about}</h2>
-      <div class="prose-constrained">
-        <div class="prose">
-          <AboutContent />
-        </div>
-      </div>
-    </section>
+    <AboutSection locale={locale} aboutLabel={t.about} />
+    <SkillsCloud locale={locale} skillsLabel={t.skills} />
 
     <section class="portfolio-section">
       <h2>{t.projects}</h2>
@@ -66,6 +60,18 @@ const t = {
         ))}
       </div>
     </section>
+
+<script>
+  const items = document.querySelectorAll('.timeline-item');
+  if (items.length && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        entry.target.classList.toggle('timeline-item--active', entry.isIntersecting);
+      });
+    }, { rootMargin: '-30% 0px -30% 0px' });
+    items.forEach(item => observer.observe(item));
+  }
+</script>
 
     <section class="portfolio-section">
       <h2>{t.publications}</h2>
@@ -132,11 +138,6 @@ const t = {
     max-width: var(--container-max);
   }
 
-  .prose {
-    line-height: var(--leading-relaxed);
-    color: var(--text-muted);
-  }
-
   .bento-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -153,17 +154,6 @@ const t = {
     display: flex;
     flex-direction: column;
     position: relative;
-  }
-
-  /* Vertical line connecting timeline dots */
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: calc(0.75rem - 1px);
-    top: 4px;
-    bottom: 0;
-    width: 2px;
-    background: var(--border);
   }
 
   .pub-list {

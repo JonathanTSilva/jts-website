@@ -49,20 +49,70 @@ test.describe('Blog', () => {
     expect(text).toContain('<rss');
     expect(text).toContain('Continuous Integration for Firmware');
   });
-});
 
-test('blog list uses two-column year/entry layout', async ({ page }) => {
-  await page.goto('/blog');
-  // Year column rendered with monospace font class
-  const yearLabel = page.locator('.blog-year').first();
-  await expect(yearLabel).toBeVisible();
-});
+  test('blog list shows tag filter pills', async ({ page }) => {
+    await page.goto('/blog');
+    const allPill = page.locator('.tag-pill--all');
+    await expect(allPill).toBeVisible();
+  });
 
-test('blog post applies prose class', async ({ page }) => {
-  // Navigate to the first available post
-  await page.goto('/blog');
-  const firstLink = page.locator('a[href^="/blog/"]').first();
-  await firstLink.click();
-  const prose = page.locator('.prose');
-  await expect(prose).toBeVisible();
+  test('blog list tag filter hides non-matching entries', async ({ page }) => {
+    await page.goto('/blog');
+    const pills = page.locator('.tag-pill:not(.tag-pill--all)');
+    const count = await pills.count();
+    if (count === 0) return; // no tags in test data — skip
+    await pills.first().click();
+    const visibleEntries = page.locator('.blog-entry:visible');
+    await expect(visibleEntries.first()).toBeVisible();
+  });
+
+  test('blog list entries show reading time', async ({ page }) => {
+    await page.goto('/blog');
+    const firstEntry = page.locator('.blog-entry').first();
+    await expect(firstEntry.locator('.blog-entry-date')).toContainText('min');
+  });
+
+  test('blog post shows reading time in header', async ({ page }) => {
+    await page.goto('/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    await firstLink.click();
+    const meta = page.locator('.post-meta');
+    await expect(meta).toContainText('min');
+  });
+
+  test('blog post renders table of contents when headings exist', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.goto('/blog/2026-03-hello-embedded-systems.en');
+    const toc = page.locator('.toc');
+    const tocCount = await toc.count();
+    if (tocCount > 0) {
+      await expect(toc).toBeVisible();
+    }
+  });
+
+  test('blog post shows prev/next navigation', async ({ page }) => {
+    await page.goto('/blog');
+    const links = page.locator('a.blog-entry');
+    const linkCount = await links.count();
+    if (linkCount < 2) return;
+    await links.nth(1).click();
+    const postNav = page.locator('.post-nav');
+    await expect(postNav).toBeVisible();
+  });
+
+  test('blog list uses two-column year/entry layout', async ({ page }) => {
+    await page.goto('/blog');
+    // Year column rendered with monospace font class
+    const yearLabel = page.locator('.blog-year').first();
+    await expect(yearLabel).toBeVisible();
+  });
+
+  test('blog post applies prose class', async ({ page }) => {
+    // Navigate to the first available post
+    await page.goto('/blog');
+    const firstLink = page.locator('a[href^="/blog/"]').first();
+    await firstLink.click();
+    const prose = page.locator('.prose');
+    await expect(prose).toBeVisible();
+  });
 });

@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import type { Locale } from '../../lib/content/locale';
 import { contentLocalePath } from '../../lib/content/locale';
+import { getReadingTime } from '../../lib/readingTime';
 
 interface Props {
   locale: Locale;
@@ -27,6 +28,9 @@ const postsToShow = uniqueTranslationKeys.map(key => {
   }
 }).filter((p): p is NonNullable<typeof p> => p !== null)
   .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+// Collect unique tags across all displayed posts, sorted alphabetically
+const allTags = [...new Set(postsToShow.flatMap(p => p.data.tags))].sort();
 
 // Group by year and month
 const groupedPosts = postsToShow.reduce((acc, post) => {
@@ -57,39 +61,60 @@ const translationMissingLabel = {
     {locale === 'en' ? 'No posts yet. Check back soon.' : 'Nenhum post ainda. Volte em breve.'}
   </p>
 ) : (
-  <div class="blog-list">
-    {years.map(year => {
-      const months = groupedPosts[year] ? Object.keys(groupedPosts[year]!).map(Number).sort((a, b) => b - a) : [];
-      return (
-        <>
-          <h2 class="blog-year">{year}</h2>
-          <div class="blog-entries">
-            {months.map(month => (
-              <div class="blog-month-group">
-                <h3 class="blog-month">{monthNames[month]}</h3>
-                {groupedPosts[year]?.[month]?.map(post => (
-                  <a
-                    href={contentLocalePath(locale, `/blog/${post.data.slug}`)}
-                    class="blog-entry"
-                  >
-                    <span class="blog-entry-title">
-                      {post.data.title}
-                      {post.isTranslationMissing && (
-                        <span class="translation-missing-tag">({translationMissingLabel})</span>
-                      )}
-                    </span>
-                    <time datetime={post.data.publishedAt.toISOString()} class="blog-entry-date">
-                      {post.data.publishedAt.toLocaleDateString(locale, { month: 'short', day: '2-digit' })}
-                    </time>
-                  </a>
-                ))}
-              </div>
-            ))}
-          </div>
-        </>
-      );
-    })}
-  </div>
+  <>
+    {allTags.length > 0 && (
+      <div class="tag-filters">
+        <button class="tag-pill tag-pill--all tag-pill--active" data-tag="">
+          {locale === 'en' ? 'All' : 'Todos'}
+        </button>
+        {allTags.map(tag => (
+          <button class="tag-pill" data-tag={tag}>{tag}</button>
+        ))}
+      </div>
+    )}
+    <div class="blog-list">
+      {years.map(year => {
+        const months = groupedPosts[year]
+          ? Object.keys(groupedPosts[year]!).map(Number).sort((a, b) => b - a)
+          : [];
+        return (
+          <>
+            <h2 class="blog-year">{year}</h2>
+            <div class="blog-entries">
+              {months.map(month => (
+                <div class="blog-month-group">
+                  <h3 class="blog-month">{monthNames[month]}</h3>
+                  {groupedPosts[year]?.[month]?.map(post => {
+                    const mins = getReadingTime(post.body);
+                    return (
+                      <a
+                        href={contentLocalePath(locale, `/blog/${post.data.slug}`)}
+                        class="blog-entry"
+                        data-tags={post.data.tags.join(',')}
+                      >
+                        <span class="blog-entry-title">
+                          {post.data.title}
+                          {post.isTranslationMissing && (
+                            <span class="translation-missing-tag">({translationMissingLabel})</span>
+                          )}
+                        </span>
+                        <span class="blog-entry-date">
+                          <time datetime={post.data.publishedAt.toISOString()}>
+                            {post.data.publishedAt.toLocaleDateString(locale, { month: 'short', day: '2-digit' })}
+                          </time>
+                          {' · '}{mins} min
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </>
+        );
+      })}
+    </div>
+  </>
 )}
 
 <style>
@@ -166,4 +191,83 @@ const translationMissingLabel = {
     white-space: nowrap;
     flex-shrink: 0;
   }
+
+  .tag-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-8);
+  }
+
+  .tag-pill {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out);
+  }
+  .tag-pill:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+  }
+  .tag-pill--active {
+    color: var(--accent);
+    border-color: var(--accent-dim);
+  }
 </style>
+
+<script>
+  const pills = document.querySelectorAll<HTMLElement>('.tag-pill');
+  const entries = document.querySelectorAll<HTMLElement>('.blog-entry');
+  const monthGroups = document.querySelectorAll<HTMLElement>('.blog-month-group');
+
+  function getActiveTag(): string {
+    return new URLSearchParams(window.location.search).get('tag') ?? '';
+  }
+
+  function applyFilter(tag: string): void {
+    pills.forEach(pill => {
+      pill.classList.toggle('tag-pill--active', pill.dataset.tag === tag);
+    });
+
+    entries.forEach(entry => {
+      const entryTags = entry.dataset.tags ? entry.dataset.tags.split(',') : [];
+      const visible = !tag || entryTags.includes(tag);
+      entry.style.display = visible ? '' : 'none';
+    });
+
+    monthGroups.forEach(group => {
+      const hasVisible = Array.from(group.querySelectorAll<HTMLElement>('.blog-entry'))
+        .some(e => e.style.display !== 'none');
+      group.style.display = hasVisible ? '' : 'none';
+    });
+
+    document.querySelectorAll<HTMLElement>('.blog-entries').forEach(entriesDiv => {
+      const hasVisible = Array.from(entriesDiv.querySelectorAll<HTMLElement>('.blog-month-group'))
+        .some(g => g.style.display !== 'none');
+      entriesDiv.style.display = hasVisible ? '' : 'none';
+      const prev = entriesDiv.previousElementSibling as HTMLElement | null;
+      if (prev?.classList.contains('blog-year')) {
+        prev.style.display = hasVisible ? '' : 'none';
+      }
+    });
+  }
+
+  applyFilter(getActiveTag());
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const tag = pill.dataset.tag ?? '';
+      const url = new URL(window.location.href);
+      if (tag) url.searchParams.set('tag', tag);
+      else url.searchParams.delete('tag');
+      history.pushState({}, '', url);
+      applyFilter(tag);
+    });
+  });
+</script>

@@ -18,6 +18,7 @@ const dateRange = `${startLabel} – ${endLabel}`;
 ---
 
 <div class="timeline-item">
+  <div class="timeline-line" aria-hidden="true"></div>
   <div class="timeline-dot" aria-hidden="true"></div>
   <div class="timeline-content">
     <div class="timeline-header">
@@ -42,6 +43,26 @@ const dateRange = `${startLabel} – ${endLabel}`;
     grid-template-columns: 1.5rem 1fr;
     gap: var(--space-4);
     position: relative;
+  }
+
+  .timeline-line {
+    position: absolute;
+    left: calc(0.75rem - 1px);
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+    transition: background var(--duration-base) var(--ease-out);
+  }
+
+  .timeline-item--active .timeline-line {
+    background: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .timeline-line {
+      transition: none;
+    }
   }
 
   .timeline-dot {
