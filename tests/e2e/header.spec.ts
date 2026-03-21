@@ -81,6 +81,25 @@ test.describe('Header', () => {
     expect(bgColor).not.toBe('transparent');
   });
 
+  test('search field is visible on desktop and opens dialog on click', async ({ page }) => {
+    await page.goto('/');
+    const searchField = page.locator('.search-field');
+    await expect(searchField).toBeVisible();
+
+    // Clicking the field should open the search dialog
+    await searchField.click();
+    // The search dialog uses role="dialog" when open
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 2000 });
+  });
+
+  test('search field is visible on mobile in header bar', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+    const searchField = page.locator('.search-field');
+    await expect(searchField).toBeVisible();
+  });
+
   test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
     await page.goto('/pt-br');
     const indicator = page.locator('.nav-indicator');

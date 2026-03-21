@@ -42,11 +42,18 @@ const navItems = getNavigation(locale);
     </nav>
 
     <div class="header-actions">
-      <button class="search-btn" aria-label="Open search" onclick="window.openSearch?.()">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+      <div class="search-field" role="button" tabindex="0" aria-label="Open search">
+        <input
+          type="text"
+          placeholder="Search..."
+          readonly
+          tabindex="-1"
+          aria-hidden="true"
+        />
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
           <circle cx="8" cy="8" r="5"/><path d="m13 13 3 3"/>
         </svg>
-      </button>
+      </div>
       <LanguageSwitcher currentLocale={locale} currentPath={currentPath} />
       <ThemeToggle />
     </div>
@@ -115,6 +122,16 @@ const navItems = getNavigation(locale);
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && mobileNav?.classList.contains('open')) setDrawer(false);
+  });
+
+  // ── Search field ─────────────────────────────────────────
+  document.querySelector('.search-field')?.addEventListener('click', () => {
+    if (typeof window.openSearch === 'function') window.openSearch();
+  });
+  document.querySelector('.search-field')?.addEventListener('keydown', (e) => {
+    if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') {
+      if (typeof window.openSearch === 'function') window.openSearch();
+    }
   });
 
   // ── Tubelight nav indicator ──────────────────────────────
@@ -257,18 +274,46 @@ const navItems = getNavigation(locale);
   }
   @media (min-width: 48rem) { .header-actions { display: flex; } }
 
-  .search-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-muted);
-    padding: var(--space-1);
+  .search-field {
     display: flex;
     align-items: center;
-    border-radius: var(--radius-sm);
-    transition: color var(--duration-fast);
+    gap: var(--space-2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    cursor: pointer;
+    width: 160px;
+    transition: border-color var(--duration-fast);
   }
-  .search-btn:hover { color: var(--text); }
+  .search-field:hover { border-color: var(--text-muted); }
+
+  .search-field input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    color: var(--text-muted);
+    cursor: pointer;
+    pointer-events: none;
+    width: 100%;
+    min-width: 0;
+  }
+  .search-field input::placeholder { color: var(--text-muted); }
+  .search-field svg { flex-shrink: 0; color: var(--text-muted); }
+
+  /* Mobile: search field always visible, hide other header-actions items */
+  @media (max-width: 47.9375rem) {
+    .header-actions {
+      display: flex;
+      gap: 0;
+    }
+    .header-actions > :not(.search-field) { display: none; }
+    .search-field { width: 120px; }
+    .main-nav { display: none; }
+  }
 
   /* ── Hamburger ── */
   .hamburger {
