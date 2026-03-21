@@ -261,3 +261,17 @@ test.describe('Portfolio Page', () => {
     });
   });
 });
+
+test.describe('Legal placeholder pages', () => {
+  test('/privacy renders with correct heading', async ({ page }) => {
+    await page.goto('/privacy');
+    await expect(page.getByRole('heading', { name: 'Privacy Policy' })).toBeVisible();
+    await expect(page.getByText('under construction')).toBeVisible();
+  });
+
+  test('/terms renders with correct heading', async ({ page }) => {
+    await page.goto('/terms');
+    await expect(page.getByRole('heading', { name: 'Terms of Service' })).toBeVisible();
+    await expect(page.getByText('under construction')).toBeVisible();
+  });
+});
