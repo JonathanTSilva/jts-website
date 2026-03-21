@@ -34,7 +34,7 @@ const { title, description, locale = 'en' } = Astro.props;
     <main id="main-content">
       <slot />
     </main>
-    <Footer locale={locale} />
+    <Footer locale={locale} currentPath={Astro.url.pathname} />
     <SearchDialog locale={locale} />
     <Toast />
   </body>

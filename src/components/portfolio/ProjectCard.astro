@@ -13,7 +13,7 @@ const description = project.description[locale];
 ---
 
 <article
-  class:list={['project-card', project.featured && 'always-active']}
+  class="project-card"
   style={project.featured ? 'grid-column: span 2;' : ''}
 >
   <div class="card-top">
@@ -85,14 +85,6 @@ const description = project.description[locale];
     border-color: var(--accent);
   }
   .project-card:hover::after { opacity: 0.04; }
-
-  /* Always-active (featured) */
-  .project-card.always-active {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--accent);
-  }
-  .project-card.always-active::after { opacity: 0.04; }
 
   .card-top {
     display: flex;

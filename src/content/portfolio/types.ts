@@ -21,7 +21,7 @@ export interface Publication {
   publisher: string;
   date: string; // ISO string or human readable
   link?: string;
-  type: "article" | "paper" | "book" | "talk";
+  type: "article" | "paper" | "book" | "talk" | "conference" | "journal";
 }
 
 export interface ExperienceEntry {

@@ -40,4 +40,20 @@ export const projects: Project[] = [
     icon: "🧪",
     status: "Active",
   },
+  {
+    title: {
+      en: 'Firmware OTA Update System',
+      'pt-br': 'Sistema de Atualização OTA de Firmware',
+    },
+    description: {
+      en: 'Secure over-the-air firmware update pipeline for IoT edge devices.',
+      'pt-br': 'Pipeline seguro de atualização de firmware OTA para dispositivos IoT de borda.',
+    },
+    tags: ['C', 'MQTT', 'TLS', 'IoT'],
+    year: 2025,
+    role: {
+      en: 'Tech Lead',
+      'pt-br': 'Tech Lead',
+    },
+  },
 ];
