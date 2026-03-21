@@ -49,25 +49,7 @@ test.describe('Blog', () => {
     expect(text).toContain('<rss');
     expect(text).toContain('Continuous Integration for Firmware');
   });
-});
 
-test('blog list uses two-column year/entry layout', async ({ page }) => {
-  await page.goto('/blog');
-  // Year column rendered with monospace font class
-  const yearLabel = page.locator('.blog-year').first();
-  await expect(yearLabel).toBeVisible();
-});
-
-test('blog post applies prose class', async ({ page }) => {
-  // Navigate to the first available post
-  await page.goto('/blog');
-  const firstLink = page.locator('a[href^="/blog/"]').first();
-  await firstLink.click();
-  const prose = page.locator('.prose');
-  await expect(prose).toBeVisible();
-});
-
-test.describe('Blog', () => {
   test('blog list shows tag filter pills', async ({ page }) => {
     await page.goto('/blog');
     const allPill = page.locator('.tag-pill--all');
@@ -117,4 +99,20 @@ test.describe('Blog', () => {
     const postNav = page.locator('.post-nav');
     await expect(postNav).toBeVisible();
   });
+});
+
+test('blog list uses two-column year/entry layout', async ({ page }) => {
+  await page.goto('/blog');
+  // Year column rendered with monospace font class
+  const yearLabel = page.locator('.blog-year').first();
+  await expect(yearLabel).toBeVisible();
+});
+
+test('blog post applies prose class', async ({ page }) => {
+  // Navigate to the first available post
+  await page.goto('/blog');
+  const firstLink = page.locator('a[href^="/blog/"]').first();
+  await firstLink.click();
+  const prose = page.locator('.prose');
+  await expect(prose).toBeVisible();
 });
