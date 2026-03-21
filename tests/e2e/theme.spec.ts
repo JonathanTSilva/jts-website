@@ -37,6 +37,25 @@ test.describe('Theme management', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', newTheme!);
   });
 
+  test('theme toggle works from mobile drawer', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+
+    // Open mobile drawer and wait for it to be visible
+    await page.locator('#hamburger').click();
+    await expect(page.locator('#mobile-nav')).toBeVisible();
+
+    // Click the toggle inside the drawer
+    const mobileToggle = page.locator('.mobile-actions .theme-toggle');
+    const html = page.locator('html');
+
+    const initialTheme = await html.getAttribute('data-theme');
+    const targetTheme = initialTheme === 'light' ? 'dark' : 'light';
+
+    await mobileToggle.click();
+    await expect(html).toHaveAttribute('data-theme', targetTheme);
+  });
+
   test('theme toggle is keyboard accessible', async ({ page }) => {
     await page.goto('/');
     const toggle = page.locator('.theme-toggle').first();
