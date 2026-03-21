@@ -166,12 +166,12 @@ test('notes section cards show category badge when category exists', async ({ pa
   await page.goto('/');
   const cards = page.locator('.note-preview-card');
   await expect(cards.first()).toBeVisible();
-  // If any note has a category badge, it should be a .note-category element
-  // We cannot assert count since category is optional — just verify no error
-  const badges = page.locator('.note-category');
-  // Could be 0 or more — just verify the locator doesn't throw
+  // Category badges must be inside note cards, and each one must be visible
+  const badges = page.locator('.note-preview-card .note-category');
   const badgeCount = await badges.count();
-  expect(badgeCount).toBeGreaterThanOrEqual(0);
+  for (let i = 0; i < badgeCount; i++) {
+    await expect(badges.nth(i)).toBeVisible();
+  }
 });
 
 test.describe('Portfolio Page', () => {
