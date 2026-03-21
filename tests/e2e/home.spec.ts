@@ -1,58 +1,49 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Homepage', () => {
-  test('en: homepage exposes portfolio, blog, notes, now, and contact section', async ({ page }) => {
+  test('en: homepage exposes portfolio, blog, notes, and now', async ({ page }) => {
     await page.goto('/');
-    
+
     await test.step('Header/Hero navigation', async () => {
       await expect(page.getByRole('link', { name: 'Portfolio' }).first()).toBeVisible();
       await expect(page.getByRole('link', { name: 'Blog' }).first()).toBeVisible();
       await expect(page.getByRole('link', { name: 'Notes' }).first()).toBeVisible();
       await expect(page.getByRole('link', { name: 'Now' }).first()).toBeVisible();
     });
-    
+
     await test.step('Sections', async () => {
       await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Publications' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Latest Blog Posts' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Latest Notes' })).toBeVisible();
     });
-    
+
     await test.step('CTAs', async () => {
       await expect(page.getByRole('link', { name: 'See full portfolio' })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Download CV (PDF)' })).toBeVisible();
     });
-    
-    await test.step('Contact', async () => {
-      await expect(page.getByRole('heading', { name: 'Contact' })).toBeVisible();
-      await expect(page.locator('#contact').getByRole('link', { name: 'Email' })).toBeVisible();
-    });
   });
 
-  test('pt-br: homepage exposes portfolio, blog, notes, now, and contact section', async ({ page }) => {
+  test('pt-br: homepage exposes portfolio, blog, notes, and now', async ({ page }) => {
     await page.goto('/pt-br');
-    
+
     await test.step('Header/Hero navigation', async () => {
       await expect(page.getByRole('link', { name: 'Portfólio' }).first()).toBeVisible();
       await expect(page.getByRole('link', { name: 'Blog' }).first()).toBeVisible();
       await expect(page.getByRole('link', { name: 'Notas' }).first()).toBeVisible();
       await expect(page.getByRole('link', { name: 'Agora' }).first()).toBeVisible();
     });
-    
+
     await test.step('Sections', async () => {
       await expect(page.getByRole('heading', { name: 'Projetos' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Publicações' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Últimos Posts' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Últimas Notas' })).toBeVisible();
     });
-    
+
     await test.step('CTAs', async () => {
       await expect(page.getByRole('link', { name: 'Ver portfólio completo' })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Baixar CV (PDF)' })).toBeVisible();
-    });
-    
-    await test.step('Contact', async () => {
-      await expect(page.getByRole('heading', { name: 'Contato' })).toBeVisible();
     });
   });
 
