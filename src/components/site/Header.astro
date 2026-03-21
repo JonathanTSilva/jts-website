@@ -9,7 +9,9 @@ interface Props {
   currentPath?: string;
 }
 
-const { locale, currentPath = Astro.url.pathname } = Astro.props;
+const { locale, currentPath: rawPath = Astro.url.pathname } = Astro.props;
+// Normalize trailing slash for comparison (keep root '/' as-is)
+const currentPath = rawPath.length > 1 ? rawPath.replace(/\/$/, '') : rawPath;
 const navItems = getNavigation(locale);
 ---
 
@@ -26,7 +28,11 @@ const navItems = getNavigation(locale);
           <li>
             <a
               href={item.href}
-              class={currentPath === item.href || (item.href !== '/' && item.href !== '/pt-br' && currentPath.startsWith(item.href)) ? 'active' : ''}
+              class={(() => {
+                const href = item.href.length > 1 ? item.href.replace(/\/$/, '') : item.href;
+                const isHome = href === '/' || href === '/pt-br';
+                return currentPath === href || (!isHome && currentPath.startsWith(href)) ? 'active' : '';
+              })()}
             >
               {item.label}
             </a>
@@ -132,10 +138,6 @@ const navItems = getNavigation(locale);
     });
   }
 
-  nav?.querySelectorAll<HTMLAnchorElement>('a').forEach(link => {
-    link.addEventListener('mouseenter', () => moveIndicator(link));
-    link.addEventListener('mouseleave', () => { if (activeLink) moveIndicator(activeLink); });
-  });
 </script>
 
 <style>
@@ -205,10 +207,18 @@ const navItems = getNavigation(locale);
     border-radius: var(--radius-full);
     position: relative;
     z-index: 1;
-    transition: color var(--duration-fast) var(--ease-out);
+    transition: color var(--duration-fast) var(--ease-out),
+                background var(--duration-fast) var(--ease-out);
   }
-  .nav-list a:hover, .nav-list a.active { color: var(--text); text-decoration: none; }
-  .nav-list a.active { color: var(--accent); }
+  .nav-list a:hover {
+    background: var(--surface-high);
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-list a.active {
+    color: var(--accent);
+    text-decoration: none;
+  }
 
   .nav-indicator {
     position: absolute;

@@ -38,4 +38,63 @@ test.describe('Header', () => {
     const innerBox = await inner.boundingBox();
     expect(innerBox!.width).toBeLessThan(1400);
   });
+
+  test('tubelight indicator does not move on hover', async ({ page }) => {
+    await page.goto('/');
+    const indicator = page.locator('.nav-indicator');
+
+    // Get initial position on page load
+    const initialLeft = await indicator.evaluate(el =>
+      (el as HTMLElement).style.left
+    );
+
+    // Hover a non-active link
+    const links = page.locator('.nav-list a');
+    const count = await links.count();
+    for (let i = 0; i < count; i++) {
+      const link = links.nth(i);
+      const isActive = await link.evaluate(el => el.classList.contains('active'));
+      if (!isActive) {
+        await link.hover();
+        break;
+      }
+    }
+
+    const afterHoverLeft = await indicator.evaluate(el =>
+      (el as HTMLElement).style.left
+    );
+    expect(afterHoverLeft).toBe(initialLeft);
+  });
+
+  test('nav links show hover background pill (CSS only)', async ({ page }) => {
+    await page.goto('/');
+    const links = page.locator('.nav-list a');
+    const firstLink = links.first();
+    await firstLink.hover();
+    const hasHoverTransition = await firstLink.evaluate(el =>
+      window.getComputedStyle(el).transition.includes('background')
+    );
+    expect(hasHoverTransition).toBe(true);
+  });
+
+  test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
+    await page.goto('/pt-br');
+    const indicator = page.locator('.nav-indicator');
+    const activeLink = page.locator('.nav-list a.active');
+
+    // Indicator must be visible (opacity: 1 set via JS)
+    const opacity = await indicator.evaluate(el =>
+      (el as HTMLElement).style.opacity
+    );
+    expect(opacity).toBe('1');
+
+    // Indicator left position must match the active link's offset
+    const indicatorLeft = await indicator.evaluate(el =>
+      (el as HTMLElement).style.left
+    );
+    const activeLinkLeft = await activeLink.evaluate(el =>
+      (el as HTMLElement).offsetLeft + 'px'
+    );
+    expect(indicatorLeft).toBe(activeLinkLeft);
+  });
 });
