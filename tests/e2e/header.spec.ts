@@ -144,21 +144,14 @@ test.describe('Header', () => {
 
   test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
     await page.goto('/pt-br');
-    const indicator = page.locator('.nav-indicator');
 
-    // Indicator must be visible (opacity: 1 set via JS)
-    const opacity = await indicator.evaluate(el =>
-      (el as HTMLElement).style.opacity
-    );
-    expect(opacity).toBe('1');
-
-    // Indicator left position must match the active link's offset
-    // Read both values in a single evaluate to avoid layout shifts between calls
-    const [indicatorLeft, activeLinkLeft] = await page.evaluate(() => {
+    // Wait until the indicator is positioned and aligned with the active link.
+    // Uses waitForFunction to tolerate font/layout settling under concurrent load.
+    await page.waitForFunction(() => {
       const ind = document.querySelector('.nav-indicator') as HTMLElement;
       const link = document.querySelector('.nav-list a.active') as HTMLElement;
-      return [ind.style.left, link.offsetLeft + 'px'];
+      if (!ind || !link) return false;
+      return ind.style.opacity === '1' && ind.style.left === link.offsetLeft + 'px';
     });
-    expect(indicatorLeft).toBe(activeLinkLeft);
   });
 });

@@ -160,6 +160,14 @@ const navItems = getNavigation(locale);
     requestAnimationFrame(() => {
       indicator?.style.removeProperty('transition');
     });
+    // Re-position after fonts load — font metrics affect offsetLeft
+    document.fonts?.ready?.then(() => {
+      indicator?.style.setProperty('transition', 'none');
+      moveIndicator(activeLink);
+      requestAnimationFrame(() => {
+        indicator?.style.removeProperty('transition');
+      });
+    });
   }
 
 </script>
