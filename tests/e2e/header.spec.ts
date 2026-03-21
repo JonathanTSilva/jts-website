@@ -145,7 +145,6 @@ test.describe('Header', () => {
   test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
     await page.goto('/pt-br');
     const indicator = page.locator('.nav-indicator');
-    const activeLink = page.locator('.nav-list a.active');
 
     // Indicator must be visible (opacity: 1 set via JS)
     const opacity = await indicator.evaluate(el =>

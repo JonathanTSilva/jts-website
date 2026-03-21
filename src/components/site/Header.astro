@@ -88,6 +88,12 @@ const navItems = getNavigation(locale);
 </header>
 
 <script>
+  declare global {
+    interface Window {
+      openSearch?: () => void;
+    }
+  }
+
   const header = document.getElementById('site-header');
   const hamburger = document.getElementById('hamburger');
   const mobileNav = document.getElementById('mobile-nav');
