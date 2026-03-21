@@ -3,6 +3,8 @@
 **Date:** 2026-03-20
 **Scope:** Global header/nav layer — positioning, nav behavior, search bar, mobile bugs, language switcher removal, moon icon fix.
 
+> **Prerequisite:** This spec assumes the `feature/frontend-redesign` branch has been merged into `main`. All token references (`--container-max`, `--surface-high`, `--border`, `--surface`, `--radius-full`, `--duration-fast`, etc.) and shell components (tubelight indicator, hamburger drawer, `ThemeToggle`) refer to the redesigned codebase, not the original `main`.
+
 ---
 
 ## Goal
@@ -19,13 +21,13 @@ The header uses `position: sticky`, which causes it to scroll with the page brie
 ### Design
 - Change header from `position: sticky` to `position: fixed` (top: 0, left: 0, full viewport width).
 - Set a z-index above all page content.
-- Add `padding-top` to the `<body>` or `.site-wrapper` equal to the header height, so page content does not slide underneath the header.
+- Add `padding-top` to `.site-wrapper` (not `<body>`) equal to the header height, so page content does not slide underneath the header.
 - The header's inner content area must be horizontally centered and constrained to `--container-max` width — matching the rest of the page layout.
 - This applies on all pages and all viewport sizes.
 
 ### Token reference
-- Layout: `--container-max: 52rem`
-- Z-index: use a fixed value (e.g. `100`) or a token if one exists
+- Layout: `--container-max: 52rem` (from redesigned `tokens.css`)
+- Z-index: add a `--z-header: 100` token to `tokens.css` and use it on the header element. The existing skip-link uses `z-index: 10000` so `100` sits safely below it.
 
 ---
 
@@ -67,6 +69,7 @@ The search trigger is an icon-only button that is invisible on mobile.
 - Clicking anywhere in the field (input area or icon) calls `window.openSearch()` and opens the existing search dialog.
 - The field itself does not perform inline filtering — it is a styled trigger only.
 - The `<input>` element has `readonly` attribute to prevent native keyboard on mobile from appearing; `cursor: pointer` to signal it is clickable.
+- The click handler must guard against `window.openSearch` being undefined: `if (typeof window.openSearch === 'function') window.openSearch()`.
 
 **Desktop:**
 - The search field sits in the nav controls area on the right side of the header, before the theme toggle.
@@ -101,9 +104,8 @@ The three-line menu icon and the X close icon are both visible simultaneously.
 The theme toggle in the mobile drawer does not respond to clicks.
 
 **Design:**
-- Ensure the `ThemeToggle` component rendered inside the mobile drawer uses the same event listener and `data-theme` toggle logic as the desktop instance.
-- If the toggle is duplicated in the DOM (desktop + mobile drawer), the JS must attach listeners to all instances, not just `document.querySelector` (which returns only the first).
-- Use `document.querySelectorAll('[data-theme-toggle]')` (or equivalent selector) to wire up all instances.
+- The `ThemeToggle` component currently uses `id="theme-toggle"` for its JS wiring. When two instances are rendered (desktop header + mobile drawer), only the first is reachable via `getElementById`.
+- Fix: replace the `id` with a `data-theme-toggle` attribute on the toggle element in `ThemeToggle.astro`, and update its `<script>` to use `document.querySelectorAll('[data-theme-toggle]')` so all instances receive the click listener.
 
 ---
 
@@ -135,7 +137,8 @@ The crescent moon SVG in `ThemeToggle.astro` renders as cut off or visually brok
 |--------|------|
 | Modify | `src/components/site/Header.astro` |
 | Modify | `src/components/site/ThemeToggle.astro` |
-| Modify | `src/styles/global.css` (body padding-top) |
+| Modify | `src/styles/global.css` (`.site-wrapper` padding-top) |
+| Modify | `src/styles/tokens.css` (add `--z-header: 100`) |
 
 ---
 
@@ -146,7 +149,7 @@ Each fix is independently verifiable:
 1. **Header fixed:** scroll any page — header stays at top, content not hidden behind it.
 2. **Nav tubelight:** hover nav links — indicator does not move. Navigate to a page — indicator lands on correct link. Switch to `/pt-br/` — indicator on Home link.
 3. **Search bar:** visible on desktop and mobile. Click it — search dialog opens. No keyboard pops on mobile.
-4. **Hamburger:** open mobile drawer — only three-line icon visible. Close it — only three-line icon visible. Open — only X visible.
+4. **Hamburger:** open mobile drawer — only X icon visible. Close it — only three-line icon visible.
 5. **Theme toggle mobile:** toggle theme from mobile drawer — theme changes and persists on reload.
 6. **Language switcher:** not present in header on any page.
 7. **Moon icon:** switch to dark mode — moon renders fully without clipping.
