@@ -133,6 +133,23 @@ test('projects bento grid: first card spans full width on desktop', async ({ pag
   expect(style).toContain('span 2');
 });
 
+test('publications section renders a horizontal card row', async ({ page }) => {
+  await page.goto('/');
+  const row = page.locator('.pub-card-row');
+  await expect(row).toBeVisible();
+  const cards = page.locator('.pub-card');
+  await expect(cards.first()).toBeVisible();
+  await expect(cards.first().locator('.pub-type-badge')).toBeVisible();
+  await expect(cards.first().locator('.pub-card-title')).toBeVisible();
+  await expect(cards.first().locator('.pub-card-publisher')).toBeVisible();
+});
+
+test('publications section has "see all" link to portfolio', async ({ page }) => {
+  await page.goto('/');
+  const link = page.locator('.pub-viewall');
+  await expect(link).toBeVisible();
+});
+
 test.describe('Portfolio Page', () => {
   test('en: portfolio page renders all sections', async ({ page }) => {
     await page.goto('/portfolio');

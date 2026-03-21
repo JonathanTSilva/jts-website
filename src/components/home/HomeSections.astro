@@ -17,6 +17,7 @@ interface Props {
     viewAllBlog: string;
     viewAllNotes: string;
     at: string;
+    viewAllPublications: string;
   };
 }
 
@@ -67,17 +68,31 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
     <p class="section-label">{publicationsLabel}</p>
     <h2 class="section-heading">{t.publications}</h2>
   </header>
-  <ul class="list list-none">
-    {publications.slice(0, 3).map((pub) => (
-      <li class="pub-list-item">
-        <span class="pub-date">{pub.date}</span>
-        <span class="pub-title">
-          {pub.link ? <a href={pub.link}>{pub.title[locale]}</a> : pub.title[locale]}
-        </span>
-        <span class="pub-publisher">{t.at} {pub.publisher}</span>
-      </li>
+  <div class="pub-card-row">
+    {publications.map((pub) => (
+      <div class="pub-card">
+        <div class="pub-card-top">
+          <span class="pub-type-badge">{pub.type}</span>
+          <span class="pub-card-date">{pub.date}</span>
+        </div>
+        <p class="pub-card-title">
+          {pub.link
+            ? <a href={pub.link} target="_blank" rel="noopener noreferrer">{pub.title[locale]}</a>
+            : pub.title[locale]
+          }
+        </p>
+        <div class="pub-card-footer">
+          <span class="pub-card-publisher">{pub.publisher}</span>
+          {pub.link && (
+            <a href={pub.link} class="pub-card-arrow" target="_blank" rel="noopener noreferrer" aria-label="Open publication">→</a>
+          )}
+        </div>
+      </div>
     ))}
-  </ul>
+  </div>
+  <a href={contentLocalePath(locale, '/portfolio')} class="pub-viewall section-viewall">
+    {t.viewAllPublications} →
+  </a>
 </section>
 
 <section class="home-section">
@@ -173,24 +188,97 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
     gap: var(--space-4);
   }
 
-  .pub-list-item {
-    display: grid;
-    grid-template-columns: 120px 1fr;
+  /* Publications card row */
+  .pub-card-row {
+    display: flex;
+    flex-wrap: nowrap;
     gap: var(--space-4);
-    align-items: baseline;
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
 
-  .pub-date {
+  .pub-card {
+    min-width: 16rem;
+    max-width: 20rem;
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    transition: box-shadow var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out);
+  }
+
+  .pub-card:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--accent);
+  }
+
+  .pub-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .pub-type-badge {
+    font-size: var(--text-xs);
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-radius: var(--radius-full);
+    padding: 2px var(--space-2);
     font-family: var(--font-mono);
+    text-transform: lowercase;
+    white-space: nowrap;
+  }
+
+  .pub-card-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .pub-card-title {
     font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--text);
+    margin: 0;
+    flex: 1;
+    line-height: var(--leading-normal);
+  }
+
+  .pub-card-title a {
+    color: var(--text);
+    text-decoration: none;
+  }
+  .pub-card-title a:hover { color: var(--accent); text-decoration: none; }
+
+  .pub-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: auto;
+  }
+
+  .pub-card-publisher {
+    font-size: var(--text-xs);
     color: var(--text-muted);
   }
 
-  .pub-publisher {
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    margin-left: var(--space-2);
+  .pub-card-arrow {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: var(--text-base);
+    flex-shrink: 0;
   }
+  .pub-card-arrow:hover { text-decoration: none; }
 
   /* Blog preview rows */
   .blog-list {
@@ -280,11 +368,6 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
   }
 
   @media (max-width: 600px) {
-    .pub-list-item {
-      grid-template-columns: 1fr;
-      gap: var(--space-1);
-    }
-
     .notes-grid {
       grid-template-columns: 1fr;
     }
