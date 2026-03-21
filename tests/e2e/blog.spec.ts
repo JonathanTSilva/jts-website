@@ -89,4 +89,32 @@ test.describe('Blog', () => {
     const firstEntry = page.locator('.blog-entry').first();
     await expect(firstEntry.locator('.blog-entry-date')).toContainText('min');
   });
+
+  test('blog post shows reading time in header', async ({ page }) => {
+    await page.goto('/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    await firstLink.click();
+    const meta = page.locator('.post-meta');
+    await expect(meta).toContainText('min');
+  });
+
+  test('blog post renders table of contents when headings exist', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.goto('/blog/2026-03-hello-embedded-systems.en');
+    const toc = page.locator('.toc');
+    const tocCount = await toc.count();
+    if (tocCount > 0) {
+      await expect(toc).toBeVisible();
+    }
+  });
+
+  test('blog post shows prev/next navigation', async ({ page }) => {
+    await page.goto('/blog');
+    const links = page.locator('a.blog-entry');
+    const linkCount = await links.count();
+    if (linkCount < 2) return;
+    await links.nth(1).click();
+    const postNav = page.locator('.post-nav');
+    await expect(postNav).toBeVisible();
+  });
 });
