@@ -1,10 +1,11 @@
 ---
+import type { Locale } from '../../lib/content/locale';
 import { contentLocalePath } from '../../lib/content/locale';
 
 interface Props {
-  locale: string;
-  prev?: { title: string; slug: string };
-  next?: { title: string; slug: string };
+  locale: Locale;
+  prev?: { title: string; slug: string } | undefined;
+  next?: { title: string; slug: string } | undefined;
 }
 
 const { locale, prev, next } = Astro.props;
