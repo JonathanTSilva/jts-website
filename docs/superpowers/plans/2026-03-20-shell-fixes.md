@@ -614,16 +614,29 @@ cd <worktree-path> && pnpm test:e2e tests/e2e/theme.spec.ts
 
 Expected: FAIL — mobile toggle click does not change theme.
 
-- [ ] **Step 3: Fix `ThemeToggle.astro` — replace `querySelector` with `querySelectorAll`**
+- [ ] **Step 3: Fix `ThemeToggle.astro` — add `data-theme-toggle` attribute and replace `querySelector` with `querySelectorAll`**
 
-In `src/components/site/ThemeToggle.astro`, replace the entire `<script>` block with:
+In the `<button>` markup of `src/components/site/ThemeToggle.astro`, add the `data-theme-toggle` attribute:
+
+```astro
+<button
+  class="theme-toggle"
+  data-theme-toggle
+  role="switch"
+  aria-checked="false"
+  aria-label="Toggle theme"
+  type="button"
+>
+```
+
+Then replace the entire `<script>` block with:
 
 ```typescript
 <script>
   import { toggleTheme, getTheme } from '../../lib/theme/theme';
 
   function applyToggleState(theme: string) {
-    document.querySelectorAll<HTMLButtonElement>('.theme-toggle').forEach(toggle => {
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(toggle => {
       toggle.setAttribute('aria-checked', String(theme === 'dark'));
       toggle.setAttribute('data-theme-state', theme);
     });
@@ -633,7 +646,7 @@ In `src/components/site/ThemeToggle.astro`, replace the entire `<script>` block 
   applyToggleState(getTheme());
 
   // Wire up all instances
-  document.querySelectorAll<HTMLButtonElement>('.theme-toggle').forEach(toggle => {
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(toggle => {
     toggle.addEventListener('click', () => {
       toggleTheme();
       applyToggleState(getTheme());
