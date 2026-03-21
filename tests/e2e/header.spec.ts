@@ -71,6 +71,7 @@ test.describe('Header', () => {
     const links = page.locator('.nav-list a');
     const firstLink = links.first();
     await firstLink.hover();
+    await page.waitForTimeout(200); // allow --duration-fast (150ms) transition to complete
 
     // After hovering, the link should have a visible background color
     const bgColor = await firstLink.evaluate(el =>
@@ -92,12 +93,12 @@ test.describe('Header', () => {
     expect(opacity).toBe('1');
 
     // Indicator left position must match the active link's offset
-    const indicatorLeft = await indicator.evaluate(el =>
-      (el as HTMLElement).style.left
-    );
-    const activeLinkLeft = await activeLink.evaluate(el =>
-      (el as HTMLElement).offsetLeft + 'px'
-    );
+    // Read both values in a single evaluate to avoid layout shifts between calls
+    const [indicatorLeft, activeLinkLeft] = await page.evaluate(() => {
+      const ind = document.querySelector('.nav-indicator') as HTMLElement;
+      const link = document.querySelector('.nav-list a.active') as HTMLElement;
+      return [ind.style.left, link.offsetLeft + 'px'];
+    });
     expect(indicatorLeft).toBe(activeLinkLeft);
   });
 });
