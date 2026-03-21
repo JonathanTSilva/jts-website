@@ -106,6 +106,30 @@ test.describe('Header', () => {
     await expect(input).toHaveAttribute('readonly', '');
   });
 
+  test('hamburger shows only menu icon when closed', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+
+    const menuIcon = page.locator('#hamburger .ham-open');
+    const closeIcon = page.locator('#hamburger .ham-close');
+
+    await expect(menuIcon).toBeVisible();
+    await expect(closeIcon).not.toBeVisible();
+  });
+
+  test('hamburger shows only close icon when menu is open', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+
+    await page.locator('#hamburger').click();
+
+    const menuIcon = page.locator('#hamburger .ham-open');
+    const closeIcon = page.locator('#hamburger .ham-close');
+
+    await expect(menuIcon).not.toBeVisible();
+    await expect(closeIcon).toBeVisible();
+  });
+
   test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
     await page.goto('/pt-br');
     const indicator = page.locator('.nav-indicator');

@@ -65,8 +65,15 @@ const navItems = getNavigation(locale);
       aria-controls="mobile-nav"
       type="button"
     >
-      <span class="ham-icon ham-open" aria-hidden="true">☰</span>
-      <span class="ham-icon ham-close" aria-hidden="true">✕</span>
+      <svg class="ham-icon ham-open" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="6" x2="17" y2="6"/>
+        <line x1="3" y1="10" x2="17" y2="10"/>
+        <line x1="3" y1="14" x2="17" y2="14"/>
+      </svg>
+      <svg class="ham-icon ham-close" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+        <line x1="4" y1="4" x2="16" y2="16"/>
+        <line x1="16" y1="4" x2="4" y2="16"/>
+      </svg>
     </button>
   </div>
 
@@ -104,8 +111,6 @@ const navItems = getNavigation(locale);
     hamburger?.setAttribute('aria-expanded', String(open));
     mobileNav?.setAttribute('aria-hidden', String(!open));
     mobileNav?.classList.toggle('open', open);
-    hamburger?.querySelector('.ham-open')?.classList.toggle('hidden', open);
-    hamburger?.querySelector('.ham-close')?.classList.toggle('hidden', !open);
     if (!open) hamburger?.setAttribute('aria-label', 'Open menu');
     else hamburger?.setAttribute('aria-label', 'Close menu');
   }
@@ -308,7 +313,8 @@ const navItems = getNavigation(locale);
       display: flex;
       gap: 0;
     }
-    .header-actions > :not(.search-field) { display: none; }
+    /* Use :global so scoped cid does not prevent matching child components */
+    .header-actions > :global(:not(.search-field)) { display: none; }
     .search-field { width: var(--search-field-width-sm); }
     .main-nav { display: none; }
   }
@@ -316,6 +322,8 @@ const navItems = getNavigation(locale);
   /* ── Hamburger ── */
   .hamburger {
     display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;
@@ -324,10 +332,16 @@ const navItems = getNavigation(locale);
     margin-left: auto;
     font-size: var(--text-lg);
     line-height: 1;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
   }
   @media (min-width: 48rem) { .hamburger { display: none; } }
 
-  .ham-icon.hidden { display: none; }
+  .ham-open  { display: inline-block; }
+  .ham-close { display: none; }
+  #hamburger[aria-expanded="true"]  .ham-open  { display: none; }
+  #hamburger[aria-expanded="true"]  .ham-close { display: inline-block; }
 
   /* ── Mobile drawer ── */
   .mobile-nav {
