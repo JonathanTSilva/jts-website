@@ -25,8 +25,8 @@ export async function getStaticPaths() {
     const translations = allPosts.filter(p => p.data.translationKey === key);
     const displayPost = displayPosts.find(p => p.data.translationKey === key);
     const idx = displayPost ? displayPosts.indexOf(displayPost) : -1;
-    const prevPost = idx > 0 ? displayPosts[idx - 1] : undefined;
-    const nextPost = idx >= 0 && idx < displayPosts.length - 1 ? displayPosts[idx + 1] : undefined;
+    const prevPost = idx >= 0 && idx < displayPosts.length - 1 ? displayPosts[idx + 1] : undefined;
+    const nextPost = idx > 0 ? displayPosts[idx - 1] : undefined;
 
     return translations.map(post => ({
       params: { slug: post.data.slug },
