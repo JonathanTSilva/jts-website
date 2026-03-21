@@ -75,6 +75,13 @@ test.describe('Header', () => {
       window.getComputedStyle(el).transition.includes('background')
     );
     expect(hasHoverTransition).toBe(true);
+
+    // After hovering, the link should have a visible background color
+    const bgColor = await firstLink.evaluate(el =>
+      window.getComputedStyle(el).backgroundColor
+    );
+    expect(bgColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(bgColor).not.toBe('transparent');
   });
 
   test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {
