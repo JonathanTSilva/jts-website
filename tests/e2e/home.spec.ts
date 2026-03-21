@@ -25,7 +25,7 @@ test.describe('Homepage', () => {
     
     await test.step('Contact', async () => {
       await expect(page.getByRole('heading', { name: 'Contact' })).toBeVisible();
-      await expect(page.getByRole('link', { name: 'Email' })).toBeVisible();
+      await expect(page.locator('#contact').getByRole('link', { name: 'Email' })).toBeVisible();
     });
   });
 
@@ -84,6 +84,16 @@ test('homepage sections use monospace labels and token-based styles', async ({ p
   // Blog preview rows should each have a title and a date
   const blogRow = page.locator('.blog-preview-row').first();
   await expect(blogRow).toBeVisible();
+});
+
+test('hero has two-column layout with profile placeholder and achievement boxes', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.hero-right')).toBeVisible();
+  await expect(page.locator('.profile-image-wrap')).toBeVisible();
+  const boxes = page.locator('.achievement-box');
+  await expect(boxes).toHaveCount(4);
+  await expect(boxes.first().locator('.achievement-value')).toBeVisible();
+  await expect(boxes.first().locator('.achievement-label')).toBeVisible();
 });
 
 test.describe('Portfolio Page', () => {
