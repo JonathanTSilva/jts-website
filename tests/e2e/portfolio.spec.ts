@@ -27,3 +27,9 @@ test('skills cloud renders at least one pill', async ({ page }) => {
   const count = await pills.count();
   expect(count).toBeGreaterThan(0);
 });
+
+test('about section shows image or placeholder', async ({ page }) => {
+  await page.goto('/portfolio');
+  const imageWrap = page.locator('.about-image-wrap');
+  await expect(imageWrap).toBeVisible();
+});

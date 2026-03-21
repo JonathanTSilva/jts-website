@@ -6,11 +6,9 @@ import { publications } from '../../../content/portfolio/publications';
 import ProjectCard from '../../../components/portfolio/ProjectCard.astro';
 import PublicationItem from '../../../components/portfolio/PublicationItem.astro';
 import TimelineItem from '../../../components/portfolio/TimelineItem.astro';
+import AboutSection from '../../../components/portfolio/AboutSection.astro';
 
 const locale = 'pt-br';
-
-const aboutModule = await import(`../../../content/portfolio/about.${locale}.md`);
-const { Content: AboutContent } = aboutModule;
 
 const sortedExperience = [...experience].sort((a, b) =>
   b.startDate.localeCompare(a.startDate)
@@ -40,14 +38,7 @@ const t = {
       </a>
     </div>
 
-    <section class="portfolio-section">
-      <h2>{t.about}</h2>
-      <div class="prose-constrained">
-        <div class="prose">
-          <AboutContent />
-        </div>
-      </div>
-    </section>
+    <AboutSection locale={locale} aboutLabel={t.about} />
 
     <section class="portfolio-section">
       <h2>{t.projects}</h2>
@@ -130,11 +121,6 @@ const t = {
 
   .prose-constrained {
     max-width: var(--container-max);
-  }
-
-  .prose {
-    line-height: var(--leading-relaxed);
-    color: var(--text-muted);
   }
 
   .bento-grid {

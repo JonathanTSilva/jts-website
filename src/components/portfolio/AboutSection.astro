@@ -1,0 +1,89 @@
+---
+import { type Locale } from '../../lib/content/locale';
+
+interface Props {
+  locale: Locale;
+  aboutLabel: string;
+}
+
+const { locale, aboutLabel } = Astro.props;
+const aboutModule = await import(`../../content/portfolio/about.${locale}.md`);
+const { Content: AboutContent } = aboutModule;
+---
+
+<section class="portfolio-section">
+  <h2>{aboutLabel}</h2>
+  <div class="about-grid">
+    <div class="about-image-wrap">
+      <img
+        src="/assets/images/profile.jpg"
+        alt="Jonathan"
+        class="about-image"
+        onerror="this.style.display='none';this.parentElement.classList.add('about-placeholder')"
+      />
+    </div>
+    <div class="prose-constrained">
+      <div class="prose">
+        <AboutContent />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  h2 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-8);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--space-2);
+    color: var(--text);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .about-image-wrap {
+    width: 12rem;
+    height: 12rem;
+    flex-shrink: 0;
+  }
+
+  .about-image {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    display: block;
+  }
+
+  .about-placeholder {
+    background: var(--surface-high);
+    border-radius: var(--radius-md);
+    width: 12rem;
+    height: 12rem;
+  }
+
+  .prose-constrained {
+    max-width: var(--container-max);
+  }
+
+  .prose {
+    line-height: var(--leading-relaxed);
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 48rem) {
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+    .about-image-wrap {
+      margin-inline: auto;
+    }
+  }
+</style>
