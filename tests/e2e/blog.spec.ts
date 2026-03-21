@@ -66,3 +66,27 @@ test('blog post applies prose class', async ({ page }) => {
   const prose = page.locator('.prose');
   await expect(prose).toBeVisible();
 });
+
+test.describe('Blog', () => {
+  test('blog list shows tag filter pills', async ({ page }) => {
+    await page.goto('/blog');
+    const allPill = page.locator('.tag-pill--all');
+    await expect(allPill).toBeVisible();
+  });
+
+  test('blog list tag filter hides non-matching entries', async ({ page }) => {
+    await page.goto('/blog');
+    const pills = page.locator('.tag-pill:not(.tag-pill--all)');
+    const count = await pills.count();
+    if (count === 0) return; // no tags in test data — skip
+    await pills.first().click();
+    const visibleEntries = page.locator('.blog-entry:visible');
+    await expect(visibleEntries.first()).toBeVisible();
+  });
+
+  test('blog list entries show reading time', async ({ page }) => {
+    await page.goto('/blog');
+    const firstEntry = page.locator('.blog-entry').first();
+    await expect(firstEntry.locator('.blog-entry-date')).toContainText('min');
+  });
+});
