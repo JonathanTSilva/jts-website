@@ -61,6 +61,18 @@ const t = {
       </div>
     </section>
 
+<script>
+  const items = document.querySelectorAll('.timeline-item');
+  if (items.length && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        entry.target.classList.toggle('timeline-item--active', entry.isIntersecting);
+      });
+    }, { rootMargin: '-30% 0px -30% 0px' });
+    items.forEach(item => observer.observe(item));
+  }
+</script>
+
     <section class="portfolio-section">
       <h2>{t.publications}</h2>
       <div class="prose-constrained">
@@ -142,17 +154,6 @@ const t = {
     display: flex;
     flex-direction: column;
     position: relative;
-  }
-
-  /* Vertical line connecting timeline dots */
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: calc(0.75rem - 1px);
-    top: 4px;
-    bottom: 0;
-    width: 2px;
-    background: var(--border);
   }
 
   .pub-list {

@@ -33,3 +33,15 @@ test('about section shows image or placeholder', async ({ page }) => {
   const imageWrap = page.locator('.about-image-wrap');
   await expect(imageWrap).toBeVisible();
 });
+
+test('timeline line highlights on scroll', async ({ page }) => {
+  await page.goto('/portfolio');
+  // Scroll to the timeline section
+  const firstItem = page.locator('.timeline-item').first();
+  await firstItem.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300); // allow IntersectionObserver to fire
+  // At least one item should be active
+  const activeItems = page.locator('.timeline-item--active');
+  const activeCount = await activeItems.count();
+  expect(activeCount).toBeGreaterThan(0);
+});
