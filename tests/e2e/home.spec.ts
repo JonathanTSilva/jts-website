@@ -165,6 +165,45 @@ test('notes section cards show category badge when category exists', async ({ pa
   }
 });
 
+test.describe('LanguageSwitcher pill', () => {
+  test('EN page: pill shows EN active and PT as link', async ({ page }) => {
+    await page.goto('/');
+    const switcher = page.locator('.lang-pill');
+    await expect(switcher).toBeVisible();
+    // Active button for EN
+    const enBtn = switcher.locator('[data-locale="en"]');
+    await expect(enBtn).toBeVisible();
+    // PT is a link
+    const ptLink = switcher.locator('a[data-locale="pt-br"]');
+    await expect(ptLink).toBeVisible();
+  });
+
+  test('PT page: pill shows PT active and EN as link', async ({ page }) => {
+    await page.goto('/pt-br');
+    const switcher = page.locator('.lang-pill');
+    await expect(switcher).toBeVisible();
+    const ptBtn = switcher.locator('[data-locale="pt-br"]');
+    await expect(ptBtn).toBeVisible();
+    const enLink = switcher.locator('a[data-locale="en"]');
+    await expect(enLink).toBeVisible();
+  });
+
+  test('switching from EN to PT navigates to /pt-br', async ({ page }) => {
+    await page.goto('/');
+    // There may be multiple lang-pill instances (header + footer)
+    const ptLink = page.locator('.lang-pill a[data-locale="pt-br"]').first();
+    await ptLink.click();
+    await expect(page).toHaveURL('/pt-br');
+  });
+
+  test('switching from PT to EN navigates to /', async ({ page }) => {
+    await page.goto('/pt-br');
+    const enLink = page.locator('.lang-pill a[data-locale="en"]').first();
+    await enLink.click();
+    await expect(page).toHaveURL('/');
+  });
+});
+
 test.describe('Portfolio Page', () => {
   test('en: portfolio page renders all sections', async ({ page }) => {
     await page.goto('/portfolio');
