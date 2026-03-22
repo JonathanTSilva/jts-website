@@ -79,6 +79,14 @@ test.describe('Notes', () => {
     await expect(lastResult).toBeFocused();
   });
 
+  test('notes category buttons have badge counts', async ({ page }) => {
+    await page.goto('/notes');
+    const badge = page.locator('.filter-btn .badge-count').first();
+    await expect(badge).toBeVisible();
+    const text = await badge.textContent();
+    expect(Number(text?.trim())).toBeGreaterThan(0);
+  });
+
   test('notes index cards reflect category color', async ({ page }) => {
     await page.goto('/notes');
     // Notes with category "Engineering" → #22c55e, "Real-Time Systems" → #f59e0b

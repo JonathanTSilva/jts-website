@@ -3,11 +3,12 @@ import type { Locale } from '../../lib/content/locale';
 
 interface Props {
   categories: string[];
+  categoryCounts: Record<string, number>;
   tags: string[];
   locale: Locale;
 }
 
-const { categories, tags, locale } = Astro.props;
+const { categories, categoryCounts, tags, locale } = Astro.props;
 
 const labels = {
   en: {
@@ -31,7 +32,12 @@ const labels = {
     <div class="filter-options">
       <button class="filter-btn active" data-filter="category" data-value="all">{labels.all}</button>
       {categories.map(category => (
-        <button class="filter-btn" data-filter="category" data-value={category}>{category}</button>
+        <button class="filter-btn" data-filter="category" data-value={category}>
+          {category}
+          {categoryCounts[category] && (
+            <span class="badge-count">{categoryCounts[category]}</span>
+          )}
+        </button>
       ))}
     </div>
   </div>
@@ -174,6 +180,7 @@ const labels = {
   }
   
   .filter-btn {
+    position: relative;
     border-radius: var(--radius-full);
     padding: var(--space-1) var(--space-4);
     font-size: var(--text-sm);
@@ -182,6 +189,24 @@ const labels = {
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-out);
     color: var(--text);
+  }
+
+  .badge-count {
+    position: absolute;
+    top: -0.375rem;
+    right: -0.375rem;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: var(--weight-bold);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-1);
   }
 
   .filter-btn:hover {

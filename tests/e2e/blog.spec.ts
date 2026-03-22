@@ -100,6 +100,14 @@ test.describe('Blog', () => {
     await expect(postNav).toBeVisible();
   });
 
+  test('en: blog index has category filter with badge counts', async ({ page }) => {
+    await page.goto('/blog');
+    await expect(page.locator('.blog-filter-bar')).toBeVisible();
+    await expect(page.getByRole('button', { name: /All/ })).toBeVisible();
+    const badge = page.locator('.filter-category-btn .badge-count').first();
+    await expect(badge).toBeVisible();
+  });
+
   test('blog list uses two-column year/entry layout', async ({ page }) => {
     await page.goto('/blog');
     // Year column rendered with monospace font class
@@ -114,5 +122,26 @@ test.describe('Blog', () => {
     await firstLink.click();
     const prose = page.locator('.prose');
     await expect(prose).toBeVisible();
+  });
+
+  test('blog post: TOC starts below preamble separator', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.goto('/blog/2026-03-ci-firmware.en');
+    const separator = page.locator('.post-preamble hr, .preamble-divider').first();
+    const toc = page.locator('.toc-sidebar');
+    await expect(separator).toBeVisible();
+    await expect(toc).toBeVisible();
+    const sepBox = await separator.boundingBox();
+    const tocBox = await toc.boundingBox();
+    expect(tocBox!.y).toBeGreaterThanOrEqual(sepBox!.y);
+  });
+
+  test('blog post: back to top button appears on scroll', async ({ page }) => {
+    await page.goto('/blog/2026-03-ci-firmware.en');
+    const btn = page.locator('.back-to-top-btn');
+    await expect(btn).not.toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 500));
+    await page.waitForTimeout(300);
+    await expect(btn).toBeVisible();
   });
 });
