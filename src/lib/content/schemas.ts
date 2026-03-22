@@ -12,6 +12,7 @@ export const blogSchema = z.object({
   summary: z.string(),
   tags: z.array(z.string()).default([]),
   updatedAt: z.coerce.date().optional(),
+  category: z.string().optional(),
 });
 
 export const notesSchema = z.object({
