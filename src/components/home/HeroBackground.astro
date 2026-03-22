@@ -11,73 +11,91 @@ const cyB   = cpuY + cpuH;        // bottom = 58
 const r     = 15;                 // corner radius
 
 // Pin tips extend 6 px outside the chip body
-const pinL  = cxL - 6;           // left  pin tips x = 514
-const pinR  = cxR + 6;           // right pin tips x = 686
-const pinB  = cyB + 6;           // bottom pin tips y = 64
+const pinL  = cxL - 6;  // left  pin tips x = 514
+const pinR  = cxR + 6;  // right pin tips x = 686
+const pinB  = cyB + 6;  // bottom pin tips y = 64
 
-// Left pin tip y positions (global): 37, 44, 51
-const lyA = cyT +  7;   // 37
-const lyB = cyT + 14;   // 44
-const lyC = cyT + 21;   // 51
+// Left / right pin y-positions (global)
+const lyA = cyT +  7;   // 37  — top pin
+const lyB = cyT + 14;   // 44  — mid pin
+const lyC = cyT + 21;   // 51  — bot pin
 
-// Bottom pin tip x positions (global): 535, 555, 600, 645, 665
+// Bottom pin x-positions (global)
 const bxA = cxL + 15;  // 535
 const bxB = cxL + 35;  // 555
-const bxC = cpuX;      // 600 (center)
+const bxC = cpuX;      // 600
 const bxD = cxR - 35;  // 645
 const bxE = cxR - 15;  // 665
 
-// Q bezier helper
+// Quadratic bezier helper
 const q = (cx: number, cy: number, ex: number, ey: number) =>
   `Q ${cx} ${cy} ${ex} ${ey}`;
 
-// Trace from anywhere on the left half → CPU left pin tip (pinL, yPin)
-// Approaches horizontally from left: right to xT, up to yPin, right to pinL
+// ── Left traces ───────────────────────────────────────────────────────────────
+// Route: start → curve right-to-up at xT → straight up → straight right to pinL
+// "Straight arrival": last segment H pinL is uninterrupted by any curve.
+// Anti-crossing rule: xT of the y=37 trace < xT of y=44 < xT of y=51,
+// so no final-horizontal crosses another trace's vertical column.
 function trL(x0: number, y0: number, xT: number, yPin: number): string {
-  return `M ${x0} ${y0} H ${xT-r} ${q(xT,y0,xT,y0-r)} V ${yPin+r} ${q(xT,yPin,xT+r,yPin)} H ${pinL}`;
+  return `M ${x0} ${y0} H ${xT-r} ${q(xT,y0,xT,y0-r)} V ${yPin} H ${pinL}`;
 }
-// Same but with extra horizontal jog (long traces)
+// Two-jog variant for long left traces
 function trL2(x0: number, y0: number, xT1: number, yMid: number, xT2: number, yPin: number): string {
-  return `M ${x0} ${y0} H ${xT1-r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1+r,yMid)} H ${xT2-r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin+r} ${q(xT2,yPin,xT2+r,yPin)} H ${pinL}`;
+  return `M ${x0} ${y0} H ${xT1-r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1+r,yMid)} H ${xT2-r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin} H ${pinL}`;
 }
 
-// Trace from anywhere on the right half → CPU right pin tip (pinR, yPin)
+// ── Right traces (mirror of left) ─────────────────────────────────────────────
 function trR(x0: number, y0: number, xT: number, yPin: number): string {
-  return `M ${x0} ${y0} H ${xT+r} ${q(xT,y0,xT,y0-r)} V ${yPin+r} ${q(xT,yPin,xT-r,yPin)} H ${pinR}`;
+  return `M ${x0} ${y0} H ${xT+r} ${q(xT,y0,xT,y0-r)} V ${yPin} H ${pinR}`;
 }
 function trR2(x0: number, y0: number, xT1: number, yMid: number, xT2: number, yPin: number): string {
-  return `M ${x0} ${y0} H ${xT1+r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1-r,yMid)} H ${xT2+r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin+r} ${q(xT2,yPin,xT2-r,yPin)} H ${pinR}`;
+  return `M ${x0} ${y0} H ${xT1+r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1-r,yMid)} H ${xT2+r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin} H ${pinR}`;
 }
 
-// Trace from anywhere in the lower half → CPU bottom pin tip (xPin, pinB)
-// Goes up to yT, jogs horizontally to xH, then up to pin tip
-function trB(x0: number, y0: number, yT: number, xH: number, xPin: number): string {
+// ── Bottom traces ─────────────────────────────────────────────────────────────
+// Route: start → curve up-to-horiz at yT → curve horiz-to-up at xPin → straight V pinB
+// Anti-crossing: jog levels stagger so no final-vertical crosses another horizontal.
+// Rule: traces approaching closer pins jog at a LOWER level (higher SVG y),
+// so longer traces' final verticals never intersect shorter traces' horizontal jogs.
+function trB(x0: number, y0: number, yT: number, xPin: number): string {
   if (x0 <= xPin) {
-    return `M ${x0} ${y0} V ${yT+r} ${q(x0,yT,x0+r,yT)} H ${xH-r} ${q(xH,yT,xH,yT-r)} V ${pinB+r} ${q(xH,pinB,xH+r,pinB)} H ${xPin}`;
+    return `M ${x0} ${y0} V ${yT+r} ${q(x0,yT,x0+r,yT)} H ${xPin-r} ${q(xPin,yT,xPin,yT-r)} V ${pinB}`;
   } else {
-    return `M ${x0} ${y0} V ${yT+r} ${q(x0,yT,x0-r,yT)} H ${xH+r} ${q(xH,yT,xH,yT-r)} V ${pinB+r} ${q(xH,pinB,xH-r,pinB)} H ${xPin}`;
+    return `M ${x0} ${y0} V ${yT+r} ${q(x0,yT,x0-r,yT)} H ${xPin+r} ${q(xPin,yT,xPin,yT-r)} V ${pinB}`;
   }
 }
 
-// 11 traces: 3 left · 3 right · 5 bottom
-// Start points distributed throughout the hero — short, medium, and long paths
+// ── 11 traces ─────────────────────────────────────────────────────────────────
+//
+//  Left (3): xT values 260 < 300 < 380 match yPin order 37 < 44 < 51.
+//  This ensures final horizontals (at y=37,44,51) never cross any trace's
+//  intermediate vertical (at x=260, 300, 380 respectively).
+//
+//  Right (3): mirror. xT values 940 > 900 > 820 match yPin order 37 < 44 < 51.
+//
+//  Bottom (5): jog levels increase toward the centre so each trace's horizontal
+//  jog sits below the final vertical of any trace whose column it passes over.
+//    B1 (x=535, jog y=380): final V at x=535 starts at y=365 — other horizontals at y≥400.
+//    B2 (x=555, jog y=400): final V at x=555 starts at y=385 — B3 jog at y=420 > 385. ✓
+//    B3 (x=600, jog y=420): all final verticals to its left start at y≤420.           ✓
+//    B4/B5 are symmetric to B2/B1 on the right side.
 const traces: Array<{ sx: number; sy: number; d: string; delay: string }> = [
-  // ── Left → CPU left pins (x=514) ─────────────────────────────
-  { sx: 0,    sy: 200, d: trL(0,   200, 300,        lyB), delay: '0.0s' }, // medium
-  { sx: 0,    sy: 420, d: trL2(0,  420, 140, 270, 390, lyA), delay: '2.5s' }, // long
-  { sx: 160,  sy: 320, d: trL(160, 320, 380,        lyC), delay: '1.2s' }, // short
+  // Left → CPU left pins (x=514)
+  { sx: 0,    sy: 420, d: trL2(0,   420, 140, 270, 260, lyA), delay: '2.5s' }, // long
+  { sx: 0,    sy: 200, d: trL (0,   200, 300,          lyB), delay: '0.0s' }, // medium
+  { sx: 160,  sy: 320, d: trL (160, 320, 380,          lyC), delay: '1.2s' }, // short
 
-  // ── Right → CPU right pins (x=686) ───────────────────────────
-  { sx: 1200, sy: 200, d: trR(1200, 200, 900,            lyB), delay: '0.5s' }, // medium
-  { sx: 1200, sy: 420, d: trR2(1200, 420, 1060, 270, 810, lyA), delay: '3.0s' }, // long
-  { sx: 1040, sy: 320, d: trR(1040, 320, 820,            lyC), delay: '1.7s' }, // short
+  // Right → CPU right pins (x=686)
+  { sx: 1200, sy: 420, d: trR2(1200, 420, 1060, 270, 940, lyA), delay: '3.0s' }, // long
+  { sx: 1200, sy: 200, d: trR (1200, 200, 900,            lyB), delay: '0.5s' }, // medium
+  { sx: 1040, sy: 320, d: trR (1040, 320, 820,            lyC), delay: '1.7s' }, // short
 
-  // ── Bottom → CPU bottom pins (y=64) ──────────────────────────
-  { sx: 160,  sy: 490, d: trB(160,  490, 340, 460, bxA), delay: '1.0s' }, // long
-  { sx: 380,  sy: 460, d: trB(380,  460, 260, 510, bxB), delay: '2.0s' }, // medium
-  { sx: 500,  sy: 410, d: trB(500,  410, 260, 570, bxC), delay: '0.3s' }, // short
-  { sx: 820,  sy: 460, d: trB(820,  460, 280, 665, bxD), delay: '1.5s' }, // medium
-  { sx: 1040, sy: 490, d: trB(1040, 490, 360, 700, bxE), delay: '2.8s' }, // long
+  // Bottom → CPU bottom pins (y=64)
+  { sx: 160,  sy: 490, d: trB(160,  490, 380, bxA), delay: '1.0s' }, // long
+  { sx: 380,  sy: 460, d: trB(380,  460, 400, bxB), delay: '2.0s' }, // medium
+  { sx: 500,  sy: 450, d: trB(500,  450, 420, bxC), delay: '0.3s' }, // short
+  { sx: 820,  sy: 460, d: trB(820,  460, 400, bxD), delay: '1.5s' }, // medium
+  { sx: 1040, sy: 490, d: trB(1040, 490, 380, bxE), delay: '2.8s' }, // long
 ];
 
 const words = ['Cybersecurity','Embedded','Software','AI','Automation',
@@ -116,13 +134,13 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
   <!-- CPU chip -->
   <g class="cpu-group" transform={`translate(${cxL}, ${cyT})`}>
     <rect width={cpuW} height={cpuH} rx="3" class="cpu-body" />
-    <!-- left pins: extend 6 px left at y=7,14,21 (global y=37,44,51) -->
+    <!-- left pins: extend 6 px left at y=7,14,21 → global y=37,44,51 -->
     <path d={`M -6 7 h 6 M -6 ${cpuH/2} h 6 M -6 ${cpuH-7} h 6`}
       class="cpu-pins" />
-    <!-- right pins: extend 6 px right (global x=680→686) -->
+    <!-- right pins: extend 6 px right → global x=680–686 -->
     <path d={`M ${cpuW} 7 h 6 M ${cpuW} ${cpuH/2} h 6 M ${cpuW} ${cpuH-7} h 6`}
       class="cpu-pins" />
-    <!-- bottom pins: extend 6 px down at x=15,35,80,125,145 (global x=535,555,600,645,665) -->
+    <!-- bottom pins: extend 6 px down at x=15,35,80,125,145 → global x=535,555,600,645,665 -->
     <path d={`M 15 ${cpuH} v 6 M 35 ${cpuH} v 6 M ${cpuW/2} ${cpuH} v 6 M 125 ${cpuH} v 6 M 145 ${cpuH} v 6`}
       class="cpu-pins" />
     <text id="cpu-word" x={cpuW / 2} y={cpuH / 2 + 4.5}
