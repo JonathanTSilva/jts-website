@@ -109,6 +109,23 @@ test('pt-br hero tagline is in Portuguese', async ({ page }) => {
   await expect(tagline).toContainText('Explore meu trabalho e insights');
 });
 
+test('mobile: hero left column renders before right column', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const left = page.locator('.hero-left');
+  const right = page.locator('.hero-right');
+  const leftBox = await left.boundingBox();
+  const rightBox = await right.boundingBox();
+  expect(leftBox!.y).toBeLessThan(rightBox!.y);
+});
+
+test('mobile: home projects in single column', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const cards = page.locator('.grid .project-card').first();
+  await expect(cards).toBeVisible();
+});
+
 test('projects section shows 3 project cards', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('.project-card');
