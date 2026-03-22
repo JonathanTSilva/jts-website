@@ -136,6 +136,14 @@ test.describe('Blog', () => {
     expect(tocBox!.y).toBeGreaterThanOrEqual(sepBox!.y);
   });
 
+  test('blog post: share buttons are visible', async ({ page }) => {
+    await page.goto('/blog/2026-03-ci-firmware.en');
+    const shareSection = page.locator('.share-buttons');
+    await expect(shareSection).toBeVisible();
+    await expect(page.locator('.share-btn[data-platform="linkedin"]')).toBeVisible();
+    await expect(page.locator('.share-btn[data-platform="copy"]')).toBeVisible();
+  });
+
   test('blog post: back to top button is present and hidden before scroll', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
     await page.goto('/blog/2026-03-ci-firmware.en');

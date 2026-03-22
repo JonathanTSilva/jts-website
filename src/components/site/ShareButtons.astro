@@ -1,0 +1,181 @@
+---
+interface Props {
+  title: string;
+  url: string;
+  type: 'post' | 'note';
+  locale: 'en' | 'pt-br';
+}
+
+const { title, url, type, locale } = Astro.props;
+
+const messages = {
+  en: {
+    post: `Check out this post: ${title} ${url}`,
+    note: `Check out this note: ${title} ${url}`,
+  },
+  'pt-br': {
+    post: `Confira este artigo: ${title} ${url}`,
+    note: `Confira esta nota: ${title} ${url}`,
+  },
+};
+
+const message = messages[locale][type];
+const encodedMessage = encodeURIComponent(message);
+const encodedUrl = encodeURIComponent(url);
+
+const shareLinks = {
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  twitter: `https://twitter.com/intent/tweet?text=${encodedMessage}`,
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedMessage}`,
+  whatsapp: `https://wa.me/?text=${encodedMessage}`,
+};
+
+const labels = {
+  en: {
+    share: type === 'post' ? 'Share this post' : 'Share this note',
+    copied: 'Link copied!',
+  },
+  'pt-br': {
+    share: type === 'post' ? 'Compartilhar este artigo' : 'Compartilhar esta nota',
+    copied: 'Link copiado!',
+  },
+}[locale];
+---
+
+<div class="share-buttons">
+  <p class="share-label">{labels.share}</p>
+  <div class="share-row">
+    <a
+      href={shareLinks.linkedin}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="share-btn"
+      data-platform="linkedin"
+      aria-label="Share on LinkedIn"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+        <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+      </svg>
+    </a>
+    <a
+      href={shareLinks.twitter}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="share-btn"
+      data-platform="twitter"
+      aria-label="Share on Twitter"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+    </a>
+    <a
+      href={shareLinks.facebook}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="share-btn"
+      data-platform="facebook"
+      aria-label="Share on Facebook"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+      </svg>
+    </a>
+    <a
+      href={shareLinks.whatsapp}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="share-btn"
+      data-platform="whatsapp"
+      aria-label="Share on WhatsApp"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a13 13 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 1.99.583 3.842 1.59 5.395L2 22l4.705-1.232A10 10 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" fill-rule="evenodd" clip-rule="evenodd"/>
+      </svg>
+    </a>
+    <button
+      class="share-btn"
+      data-platform="copy"
+      data-message={message}
+      data-copied-label={labels.copied}
+      aria-label="Copy link"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  function initShareButtons() {
+    document.querySelectorAll<HTMLButtonElement>('.share-btn[data-platform="copy"]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const msg = btn.dataset.message ?? '';
+        const copiedLabel = btn.dataset.copiedLabel ?? 'Link copied!';
+        try {
+          await navigator.clipboard.writeText(msg);
+          window.showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = msg;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          window.showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
+        }
+      });
+    });
+  }
+
+  initShareButtons();
+  document.addEventListener('astro:page-load', initShareButtons);
+</script>
+
+<style>
+  .share-buttons {
+    margin-top: var(--space-10);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .share-label {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    font-family: var(--font-mono);
+  }
+
+  .share-row {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--duration-fast) var(--ease-out),
+                color var(--duration-fast) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .share-btn:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+</style>

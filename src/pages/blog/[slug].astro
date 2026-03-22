@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TableOfContents from '../../components/blog/TableOfContents.astro';
 import PostNav from '../../components/blog/PostNav.astro';
 import BackToTop from '../../components/site/BackToTop.astro';
+import ShareButtons from '../../components/site/ShareButtons.astro';
 import { getReadingTime } from '../../lib/readingTime';
 
 export async function getStaticPaths() {
@@ -107,6 +108,7 @@ const t = {
         </div>
 
         <PostNav locale={locale} prev={prev} next={next} />
+        <ShareButtons title={post.data.title} url={Astro.url.href} type="post" locale={locale as 'en' | 'pt-br'} />
       </div>
 
       <aside class="toc-sidebar">
