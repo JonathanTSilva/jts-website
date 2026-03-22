@@ -56,6 +56,17 @@ const navItems = getNavigation(locale);
     </div>
 
     <button
+      class="search-icon-btn"
+      id="search-icon-btn"
+      aria-label="Open search"
+      type="button"
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+        <circle cx="8" cy="8" r="5"/><path d="m13 13 3 3"/>
+      </svg>
+    </button>
+
+    <button
       class="hamburger"
       id="hamburger"
       aria-label="Open menu"
@@ -130,6 +141,10 @@ const navItems = getNavigation(locale);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && mobileNav?.classList.contains('open')) setDrawer(false);
   });
+
+  // ── Search icon button (mobile) ──────────────────────────
+  const searchIconBtn = document.getElementById('search-icon-btn');
+  searchIconBtn?.addEventListener('click', () => { window.openSearch?.(); });
 
   // ── Search field ─────────────────────────────────────────
   document.querySelector('.search-field')?.addEventListener('click', () => {
@@ -318,16 +333,27 @@ const navItems = getNavigation(locale);
   .search-field input::placeholder { color: var(--text-muted); }
   .search-field svg { flex-shrink: 0; color: var(--text-muted); }
 
-  /* Mobile: search field always visible, hide other header-actions items */
+  /* Mobile: hide search field, show icon button instead */
   @media (max-width: 47.9375rem) {
-    .header-actions {
-      display: flex;
-      gap: 0;
-    }
-    /* Use :global so scoped cid does not prevent matching child components */
-    .header-actions > :global(:not(.search-field)) { display: none; }
-    .search-field { width: var(--search-field-width-sm); }
     .main-nav { display: none; }
+  }
+
+  /* ── Search icon button ── */
+  .search-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    transition: color var(--duration-fast) var(--ease-out);
+    display: none; /* hidden by default (desktop) */
+  }
+  .search-icon-btn:hover { color: var(--accent); }
+
+  @media (max-width: 47.9375rem) {
+    .search-field { display: none; }
+    .search-icon-btn { display: flex; align-items: center; justify-content: center; }
   }
 
   /* ── Hamburger ── */
@@ -393,6 +419,7 @@ const navItems = getNavigation(locale);
   .mobile-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6) var(--space-6);
     border-top: 1px solid var(--border);

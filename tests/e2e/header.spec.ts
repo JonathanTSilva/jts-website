@@ -93,11 +93,32 @@ test.describe('Header', () => {
     await expect(dialog).toBeVisible({ timeout: 2000 });
   });
 
-  test('search field is visible on mobile in header bar', async ({ page }) => {
+  test('search field is hidden on mobile; search icon button is shown instead', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/');
-    const searchField = page.locator('.search-field');
-    await expect(searchField).toBeVisible();
+    await expect(page.locator('.search-field')).toBeHidden();
+    await expect(page.locator('.search-icon-btn')).toBeVisible();
+  });
+
+  test('mobile: theme toggle is right-aligned in drawer', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+    await page.click('#hamburger');
+    const mobileActions = page.locator('.mobile-actions');
+    await expect(mobileActions).toBeVisible();
+    const toggleBox = await mobileActions.locator('> *').first().boundingBox();
+    const viewport = page.viewportSize()!;
+    // Toggle center should be in the right half of the viewport
+    expect(toggleBox!.x + toggleBox!.width / 2).toBeGreaterThan(viewport.width / 2);
+  });
+
+  test('mobile: search shows icon only, opens dialog on click', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+    await expect(page.locator('.search-field')).toBeHidden();
+    await expect(page.locator('.search-icon-btn')).toBeVisible();
+    await page.click('.search-icon-btn');
+    await expect(page.getByRole('dialog')).toBeVisible();
   });
 
   test('search input has readonly attribute to prevent mobile keyboard', async ({ page }) => {

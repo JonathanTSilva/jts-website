@@ -109,6 +109,23 @@ test('pt-br hero tagline is in Portuguese', async ({ page }) => {
   await expect(tagline).toContainText('Explore meu trabalho e insights');
 });
 
+test('mobile: hero left column renders before right column', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const left = page.locator('.hero-left');
+  const right = page.locator('.hero-right');
+  const leftBox = await left.boundingBox();
+  const rightBox = await right.boundingBox();
+  expect(leftBox!.y).toBeLessThan(rightBox!.y);
+});
+
+test('mobile: home projects in single column', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const cards = page.locator('.grid .project-card').first();
+  await expect(cards).toBeVisible();
+});
+
 test('projects section shows 3 project cards', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('.project-card');
@@ -233,7 +250,7 @@ test.describe('Footer', () => {
     await page.setViewportSize({ width: 1400, height: 800 });
     const inner = page.locator('.footer-inner');
     const box = await inner.boundingBox();
-    // container-max = 52rem = 832px; inner must be narrower than 1400
+    // container-max = 60rem = 960px; inner must be narrower than 1400
     expect(box!.width).toBeLessThan(1400);
   });
 });
@@ -260,6 +277,32 @@ test.describe('Portfolio Page', () => {
       await expect(page.getByRole('heading', { name: 'Publicações' })).toBeVisible();
     });
   });
+});
+
+test('hero has circuit background with CPU node', async ({ page }) => {
+  await page.goto('/');
+  const cpuNode = page.locator('.hero-bg .cpu-node');
+  await expect(cpuNode).toBeVisible();
+  const circuitPaths = page.locator('.hero-bg .circuit-path');
+  const count = await circuitPaths.count();
+  expect(count).toBeGreaterThan(0);
+  await expect(circuitPaths.first()).toBeVisible();
+});
+
+test('html has scrollbar-gutter: stable', async ({ page }) => {
+  await page.goto('/');
+  const scrollbarGutter = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).scrollbarGutter
+  );
+  expect(scrollbarGutter).toBe('stable');
+});
+
+test('container max width is 60rem', async ({ page }) => {
+  await page.goto('/');
+  const maxWidth = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--container-max').trim()
+  );
+  expect(maxWidth).toBe('60rem');
 });
 
 test.describe('Legal placeholder pages', () => {

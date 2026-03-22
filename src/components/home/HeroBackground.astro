@@ -1,0 +1,140 @@
+---
+// No props — purely decorative background component.
+// SVG paths on 1440×900 viewBox. CPU node centered at x=720, y=80.
+const paths = [
+  { id: 'p1', d: 'M 0 200 L 400 200 L 400 80 L 680 80', color: 'var(--accent)', delay: '0s' },
+  { id: 'p2', d: 'M 0 450 L 300 450 L 300 180 L 680 180', color: 'var(--accent-dim)', delay: '0.4s' },
+  { id: 'p3', d: 'M 0 650 L 200 650 L 200 350 L 680 350', color: 'var(--text-muted)', delay: '0.8s' },
+  { id: 'p4', d: 'M 0 820 L 150 820 L 150 500 L 600 500 L 600 160 L 680 160', color: 'var(--accent)', delay: '1.2s' },
+  { id: 'p5', d: 'M 1440 200 L 1040 200 L 1040 80 L 760 80', color: 'var(--accent)', delay: '0.2s' },
+  { id: 'p6', d: 'M 1440 450 L 1140 450 L 1140 180 L 760 180', color: 'var(--accent-dim)', delay: '0.6s' },
+  { id: 'p7', d: 'M 1440 650 L 1240 650 L 1240 350 L 760 350', color: 'var(--text-muted)', delay: '1.0s' },
+  { id: 'p8', d: 'M 1440 820 L 1290 820 L 1290 500 L 840 500 L 840 160 L 760 160', color: 'var(--accent)', delay: '1.4s' },
+];
+---
+
+<div class="hero-bg" aria-hidden="true">
+  <svg
+    class="hero-bg-svg"
+    viewBox="0 0 1440 900"
+    preserveAspectRatio="xMidYMid slice"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      {paths.map(p => (
+        <path id={p.id} d={p.d} />
+      ))}
+    </defs>
+
+    {paths.map(p => (
+      <use
+        href={`#${p.id}`}
+        class="circuit-path"
+        stroke={p.color}
+        stroke-width="1"
+        fill="none"
+        opacity="0.25"
+      />
+    ))}
+
+    <g class="cpu-node" transform="translate(680, 40)">
+      <rect x="0" y="0" width="80" height="80" rx="4" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.6" />
+      <line x1="20" y1="0" x2="20" y2="80" stroke="var(--accent)" stroke-width="0.5" opacity="0.4" />
+      <line x1="40" y1="0" x2="40" y2="80" stroke="var(--accent)" stroke-width="0.5" opacity="0.4" />
+      <line x1="60" y1="0" x2="60" y2="80" stroke="var(--accent)" stroke-width="0.5" opacity="0.4" />
+      <line x1="0" y1="20" x2="80" y2="20" stroke="var(--accent)" stroke-width="0.5" opacity="0.4" />
+      <line x1="0" y1="40" x2="80" y2="40" stroke="var(--accent)" stroke-width="0.5" opacity="0.4" />
+      <line x1="0" y1="60" x2="80" y2="60" stroke="var(--accent)" stroke-width="0.5" opacity="0.4" />
+      <rect x="-6" y="15" width="6" height="4" fill="var(--accent)" opacity="0.5" />
+      <rect x="-6" y="35" width="6" height="4" fill="var(--accent)" opacity="0.5" />
+      <rect x="-6" y="55" width="6" height="4" fill="var(--accent)" opacity="0.5" />
+      <rect x="80" y="15" width="6" height="4" fill="var(--accent)" opacity="0.5" />
+      <rect x="80" y="35" width="6" height="4" fill="var(--accent)" opacity="0.5" />
+      <rect x="80" y="55" width="6" height="4" fill="var(--accent)" opacity="0.5" />
+    </g>
+
+    {paths.map((p) => (
+      <circle
+        class="data-pulse"
+        r="4"
+        fill={p.color}
+        style={`--delay: ${p.delay}; filter: drop-shadow(0 0 4px ${p.color});`}
+        data-path-id={p.id}
+      />
+    ))}
+  </svg>
+</div>
+
+<style>
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .hero-bg-svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    animation: bg-fade-in 0.8s var(--ease-out) forwards;
+  }
+
+  @keyframes bg-fade-in {
+    to { opacity: 1; }
+  }
+
+  .circuit-path {
+    opacity: 0;
+    animation: path-appear 0.8s var(--ease-out) 0.2s forwards;
+  }
+
+  @keyframes path-appear {
+    to { opacity: 0.25; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .data-pulse {
+      offset-rotate: 0deg;
+      animation: pulse-travel 4s linear var(--delay, 0s) infinite;
+    }
+
+    @keyframes pulse-travel {
+      0%   { offset-distance: 0%; opacity: 0; }
+      5%   { opacity: 1; }
+      95%  { opacity: 1; }
+      100% { offset-distance: 100%; opacity: 0; }
+    }
+  }
+
+  [data-theme='light'] .circuit-path {
+    opacity: 0;
+    animation: path-appear-light 0.8s var(--ease-out) 0.2s forwards;
+  }
+
+  [data-theme='light'] .cpu-node rect,
+  [data-theme='light'] .cpu-node line {
+    opacity: 0.4;
+  }
+
+  @keyframes path-appear-light {
+    to { opacity: 0.15; }
+  }
+</style>
+
+<script>
+  function initPulses() {
+    document.querySelectorAll<SVGCircleElement>('.data-pulse').forEach(pulse => {
+      const el = pulse as unknown as HTMLElement;
+      const pathId = el.dataset.pathId;
+      if (pathId) {
+        const pathEl = document.getElementById(pathId);
+        const d = pathEl?.getAttribute('d') ?? '';
+        el.style.offsetPath = `path('${d}')`;
+      }
+    });
+  }
+  initPulses();
+  document.addEventListener('astro:page-load', initPulses);
+</script>

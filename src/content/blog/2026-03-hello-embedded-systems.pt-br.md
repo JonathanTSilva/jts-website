@@ -6,6 +6,7 @@ translationKey: "hello-embedded-systems"
 publishedAt: "2026-03-10"
 summary: "Introdução a sistemas embarcados com C e Rust."
 tags: ["C", "Rust", "Embarcados"]
+category: "Software Engineering"
 ---
 
 Bem-vindo ao mundo da programação de baixo nível!

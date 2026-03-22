@@ -1,0 +1,76 @@
+---
+// No props. Uses scroll event to show/hide.
+---
+
+<button
+  class="back-to-top-btn"
+  aria-label="Back to top"
+>
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="4 10 8 6 12 10"/>
+  </svg>
+</button>
+
+<script>
+  function initBackToTop() {
+    const btn = document.querySelector<HTMLButtonElement>('.back-to-top-btn');
+    if (!btn) return;
+
+    function onScroll() {
+      btn!.classList.toggle('visible', window.scrollY > 300);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    btn.addEventListener('click', () => {
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reducedMotion ? 'instant' : 'smooth' });
+    });
+  }
+
+  initBackToTop();
+  document.addEventListener('astro:page-load', initBackToTop);
+</script>
+
+<style>
+  .back-to-top-btn {
+    position: fixed;
+    bottom: var(--space-6);
+    right: var(--space-6);
+    z-index: 50;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: var(--surface-high);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-base) var(--ease-out),
+                background var(--duration-fast) var(--ease-out),
+                color var(--duration-fast) var(--ease-out);
+  }
+
+  .back-to-top-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .back-to-top-btn:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-to-top-btn {
+      transition: none;
+    }
+  }
+</style>

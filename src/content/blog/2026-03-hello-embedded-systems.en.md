@@ -6,6 +6,7 @@ translationKey: "hello-embedded-systems"
 publishedAt: "2026-03-10"
 summary: "Introduction to embedded programming with C and Rust."
 tags: ["C", "Rust", "Embedded"]
+category: "Software Engineering"
 ---
 
 Welcome to the world of low-level programming!

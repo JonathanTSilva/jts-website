@@ -32,6 +32,10 @@ const notesToShow = uniqueTranslationKeys.map(key => {
 
 const categories = Array.from(new Set(notesToShow.map(note => note.data.category).filter((c): c is string => !!c))).sort();
 const tags = Array.from(new Set(notesToShow.flatMap(note => note.data.tags))).sort();
+const categoryCounts = categories.reduce((acc, cat) => {
+  acc[cat] = notesToShow.filter(n => n.data.category === cat).length;
+  return acc;
+}, {} as Record<string, number>);
 ---
 
 <BaseLayout locale={locale} title={t.title} description={t.description}>
@@ -41,7 +45,7 @@ const tags = Array.from(new Set(notesToShow.flatMap(note => note.data.tags))).so
       <p class="page-description">{t.description}</p>
     </header>
 
-    <NotesFilters categories={categories} tags={tags} locale={locale} />
+    <NotesFilters categories={categories} categoryCounts={categoryCounts} tags={tags} locale={locale} />
     <NotesGrid notes={notesToShow} locale={locale} />
   </div>
 </BaseLayout>

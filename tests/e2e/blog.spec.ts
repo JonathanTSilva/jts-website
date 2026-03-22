@@ -50,18 +50,20 @@ test.describe('Blog', () => {
     expect(text).toContain('Continuous Integration for Firmware');
   });
 
-  test('blog list shows tag filter pills', async ({ page }) => {
+  test('blog list shows category filter bar', async ({ page }) => {
     await page.goto('/blog');
-    const allPill = page.locator('.tag-pill--all');
-    await expect(allPill).toBeVisible();
+    const filterBar = page.locator('.blog-filter-bar');
+    await expect(filterBar).toBeVisible();
+    const allBtn = page.getByRole('button', { name: /All/ });
+    await expect(allBtn).toBeVisible();
   });
 
-  test('blog list tag filter hides non-matching entries', async ({ page }) => {
+  test('blog list category filter hides non-matching entries', async ({ page }) => {
     await page.goto('/blog');
-    const pills = page.locator('.tag-pill:not(.tag-pill--all)');
-    const count = await pills.count();
-    if (count === 0) return; // no tags in test data — skip
-    await pills.first().click();
+    const categoryBtns = page.locator('.filter-category-btn:not([data-category="all"])');
+    const count = await categoryBtns.count();
+    if (count === 0) return; // no categories in test data — skip
+    await categoryBtns.first().click();
     const visibleEntries = page.locator('.blog-entry:visible');
     await expect(visibleEntries.first()).toBeVisible();
   });
@@ -100,6 +102,14 @@ test.describe('Blog', () => {
     await expect(postNav).toBeVisible();
   });
 
+  test('en: blog index has category filter with badge counts', async ({ page }) => {
+    await page.goto('/blog');
+    await expect(page.locator('.blog-filter-bar')).toBeVisible();
+    await expect(page.getByRole('button', { name: /All/ })).toBeVisible();
+    const badge = page.locator('.filter-category-btn .badge-count').first();
+    await expect(badge).toBeVisible();
+  });
+
   test('blog list uses two-column year/entry layout', async ({ page }) => {
     await page.goto('/blog');
     // Year column rendered with monospace font class
@@ -114,5 +124,44 @@ test.describe('Blog', () => {
     await firstLink.click();
     const prose = page.locator('.prose');
     await expect(prose).toBeVisible();
+  });
+
+  test('blog post: TOC starts below preamble separator', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.goto('/blog/2026-03-ci-firmware.en');
+    const separator = page.locator('.post-preamble hr, .preamble-divider').first();
+    const toc = page.locator('.toc-sidebar');
+    await expect(separator).toBeVisible();
+    await expect(toc).toBeVisible();
+    const sepBox = await separator.boundingBox();
+    const tocBox = await toc.boundingBox();
+    expect(tocBox!.y).toBeGreaterThanOrEqual(sepBox!.y);
+  });
+
+  test('blog post: share buttons are visible', async ({ page }) => {
+    await page.goto('/blog/2026-03-ci-firmware.en');
+    const shareSection = page.locator('.share-buttons');
+    await expect(shareSection).toBeVisible();
+    await expect(page.locator('.share-btn[data-platform="linkedin"]')).toBeVisible();
+    await expect(page.locator('.share-btn[data-platform="copy"]')).toBeVisible();
+  });
+
+  test('blog post: back to top button is present and hidden before scroll', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.goto('/blog/2026-03-ci-firmware.en');
+    const btn = page.locator('.back-to-top-btn');
+    // Button exists in DOM but is not visually active (opacity: 0, pointer-events: none)
+    await expect(btn).toBeAttached();
+    const opacity = await btn.evaluate(el => window.getComputedStyle(el).opacity);
+    expect(opacity).toBe('0');
+    // After scrolling past 300px it gains the .visible class
+    await page.evaluate(() => {
+      window.dispatchEvent(new Event('scroll'));
+      Object.defineProperty(window, 'scrollY', { value: 400, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+    await page.waitForTimeout(300);
+    const hasVisible = await btn.evaluate(el => el.classList.contains('visible'));
+    expect(hasVisible).toBe(true);
   });
 });
