@@ -34,6 +34,8 @@ Nine independent feature groups covering global layout, responsiveness, hero bac
 
 No structural changes — the auto-centering approach is preserved. All pages inherit the wider layout automatically.
 
+> **Design decision:** The source requirement describes a "20/80/20 three-column grid layout." This spec intentionally implements it as a max-width token increase instead, because a fluid 20/60/20 grid would collapse content to 60% of viewport width on widescreen monitors — far too narrow for prose. The token approach achieves the same visual result (content fills more of the screen with proportional breathing room) without the usability regression. This deviation was confirmed with the user during design review.
+
 **Files changed:** `src/styles/tokens.css` (two-line change).
 
 ---
@@ -110,7 +112,7 @@ The component renders a full-bleed `<svg>` positioned absolutely behind the hero
 
 **Data Pulses**
 - Each primary path hosts one animated `<circle>` (4–8px radius, filled, no stroke)
-- Animation: CSS `stroke-dashoffset` keyframes cause each pulse to travel the full path length, looping indefinitely
+- Animation: CSS `offset-path` (motion path) moves each circle along its corresponding `<path>` element using `offset-distance` keyframes from `0%` to `100%`. This is the correct technique for moving an element along an SVG path (not `stroke-dashoffset`, which animates line strokes, not element positions). `offset-rotate: 0deg` keeps the circle round regardless of path direction.
 - Staggered `animation-delay` values (0s to 3s) across pulses to create the impression of parallel simultaneous activity
 - Pulse colors: 3–4 variants — `var(--accent)`, `var(--accent-dim)`, and two neutral muted tones — assigned to paths to suggest different data streams
 - Glow effect: `filter: drop-shadow(0 0 4px currentColor)` on each pulse
@@ -151,7 +153,7 @@ Content is a faithful Portuguese translation of the English pages. No new compon
 
 ### 5.1 Schema: Category Field
 
-Add `category` (required `z.string()`) to the blog post content schema in `src/content/config.ts`. All existing blog post MDX/MD files receive a `category:` frontmatter field.
+Add `category` (required `z.string()`) to the blog post Zod schema in `src/lib/content/schemas.ts` (where `blogSchema` is defined — not `src/content/config.ts`, which only calls `defineCollection`). All existing blog post MDX/MD files receive a `category:` frontmatter field.
 
 ### 5.2 Category Filter Bar
 
@@ -175,11 +177,23 @@ Each category button displays a count badge:
 
 Tags on the **notes** filter bar do **not** show count badges — only category buttons show counts (both blog and notes categories).
 
-### 5.4 Separator Lines
+> **Scope note:** The notification badge on category filter buttons is new work for both the blog list and the notes list. It is not covered by the `2026-03-21-notes-category-colors` plan (which only handles card accent colors). The notes category filter bar gains the same badge treatment as the blog filter bar as part of this spec.
+
+### 5.4 Blog Filter: Relationship to Blog Improvements Plan
+
+The `2026-03-21-blog-improvements` plan already adds a **tag filter** to `BlogList.astro` using `.tag-pill` classes and `?tag=` URL state. This spec's **category filter** replaces that tag filter entirely:
+
+- The `?tag=` param and tag pill markup from the blog-improvements plan are **not implemented** — the blog list is filtered by category only
+- The `?category=` param from this spec is the single filter mechanism for the blog list
+- Notes retain tag filtering (from the existing notes implementation); blog posts do not
+
+When implementing, ensure these two plans do not both write conflicting filter logic to `BlogList.astro`.
+
+### 5.5 Separator Lines
 
 Separator lines are removed between individual blog posts. Separators remain between months (content-width) and between years (full content-width). This is consistent with the existing blog improvements plan.
 
-**Files changed:** `src/content/config.ts`, all blog post MDX files (frontmatter), `src/components/blog/BlogList.astro`, `src/pages/blog/index.astro`, `src/pages/pt-br/blog/index.astro`.
+**Files changed:** `src/lib/content/schemas.ts` (add `category` field), `src/content/config.ts` (if collection re-export needs updating), all blog post MDX files (frontmatter), `src/components/blog/BlogList.astro`, `src/pages/blog/index.astro`, `src/pages/pt-br/blog/index.astro`.
 
 ---
 
@@ -237,7 +251,7 @@ The TOC column does **not** extend above the separator. It begins aligned with t
 No reading progress bar, no TOC sidebar, no two-column grid, no CTA card.
 
 ### Related Notes
-Last 3 notes sharing the same category, ordered newest-first. Uses the same card component as the notes list page. Displayed in a row on desktop, stacked on mobile.
+Last 3 notes sharing the same category, displayed left-to-right in ascending date order (older on left, newer on right). Uses the same card component as the notes list page. Displayed in a row on desktop, stacked on mobile.
 
 **Files changed:** `src/pages/notes/[slug].astro`, `src/pages/pt-br/notes/[slug].astro`.
 
@@ -253,8 +267,8 @@ Used by: `src/pages/blog/[slug].astro`, `src/pages/pt-br/blog/[slug].astro`, `sr
 
 ### Behavior
 - Hidden by default (`opacity: 0`, `pointer-events: none`)
-- Becomes visible (`.visible` class) after user scrolls past 300px
-- Visibility toggled by a vanilla JS `IntersectionObserver` watching a sentinel `<div>` at the top of the page
+- Becomes visible (`.visible` class) after user scrolls past 300px from the top
+- Visibility toggled by a vanilla JS `scroll` event listener checking `window.scrollY > 300`. This is the single mechanism — no IntersectionObserver sentinel is used (the scroll threshold approach is simpler and more predictable across all page lengths)
 - Clicking triggers `window.scrollTo({ top: 0, behavior: 'smooth' })`
 - `prefers-reduced-motion`: uses `behavior: 'instant'` instead; no fade transition
 
@@ -275,43 +289,67 @@ Used by: `src/pages/blog/[slug].astro`, `src/pages/pt-br/blog/[slug].astro`, `sr
 ### Dependencies
 Add `satori` and `sharp` to `devDependencies`. No runtime dependency.
 
-### OG Image Route
+### OG Image Routes
 
-New file: `src/pages/og/[...slug].png.ts`
+Two separate endpoint files to avoid slug namespace collisions between blog posts and notes:
 
-Uses Astro's `getStaticPaths()` to enumerate all blog posts and notes at build time. For each entry, renders an SVG template via Satori, converts to PNG with Sharp, and returns the binary response. Output: one PNG per post/note at `/og/[slug].png`.
+| File | Output path |
+|------|------------|
+| `src/pages/og/blog/[slug].png.ts` | `/og/blog/[slug].png` |
+| `src/pages/og/notes/[slug].png.ts` | `/og/notes/[slug].png` |
+
+Each file uses `getStaticPaths()` to enumerate its respective collection at build time. Both use the same template function (extracted to `src/lib/ogImage.ts`).
+
+### Font Loading
+
+Satori requires a `Buffer` of the actual font file — it cannot use CSS font-family strings. The implementation must:
+
+1. Read the Geist Regular font buffer at build time using Node.js `fs.readFileSync` on the Geist package path: `node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff`
+2. Read Geist Mono Regular from: `node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.woff`
+3. Pass both as entries in Satori's `fonts` array with `name` matching the font-family string used in the SVG template
+4. Only one weight per family is needed (static OG image, no variable weight rendering)
+
+Font loading is done once per endpoint file, outside `getStaticPaths()`.
 
 ### Template Design
 
-A single template is used for both blog posts and notes:
+A single template function in `src/lib/ogImage.ts` is used for both blog posts and notes:
 
 | Element | Position | Style |
 |---------|----------|-------|
 | Dark background | Full | `#0f0f1a` (matches `--bg` dark value) |
 | Circuit decoration | Background | Simplified 4-path SVG, 8% opacity |
-| Site name | Top-left | `--font-sans`, small, `#888` |
-| Title | Center | `--font-sans`, 48px bold, white, max 2 lines |
-| Category badge | Below title | Accent pill, white text |
-| Author + domain | Bottom-right | `--font-mono`, small, `#888` |
+| Site name | Top-left | Geist, small, `#888` |
+| Title | Center | Geist, 48px bold, white, max 2 lines |
+| Category badge | Below title | Accent pill (`#7c3aed`), white text |
+| Author + domain | Bottom-right | Geist Mono, small, `#888` |
 
 Dimensions: 1200×630px (standard OG).
 
 ### Meta Tag
 
-The `<meta property="og:image">` tag in `BaseLayout.astro` (or the individual post layouts) is updated to reference `/og/[slug].png` when a post/note slug is available.
+The `<meta property="og:image">` tag in the individual post/note layouts (not `BaseLayout`) is set to the correct prefixed path: `/og/blog/[slug].png` in blog post pages and `/og/notes/[slug].png` in note pages.
 
 ### Share Buttons
 
-A new `ShareButtons.astro` component used by both blog posts and notes:
+A new `ShareButtons.astro` component used by both blog posts and notes. Accepts props:
+- `title: string` — post/note title
+- `url: string` — canonical URL
+- `type: 'post' | 'note'` — used to vary the share message copy
+- `locale: 'en' | 'pt-br'` — determines message language
 
-- Five buttons: LinkedIn, Twitter/X, Facebook, WhatsApp, Copy Link
-- Platform share URLs constructed at Astro render time (server-side string interpolation) — no JS needed for URL construction
-- Pre-filled message: `"Check out this post: [title] [canonical-url]"` (or "note" for notes)
-- Copy Link button: client-side clipboard write via `navigator.clipboard.writeText()`, then calls `window.showToast({ message: 'Link copied!', variant: 'success', duration: 2000 })`
-- Icons: simple SVG icons inline in the component
-- Layout: horizontal row of icon buttons, centered below the post content
+Pre-filled messages by locale:
 
-**Files changed:** `src/pages/og/[...slug].png.ts` (new), `src/components/site/ShareButtons.astro` (new), `src/layouts/BaseLayout.astro` or post layouts (og:image meta), 4 post/note page files (import ShareButtons).
+| Locale | Message |
+|--------|---------|
+| `en` | `"Check out this [post/note]: [title] [url]"` |
+| `pt-br` | `"Confira [este artigo/esta nota]: [title] [url]"` |
+
+Five buttons: LinkedIn, Twitter/X, Facebook, WhatsApp, Copy Link. Platform share URLs constructed at Astro render time (server-side string interpolation) — no JS needed for URL construction. Copy Link button: client-side clipboard write via `navigator.clipboard.writeText()`, then calls `window.showToast({ message: 'Link copied!', variant: 'success', duration: 2000 })` (EN) or `window.showToast({ message: 'Link copiado!', ... })` (PT-BR).
+
+Icons: simple inline SVG. Layout: horizontal row of icon buttons, centered below the post content.
+
+**Files changed:** `src/lib/ogImage.ts` (new, template + font loader), `src/pages/og/blog/[slug].png.ts` (new), `src/pages/og/notes/[slug].png.ts` (new), `src/components/site/ShareButtons.astro` (new), blog/note post layouts (og:image meta), 4 post/note page files (import ShareButtons).
 
 ---
 
@@ -344,7 +382,8 @@ When implementing, cross-reference those plans to avoid duplicate work and ensur
 | Replace | `src/components/home/HeroBackground.astro` |
 | Create | `src/pages/pt-br/privacy.astro` |
 | Create | `src/pages/pt-br/terms.astro` |
-| Modify | `src/content/config.ts` |
+| Modify | `src/lib/content/schemas.ts` |
+| Modify | `src/content/config.ts` (if needed) |
 | Modify | All blog post MDX/MD files (frontmatter) |
 | Modify | `src/components/blog/BlogList.astro` |
 | Modify | `src/pages/blog/index.astro` |
@@ -355,6 +394,11 @@ When implementing, cross-reference those plans to avoid duplicate work and ensur
 | Modify | `src/pages/notes/[slug].astro` |
 | Modify | `src/pages/pt-br/notes/[slug].astro` |
 | Create | `src/components/site/BackToTop.astro` |
-| Create | `src/pages/og/[...slug].png.ts` |
+| Create | `src/lib/ogImage.ts` |
+| Create | `src/pages/og/blog/[slug].png.ts` |
+| Create | `src/pages/og/notes/[slug].png.ts` |
 | Create | `src/components/site/ShareButtons.astro` |
-| Modify | `src/layouts/BaseLayout.astro` |
+| Modify | `src/pages/blog/[slug].astro` (og:image meta) |
+| Modify | `src/pages/pt-br/blog/[slug].astro` (og:image meta) |
+| Modify | `src/pages/notes/[slug].astro` (og:image meta) |
+| Modify | `src/pages/pt-br/notes/[slug].astro` (og:image meta) |
