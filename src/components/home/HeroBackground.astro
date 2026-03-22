@@ -4,59 +4,80 @@ const cpuX  = 600;
 const cpuY  = 30;
 const cpuW  = 160;
 const cpuH  = 28;
-const cxL   = cpuX - cpuW / 2;   // left edge  = 520
-const cxR   = cpuX + cpuW / 2;   // right edge = 680
-const cyT   = cpuY;               // top edge   = 30
-const cyB   = cpuY + cpuH;        // bot edge   = 58
+const cxL   = cpuX - cpuW / 2;   // left chip edge  = 520
+const cxR   = cpuX + cpuW / 2;   // right chip edge = 680
+const cyT   = cpuY;               // top  = 30
+const cyB   = cpuY + cpuH;        // bottom = 58
 const r     = 15;                 // corner radius
 
-// Quadratic bezier helper
+// Pin tips extend 6 px outside the chip body
+const pinL  = cxL - 6;           // left  pin tips x = 514
+const pinR  = cxR + 6;           // right pin tips x = 686
+const pinB  = cyB + 6;           // bottom pin tips y = 64
+
+// Left pin tip y positions (global): 37, 44, 51
+const lyA = cyT +  7;   // 37
+const lyB = cyT + 14;   // 44
+const lyC = cyT + 21;   // 51
+
+// Bottom pin tip x positions (global): 535, 555, 600, 645, 665
+const bxA = cxL + 15;  // 535
+const bxB = cxL + 35;  // 555
+const bxC = cpuX;      // 600 (center)
+const bxD = cxR - 35;  // 645
+const bxE = cxR - 15;  // 665
+
+// Q bezier helper
 const q = (cx: number, cy: number, ex: number, ey: number) =>
   `Q ${cx} ${cy} ${ex} ${ey}`;
 
-// Left traces: start at x=0, route right then up to CPU left perimeter (x=520)
-function lL(y0: number, xT: number, yPin: number): string {
-  return `M 0 ${y0} H ${xT-r} ${q(xT,y0,xT,y0-r)} V ${yPin+r} ${q(xT,yPin,xT+r,yPin)} H ${cxL}`;
+// Trace from anywhere on the left half → CPU left pin tip (pinL, yPin)
+// Approaches horizontally from left: right to xT, up to yPin, right to pinL
+function trL(x0: number, y0: number, xT: number, yPin: number): string {
+  return `M ${x0} ${y0} H ${xT-r} ${q(xT,y0,xT,y0-r)} V ${yPin+r} ${q(xT,yPin,xT+r,yPin)} H ${pinL}`;
 }
-function lL2(y0: number, xT1: number, yMid: number, xT2: number, yPin: number): string {
-  return `M 0 ${y0} H ${xT1-r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1+r,yMid)} H ${xT2-r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin+r} ${q(xT2,yPin,xT2+r,yPin)} H ${cxL}`;
-}
-
-// Right traces: start at x=1200, route left then up to CPU right perimeter (x=680)
-function rL(y0: number, xT: number, yPin: number): string {
-  return `M 1200 ${y0} H ${xT+r} ${q(xT,y0,xT,y0-r)} V ${yPin+r} ${q(xT,yPin,xT-r,yPin)} H ${cxR}`;
-}
-function rL2(y0: number, xT1: number, yMid: number, xT2: number, yPin: number): string {
-  return `M 1200 ${y0} H ${xT1+r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1-r,yMid)} H ${xT2+r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin+r} ${q(xT2,yPin,xT2-r,yPin)} H ${cxR}`;
+// Same but with extra horizontal jog (long traces)
+function trL2(x0: number, y0: number, xT1: number, yMid: number, xT2: number, yPin: number): string {
+  return `M ${x0} ${y0} H ${xT1-r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1+r,yMid)} H ${xT2-r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin+r} ${q(xT2,yPin,xT2+r,yPin)} H ${pinL}`;
 }
 
-// Bottom traces: start at y=490, route up to CPU bottom perimeter (y=58)
-function bL(x0: number, yT: number, xH: number, xPin: number): string {
+// Trace from anywhere on the right half → CPU right pin tip (pinR, yPin)
+function trR(x0: number, y0: number, xT: number, yPin: number): string {
+  return `M ${x0} ${y0} H ${xT+r} ${q(xT,y0,xT,y0-r)} V ${yPin+r} ${q(xT,yPin,xT-r,yPin)} H ${pinR}`;
+}
+function trR2(x0: number, y0: number, xT1: number, yMid: number, xT2: number, yPin: number): string {
+  return `M ${x0} ${y0} H ${xT1+r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1-r,yMid)} H ${xT2+r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin+r} ${q(xT2,yPin,xT2-r,yPin)} H ${pinR}`;
+}
+
+// Trace from anywhere in the lower half → CPU bottom pin tip (xPin, pinB)
+// Goes up to yT, jogs horizontally to xH, then up to pin tip
+function trB(x0: number, y0: number, yT: number, xH: number, xPin: number): string {
   if (x0 <= xPin) {
-    return `M ${x0} 490 V ${yT+r} ${q(x0,yT,x0+r,yT)} H ${xH-r} ${q(xH,yT,xH,yT-r)} V ${cyB+r} ${q(xH,cyB,xH+r,cyB)} H ${xPin}`;
+    return `M ${x0} ${y0} V ${yT+r} ${q(x0,yT,x0+r,yT)} H ${xH-r} ${q(xH,yT,xH,yT-r)} V ${pinB+r} ${q(xH,pinB,xH+r,pinB)} H ${xPin}`;
   } else {
-    return `M ${x0} 490 V ${yT+r} ${q(x0,yT,x0-r,yT)} H ${xH+r} ${q(xH,yT,xH,yT-r)} V ${cyB+r} ${q(xH,cyB,xH-r,cyB)} H ${xPin}`;
+    return `M ${x0} ${y0} V ${yT+r} ${q(x0,yT,x0-r,yT)} H ${xH+r} ${q(xH,yT,xH,yT-r)} V ${pinB+r} ${q(xH,pinB,xH-r,pinB)} H ${xPin}`;
   }
 }
 
-// 11 traces: 3 left (y-pins 37, 44, 51) · 3 right (y-pins 37, 44, 51) · 5 bottom (x-pins 535, 555, 600, 645, 665)
+// 11 traces: 3 left · 3 right · 5 bottom
+// Start points distributed throughout the hero — short, medium, and long paths
 const traces: Array<{ sx: number; sy: number; d: string; delay: string }> = [
-  // ── Left edge → CPU left perimeter ───────────────────────────
-  { sx: 0, sy: 100, d: lL(100, 320, 37),                   delay: '0.0s' },
-  { sx: 0, sy: 290, d: lL(290, 210, 44),                   delay: '1.5s' },
-  { sx: 0, sy: 430, d: lL2(430, 140, 280, 390, 51),        delay: '3.0s' },
+  // ── Left → CPU left pins (x=514) ─────────────────────────────
+  { sx: 0,    sy: 200, d: trL(0,   200, 300,        lyB), delay: '0.0s' }, // medium
+  { sx: 0,    sy: 420, d: trL2(0,  420, 140, 270, 390, lyA), delay: '2.5s' }, // long
+  { sx: 160,  sy: 320, d: trL(160, 320, 380,        lyC), delay: '1.2s' }, // short
 
-  // ── Right edge → CPU right perimeter ─────────────────────────
-  { sx: 1200, sy: 100, d: rL(100, 880, 37),                delay: '0.5s' },
-  { sx: 1200, sy: 290, d: rL(290, 990, 44),                delay: '2.0s' },
-  { sx: 1200, sy: 430, d: rL2(430, 1060, 280, 810, 51),   delay: '3.5s' },
+  // ── Right → CPU right pins (x=686) ───────────────────────────
+  { sx: 1200, sy: 200, d: trR(1200, 200, 900,            lyB), delay: '0.5s' }, // medium
+  { sx: 1200, sy: 420, d: trR2(1200, 420, 1060, 270, 810, lyA), delay: '3.0s' }, // long
+  { sx: 1040, sy: 320, d: trR(1040, 320, 820,            lyC), delay: '1.7s' }, // short
 
-  // ── Bottom area → CPU bottom perimeter ───────────────────────
-  { sx: 340, sy: 490, d: bL(340, 340, 460, 535),           delay: '1.0s' },
-  { sx: 490, sy: 490, d: bL(490, 260, 540, 555),           delay: '2.5s' },
-  { sx: 600, sy: 490, d: `M 600 490 V ${cyB}`,             delay: '0.3s' },
-  { sx: 710, sy: 490, d: bL(710, 260, 660, 645),           delay: '1.8s' },
-  { sx: 860, sy: 490, d: bL(860, 340, 740, 665),           delay: '2.8s' },
+  // ── Bottom → CPU bottom pins (y=64) ──────────────────────────
+  { sx: 160,  sy: 490, d: trB(160,  490, 340, 460, bxA), delay: '1.0s' }, // long
+  { sx: 380,  sy: 460, d: trB(380,  460, 260, 510, bxB), delay: '2.0s' }, // medium
+  { sx: 500,  sy: 410, d: trB(500,  410, 260, 570, bxC), delay: '0.3s' }, // short
+  { sx: 820,  sy: 460, d: trB(820,  460, 280, 665, bxD), delay: '1.5s' }, // medium
+  { sx: 1040, sy: 490, d: trB(1040, 490, 360, 700, bxE), delay: '2.8s' }, // long
 ];
 
 const words = ['Cybersecurity','Embedded','Software','AI','Automation',
@@ -77,7 +98,7 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
     </linearGradient>
   </defs>
 
-  <!-- Start-point circles (vias / pads) -->
+  <!-- Start-point via circles -->
   {traces.map(t => (
     <circle cx={t.sx} cy={t.sy} r="3.5" class="start-dot" />
   ))}
@@ -95,13 +116,13 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
   <!-- CPU chip -->
   <g class="cpu-group" transform={`translate(${cxL}, ${cyT})`}>
     <rect width={cpuW} height={cpuH} rx="3" class="cpu-body" />
-    <!-- left pins (y=7, 14, 21 → global y=37, 44, 51) -->
+    <!-- left pins: extend 6 px left at y=7,14,21 (global y=37,44,51) -->
     <path d={`M -6 7 h 6 M -6 ${cpuH/2} h 6 M -6 ${cpuH-7} h 6`}
       class="cpu-pins" />
-    <!-- right pins (mirror) -->
+    <!-- right pins: extend 6 px right (global x=680→686) -->
     <path d={`M ${cpuW} 7 h 6 M ${cpuW} ${cpuH/2} h 6 M ${cpuW} ${cpuH-7} h 6`}
       class="cpu-pins" />
-    <!-- bottom pins (x=15,35,80,125,145 → global x=535,555,600,645,665) -->
+    <!-- bottom pins: extend 6 px down at x=15,35,80,125,145 (global x=535,555,600,645,665) -->
     <path d={`M 15 ${cpuH} v 6 M 35 ${cpuH} v 6 M ${cpuW/2} ${cpuH} v 6 M 125 ${cpuH} v 6 M 145 ${cpuH} v 6`}
       class="cpu-pins" />
     <text id="cpu-word" x={cpuW / 2} y={cpuH / 2 + 4.5}
@@ -119,7 +140,6 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
     pointer-events: none;
   }
 
-  /* Via / start-point circles */
   .start-dot {
     fill: none;
     stroke: var(--accent);
@@ -127,7 +147,6 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
     opacity: 0.25;
   }
 
-  /* Static trace lines */
   .trace-base {
     fill: none;
     stroke: var(--accent);
@@ -137,7 +156,6 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
     opacity: 0.12;
   }
 
-  /* Moving electricity pulse */
   .trace-pulse {
     fill: none;
     stroke: url(#pulse-grad);
@@ -153,7 +171,6 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
     to { stroke-dashoffset: 0; }
   }
 
-  /* CPU body — blinks to reveal word */
   .cpu-body {
     fill: none;
     stroke: var(--accent);
@@ -177,11 +194,6 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
     animation: blink-text 4s ease-in-out infinite;
   }
 
-  /*
-   * 0% = minimum: word just swapped (animationiteration fires here)
-   * 20%–75% = bright: new word visible
-   * 100% = back to minimum: cycle restarts
-   */
   @keyframes blink-box {
     0%         { opacity: 0.05; }
     20%, 75%   { opacity: 0.30; }
