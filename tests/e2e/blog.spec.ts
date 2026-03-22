@@ -50,18 +50,20 @@ test.describe('Blog', () => {
     expect(text).toContain('Continuous Integration for Firmware');
   });
 
-  test('blog list shows tag filter pills', async ({ page }) => {
+  test('blog list shows category filter bar', async ({ page }) => {
     await page.goto('/blog');
-    const allPill = page.locator('.tag-pill--all');
-    await expect(allPill).toBeVisible();
+    const filterBar = page.locator('.blog-filter-bar');
+    await expect(filterBar).toBeVisible();
+    const allBtn = page.getByRole('button', { name: /All/ });
+    await expect(allBtn).toBeVisible();
   });
 
-  test('blog list tag filter hides non-matching entries', async ({ page }) => {
+  test('blog list category filter hides non-matching entries', async ({ page }) => {
     await page.goto('/blog');
-    const pills = page.locator('.tag-pill:not(.tag-pill--all)');
-    const count = await pills.count();
-    if (count === 0) return; // no tags in test data — skip
-    await pills.first().click();
+    const categoryBtns = page.locator('.filter-category-btn:not([data-category="all"])');
+    const count = await categoryBtns.count();
+    if (count === 0) return; // no categories in test data — skip
+    await categoryBtns.first().click();
     const visibleEntries = page.locator('.blog-entry:visible');
     await expect(visibleEntries.first()).toBeVisible();
   });
