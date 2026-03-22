@@ -279,14 +279,12 @@ test.describe('Portfolio Page', () => {
   });
 });
 
-test('hero has circuit background with CPU node', async ({ page }) => {
+test('hero has CPU architecture background', async ({ page }) => {
   await page.goto('/');
-  const cpuNode = page.locator('.hero-bg .cpu-node');
-  await expect(cpuNode).toBeVisible();
-  const circuitPaths = page.locator('.hero-bg .circuit-path');
-  const count = await circuitPaths.count();
-  expect(count).toBeGreaterThan(0);
-  await expect(circuitPaths.first()).toBeVisible();
+  await expect(page.locator('.hero-bg')).toBeVisible();
+  await expect(page.locator('.hero-bg .cpu-wrap')).toBeVisible();
+  const cpuSvg = page.locator('.hero-bg .cpu-svg');
+  await expect(cpuSvg).toBeVisible();
 });
 
 test('html has scrollbar-gutter: stable', async ({ page }) => {
