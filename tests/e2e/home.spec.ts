@@ -283,9 +283,8 @@ test('hero has CPU architecture background', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.hero .hero-paths')).toBeVisible();
   await expect(page.locator('.hero .cpu-group')).toBeVisible();
-  const circuitPaths = page.locator('.hero .trace-base');
-  const count = await circuitPaths.count();
-  expect(count).toBeGreaterThan(0);
+  const count = await page.locator('.hero .trace-base').count();
+  expect(count).toBeGreaterThan(5);
 });
 
 test('html has scrollbar-gutter: stable', async ({ page }) => {
