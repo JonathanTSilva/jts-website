@@ -1,173 +1,117 @@
 ---
-// Hero background — CPU chip at the top-center of the hero, with circuit traces
-// extending across the full hero width and height at low opacity (no colors).
-// SVG viewBox 1440×900; CPU centered at (720, 65).
+const cpuX = 600;
+const cpuY = 100;
+
+const leftTraces = [
+  { d: `M 0 150 H 300 V ${cpuY + 20} H ${cpuX - 40}`, delay: '0s' },
+  { d: `M 0 300 H 400 V ${cpuY + 40} H ${cpuX - 40}`, delay: '1.2s' },
+  { d: `M 0 450 H 500 V ${cpuY + 60} H ${cpuX - 40}`, delay: '0.5s' },
+];
+
+const rightTraces = [
+  { d: `M 1200 150 H 900 V ${cpuY + 20} H ${cpuX + 40}`, delay: '0.8s' },
+  { d: `M 1200 300 H 800 V ${cpuY + 40} H ${cpuX + 40}`, delay: '1.5s' },
+  { d: `M 1200 450 H 700 V ${cpuY + 60} H ${cpuX + 40}`, delay: '0.3s' },
+];
+
+const bottomTraces = [
+  { d: `M ${cpuX - 15} ${cpuY + 70} V 500`, delay: '2s' },
+  { d: `M ${cpuX} ${cpuY + 70} V 500`, delay: '2.4s' },
+  { d: `M ${cpuX + 15} ${cpuY + 70} V 500`, delay: '2.2s' },
+];
+
+const allTraces = [...leftTraces, ...rightTraces, ...bottomTraces];
 ---
 
-<div class="hero-bg" aria-hidden="true">
-  <svg
-    class="hero-bg-svg"
-    viewBox="0 0 1440 900"
-    preserveAspectRatio="xMidYMid slice"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <defs>
-      <!-- Shimmer animation for CPU label text -->
-      <linearGradient id="cpu-text-grad" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#666666">
-          <animate attributeName="offset" values="-2; -1; 0" dur="5s"
-            repeatCount="indefinite" calcMode="spline"
-            keyTimes="0; 0.5; 1" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" />
-        </stop>
-        <stop offset="25%" stop-color="white">
-          <animate attributeName="offset" values="-1; 0; 1" dur="5s"
-            repeatCount="indefinite" calcMode="spline"
-            keyTimes="0; 0.5; 1" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" />
-        </stop>
-        <stop offset="50%" stop-color="#666666">
-          <animate attributeName="offset" values="0; 1; 2" dur="5s"
-            repeatCount="indefinite" calcMode="spline"
-            keyTimes="0; 0.5; 1" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" />
-        </stop>
-      </linearGradient>
+<svg class="hero-paths" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="pulse-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="transparent" />
+      <stop offset="50%"  stop-color="var(--accent)" stop-opacity="1" />
+      <stop offset="100%" stop-color="transparent" />
+    </linearGradient>
 
-      <!-- Drop shadow for CPU chip -->
-      <filter id="cpu-shadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="2" dy="2" stdDeviation="2"
-          flood-color="black" flood-opacity="0.4" />
-      </filter>
+    <linearGradient id="cpu-text-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="var(--text-muted)" />
+      <stop offset="50%"  stop-color="white" />
+      <stop offset="100%" stop-color="var(--text-muted)" />
+    </linearGradient>
+  </defs>
 
-      <!-- Gradient for chip pin connectors -->
-      <linearGradient id="pin-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"  stop-color="#4F4F4F" />
-        <stop offset="100%" stop-color="#121214" />
-      </linearGradient>
+  {allTraces.map(t => (
+    <path d={t.d} class="trace-base" />
+  ))}
 
-      <!-- Dot marker at path endpoints -->
-      <marker id="trace-dot" viewBox="0 0 10 10"
-        refX="5" refY="5" markerWidth="6" markerHeight="6">
-        <circle cx="5" cy="5" r="2.5" fill="none"
-          stroke="currentColor" stroke-width="1" opacity="0.5" />
-      </marker>
-    </defs>
+  {allTraces.map(t => (
+    <path d={t.d} class="trace-pulse" style={`animation-delay: ${t.delay}`} />
+  ))}
 
-    <!-- ── Circuit traces — full hero width/height, low opacity ── -->
-    <!-- Draw-in animation: stroke-dashoffset 1 → 0 over 1.2s -->
-    <g
-      class="traces"
-      stroke="currentColor"
-      fill="none"
-      stroke-width="0.8"
-      marker-start="url(#trace-dot)"
-    >
-      <!-- Left side: 4 traces from left edge → CPU chip left pins -->
-      <path d="M 0 180 L 460 180 L 460 60 L 685 60" />
-      <path d="M 0 340 L 320 340 L 320 73 L 685 73" />
-      <path d="M 0 520 L 180 520 L 180 220 L 380 220 L 380 88 L 680 88" />
-      <path d="M 0 720 L 120 720 L 120 440 L 580 440 L 580 130 L 660 130 L 660 85" />
-
-      <!-- Right side: 4 traces from right edge → CPU chip right pins -->
-      <path d="M 1440 180 L 980 180 L 980 60 L 755 60" />
-      <path d="M 1440 340 L 1120 340 L 1120 73 L 755 73" />
-      <path d="M 1440 520 L 1260 520 L 1260 220 L 1060 220 L 1060 88 L 760 88" />
-      <path d="M 1440 720 L 1320 720 L 1320 440 L 860 440 L 860 130 L 780 130 L 780 85" />
-
-      <!-- Bottom: traces descending from chip bottom through the hero -->
-      <path d="M 700 85 L 700 280 L 500 280 L 500 640 L 680 640 L 680 900" />
-      <path d="M 720 85 L 720 900" />
-      <path d="M 740 85 L 740 380 L 940 380 L 940 580 L 760 580 L 760 900" />
-    </g>
-
-    <!-- ── CPU Chip — centered at (720, 65) ── -->
-    <g class="cpu-node">
-      <!-- Pin connectors (8 total — top, bottom, left, right) -->
-      <g fill="url(#pin-grad)">
-        <!-- Top pins -->
-        <rect x="697.5" y="33" width="6" height="12" rx="1.5" />
-        <rect x="723.5" y="33" width="6" height="12" rx="1.5" />
-        <!-- Bottom pins -->
-        <rect x="697.5" y="85" width="6" height="12" rx="1.5" />
-        <rect x="723.5" y="85" width="6" height="12" rx="1.5" />
-        <!-- Left pins -->
-        <rect x="671" y="54" width="14" height="6" rx="1.5" />
-        <rect x="671" y="70" width="14" height="6" rx="1.5" />
-        <!-- Right pins -->
-        <rect x="755" y="54" width="14" height="6" rx="1.5" />
-        <rect x="755" y="70" width="14" height="6" rx="1.5" />
-      </g>
-
-      <!-- Chip body -->
-      <rect
-        x="685" y="45" width="70" height="40" rx="4"
-        fill="#181818" filter="url(#cpu-shadow)"
-      />
-      <!-- Internal grid lines (subtle) -->
-      <line x1="708" y1="45" x2="708" y2="85" stroke="#2a2a2a" stroke-width="0.5" />
-      <line x1="720" y1="45" x2="720" y2="85" stroke="#2a2a2a" stroke-width="0.5" />
-      <line x1="732" y1="45" x2="732" y2="85" stroke="#2a2a2a" stroke-width="0.5" />
-      <line x1="685" y1="58" x2="755" y2="58" stroke="#2a2a2a" stroke-width="0.5" />
-      <line x1="685" y1="72" x2="755" y2="72" stroke="#2a2a2a" stroke-width="0.5" />
-      <!-- Label -->
-      <text
-        x="707" y="70"
-        font-size="14" font-weight="600" letter-spacing="1"
-        fill="url(#cpu-text-grad)"
-      >CPU</text>
-    </g>
-  </svg>
-</div>
+  <g class="cpu-group" transform={`translate(${cpuX - 50}, ${cpuY})`}>
+    <rect width="100" height="70" rx="4" class="cpu-body" />
+    <text x="50" y="42" text-anchor="middle" class="cpu-text">CPU</text>
+    <path d="M -5 15 h 5 M -5 35 h 5 M -5 55 h 5" stroke="var(--accent)" stroke-width="2" />
+    <path d="M 100 15 h 5 M 100 35 h 5 M 100 55 h 5" stroke="var(--accent)" stroke-width="2" />
+  </g>
+</svg>
 
 <style>
-  .hero-bg {
+  .hero-paths {
     position: absolute;
     inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-
-  .hero-bg-svg {
     width: 100%;
     height: 100%;
-    color: var(--accent);
-    opacity: 0;
-    animation: bg-fade-in 0.8s var(--ease-out) 0.15s forwards;
+    z-index: 0;
+    pointer-events: none;
   }
 
-  @keyframes bg-fade-in {
-    to { opacity: 1; }
+  .trace-base {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1;
+    opacity: 0.12;
   }
 
-  /* Circuit traces — draw-in on load + low opacity */
-  .traces {
-    opacity: 0;
-    animation: traces-in 1.2s var(--ease-out) 0.3s forwards;
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
+  .trace-pulse {
+    fill: none;
+    stroke: url(#pulse-grad);
+    stroke-width: 2;
+    stroke-dasharray: 100 1000;
+    stroke-dashoffset: 1100;
+    animation: flow 4s linear infinite;
+    opacity: 0.8;
   }
 
-  @keyframes traces-in {
-    to {
-      opacity: 0.18;
-      stroke-dashoffset: 0;
-    }
+  @keyframes flow {
+    0%   { stroke-dashoffset: 1100; }
+    100% { stroke-dashoffset: 0; }
   }
 
-  /* CPU chip fades in after traces */
-  .cpu-node {
-    opacity: 0;
-    animation: bg-fade-in 0.6s var(--ease-out) 1.0s forwards;
+  .cpu-body {
+    fill: #121212;
+    stroke: var(--accent);
+    stroke-width: 1;
+    filter: drop-shadow(0 0 8px var(--accent));
+    animation: breathe 3s ease-in-out infinite alternate;
   }
 
-  /* Light theme: reduce trace brightness slightly */
-  [data-theme='light'] .traces {
-    animation: traces-in-light 1.2s var(--ease-out) 0.3s forwards;
+  @keyframes breathe {
+    from { opacity: 0.8; filter: drop-shadow(0 0 4px var(--accent)); }
+    to   { opacity: 1;   filter: drop-shadow(0 0 12px var(--accent)); }
   }
 
-  @keyframes traces-in-light {
-    to {
-      opacity: 0.12;
-      stroke-dashoffset: 0;
-    }
+  .cpu-text {
+    font-family: var(--font-mono);
+    font-weight: bold;
+    font-size: 14px;
+    fill: url(#cpu-text-grad);
+  }
+
+  @media (max-width: 48rem) {
+    .hero-paths { opacity: 0.5; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trace-pulse { animation: none; opacity: 0; }
+    .cpu-body    { animation: none; }
   }
 </style>
