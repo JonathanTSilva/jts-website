@@ -118,7 +118,7 @@ const labels = {
         const copiedLabel = btn.dataset.copiedLabel ?? 'Link copied!';
         try {
           await navigator.clipboard.writeText(msg);
-          window.showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
+          (window as Window & { showToast?: (opts: { message: string; variant: string; duration: number }) => void }).showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
         } catch {
           const ta = document.createElement('textarea');
           ta.value = msg;
@@ -126,7 +126,7 @@ const labels = {
           ta.select();
           document.execCommand('copy');
           document.body.removeChild(ta);
-          window.showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
+          (window as Window & { showToast?: (opts: { message: string; variant: string; duration: number }) => void }).showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
         }
       });
     });

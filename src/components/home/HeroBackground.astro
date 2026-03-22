@@ -126,11 +126,12 @@ const paths = [
 <script>
   function initPulses() {
     document.querySelectorAll<SVGCircleElement>('.data-pulse').forEach(pulse => {
-      const pathId = (pulse as HTMLElement).dataset.pathId;
+      const el = pulse as unknown as HTMLElement;
+      const pathId = el.dataset.pathId;
       if (pathId) {
         const pathEl = document.getElementById(pathId);
         const d = pathEl?.getAttribute('d') ?? '';
-        (pulse as HTMLElement).style.offsetPath = `path('${d}')`;
+        el.style.offsetPath = `path('${d}')`;
       }
     });
   }

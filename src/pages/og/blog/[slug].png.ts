@@ -14,10 +14,10 @@ export const GET: APIRoute = async ({ props }) => {
   const { post } = props as { post: Awaited<ReturnType<typeof getCollection<'blog'>>>[0] };
   const png = await generateOGImage({
     title: post.data.title,
-    category: post.data.category,
+    ...(post.data.category ? { category: post.data.category } : {}),
   });
 
-  return new Response(png, {
+  return new Response(new Uint8Array(png), {
     headers: { 'Content-Type': 'image/png' },
   });
 };

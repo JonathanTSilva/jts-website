@@ -17,7 +17,7 @@
     if (!btn) return;
 
     function onScroll() {
-      btn.classList.toggle('visible', window.scrollY > 300);
+      btn!.classList.toggle('visible', window.scrollY > 300);
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
