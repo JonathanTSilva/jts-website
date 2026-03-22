@@ -104,4 +104,15 @@ test.describe('Notes', () => {
     }
     expect(foundCategoryColor).toBe(true);
   });
+
+  test('note page: has back to notes button', async ({ page }) => {
+    await page.goto('/notes/debugging-habits.en');
+    await expect(page.locator('.back-link')).toBeVisible();
+    await expect(page.locator('.back-link')).toContainText('Back to notes');
+  });
+
+  test('note page: has share buttons', async ({ page }) => {
+    await page.goto('/notes/debugging-habits.en');
+    await expect(page.locator('.share-buttons')).toBeVisible();
+  });
 });
