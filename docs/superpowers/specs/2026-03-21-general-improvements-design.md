@@ -308,8 +308,8 @@ Each file uses `getStaticPaths()` to enumerate its respective collection at buil
 
 Satori requires a `Buffer` of the actual font file — it cannot use CSS font-family strings. The implementation must:
 
-1. Read the Geist Regular font buffer at build time using Node.js `fs.readFileSync` on the Geist package path: `node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff2`
-2. Read Geist Mono Regular from: `node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.woff2`
+1. Read the Geist Regular font buffer at build time using Node.js `fs.readFileSync` on the Geist package path: `node_modules/geist/dist/fonts/geist-sans/Geist-Regular.ttf`
+2. Read Geist Mono Regular from: `node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.ttf`
 3. Pass both as entries in Satori's `fonts` array with `name` matching the font-family string used in the SVG template
 4. Only one weight per family is needed (static OG image, no variable weight rendering)
 

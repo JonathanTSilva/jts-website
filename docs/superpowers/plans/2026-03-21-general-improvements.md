@@ -21,7 +21,7 @@
 | Modify | `src/components/home/Hero.astro` | Extract background to component; fix mobile column order |
 | Create | `src/components/home/HeroBackground.astro` | SVG circuit board animation with CPU node and data pulses |
 | Modify | `src/components/site/Header.astro` | Toggle right-align in drawer; search icon-only on mobile |
-| Modify | `src/components/home/ProjectsSection.astro` | Collapse bento grid to single column on mobile (if file exists) |
+| Modify | `src/components/home/HomeSections.astro` | Collapse projects bento grid to single column on mobile (if not already done) |
 | Create | `src/pages/pt-br/privacy.astro` | Portuguese privacy policy |
 | Create | `src/pages/pt-br/terms.astro` | Portuguese terms of service |
 | Modify | `src/lib/content/schemas.ts` | Add `category` field to `blogSchema` |
@@ -142,7 +142,8 @@ test('hero has circuit background with CPU node', async ({ page }) => {
   const cpuNode = page.locator('.hero-bg .cpu-node');
   await expect(cpuNode).toBeVisible();
   const circuitPaths = page.locator('.hero-bg .circuit-path');
-  await expect(circuitPaths).toHaveCount(await circuitPaths.count()); // at least 1
+  const count = await circuitPaths.count();
+  expect(count).toBeGreaterThan(0);
   await expect(circuitPaths.first()).toBeVisible();
 });
 ```
@@ -227,7 +228,7 @@ const paths = [
         class="data-pulse"
         r="4"
         fill={p.color}
-        style={`--path-id: url(#${p.id}); --delay: ${p.delay}; filter: drop-shadow(0 0 4px ${p.color});`}
+        style={`--delay: ${p.delay}; filter: drop-shadow(0 0 4px ${p.color});`}
         data-path-id={p.id}
       />
     ))}
@@ -332,7 +333,7 @@ npx playwright test tests/e2e/home.spec.ts --grep "circuit background" -x
 
 Expected: PASS
 
-- [ ] **Step 5: Visual check** — run `npm run dev` and verify the circuit animation plays in both light and dark mode, and stops when prefers-reduced-motion is enabled (test with DevTools emulation).
+- [ ] **Step 5: Visual check** — run `pnpm run dev` and verify the circuit animation plays in both light and dark mode, and stops when prefers-reduced-motion is enabled (test with DevTools emulation).
 
 - [ ] **Step 6: Commit**
 
@@ -352,27 +353,20 @@ git commit -m "feat: replace hero background with SVG circuit board animation"
 
 ### 3a: Theme Toggle Right-Aligned in Mobile Drawer
 
-The mobile drawer (`#nav-drawer` or equivalent) shows the ThemeToggle. It must appear right-aligned.
+The mobile drawer shows `ThemeToggle` inside a `.mobile-actions` div (confirmed in `Header.astro`). It must appear right-aligned.
 
-- [ ] **Step 1: Locate the drawer markup in `Header.astro`**
+- [ ] **Step 1: Locate `.mobile-actions` in `Header.astro`**
 
-Find where `<ThemeToggle />` appears inside the hamburger/drawer section. Add a wrapper if not present, and apply `margin-left: auto` in the scoped `<style>` block.
-
-Example — find and update the drawer ThemeToggle wrapper:
-
-```astro
-<!-- In the drawer section of Header.astro -->
-<div class="drawer-toggle-wrapper">
-  <ThemeToggle />
-</div>
-```
+Find the `.mobile-actions` flex container that wraps `<ThemeToggle />` in the drawer section. Apply `margin-left: auto` to the `ThemeToggle` wrapper inside it (or `justify-content: flex-end` on `.mobile-actions` itself if it only contains the toggle):
 
 ```css
 /* In Header.astro <style> */
-.drawer-toggle-wrapper {
-  margin-left: auto;
+.mobile-actions {
+  justify-content: flex-end;
 }
 ```
+
+If `.mobile-actions` contains other elements besides ThemeToggle, apply `margin-left: auto` to the ThemeToggle wrapper `<div>` directly instead.
 
 - [ ] **Step 2: Write test**
 
@@ -383,12 +377,12 @@ test('mobile: theme toggle is right-aligned in drawer', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');
   await page.click('#hamburger');
-  const toggle = page.locator('.drawer-toggle-wrapper');
+  const toggle = page.locator('.mobile-actions');
   await expect(toggle).toBeVisible();
   const box = await toggle.boundingBox();
   const viewport = page.viewportSize()!;
   // Toggle wrapper should start in the right half of the viewport
-  expect(box!.x).toBeGreaterThan(viewport.width / 2);
+  expect(box!.x + box!.width / 2).toBeGreaterThan(viewport.width / 2);
 });
 ```
 
@@ -397,27 +391,26 @@ Expected: PASS
 
 ### 3b: Mobile Hero Column Order
 
-The hero uses a two-column grid. On mobile the right column (image/achievements) renders first. Fix with `order`.
+The hero uses a two-column grid. The current `Hero.astro` already has `@media (max-width: 48rem)` with `.hero-right { order: -1 }` which puts the right column first — this is the bug. Fix it by removing `order: -1` and ensuring left column comes first.
 
-- [ ] **Step 3: Locate the hero grid in `Hero.astro`**
+- [ ] **Step 3: Fix `.hero-right` order in `Hero.astro`**
 
-In the `<style>` block, find the mobile breakpoint for the hero grid (look for `grid-template-columns` with a media query). Add `order` properties to the left and right columns:
+In the `<style>` block, find the `@media (max-width: 48rem)` rule (project convention uses `rem`, not `px`). The actual class names are `.hero-left`, `.hero-right`, `.hero-grid`. Change:
 
 ```css
-@media (max-width: 768px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
-  }
-  .hero-left {
-    order: 1;
-  }
-  .hero-right {
-    order: 2;
-  }
+/* Before (buggy) */
+@media (max-width: 48rem) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-right { order: -1; }
+}
+
+/* After (fixed) */
+@media (max-width: 48rem) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-left  { order: 1; }
+  .hero-right { order: 2; }
 }
 ```
-
-Replace `.hero-grid`, `.hero-left`, `.hero-right` with the actual class names in `Hero.astro`.
 
 - [ ] **Step 4: Write test**
 
@@ -449,8 +442,8 @@ The current search markup is a `.search-field` div with an `<input>` and SVG ico
 <!-- In header-actions, before hamburger button -->
 <button
   class="search-icon-btn"
+  id="search-icon-btn"
   aria-label="Open search"
-  onclick="window.openSearch()"
 >
   <!-- Same magnifying glass SVG -->
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
@@ -459,15 +452,22 @@ The current search markup is a `.search-field` div with an `<input>` and SVG ico
 </button>
 ```
 
+In the existing `<script>` block of `Header.astro` (where hamburger logic lives), add:
+
+```javascript
+const searchIconBtn = document.getElementById('search-icon-btn');
+searchIconBtn?.addEventListener('click', () => { window.openSearch?.(); });
+```
+
 ```css
 /* Hide full search field on mobile, show icon button */
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
   .search-field { display: none; }
   .search-icon-btn { display: flex; align-items: center; justify-content: center; }
 }
 
 /* Hide icon button on desktop */
-@media (min-width: 769px) {
+@media (min-width: 48.01rem) {
   .search-icon-btn { display: none; }
 }
 
@@ -504,19 +504,23 @@ Expected: PASS
 
 ### 3d: Home Projects Bento — Single Column on Mobile
 
-- [ ] **Step 7: Find and update `ProjectsSection.astro`**
+**Note:** `src/components/home/ProjectsSection.astro` does not exist. The projects grid lives in `src/components/home/HomeSections.astro`. The home section grid may already collapse to single column at `max-width: 48rem` — check first before writing new CSS.
 
-Check if `src/components/home/ProjectsSection.astro` exists. If it's inline in `src/pages/index.astro`, locate the projects bento grid there instead.
+- [ ] **Step 7: Check existing responsive behavior in `HomeSections.astro`**
 
-Find the bento grid CSS and add:
+```bash
+grep -n "grid-template-columns\|48rem\|max-width" src/components/home/HomeSections.astro
+```
+
+If the projects `.grid` already has `grid-template-columns: 1fr` at `max-width: 48rem`, **this step is already complete** — skip to Step 9. If not, add:
 
 ```css
-@media (max-width: 768px) {
-  .bento-grid {          /* replace with actual grid class name */
+@media (max-width: 48rem) {
+  .grid {                /* use the actual projects grid class name from HomeSections.astro */
     grid-template-columns: 1fr;
     grid-template-rows: auto;
   }
-  .bento-grid > * {
+  .grid > * {
     grid-column: 1 / -1;
     grid-row: auto;
   }
@@ -525,11 +529,14 @@ Find the bento grid CSS and add:
 
 - [ ] **Step 8: Write test**
 
+Use the actual CSS class names from `HomeSections.astro` for the project cards:
+
 ```typescript
 test('mobile: home projects in single column', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');
-  const cards = page.locator('.bento-grid .project-card'); // adjust selector
+  // Adjust selector to match actual project card class in HomeSections.astro
+  const cards = page.locator('.home-projects .grid > *');
   const count = await cards.count();
   if (count >= 2) {
     const box1 = await cards.nth(0).boundingBox();
@@ -544,7 +551,7 @@ test('mobile: home projects in single column', async ({ page }) => {
 - [ ] **Step 9: Commit**
 
 ```bash
-git add src/components/site/Header.astro src/components/home/Hero.astro tests/e2e/home.spec.ts tests/e2e/header.spec.ts
+git add src/components/site/Header.astro src/components/home/Hero.astro src/components/home/HomeSections.astro tests/e2e/home.spec.ts tests/e2e/header.spec.ts
 git commit -m "fix: mobile responsiveness — toggle align, hero order, search icon, bento grid"
 ```
 
@@ -730,19 +737,9 @@ git commit -m "feat: add PT-BR privacy policy and terms of service pages"
 - Modify: All files in `src/content/blog/`
 - Test: `tests/e2e/blog.spec.ts`
 
-- [ ] **Step 1: Write failing test**
+**Note:** Schema changes are validated by `pnpm run build`. No separate Playwright test is needed here — the failing test for category support is in Task 6 Step 1 (category filter bar visibility). Proceed directly to the schema change.
 
-```typescript
-test('en: blog posts have category data', async ({ page }) => {
-  await page.goto('/blog');
-  // Category filter bar should exist once we add category support
-  // For now, just verify the page loads without schema errors
-  const response = await page.goto('/blog');
-  expect(response?.status()).toBe(200);
-});
-```
-
-- [ ] **Step 2: Add `category` to `blogSchema` in `src/lib/content/schemas.ts`**
+- [ ] **Step 1: Add `category` to `blogSchema` in `src/lib/content/schemas.ts`**
 
 ```typescript
 export const blogSchema = z.object({
@@ -758,15 +755,15 @@ export const blogSchema = z.object({
 });
 ```
 
-- [ ] **Step 3: Run `npm run build` to confirm schema compiles**
+- [ ] **Step 2: Run `pnpm run build` to confirm schema compiles**
 
 ```bash
-npm run build 2>&1 | tail -20
+pnpm run build 2>&1 | tail -20
 ```
 
 Expected: build succeeds (no new errors).
 
-- [ ] **Step 4: Add `category` frontmatter to all blog post files**
+- [ ] **Step 3: Add `category` frontmatter to all blog post files**
 
 List all blog posts: `ls src/content/blog/`
 
@@ -790,15 +787,15 @@ category: "Software Engineering"   # ADD
 
 Do this for every `.md` file in `src/content/blog/`.
 
-- [ ] **Step 5: Run build again to confirm no validation errors**
+- [ ] **Step 4: Run build again to confirm no validation errors**
 
 ```bash
-npm run build 2>&1 | grep -i error | head -20
+pnpm run build 2>&1 | grep -i error | head -20
 ```
 
 Expected: no content validation errors.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add src/lib/content/schemas.ts src/content/blog/
@@ -836,7 +833,7 @@ Expected: FAIL
 
 - [ ] **Step 2: Update `BlogList.astro` — add category aggregation in the frontmatter script**
 
-After the existing `allTags` line (line 33 in current file), add:
+**First, verify the actual variable name** used for the post array in `BlogList.astro` (it is `postsToShow` — verify by reading the file). After the existing `allTags` line (approximately line 33), add:
 
 ```typescript
 // Collect unique categories and their counts
@@ -850,7 +847,7 @@ const categories = Object.keys(categoryCountMap).sort();
 const totalCount = postsToShow.length;
 ```
 
-Remove the existing `allTags` aggregation (tags are no longer used for blog filtering per spec).
+Remove **both** the `allTags` aggregation script line AND any `{allTags}` / tag-pill usage in the template below `---`. If `allTags` is referenced in the HTML template, remove those usages too, or the TypeScript compiler will error on the undefined variable.
 
 - [ ] **Step 3: Add category filter bar HTML to `BlogList.astro` template**
 
@@ -1134,20 +1131,30 @@ The template should follow this structure:
     <!-- TWO-COLUMN GRID: starts here, after preamble -->
     <div class="post-body-grid">
       <div class="post-content">
+        {/* PRESERVE: fallback notice from existing file */}
+        {isTranslationFallback && (
+          <div class="fallback-notice">
+            <p>{t.fallbackNotice}</p>
+          </div>
+        )}
+
         <Content />
-        <!-- CTA card -->
-        <!-- Share buttons (added in Task 10) -->
+
+        {/* PRESERVE: PostNav prev/next from existing file */}
+        <PostNav locale={locale} prev={prev} next={next} />
+
+        {/* Share buttons — added in Task 9 */}
+        {/* <ShareButtons title={post.data.title} url={Astro.url.href} type="post" locale={locale} /> */}
       </div>
       <aside class="toc-sidebar">
         <TableOfContents headings={headings} />
       </aside>
     </div>
-
-    <!-- Related posts (full width) -->
-    <!-- PostNav prev/next -->
   </div>
 </div>
 ```
+
+> **Preservation note:** The existing `src/pages/blog/[slug].astro` template has `.post-wrapper > .post-main` (with `post-header`, fallback notice, `.prose > <Content />`, and `<PostNav>`) and `.post-toc > <TableOfContents>`. The new structure wraps them in `.post-preamble` + `.post-body-grid`. Keep `isTranslationFallback`, `PostNav`, `readingTime`, all existing `t.` keys, and the `<TableOfContents headings={headings} />` call — do not delete any of these.
 
 - [ ] **Step 3: Add layout CSS**
 
@@ -1652,24 +1659,40 @@ Use a real slug from the output in your test above.
 
 - [ ] **Step 3: Rewrite `src/pages/notes/[slug].astro` template section**
 
-Keep the frontmatter script (`getStaticPaths`, `getCollection`, etc.) unchanged. Replace only the template below `---`:
+In the frontmatter script, **add these imports** (the existing `getNoteAccentColor` import from `'../../lib/notes'` must be kept):
 
-```astro
+```typescript
 import BackToTop from '../../components/site/BackToTop.astro';
 import ShareButtons from '../../components/site/ShareButtons.astro';
+```
 
-// Add to the `t` object:
+Also add related notes query after the existing `render(note)` call:
+
+```typescript
+// Related notes: last 3 notes in same category, ordered oldest→newest (ascending)
+const allNotesForRelated = await getCollection('notes');
+const relatedNotes = allNotesForRelated
+  .filter(n =>
+    n.data.slug !== note.data.slug &&
+    n.data.language === locale &&
+    n.data.category === note.data.category
+  )
+  .sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime())
+  .slice(-3); // last 3 = most recent 3, ascending order = older on left
+```
+
+Update the `t` object to add:
+
+```typescript
 const t = {
-  fallbackNotice: 'This note is not available in English. Showing the original version.',
-  publishedAt: 'Published on',
-  category: 'Category',
-  tags: 'Tags',
+  // ... keep existing keys ...
   back: '← Back to notes',
   backHref: '/notes',
+  relatedNotes: 'Related Notes',
 };
 ```
 
-Template:
+Template (replace the existing template below `---`):
 
 ```astro
 <BaseLayout
@@ -1725,13 +1748,31 @@ Template:
       locale={locale}
     />
 
+    <!-- Related notes: older on left, newer on right -->
+    {relatedNotes.length > 0 && (
+      <section class="related-notes">
+        <h2 class="related-title">{t.relatedNotes}</h2>
+        <div class="related-grid">
+          {relatedNotes.map(related => (
+            <a href={`${locale === 'en' ? '/notes' : '/pt-br/notes'}/${related.data.slug}`} class="related-card note-card"
+               data-category={related.data.category ?? ''}
+               style={`--note-accent: ${getNoteAccentColor(related.data.colorToken, related.data.category)}`}>
+              <span class="note-date">{related.data.publishedAt.toLocaleDateString(locale, { dateStyle: 'medium' })}</span>
+              <h3>{related.data.title}</h3>
+              {related.data.category && <span class="note-category">{related.data.category}</span>}
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
   </article>
 
   <BackToTop />
 </BaseLayout>
 ```
 
-Add CSS for `.note-page`, `.note-category-badge`, `.note-title`, `.note-subtitle`, `.note-date`, `.tag-pill`, `.preamble-divider` (reuse patterns from blog post styles — these are the same design).
+Add CSS for `.note-page`, `.note-category-badge`, `.note-title`, `.note-subtitle`, `.note-date`, `.tag-pill`, `.preamble-divider`, `.related-notes`, `.related-grid`, `.related-card` (reuse patterns from blog post styles — these are the same design; `.related-grid` is `display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4)` on desktop, `grid-template-columns: 1fr` on mobile).
 
 - [ ] **Step 4: Repeat for `src/pages/pt-br/notes/[slug].astro`** with PT-BR strings:
 
@@ -1772,7 +1813,7 @@ git commit -m "feat: overhaul notes individual page layout with share buttons an
 - [ ] **Step 1: Install dependencies**
 
 ```bash
-npm install --save-dev satori sharp
+pnpm add -D satori sharp
 ```
 
 Verify `package.json` has both in `devDependencies`.
@@ -1806,10 +1847,10 @@ import sharp from 'sharp';
 
 // Load fonts once at module level
 const geistFont = readFileSync(
-  resolve('node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff2')
+  resolve('node_modules/geist/dist/fonts/geist-sans/Geist-Regular.ttf')
 );
 const geistMonoFont = readFileSync(
-  resolve('node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.woff2')
+  resolve('node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.ttf')
 );
 
 export interface OGImageOptions {
@@ -1988,13 +2029,19 @@ export const GET: APIRoute = async ({ props }) => {
 };
 ```
 
-- [ ] **Step 6: Add `og:image` meta to blog post and note layouts**
+- [ ] **Step 6: Add `<slot name="head" />` to `BaseLayout.astro`**
 
-In `src/pages/blog/[slug].astro`, update `<BaseLayout>` call or add a `<slot name="head">` if supported, or add directly to `BaseLayout`'s SEO head:
+`src/layouts/BaseLayout.astro` currently has no named head slot (confirmed). The `<head>` ends with `<SeoHead ... />`. Add a named slot immediately after:
 
-Alternatively, pass an `ogImage` prop to `BaseLayout`:
+```astro
+<!-- In src/layouts/BaseLayout.astro, inside <head>, after <SeoHead /> -->
+<SeoHead title={title} description={description} locale={locale} currentPath={Astro.url.pathname} />
+<slot name="head" />   {/* ADD THIS LINE */}
+```
 
-Check `src/components/site/SeoHead.astro` — if it already handles `og:image`, add an optional prop. If not, add the meta tag directly in the post/note page template inside a `<Fragment slot="head">`:
+- [ ] **Step 7: Add `og:image` meta to blog post and note layouts**
+
+Now that `BaseLayout` has a `head` slot, use it in the four post/note page files:
 
 ```astro
 <!-- In blog/[slug].astro and pt-br/blog/[slug].astro -->
@@ -2016,12 +2063,10 @@ Check `src/components/site/SeoHead.astro` — if it already handles `og:image`, 
 </BaseLayout>
 ```
 
-Check whether `BaseLayout.astro` has a `<slot name="head">` — if not, add one inside `<head>`.
-
 - [ ] **Step 7: Run build to confirm OG images generate**
 
 ```bash
-npm run build 2>&1 | grep -E "og/|error" | head -30
+pnpm run build 2>&1 | grep -E "og/|error" | head -30
 ```
 
 Expected: no errors, OG PNG routes visible in build output.
@@ -2045,23 +2090,31 @@ git commit -m "feat: add OG image generation for blog posts and notes"
 
 ## Final: Full Test Run
 
-- [ ] **Step 1: Run full Playwright suite**
+- [ ] **Step 1: Ensure dev/preview server is running**
 
 ```bash
-npx playwright test
+pnpm run build && pnpm run preview
+```
+
+Playwright requires the server to be running. Open a second terminal and keep it running throughout the test run.
+
+- [ ] **Step 2: Run full Playwright suite**
+
+```bash
+pnpm exec playwright test
 ```
 
 Expected: all tests pass.
 
-- [ ] **Step 2: Run build**
+- [ ] **Step 3: Run clean build**
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Expected: clean build, no type errors, no content validation errors.
 
-- [ ] **Step 3: Visual smoke check** — run `npm run preview` and check:
+- [ ] **Step 4: Visual smoke check** — run `pnpm run preview` and check:
   - Home page circuit animation (dark and light mode)
   - Mobile layout at 375px (column order, search icon, bento grid)
   - Blog filter bar with badge counts
