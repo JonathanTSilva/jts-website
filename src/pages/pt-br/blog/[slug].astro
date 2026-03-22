@@ -60,6 +60,9 @@ const t = {
   title={post.data.title}
   description={post.data.summary}
 >
+  <Fragment slot="head">
+    <meta property="og:image" content={`/og/blog/${post.data.slug}.png`} />
+  </Fragment>
   <div class="post-wrapper">
     <!-- PREAMBLE: full width -->
     <div class="post-preamble">

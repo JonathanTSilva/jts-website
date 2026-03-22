@@ -27,6 +27,7 @@ const { title, description, locale = 'en' } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <script is:inline set:html={themeInlineScript} />
     <SeoHead title={title} description={description} locale={locale} currentPath={Astro.url.pathname} />
+    <slot name="head" />
   </head>
   <body class="site-wrapper">
     <a href="#main-content" class="skip-link">Skip to content</a>

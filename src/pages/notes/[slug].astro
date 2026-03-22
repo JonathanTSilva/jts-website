@@ -52,6 +52,9 @@ const relatedNotes = allNotesForRelated
   title={note.data.title}
   description={note.data.summary ?? undefined}
 >
+  <Fragment slot="head">
+    <meta property="og:image" content={`/og/notes/${note.data.slug}.png`} />
+  </Fragment>
   <article class="container note-page" style={`--note-accent: ${getNoteAccentColor(note.data.colorToken, note.data.category)}`}>
 
     <a href={t.backHref} class="back-link">{t.back}</a>
