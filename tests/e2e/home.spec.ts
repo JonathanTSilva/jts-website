@@ -233,7 +233,7 @@ test.describe('Footer', () => {
     await page.setViewportSize({ width: 1400, height: 800 });
     const inner = page.locator('.footer-inner');
     const box = await inner.boundingBox();
-    // container-max = 52rem = 832px; inner must be narrower than 1400
+    // container-max = 60rem = 960px; inner must be narrower than 1400
     expect(box!.width).toBeLessThan(1400);
   });
 });
@@ -260,6 +260,22 @@ test.describe('Portfolio Page', () => {
       await expect(page.getByRole('heading', { name: 'Publicações' })).toBeVisible();
     });
   });
+});
+
+test('html has scrollbar-gutter: stable', async ({ page }) => {
+  await page.goto('/');
+  const scrollbarGutter = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).scrollbarGutter
+  );
+  expect(scrollbarGutter).toBe('stable');
+});
+
+test('container max width is 60rem', async ({ page }) => {
+  await page.goto('/');
+  const maxWidth = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--container-max').trim()
+  );
+  expect(maxWidth).toBe('60rem');
 });
 
 test.describe('Legal placeholder pages', () => {

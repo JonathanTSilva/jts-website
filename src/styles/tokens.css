@@ -45,8 +45,8 @@
   --card-padding: var(--space-6);
 
   /* Layout */
-  --container-max:        52rem;
-  --wide-max:             72rem;
+  --container-max:        60rem;
+  --wide-max:             80rem;
   --search-field-width:   10rem;   /* 160px — desktop search field */
   --search-field-width-sm: 7.5rem; /* 120px — mobile search field */
 
