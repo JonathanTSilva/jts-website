@@ -1,59 +1,104 @@
 ---
-const cpuX = 600;
-const cpuY = 20;
-const cpuW = 160;
-const cpuH = 28;
-const cpuMid    = cpuY + cpuH / 2;          // 34 — vertical midline
-const cpuBottom = cpuY + cpuH;               // 48
-const cpuLeft   = cpuX - cpuW / 2;          // 520
-const cpuRight  = cpuX + cpuW / 2;          // 680
-const r = 12;                                // corner radius
+// CPU box geometry
+const cpuX  = 600;
+const cpuY  = 30;
+const cpuW  = 160;
+const cpuH  = 28;
+const cxL   = cpuX - cpuW / 2;      // left edge  = 520
+const cxR   = cpuX + cpuW / 2;      // right edge = 680
+const cyT   = cpuY;                  // top edge   = 30
+const cyB   = cpuY + cpuH;           // bot edge   = 58
+const cyM   = cpuY + cpuH / 2;      // mid        = 44
+const r     = 15;                    // corner radius
 
-// Rounded-corner path helpers ------------------------------------------
-// L-shape from left edge (0, y0) → right to xT → up to yCPU → right to xEnd
-function lTrace(y0: number, xT: number): string {
-  return `M 0 ${y0} H ${xT-r} Q ${xT} ${y0} ${xT} ${y0-r} V ${cpuMid+r} Q ${xT} ${cpuMid} ${xT+r} ${cpuMid} H ${cpuLeft}`;
+// Rounded-corner helpers (H→V and V→H transitions)
+const q = (cx: number, cy: number, ex: number, ey: number) =>
+  `Q ${cx} ${cy} ${ex} ${ey}`;
+
+// L-shape: (0, y0) → right to xT → up → right to CPU left perimeter
+function lL(y0: number, xT: number, yPin: number): string {
+  return `M 0 ${y0} H ${xT-r} ${q(xT,y0,xT,y0-r)} V ${yPin+r} ${q(xT,yPin,xT+r,yPin)} H ${cxL}`;
 }
-// Same with an extra intermediate turn (y0 → yMid horizontal leg first)
-function lTrace2(y0: number, xT1: number, yMid: number, xT2: number): string {
-  return `M 0 ${y0} H ${xT1-r} Q ${xT1} ${y0} ${xT1} ${y0-r} V ${yMid+r} Q ${xT1} ${yMid} ${xT1+r} ${yMid} H ${xT2-r} Q ${xT2} ${yMid} ${xT2} ${yMid-r} V ${cpuMid+r} Q ${xT2} ${cpuMid} ${xT2+r} ${cpuMid} H ${cpuLeft}`;
+// L-shape with one extra jog: left edge → right → up → right → up → CPU left
+function lL2(y0: number, xT1: number, yMid: number, xT2: number, yPin: number): string {
+  return `M 0 ${y0} H ${xT1-r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1+r,yMid)} H ${xT2-r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin+r} ${q(xT2,yPin,xT2+r,yPin)} H ${cxL}`;
 }
-// Mirror of lTrace for right side
-function rTrace(y0: number, xT: number): string {
-  return `M 1200 ${y0} H ${xT+r} Q ${xT} ${y0} ${xT} ${y0-r} V ${cpuMid+r} Q ${xT} ${cpuMid} ${xT-r} ${cpuMid} H ${cpuRight}`;
+// Mirror helpers for right side
+function rL(y0: number, xT: number, yPin: number): string {
+  return `M 1200 ${y0} H ${xT+r} ${q(xT,y0,xT,y0-r)} V ${yPin+r} ${q(xT,yPin,xT-r,yPin)} H ${cxR}`;
 }
-function rTrace2(y0: number, xT1: number, yMid: number, xT2: number): string {
-  return `M 1200 ${y0} H ${xT1+r} Q ${xT1} ${y0} ${xT1} ${y0-r} V ${yMid+r} Q ${xT1} ${yMid} ${xT1-r} ${yMid} H ${xT2+r} Q ${xT2} ${yMid} ${xT2} ${yMid-r} V ${cpuMid+r} Q ${xT2} ${cpuMid} ${xT2-r} ${cpuMid} H ${cpuRight}`;
+function rL2(y0: number, xT1: number, yMid: number, xT2: number, yPin: number): string {
+  return `M 1200 ${y0} H ${xT1+r} ${q(xT1,y0,xT1,y0-r)} V ${yMid+r} ${q(xT1,yMid,xT1-r,yMid)} H ${xT2+r} ${q(xT2,yMid,xT2,yMid-r)} V ${yPin+r} ${q(xT2,yPin,xT2-r,yPin)} H ${cxR}`;
 }
-// Bottom trace: from (x0, cpuBottom) → down to yT → horizontal → down to 500
-function bTraceLeft(x0: number, yT: number, xEnd: number): string {
-  return `M ${x0} ${cpuBottom} V ${yT-r} Q ${x0} ${yT} ${x0-r} ${yT} H ${xEnd+r} Q ${xEnd} ${yT} ${xEnd} ${yT+r} V 500`;
-}
-function bTraceRight(x0: number, yT: number, xEnd: number): string {
-  return `M ${x0} ${cpuBottom} V ${yT-r} Q ${x0} ${yT} ${x0+r} ${yT} H ${xEnd-r} Q ${xEnd} ${yT} ${xEnd} ${yT+r} V 500`;
+// From bottom: (x0, 490) → up to yT → horizontal → up to CPU bottom perimeter
+function bL(x0: number, yT: number, xH: number, xPin: number): string {
+  // x0 < xPin (trace goes right)
+  if (x0 <= xPin) {
+    return `M ${x0} 490 V ${yT+r} ${q(x0,yT,x0+r,yT)} H ${xH-r} ${q(xH,yT,xH,yT-r)} V ${cyB+r} ${q(xH,cyB,xH+r,cyB)} H ${xPin}`;
+  } else {
+    return `M ${x0} 490 V ${yT+r} ${q(x0,yT,x0-r,yT)} H ${xH+r} ${q(xH,yT,xH,yT-r)} V ${cyB+r} ${q(xH,cyB,xH-r,cyB)} H ${xPin}`;
+  }
 }
 
-// Trace definitions -------------------------------------------------------
-const traces = [
-  // Left — 3 traces connecting to CPU left pin
-  { d: lTrace(90, 200),              delay: '0s'   },
-  { d: lTrace(240, 350),             delay: '1.2s' },
-  { d: lTrace2(390, 80, 280, 460),   delay: '0.5s' },
-  // Right — 3 traces connecting to CPU right pin
-  { d: rTrace(90, 1000),             delay: '0.8s' },
-  { d: rTrace(240, 850),             delay: '1.5s' },
-  { d: rTrace2(390, 1120, 280, 740), delay: '0.3s' },
-  // Bottom — 3 traces descending from CPU
-  { d: bTraceLeft(cpuX - 20, 180, 160),  delay: '2.0s' },
-  { d: `M ${cpuX} ${cpuBottom} V 500`,   delay: '2.4s' },
-  { d: bTraceRight(cpuX + 20, 180, 1040), delay: '2.2s' },
-  // Interior — extra coverage across the full hero area
-  { d: `M 0 460 H ${128} Q 140 460 140 ${472} V 500`,                          delay: '0.6s' },
-  { d: `M 1200 460 H ${1072} Q 1060 460 1060 ${472} V 500`,                    delay: '1.0s' },
-  { d: `M 300 500 V ${432} Q 300 420 ${288} 420 H 0`,                          delay: '1.8s' },
-  { d: `M 900 500 V ${432} Q 900 420 ${912} 420 H 1200`,                       delay: '2.6s' },
-  { d: `M 150 500 V ${362} Q 150 350 ${138} 350 H 0`,                          delay: '0.9s' },
-  { d: `M 1050 500 V ${362} Q 1050 350 ${1062} 350 H 1200`,                    delay: '1.4s' },
+const traces: Array<{ sx: number; sy: number; d: string; delay: string }> = [
+  // ── Left edge → CPU left perimeter (x=520) ──────────────────
+  { sx: 50,   sy: 80,  d: lL(80,  360, cyM - 6),  delay: '0.0s' },
+  { sx: 80,   sy: 280, d: lL(280, 220, cyM),       delay: '1.0s' },
+  { sx: 40,   sy: 450, d: lL2(450, 140, 280, 400, cyM + 7), delay: '2.0s' },
+
+  // ── Right edge → CPU right perimeter (x=680) ─────────────────
+  { sx: 1150, sy: 80,  d: rL(80,  840, cyM - 6),  delay: '0.4s' },
+  { sx: 1120, sy: 280, d: rL(280, 980, cyM),       delay: '1.4s' },
+  { sx: 1160, sy: 450, d: rL2(450, 1060, 280, 800, cyM + 7), delay: '2.4s' },
+
+  // ── Top edge → CPU top perimeter (y=30), curved entries ──────
+  {
+    sx: 180, sy: 10,
+    d: `M 180 10 Q 300 10 380 18 Q 460 26 540 ${cyT}`,
+    delay: '0.8s',
+  },
+  {
+    sx: 420, sy: 10,
+    d: `M 420 10 V ${cyT-r} ${q(420,cyT,420+r,cyT)} H 560`,
+    delay: '1.8s',
+  },
+  {
+    sx: 780, sy: 10,
+    d: `M 780 10 V ${cyT-r} ${q(780,cyT,780-r,cyT)} H 640`,
+    delay: '2.8s',
+  },
+  {
+    sx: 1020, sy: 10,
+    d: `M 1020 10 Q 900 10 820 18 Q 740 26 660 ${cyT}`,
+    delay: '3.2s',
+  },
+
+  // ── Interior diagonal curves → CPU top ───────────────────────
+  {
+    sx: 200, sy: 150,
+    d: `M 200 150 Q 350 150 420 90 Q 490 30 580 ${cyT}`,
+    delay: '1.6s',
+  },
+  {
+    sx: 1000, sy: 150,
+    d: `M 1000 150 Q 850 150 780 90 Q 710 30 620 ${cyT}`,
+    delay: '2.6s',
+  },
+
+  // ── Bottom area → CPU bottom perimeter (y=58) ─────────────────
+  { sx: 480, sy: 490, d: bL(480, 200, 500, 560), delay: '0.2s' },
+  { sx: 600, sy: 490, d: `M 600 490 V ${cyB}`,  delay: '1.2s' },
+  { sx: 720, sy: 490, d: bL(720, 200, 700, 640), delay: '2.2s' },
+  {
+    sx: 340, sy: 460,
+    d: `M 340 460 V 280 H ${380-r} ${q(380,280,380,280-r)} V ${cyB+r} ${q(380,cyB,380+r,cyB)} H 540`,
+    delay: '3.6s',
+  },
+  {
+    sx: 860, sy: 460,
+    d: `M 860 460 V 280 H ${820+r} ${q(820,280,820,280-r)} V ${cyB+r} ${q(820,cyB,820-r,cyB)} H 660`,
+    delay: '3.0s',
+  },
 ];
 
 const words = ['Cybersecurity','Embedded','Software','AI','Automation',
@@ -74,6 +119,11 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
     </linearGradient>
   </defs>
 
+  <!-- Start-point circles (vias) -->
+  {traces.map(t => (
+    <circle cx={t.sx} cy={t.sy} r="3.5" class="start-dot" />
+  ))}
+
   <!-- Static base traces -->
   {traces.map(t => (
     <path d={t.d} class="trace-base" />
@@ -85,15 +135,15 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
   ))}
 
   <!-- CPU chip -->
-  <g class="cpu-group" transform={`translate(${cpuLeft}, ${cpuY})`}>
-    <rect width={cpuW} height={cpuH} rx="4" class="cpu-body" />
-    <!-- side pins -->
-    <path d={`M -6 8 h 6 M -6 ${cpuH/2} h 6 M -6 ${cpuH-8} h 6`}
-      stroke="var(--accent)" stroke-width="1.5" fill="none" />
-    <path d={`M ${cpuW} 8 h 6 M ${cpuW} ${cpuH/2} h 6 M ${cpuW} ${cpuH-8} h 6`}
-      stroke="var(--accent)" stroke-width="1.5" fill="none" />
-    <!-- label — text changed by JS on each blink -->
-    <text id="cpu-word" x={cpuW/2} y={cpuH/2 + 5}
+  <g class="cpu-group" transform={`translate(${cxL}, ${cyT})`}>
+    <rect width={cpuW} height={cpuH} rx="3" class="cpu-body" />
+    <!-- left pins -->
+    <path d={`M -6 7 h 6 M -6 ${cpuH/2} h 6 M -6 ${cpuH-7} h 6`}
+      class="cpu-pins" />
+    <!-- right pins -->
+    <path d={`M ${cpuW} 7 h 6 M ${cpuW} ${cpuH/2} h 6 M ${cpuW} ${cpuH-7} h 6`}
+      class="cpu-pins" />
+    <text id="cpu-word" x={cpuW / 2} y={cpuH / 2 + 4.5}
       text-anchor="middle" class="cpu-text">{words[0]}</text>
   </g>
 </svg>
@@ -108,66 +158,78 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
     pointer-events: none;
   }
 
+  /* Via / start-point circles */
+  .start-dot {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1;
+    opacity: 0.25;
+  }
+
+  /* Static trace lines */
   .trace-base {
     fill: none;
     stroke: var(--accent);
     stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
     opacity: 0.12;
   }
 
+  /* Moving electricity pulse */
   .trace-pulse {
     fill: none;
     stroke: url(#pulse-grad);
     stroke-width: 2;
-    stroke-dasharray: 100 1000;
-    stroke-dashoffset: 1100;
-    animation: flow 4s linear infinite;
-    opacity: 0.7;
+    stroke-linecap: round;
+    stroke-dasharray: 80 1200;
+    stroke-dashoffset: 1280;
+    animation: flow 5s linear infinite;
+    opacity: 0.75;
   }
 
   @keyframes flow {
     to { stroke-dashoffset: 0; }
   }
 
-  /* CPU box: same low opacity as traces, blinks to reveal each word */
+  /* CPU body — same opacity family as traces, blinks to reveal word */
   .cpu-body {
     fill: none;
     stroke: var(--accent);
     stroke-width: 1;
-    opacity: 0.06;
-    animation: blink-cpu 4s ease-in-out infinite;
+    animation: blink-box 4s ease-in-out infinite;
+  }
+
+  .cpu-pins {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    animation: blink-box 4s ease-in-out infinite;
   }
 
   .cpu-text {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     fill: var(--accent);
-    opacity: 0;
-    animation: blink-cpu 4s ease-in-out infinite;
+    animation: blink-text 4s ease-in-out infinite;
   }
 
   /*
-   * Keyframes: fade from dim → bright → dim.
-   * animationiteration fires at the start of 0% → word is changed then →
-   * the new word brightens in immediately.
+   * 0% = minimum: word just swapped (animationiteration fires here)
+   * 20%–75% = bright: new word visible
+   * 100% = back to minimum: cycle restarts
    */
-  @keyframes blink-cpu {
-    0%   { opacity: 0.04; }
-    20%  { opacity: 0.35; }
-    75%  { opacity: 0.35; }
-    100% { opacity: 0.04; }
-  }
-
-  /* text peaks at slightly lower opacity than box */
-  .cpu-text {
-    animation: blink-text 4s ease-in-out infinite;
+  @keyframes blink-box {
+    0%         { opacity: 0.05; }
+    20%, 75%   { opacity: 0.30; }
+    100%       { opacity: 0.05; }
   }
   @keyframes blink-text {
-    0%   { opacity: 0.0;  }
-    20%  { opacity: 0.55; }
-    75%  { opacity: 0.55; }
-    100% { opacity: 0.0;  }
+    0%         { opacity: 0.00; }
+    20%, 75%   { opacity: 0.55; }
+    100%       { opacity: 0.00; }
   }
 
   @media (max-width: 48rem) {
@@ -175,14 +237,14 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation',
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .trace-pulse { animation: none; opacity: 0; }
-    .cpu-body    { animation: none; opacity: 0.2; }
-    .cpu-text    { animation: none; opacity: 0.4; }
+    .trace-pulse            { animation: none; opacity: 0; }
+    .cpu-body, .cpu-pins    { animation: none; opacity: 0.20; }
+    .cpu-text               { animation: none; opacity: 0.40; }
   }
 </style>
 
 <script define:vars={{ words }}>
-  const textEl = document.getElementById('cpu-word');
+  const textEl  = document.getElementById('cpu-word');
   const cpuBody = document.querySelector('.cpu-body');
   let idx = 0;
 
