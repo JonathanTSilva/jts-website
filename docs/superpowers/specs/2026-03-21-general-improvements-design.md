@@ -153,7 +153,9 @@ Content is a faithful Portuguese translation of the English pages. No new compon
 
 ### 5.1 Schema: Category Field
 
-Add `category` (required `z.string()`) to the blog post Zod schema in `src/lib/content/schemas.ts` (where `blogSchema` is defined — not `src/content/config.ts`, which only calls `defineCollection`). All existing blog post MDX/MD files receive a `category:` frontmatter field.
+Add `category: z.string().optional()` to the blog post Zod schema in `src/lib/content/schemas.ts` (where `blogSchema` is defined — not `src/content/config.ts`, which only calls `defineCollection`). Matching the notes schema precedent (`category` is optional there too), this avoids a breaking build for existing posts that don't yet have the field.
+
+All existing blog post MDX/MD files should receive a `category:` frontmatter field as part of this implementation. Suggested taxonomy (matches existing notes categories for cross-site consistency): `Software Engineering`, `Data Science`, `Career`, `General`. Posts that don't clearly fit a category get `General`. The implementer assigns the category per post using their judgment — there is no automation for this step.
 
 ### 5.2 Category Filter Bar
 
@@ -178,6 +180,8 @@ Each category button displays a count badge:
 Tags on the **notes** filter bar do **not** show count badges — only category buttons show counts (both blog and notes categories).
 
 > **Scope note:** The notification badge on category filter buttons is new work for both the blog list and the notes list. It is not covered by the `2026-03-21-notes-category-colors` plan (which only handles card accent colors). The notes category filter bar gains the same badge treatment as the blog filter bar as part of this spec.
+
+> **Notes filter scope:** The source requirement states notes should be filterable by both category and tags. The existing notes implementation already filters by tags. If the notes filter bar does not yet have a category sub-filter, adding one is in scope for this spec (same badge design as the blog category filter). If it already exists, this spec only adds the badge counts. Implementer should check `src/pages/notes/index.astro` and `NotesFilters` component state before writing new code.
 
 ### 5.4 Blog Filter: Relationship to Blog Improvements Plan
 
@@ -304,8 +308,8 @@ Each file uses `getStaticPaths()` to enumerate its respective collection at buil
 
 Satori requires a `Buffer` of the actual font file — it cannot use CSS font-family strings. The implementation must:
 
-1. Read the Geist Regular font buffer at build time using Node.js `fs.readFileSync` on the Geist package path: `node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff`
-2. Read Geist Mono Regular from: `node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.woff`
+1. Read the Geist Regular font buffer at build time using Node.js `fs.readFileSync` on the Geist package path: `node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff2`
+2. Read Geist Mono Regular from: `node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.woff2`
 3. Pass both as entries in Satori's `fonts` array with `name` matching the font-family string used in the SVG template
 4. Only one weight per family is needed (static OG image, no variable weight rendering)
 
@@ -345,7 +349,7 @@ Pre-filled messages by locale:
 | `en` | `"Check out this [post/note]: [title] [url]"` |
 | `pt-br` | `"Confira [este artigo/esta nota]: [title] [url]"` |
 
-Five buttons: LinkedIn, Twitter/X, Facebook, WhatsApp, Copy Link. Platform share URLs constructed at Astro render time (server-side string interpolation) — no JS needed for URL construction. Copy Link button: client-side clipboard write via `navigator.clipboard.writeText()`, then calls `window.showToast({ message: 'Link copied!', variant: 'success', duration: 2000 })` (EN) or `window.showToast({ message: 'Link copiado!', ... })` (PT-BR).
+Five buttons: LinkedIn, Twitter/X, Facebook, WhatsApp, Copy Link. Platform share URLs constructed at Astro render time (server-side string interpolation) — no JS needed for URL construction. Copy Link button: client-side clipboard write via `navigator.clipboard.writeText(fullMessage)` — writes the **full pre-filled message** (e.g. `"Check out this post: [title] [url]"`), not just the bare URL. After writing, calls `window.showToast({ message: 'Link copied!', variant: 'success', duration: 2000 })` (EN) or `window.showToast({ message: 'Link copiado!', variant: 'success', duration: 2000 })` (PT-BR).
 
 Icons: simple inline SVG. Layout: horizontal row of icon buttons, centered below the post content.
 
@@ -388,17 +392,13 @@ When implementing, cross-reference those plans to avoid duplicate work and ensur
 | Modify | `src/components/blog/BlogList.astro` |
 | Modify | `src/pages/blog/index.astro` |
 | Modify | `src/pages/pt-br/blog/index.astro` |
-| Modify | `src/pages/blog/[slug].astro` |
-| Modify | `src/pages/pt-br/blog/[slug].astro` |
+| Modify | `src/pages/blog/[slug].astro` (TOC layout + og:image meta) |
+| Modify | `src/pages/pt-br/blog/[slug].astro` (TOC layout + og:image meta) |
 | Modify | `src/components/blog/TableOfContents.astro` |
-| Modify | `src/pages/notes/[slug].astro` |
-| Modify | `src/pages/pt-br/notes/[slug].astro` |
+| Modify | `src/pages/notes/[slug].astro` (layout overhaul + og:image meta) |
+| Modify | `src/pages/pt-br/notes/[slug].astro` (layout overhaul + og:image meta) |
 | Create | `src/components/site/BackToTop.astro` |
 | Create | `src/lib/ogImage.ts` |
 | Create | `src/pages/og/blog/[slug].png.ts` |
 | Create | `src/pages/og/notes/[slug].png.ts` |
 | Create | `src/components/site/ShareButtons.astro` |
-| Modify | `src/pages/blog/[slug].astro` (og:image meta) |
-| Modify | `src/pages/pt-br/blog/[slug].astro` (og:image meta) |
-| Modify | `src/pages/notes/[slug].astro` (og:image meta) |
-| Modify | `src/pages/pt-br/notes/[slug].astro` (og:image meta) |
