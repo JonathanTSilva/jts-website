@@ -4,6 +4,18 @@ test('harness is functional', async () => {
   expect(true).toBe(true);
 });
 
+test('pt-br privacy policy page loads', async ({ page }) => {
+  const response = await page.goto('/pt-br/privacy');
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole('heading', { name: /Política de Privacidade/i })).toBeVisible();
+});
+
+test('pt-br terms of service page loads', async ({ page }) => {
+  const response = await page.goto('/pt-br/terms');
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole('heading', { name: /Termos de Serviço/i })).toBeVisible();
+});
+
 test('window.showToast fires a toast and it disappears after duration', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => {
