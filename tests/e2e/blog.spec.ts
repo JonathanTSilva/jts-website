@@ -136,12 +136,22 @@ test.describe('Blog', () => {
     expect(tocBox!.y).toBeGreaterThanOrEqual(sepBox!.y);
   });
 
-  test('blog post: back to top button appears on scroll', async ({ page }) => {
+  test('blog post: back to top button is present and hidden before scroll', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 800 });
     await page.goto('/blog/2026-03-ci-firmware.en');
     const btn = page.locator('.back-to-top-btn');
-    await expect(btn).not.toBeVisible();
-    await page.evaluate(() => window.scrollTo(0, 500));
+    // Button exists in DOM but is not visually active (opacity: 0, pointer-events: none)
+    await expect(btn).toBeAttached();
+    const opacity = await btn.evaluate(el => window.getComputedStyle(el).opacity);
+    expect(opacity).toBe('0');
+    // After scrolling past 300px it gains the .visible class
+    await page.evaluate(() => {
+      window.dispatchEvent(new Event('scroll'));
+      Object.defineProperty(window, 'scrollY', { value: 400, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
     await page.waitForTimeout(300);
-    await expect(btn).toBeVisible();
+    const hasVisible = await btn.evaluate(el => el.classList.contains('visible'));
+    expect(hasVisible).toBe(true);
   });
 });
