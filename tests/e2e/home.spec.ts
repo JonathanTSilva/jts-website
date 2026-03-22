@@ -282,9 +282,8 @@ test.describe('Portfolio Page', () => {
 test('hero has CPU architecture background', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.hero-bg')).toBeVisible();
-  await expect(page.locator('.hero-bg .cpu-wrap')).toBeVisible();
-  const cpuSvg = page.locator('.hero-bg .cpu-svg');
-  await expect(cpuSvg).toBeVisible();
+  await expect(page.locator('.hero-bg .hero-bg-svg')).toBeVisible();
+  await expect(page.locator('.hero-bg .cpu-node')).toBeVisible();
 });
 
 test('html has scrollbar-gutter: stable', async ({ page }) => {
