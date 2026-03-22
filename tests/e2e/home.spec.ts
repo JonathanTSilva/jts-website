@@ -262,6 +262,16 @@ test.describe('Portfolio Page', () => {
   });
 });
 
+test('hero has circuit background with CPU node', async ({ page }) => {
+  await page.goto('/');
+  const cpuNode = page.locator('.hero-bg .cpu-node');
+  await expect(cpuNode).toBeVisible();
+  const circuitPaths = page.locator('.hero-bg .circuit-path');
+  const count = await circuitPaths.count();
+  expect(count).toBeGreaterThan(0);
+  await expect(circuitPaths.first()).toBeVisible();
+});
+
 test('html has scrollbar-gutter: stable', async ({ page }) => {
   await page.goto('/');
   const scrollbarGutter = await page.evaluate(() =>

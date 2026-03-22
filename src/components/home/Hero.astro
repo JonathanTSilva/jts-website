@@ -1,5 +1,6 @@
 ---
 import type { Locale } from '../../lib/content/locale';
+import HeroBackground from './HeroBackground.astro';
 
 interface Props {
   locale: Locale;
@@ -34,16 +35,6 @@ const portfolioHref = locale === 'en' ? '/portfolio' : '/pt-br/portfolio';
 const blogHref      = locale === 'en' ? '/blog'      : '/pt-br/blog';
 const notesHref     = locale === 'en' ? '/notes'     : '/pt-br/notes';
 
-// Generate 36 SVG paths using the spec formula
-const paths = Array.from({ length: 36 }, (_, i) => {
-  const d = `M${-380 - i*5} ${-189 + i*6} C${-380 - i*5} ${-189 + i*6} ${-312 - i*5} ${216 - i*6} ${152 - i*5} ${343 - i*6} C${616 - i*5} ${470 - i*6} ${684 - i*5} ${875 - i*6} ${684 - i*5} ${875 - i*6}`;
-  const opacity = +(0.04 + i * 0.004).toFixed(3);
-  const strokeWidth = +(0.5 + i * 0.029).toFixed(2);
-  const duration = +(20 + i * 0.42).toFixed(1);
-  const delay = +(-i * 0.22).toFixed(2);
-  return { d, opacity, strokeWidth, duration, delay };
-});
-
 const currentYear = new Date().getFullYear();
 const yearsExp = currentYear - 2020;
 
@@ -64,20 +55,7 @@ const achievements = {
 ---
 
 <section class="hero" aria-label="Introduction">
-  <!-- Background paths -->
-  <svg class="hero-paths" viewBox="0 0 1200 500" fill="none" aria-hidden="true">
-    {paths.map((p) => (
-      <path
-        d={p.d}
-        stroke="currentColor"
-        stroke-width={p.strokeWidth}
-        stroke-opacity={p.opacity}
-        stroke-dasharray="2000"
-        stroke-dashoffset="2000"
-        style={`animation: hero-flow ${p.duration}s ${p.delay}s linear infinite alternate;`}
-      />
-    ))}
-  </svg>
+  <HeroBackground />
 
   <div class="hero-grid">
     <div class="hero-left">
@@ -194,25 +172,6 @@ const achievements = {
     display: flex;
     align-items: center;
     overflow: hidden;
-    color: var(--border); /* drives currentColor for SVG path strokes */
-  }
-
-  .hero-paths {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  @keyframes hero-flow {
-    from { stroke-dashoffset: 2000; }
-    to   { stroke-dashoffset: 0; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-paths path { animation: none !important; }
   }
 
   .hero-grid {
