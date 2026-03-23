@@ -102,17 +102,17 @@
   .icon-sun, .icon-moon-dim { display: none; }
   .icon-moon, .icon-sun-dim { display: block; }
 
-  /* Light state */
-  [data-theme-state='light'] .toggle-thumb {
+  /* Light state — driven by data-theme on <html> set before first paint */
+  :global([data-theme='light']) .toggle-thumb {
     transform: translateX(calc(3.5rem - 1.35rem - 4px));
     background: #ffffff;
   }
-  [data-theme-state='light'] .toggle-inactive {
+  :global([data-theme='light']) .toggle-inactive {
     right: auto;
     left: 4px;
   }
-  [data-theme-state='light'] .icon-moon { display: none; }
-  [data-theme-state='light'] .icon-sun  { display: block; }
-  [data-theme-state='light'] .icon-sun-dim  { display: none; }
-  [data-theme-state='light'] .icon-moon-dim { display: block; }
+  :global([data-theme='light']) .icon-moon { display: none; }
+  :global([data-theme='light']) .icon-sun  { display: block; }
+  :global([data-theme='light']) .icon-sun-dim  { display: none; }
+  :global([data-theme='light']) .icon-moon-dim { display: block; }
 </style>

@@ -244,14 +244,14 @@ test.describe('Footer', () => {
     await expect(legal.locator('a[href="/terms"]')).toBeVisible();
   });
 
-  test('footer uses container-max width (not wide-max)', async ({ page }) => {
+  test('footer uses wide-max width and is narrower than viewport at 1600px', async ({ page }) => {
     await page.goto('/');
-    // Behavioral: at wide viewport inner should not fill full width
-    await page.setViewportSize({ width: 1400, height: 800 });
+    // Behavioral: at very wide viewport inner should not fill full width
+    await page.setViewportSize({ width: 1600, height: 800 });
     const inner = page.locator('.footer-inner');
     const box = await inner.boundingBox();
-    // container-max = 60rem = 960px; inner must be narrower than 1400
-    expect(box!.width).toBeLessThan(1400);
+    // wide-max = 88rem = 1408px; inner must be narrower than 1600
+    expect(box!.width).toBeLessThan(1600);
   });
 });
 
@@ -279,14 +279,12 @@ test.describe('Portfolio Page', () => {
   });
 });
 
-test('hero has circuit background with CPU node', async ({ page }) => {
+test('hero has CPU architecture background', async ({ page }) => {
   await page.goto('/');
-  const cpuNode = page.locator('.hero-bg .cpu-node');
-  await expect(cpuNode).toBeVisible();
-  const circuitPaths = page.locator('.hero-bg .circuit-path');
-  const count = await circuitPaths.count();
-  expect(count).toBeGreaterThan(0);
-  await expect(circuitPaths.first()).toBeVisible();
+  await expect(page.locator('.hero .hero-paths')).toBeVisible();
+  await expect(page.locator('.hero .cpu-group')).toBeVisible();
+  const count = await page.locator('.hero .trace-base').count();
+  expect(count).toBe(13);
 });
 
 test('html has scrollbar-gutter: stable', async ({ page }) => {
@@ -297,12 +295,12 @@ test('html has scrollbar-gutter: stable', async ({ page }) => {
   expect(scrollbarGutter).toBe('stable');
 });
 
-test('container max width is 60rem', async ({ page }) => {
+test('container max width is 68rem', async ({ page }) => {
   await page.goto('/');
   const maxWidth = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--container-max').trim()
   );
-  expect(maxWidth).toBe('60rem');
+  expect(maxWidth).toBe('68rem');
 });
 
 test.describe('Legal placeholder pages', () => {

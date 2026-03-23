@@ -86,13 +86,20 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 .container {
   max-width: var(--container-max);
   margin-inline: auto;
-  padding-inline: var(--space-4);
+  padding-inline: var(--space-6);
 }
 
 .container--wide {
   max-width: var(--wide-max);
   margin-inline: auto;
-  padding-inline: var(--space-4);
+  padding-inline: var(--space-6);
+}
+
+@media (min-width: 48rem) {
+  .container,
+  .container--wide {
+    padding-inline: var(--space-8);
+  }
 }
 
 /* ── Button styles ──────────────────────────────────────── */
