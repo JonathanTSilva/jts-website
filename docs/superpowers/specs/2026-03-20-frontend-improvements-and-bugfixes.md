@@ -210,3 +210,11 @@ Share this post with social media icons (LinkedIn, Twitter, Facebook, WhatsApp, 
 
 - Here in the notes, the cards colors should vary based on the category. Not the highlight color, but that color in the .note-card::before that is an accent color. Each category should have a different color, and this color should be consistent across the website (for example, if I have a category "Data Science" with a blue accent color, all notes with this category should have this blue accent color in the card, and also in the tag of the category in the blog posts and in the portfolio page).
 - ← Back to notes button at the top of the page, like in the blog post page.
+
+## Summary of Priorities
+
+1. Shell fixes — bugs first (hamburger, theme toggle, search bar) + language switcher → footer + navbar alignment. Everything else builds on top of a working shell.
+2. Home page — hero overhaul, projects/publications/blog/notes sections, footer restructure, remove contact section.
+3. Portfolio page — about image, skills section, timeline highlight.
+4. Blog page — list filters + reading time, individual post overhaul (the largest chunk).
+5. Notes page — category color system.
