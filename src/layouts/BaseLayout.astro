@@ -1,6 +1,5 @@
 ---
 import { themeInlineScript } from '../lib/theme/theme-inline-script';
-import { ViewTransitions } from 'astro:transitions';
 import SeoHead from '../components/site/SeoHead.astro';
 import Header from '../components/site/Header.astro';
 import Footer from '../components/site/Footer.astro';
@@ -28,18 +27,17 @@ const { title, description, locale = 'en' } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <script is:inline set:html={themeInlineScript} />
     <SeoHead title={title} description={description} locale={locale} currentPath={Astro.url.pathname} />
-    <ViewTransitions />
     <slot name="head" />
   </head>
   <body class="site-wrapper">
     <a href="#main-content" class="skip-link">Skip to content</a>
-    <Header locale={locale} transition:animate="none" />
+    <Header locale={locale} />
     <main id="main-content">
       <slot />
     </main>
-    <Footer locale={locale} currentPath={Astro.url.pathname} transition:animate="none" />
-    <SearchDialog locale={locale} transition:animate="none" />
-    <Toast transition:animate="none" />
+    <Footer locale={locale} currentPath={Astro.url.pathname} />
+    <SearchDialog locale={locale} />
+    <Toast />
   </body>
 </html>
 

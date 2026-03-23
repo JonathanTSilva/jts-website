@@ -1,21 +1,25 @@
 export const themeInlineScript = `
   (function() {
     const storageKey = 'theme-preference';
-
-    function applyTheme() {
-      const theme = localStorage.getItem(storageKey) ||
-        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
-      if (!localStorage.getItem(storageKey)) {
-        localStorage.setItem(storageKey, theme);
+    const theme = (function() {
+      if (typeof localStorage !== 'undefined' && localStorage.getItem(storageKey)) {
+        return localStorage.getItem(storageKey);
       }
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      return 'light';
+    })();
+
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
     }
-
-    // Apply on initial load (before first paint)
-    applyTheme();
-
-    // Re-apply after each View Transitions swap, because Astro re-sets
-    // html attributes (including data-theme="light") from the new page.
-    document.addEventListener('astro:after-swap', applyTheme);
+    
+    // Ensure the initial theme is persisted if it was derived from system preference
+    if (typeof localStorage !== 'undefined' && !localStorage.getItem(storageKey)) {
+        localStorage.setItem(storageKey, theme);
+    }
   })();
 `.trim();
