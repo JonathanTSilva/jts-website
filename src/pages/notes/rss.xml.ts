@@ -9,7 +9,7 @@ export async function GET(context: any) {
   return rss({
     title: 'Jonathan’s Notes',
     description: 'Technical notes, cheat sheets, and bits of knowledge.',
-    site: context.site || 'https://example.com',
+    site: context.site || 'https://jontobias.com/',
     items: sortedNotes.map((note) => ({
       title: note.data.title,
       pubDate: note.data.publishedAt,

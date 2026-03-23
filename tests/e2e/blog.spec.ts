@@ -27,11 +27,15 @@ test.describe('Blog', () => {
     await page.goto('/blog/2026-03-hello-embedded-systems.en');
     await expect(page.getByRole('heading', { name: 'Hello Embedded Systems', level: 1 })).toBeVisible();
     await expect(page.getByText(/Published on March (9|10), 2026/)).toBeVisible();
+    await expect(page.locator('.author-name')).toHaveText('Jonathan Tobias');
+    await expect(page.locator('.author-subtitle')).toHaveText('Senior Embedded Software Engineer');
   });
 
   test('pt-br: blog detail page renders content', async ({ page }) => {
     await page.goto('/pt-br/blog/2026-03-hello-embedded-systems.pt-br');
     await expect(page.getByRole('heading', { name: 'Olá Sistemas Embarcados', level: 1 })).toBeVisible();
+    await expect(page.locator('.author-name')).toHaveText('Jonathan Tobias');
+    await expect(page.locator('.author-subtitle')).toHaveText('Senior Embedded Software Engineer');
   });
 
   test('translation fallback notice is visible', async ({ page }) => {

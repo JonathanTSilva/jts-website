@@ -57,7 +57,7 @@ test.describe('Homepage', () => {
 
 test('hero renders name, monospace label, CTA buttons, and typewriter', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.hero h1')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Jonathan Tobias da Silva', level: 1 })).toBeVisible();
   await expect(page.locator('.typewriter-prefix')).toBeVisible();
   await expect(page.locator('a[href="/portfolio"]').first()).toBeVisible();
   await expect(page.locator('a[href="/blog"]').first()).toBeVisible();
@@ -91,9 +91,9 @@ test('hero social contact row has email, linkedin, github links', async ({ page 
   await page.goto('/');
   const social = page.locator('.hero-social');
   await expect(social).toBeVisible();
-  await expect(social.locator('a[href^="mailto:"]')).toBeVisible();
-  await expect(social.locator('a[href*="linkedin"]')).toBeVisible();
-  await expect(social.locator('a[href*="github"]')).toBeVisible();
+  await expect(social.locator('a[href="mailto:jonathantosilva@hotmail.com"]')).toBeVisible();
+  await expect(social.locator('a[href="https://www.linkedin.com/in/jonathantsilva/"]')).toBeVisible();
+  await expect(social.locator('a[href="https://github.com/JonathanTSilva"]')).toBeVisible();
 });
 
 test('hero CTA area has tagline text and three CTA buttons', async ({ page }) => {
@@ -232,6 +232,10 @@ test.describe('Footer', () => {
     await page.goto('/');
     await expect(page.locator('.footer-logo')).toBeVisible();
     await expect(page.locator('.footer-social')).toBeVisible();
+    await expect(page.locator('.footer-name')).toHaveText('Jonathan Tobias');
+    await expect(page.locator('.footer-social a[href="mailto:jonathantosilva@hotmail.com"]')).toBeVisible();
+    await expect(page.locator('.footer-social a[href="https://www.linkedin.com/in/jonathantsilva/"]')).toBeVisible();
+    await expect(page.locator('.footer-social a[href="https://github.com/JonathanTSilva"]')).toBeVisible();
     // LanguageSwitcher pill is inside footer
     await expect(page.locator('.footer-row-brand .lang-pill')).toBeVisible();
   });
@@ -240,6 +244,7 @@ test.describe('Footer', () => {
     await page.goto('/');
     const legal = page.locator('.footer-row-legal');
     await expect(legal).toBeVisible();
+    await expect(legal).toContainText('Jonathan Tobias');
     await expect(legal.locator('a[href="/privacy"]')).toBeVisible();
     await expect(legal.locator('a[href="/terms"]')).toBeVisible();
   });

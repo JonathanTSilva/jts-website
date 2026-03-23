@@ -25,9 +25,9 @@ const t = {
 }[locale];
 
 const contacts = [
-  { label: t.email, href: 'mailto:contact@example.com' },
-  { label: t.linkedin, href: 'https://linkedin.com/in/example' },
-  { label: t.github, href: 'https://github.com/example' },
+  { label: t.email, href: 'mailto:jonathantosilva@hotmail.com', external: false },
+  { label: t.linkedin, href: 'https://www.linkedin.com/in/jonathantsilva/', external: true },
+  { label: t.github, href: 'https://github.com/JonathanTSilva', external: true },
 ];
 ---
 
@@ -38,7 +38,12 @@ const contacts = [
   </header>
   <div class="contact-links">
     {contacts.map((contact) => (
-      <a href={contact.href} class="btn-secondary" target="_blank" rel="noopener noreferrer">
+      <a
+        href={contact.href}
+        class="btn-secondary"
+        target={contact.external ? '_blank' : undefined}
+        rel={contact.external ? 'noopener noreferrer' : undefined}
+      >
         {contact.label}
       </a>
     ))}

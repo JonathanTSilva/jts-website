@@ -5,6 +5,20 @@ test('portfolio page loads', async ({ page }) => {
   await expect(page).toHaveTitle(/Portfolio/i);
 });
 
+test('portfolio CV link points to the public PDF', async ({ page }) => {
+  await page.goto('/portfolio');
+  const cvLink = page.getByRole('link', { name: 'Download CV (PDF)' });
+  await expect(cvLink).toHaveAttribute('href', '/assets/cv/jonathan-cv.pdf');
+  await expect(cvLink).toHaveAttribute('download', '');
+});
+
+test('pt-br portfolio CV link points to the public PDF', async ({ page }) => {
+  await page.goto('/pt-br/portfolio');
+  const cvLink = page.getByRole('link', { name: 'Baixar CV (PDF)' });
+  await expect(cvLink).toHaveAttribute('href', '/assets/cv/jonathan-cv.pdf');
+  await expect(cvLink).toHaveAttribute('download', '');
+});
+
 test('portfolio bento grid renders project cards', async ({ page }) => {
   await page.goto('/portfolio');
   const bentoGrid = page.locator('.bento-grid');
