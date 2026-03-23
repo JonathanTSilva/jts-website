@@ -141,7 +141,7 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation','Networki
     <g>
       <circle cx={t.sx} cy={t.sy} r="3.5" class="start-dot" />
       <path d={t.d} class="trace-base" />
-      <path d={t.d} class="trace-pulse" stroke-dasharray="1 2000" stroke-dashoffset="2000" style={`animation-delay: ${t.delay}`} />
+      <path d={t.d} class="trace-pulse" style={`animation-delay: ${t.delay}`} />
     </g>
   ))}
 
@@ -166,12 +166,13 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation','Networki
     stroke-linecap: round;
     stroke-dasharray: 80 2000;
     animation: flow 6s linear infinite;
+    animation-fill-mode: backwards;
     opacity: 0.15;
   }
 
   @keyframes flow {
-    from { stroke-dashoffset: 0; }
-    to { stroke-dashoffset: 2080; }
+    from { stroke-dashoffset: 2160; }
+    to   { stroke-dashoffset: 0; }
   }
 
   .cpu-body, .cpu-pins {

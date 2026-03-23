@@ -284,7 +284,7 @@ test('hero has CPU architecture background', async ({ page }) => {
   await expect(page.locator('.hero .hero-paths')).toBeVisible();
   await expect(page.locator('.hero .cpu-group')).toBeVisible();
   const count = await page.locator('.hero .trace-base').count();
-  expect(count).toBe(11);
+  expect(count).toBe(13);
 });
 
 test('html has scrollbar-gutter: stable', async ({ page }) => {
