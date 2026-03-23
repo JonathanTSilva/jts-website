@@ -112,7 +112,6 @@ const t = {
           <Content />
         </div>
 
-        <PostNav locale={locale} prev={prev} next={next} />
         <ShareButtons title={post.data.title} url={Astro.url.href} type="post" locale={locale as 'en' | 'pt-br'} />
       </div>
 
@@ -120,6 +119,10 @@ const t = {
         <TableOfContents headings={headings} />
       </aside>
     </div>
+
+    <!-- FULL-WIDTH: divider + older/newer navigation -->
+    <hr class="post-end-divider" />
+    <PostNav locale={locale} prev={prev} next={next} />
   </div>
 
   <BackToTop />
@@ -238,6 +241,12 @@ const t = {
     border: none;
     border-top: 1px solid var(--border);
     margin: var(--space-8) 0 0;
+  }
+
+  .post-end-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: var(--space-12) 0 var(--space-8);
   }
 
   .post-body-grid {
