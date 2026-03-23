@@ -6,6 +6,7 @@ import PostNav from '../../../components/blog/PostNav.astro';
 import BackToTop from '../../../components/site/BackToTop.astro';
 import ShareButtons from '../../../components/site/ShareButtons.astro';
 import { getReadingTime } from '../../../lib/readingTime';
+import { getCategoryColor } from '../../../lib/categoryColors';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('blog');
@@ -45,6 +46,7 @@ const { post, isTranslationFallback, prev, next } = Astro.props;
 const { Content, headings } = await render(post);
 const locale = 'pt-br';
 const readingTime = getReadingTime(post.body);
+const categoryColor = getCategoryColor(post.data.category);
 
 const t = {
   fallbackNotice: 'Este post não está disponível em Português. Exibindo a versão original.',
@@ -63,7 +65,7 @@ const t = {
   <Fragment slot="head">
     <meta property="og:image" content={`/og/blog/${post.data.slug}.png`} />
   </Fragment>
-  <div class="post-wrapper">
+  <div class="post-wrapper" style={`--category-color: ${categoryColor}`}>
     <!-- PREAMBLE: full width -->
     <div class="post-preamble">
       <a href="/pt-br/blog" class="back-link">{t.backToBlog}</a>
@@ -135,7 +137,7 @@ const t = {
   }
 
   .back-link {
-    display: inline-block;
+    display: block;
     color: var(--text-muted);
     font-family: var(--font-mono);
     font-size: var(--text-sm);
@@ -152,12 +154,11 @@ const t = {
     display: inline-block;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
-    color: var(--accent);
-    background: var(--accent-dim);
+    color: var(--category-color);
+    background: color-mix(in srgb, var(--category-color) 12%, var(--surface));
     border-radius: var(--radius-full);
     padding: var(--space-1) var(--space-3);
     margin-bottom: var(--space-3);
-    margin-left: var(--space-2);
   }
 
   .post-title {
