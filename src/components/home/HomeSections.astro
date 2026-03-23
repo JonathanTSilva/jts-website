@@ -175,6 +175,9 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
     .grid {
       grid-template-columns: 1fr;
     }
+    .grid :global(.project-card[style*="span"]) {
+      grid-column: span 1 !important;
+    }
   }
 
   .cta {
