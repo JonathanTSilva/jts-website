@@ -29,7 +29,7 @@ const t = {
     <div class="footer-row footer-row-brand">
       <!-- Logo + name -->
       <div class="footer-logo">
-        <span class="footer-logo-mark" aria-hidden="true"></span>
+        <img src="/assets/images/jts-logo-circle-simple.png" alt="JTS logo" class="footer-logo-img" width="24" height="24" />
         <span class="footer-name">Jonathan</span>
       </div>
 
@@ -111,12 +111,10 @@ const t = {
     align-items: center;
     gap: var(--space-2);
   }
-  .footer-logo-mark {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    background: var(--accent);
-    border-radius: var(--radius-sm);
+  .footer-logo-img {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
     flex-shrink: 0;
   }
   .footer-name {
