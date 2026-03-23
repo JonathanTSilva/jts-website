@@ -52,6 +52,7 @@ test.describe('Blog', () => {
     const text = await response?.text();
     expect(text).toContain('<rss');
     expect(text).toContain('Continuous Integration for Firmware');
+    expect(text).toContain('https://www.jontobias.com');
   });
 
   test('blog list shows category filter bar', async ({ page }) => {

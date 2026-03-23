@@ -115,4 +115,12 @@ test.describe('Notes', () => {
     await page.goto('/notes/debugging-habits.en');
     await expect(page.locator('.share-buttons')).toBeVisible();
   });
+
+  test('notes RSS feed uses canonical www domain', async ({ page }) => {
+    const response = await page.goto('/notes/rss.xml');
+    expect(response?.status()).toBe(200);
+    const text = await response?.text();
+    expect(text).toContain('<rss');
+    expect(text).toContain('https://www.jontobias.com');
+  });
 });

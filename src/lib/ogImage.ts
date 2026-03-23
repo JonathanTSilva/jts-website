@@ -21,12 +21,15 @@ export interface OGImageOptions {
   author?: string;
 }
 
+export const DEFAULT_OG_SITE_NAME = 'www.jontobias.com';
+export const DEFAULT_OG_AUTHOR = 'Jonathan Tobias';
+
 export async function generateOGImage(options: OGImageOptions): Promise<Buffer> {
   const {
     title,
     category,
-    siteName = 'jts.dev',
-    author = 'Jonathan',
+    siteName = DEFAULT_OG_SITE_NAME,
+    author = DEFAULT_OG_AUTHOR,
   } = options;
 
   const svg = await satori(
