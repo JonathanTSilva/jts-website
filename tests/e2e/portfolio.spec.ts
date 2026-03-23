@@ -46,6 +46,7 @@ test('about section shows image or placeholder', async ({ page }) => {
   await page.goto('/portfolio');
   const imageWrap = page.locator('.about-image-wrap');
   await expect(imageWrap).toBeVisible();
+  await expect(page.locator('.about-image')).toHaveAttribute('alt', 'Jonathan Tobias');
 });
 
 test('timeline line highlights on scroll', async ({ page }) => {

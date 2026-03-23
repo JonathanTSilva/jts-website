@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Header', () => {
+  test('header brand uses Jonathan Tobias', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.logo-name')).toHaveText('Jonathan Tobias');
+  });
+
   test('header is fixed at top and content is not hidden beneath it', async ({ page }) => {
     await page.goto('/');
     const header = page.locator('#site-header');

@@ -63,6 +63,11 @@ test('hero renders name, monospace label, CTA buttons, and typewriter', async ({
   await expect(page.locator('a[href="/blog"]').first()).toBeVisible();
 });
 
+test('homepage title uses Jonathan Tobias site name', async ({ page }) => {
+  await page.goto('/');
+  await expect(page).toHaveTitle('Home | Jonathan Tobias');
+});
+
 test('hero does not render a nav element', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.hero nav')).not.toBeAttached();
