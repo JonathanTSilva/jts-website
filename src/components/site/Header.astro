@@ -348,10 +348,10 @@ const navItems = getNavigation(locale);
   .search-field input::placeholder { color: var(--text-muted); }
   .search-field svg { flex-shrink: 0; color: var(--text-muted); }
 
-  /* Mobile: 2-column layout (logo | actions) */
+  /* Mobile: 3-column layout (logo | search-icon | hamburger) */
   @media (max-width: 47.9375rem) {
     .header-inner {
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr auto auto;
     }
     .main-nav { display: none; }
   }
