@@ -1,59 +1,59 @@
-import type { Project } from "./types";
+import type { ProjectEntry } from "./types";
 
-export const projects: Project[] = [
+export const projects: ProjectEntry[] = [
   {
     title: {
-      en: "Embedded RTOS Kernel",
-      "pt-br": "Kernel RTOS Embarcado",
+      en: "Industrial Connectivity Platform",
+      "pt-br": "Plataforma de Conectividade Industrial",
     },
     description: {
-      en: "A real-time operating system kernel for ARM Cortex-M microcontrollers.",
-      "pt-br": "Um kernel de sistema operacional de tempo real para microcontroladores ARM Cortex-M.",
+      en: "Mission-critical embedded software for industrial switches and PLCs, focusing on peak performance and high availability.",
+      "pt-br": "Software embarcado de missão crítica para switches industriais e CLPs, com foco em alto desempenho e disponibilidade.",
     },
-    tags: ["C", "RTOS", "ARM", "Cortex-M"],
-    year: 2023,
-    github: "https://github.com/example/rtos-kernel",
-    role: {
-      en: "Lead Developer",
-      "pt-br": "Desenvolvedor Principal",
-    },
-    icon: "⚙️",
-    status: "Active",
+    image: "/assets/images/projects/connectivity.png",
+    tags: ["Embedded Linux", "VxWorks", "C/C++", "Industrial Protocols"],
+    github: "https://github.com/JonathanTSilva",
     featured: true,
   },
   {
     title: {
-      en: "Automated Test Harness",
-      "pt-br": "Harness de Teste Automatizado",
+      en: "L3 Telecommunications Stack",
+      "pt-br": "Stack de Telecomunicações L3",
     },
     description: {
-      en: "Distributed testing framework for firmware validation.",
-      "pt-br": "Framework de testes distribuídos para validação de firmware.",
+      en: "Implementation and optimization of Layer 3 protocols (IP, OSPF, BGP) for high-performance networking devices.",
+      "pt-br": "Implementação e otimização de protocolos de Camada 3 (IP, OSPF, BGP) para dispositivos de rede de alta performance.",
     },
-    tags: ["Python", "CI/CD", "Firmware", "Automation"],
-    year: 2024,
-    link: "https://example.com/test-harness",
-    role: {
-      en: "Architect",
-      "pt-br": "Arquiteto",
-    },
-    icon: "🧪",
-    status: "Active",
+    image: "/assets/images/projects/telecom.png",
+    tags: ["C/C++", "Python", "Networking", "L3 Protocols"],
+    github: "https://github.com/JonathanTSilva",
+    featured: true,
   },
   {
     title: {
-      en: 'Firmware OTA Update System',
-      'pt-br': 'Sistema de Atualização OTA de Firmware',
+      en: "Secure OPC UA Framework",
+      "pt-br": "Framework Seguro OPC UA",
     },
     description: {
-      en: 'Secure over-the-air firmware update pipeline for IoT edge devices.',
-      'pt-br': 'Pipeline seguro de atualização de firmware OTA para dispositivos IoT de borda.',
+      en: "Research and development of security measures for OPC UA networks, including vulnerability analysis and resilience testing.",
+      "pt-br": "Pesquisa e desenvolvimento de medidas de segurança para redes OPC UA, incluindo análise de vulnerabilidades e testes de resiliência.",
     },
-    tags: ['C', 'MQTT', 'TLS', 'IoT'],
-    year: 2025,
-    role: {
-      en: 'Tech Lead',
-      'pt-br': 'Tech Lead',
-    },
+    image: "/assets/images/projects/opcua.png",
+    tags: ["Cybersecurity", "OPC UA", "M.Sc. Research", "Industrial Security"],
+    link: "https://ieeexplore.ieee.org/document/10375053",
+    featured: true,
   },
+  {
+    title: {
+      en: "Custom Embedded Linux (Yocto)",
+      "pt-br": "Linux Embarcado Customizado (Yocto)",
+    },
+    description: {
+      en: "Development and maintenance of optimized Linux distributions for industrial automation systems using the Yocto Project.",
+      "pt-br": "Desenvolvimento e manutenção de distribuições Linux otimizadas para sistemas de automação industrial usando Yocto Project.",
+    },
+    image: "/assets/images/projects/yocto.png",
+    tags: ["Yocto Project", "Embedded Linux", "Kernel", "Automation"],
+    github: "https://github.com/JonathanTSilva",
+  }
 ];

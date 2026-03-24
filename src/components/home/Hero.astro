@@ -1,57 +1,20 @@
 ---
 import type { Locale } from '../../lib/content/locale';
+import { getHeroPositioning } from '../../lib/content/positioning';
 import HeroBackground from './HeroBackground.astro';
 
 interface Props {
   locale: Locale;
-  typewriterPrefix: string;
-  typewriterPhrases: string[];
 }
 
-const { locale, typewriterPrefix, typewriterPhrases } = Astro.props;
-
-const t = {
-  en: {
-    label: '// SENIOR EMBEDDED SOFTWARE ENGINEER',
-    name: 'Jonathan Tobias da Silva',
-    portfolioCta: 'View Portfolio',
-    blogCta: 'Read Blog',
-    notesCta: 'Check my notes',
-    tagline: 'Explore my work and insights',
-    profileAlt: 'Jonathan Tobias',
-  },
-  'pt-br': {
-    label: '// ENGENHEIRO SÊNIOR DE SOFTWARE EMBARCADO',
-    name: 'Jonathan Tobias da Silva',
-    portfolioCta: 'Ver Portfólio',
-    blogCta: 'Ler Blog',
-    notesCta: 'Ver minhas notas',
-    tagline: 'Explore meu trabalho e insights',
-    profileAlt: 'Jonathan Tobias',
-  },
-}[locale];
+const { locale } = Astro.props;
+const t = getHeroPositioning(locale);
 
 const portfolioHref = locale === 'en' ? '/portfolio' : '/pt-br/portfolio';
 const blogHref      = locale === 'en' ? '/blog'      : '/pt-br/blog';
 const notesHref     = locale === 'en' ? '/notes'     : '/pt-br/notes';
 
-const currentYear = new Date().getFullYear();
-const yearsExp = currentYear - 2020;
-
-const achievements = {
-  en: [
-    { value: `${yearsExp}+`, label: 'Years of Experience' },
-    { value: '3',            label: 'R&D Projects Coordinated' },
-    { value: '30+',         label: 'Professional Projects' },
-    { value: '★ Best',      label: 'Highest GPA (Grad + Master)' },
-  ],
-  'pt-br': [
-    { value: `${yearsExp}+`, label: 'Anos de Experiência' },
-    { value: '3',            label: 'Projetos P&D Coordenados' },
-    { value: '30+',         label: 'Projetos Profissionais' },
-    { value: '★ Best',      label: 'Maior GPA (Grad + Mestrado)' },
-  ],
-}[locale];
+const { typewriterPrefix, typewriterPhrases, achievements } = t;
 ---
 
 <section class="hero" aria-label="Introduction">

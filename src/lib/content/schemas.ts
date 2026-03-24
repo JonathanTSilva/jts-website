@@ -30,8 +30,15 @@ export const notesSchema = z.object({
 export const nowSchema = z.object({
   title: z.string(),
   language: languageEnum,
-  translationKey: z.string().min(1).optional(),
+  translationKey: z.string().min(1),
   updatedAt: z.coerce.date(),
   summary: z.string().optional(),
   status: z.string().optional(),
+});
+
+export const portfolioAboutSchema = z.object({
+  title: z.string(),
+  language: languageEnum,
+  translationKey: z.string().min(1),
+  summary: z.string().optional(),
 });
