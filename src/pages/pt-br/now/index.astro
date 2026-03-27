@@ -21,6 +21,11 @@ if (!entry) {
 
 const { Content } = await render(entry);
 
+const translations = {
+  en: '/now',
+  'pt-br': '/pt-br/now',
+};
+
 const t = {
   lastUpdated: 'Última atualização:',
   status: 'Foco atual:',
@@ -32,6 +37,7 @@ const t = {
   locale={locale} 
   title={entry.data.title}
   description={entry.data.summary}
+  translations={translations}
 >
   <main class="container">
     <header class="now-header">

@@ -9,17 +9,26 @@ export async function getStaticPaths() {
   const allNotes = await getCollection('notes');
   const locale = 'en';
 
-  // We want to generate paths for all notes.
-  // The logic should be: for each note, we want a route in each locale index,
-  // but the slug-based route should probably just exist for each specific note's slug.
+  return allNotes.map(note => {
+    const translations = allNotes.filter(n => n.data.translationKey === note.data.translationKey);
+    const enNote = translations.find(n => n.data.language === 'en');
+    const ptNote = translations.find(n => n.data.language === 'pt-br');
 
-  return allNotes.map(note => ({
-    params: { slug: note.data.slug },
-    props: { note, isTranslationFallback: note.data.language !== locale },
-  }));
+    return {
+      params: { slug: note.data.slug },
+      props: {
+        note,
+        isTranslationFallback: note.data.language !== locale,
+        translations: {
+          ...(enNote ? { en: `/notes/${enNote.data.slug}` } : {}),
+          ...(ptNote ? { 'pt-br': `/pt-br/notes/${ptNote.data.slug}` } : {}),
+        }
+      },
+    };
+  });
 }
 
-const { note, isTranslationFallback } = Astro.props;
+const { note, isTranslationFallback, translations } = Astro.props;
 const { Content } = await render(note);
 
 const locale = 'en';
@@ -50,6 +59,7 @@ const relatedNotes = allNotesForRelated
   locale={locale}
   title={note.data.title}
   description={note.data.summary ?? undefined}
+  translations={translations}
 >
   <Fragment slot="head">
     <meta property="og:image" content={`/og/notes/${note.data.slug}.png`} />

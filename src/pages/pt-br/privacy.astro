@@ -1,8 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const translations = {
+  en: '/privacy',
+  'pt-br': '/pt-br/privacy',
+};
 ---
 
-<BaseLayout locale="pt-br" title="Política de Privacidade">
+<BaseLayout locale="pt-br" title="Política de Privacidade" translations={translations}>
   <h1>Política de Privacidade</h1>
   <p>Esta página está em construção. Volte em breve.</p>
 </BaseLayout>

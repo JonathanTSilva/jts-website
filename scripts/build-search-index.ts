@@ -17,7 +17,7 @@ interface SearchItem {
   tags: string[];
   category?: string;
   url: string;
-  type: 'blog' | 'notes';
+  type: 'blog' | 'notes' | 'now' | 'portfolio';
 }
 
 async function buildIndex() {
@@ -39,7 +39,7 @@ async function buildIndex() {
             title: data.title,
             summary: data.summary || '',
             tags: data.tags || [],
-            url: locale === 'en' ? `/blog/${data.slug}` : `/pt-br/blog/${data.slug}`,
+            url: locale === 'en' ? `/blog/${data.slug || file.split('.')[0]}` : `/pt-br/blog/${data.slug || file.split('.')[0]}`,
             type: 'blog'
           });
         }
@@ -62,8 +62,53 @@ async function buildIndex() {
             summary: data.summary || '',
             tags: data.tags || [],
             category: data.category,
-            url: locale === 'en' ? `/notes/${data.slug}` : `/pt-br/notes/${data.slug}`,
+            url: locale === 'en' ? `/notes/${data.slug || file.split('.')[0]}` : `/pt-br/notes/${data.slug || file.split('.')[0]}`,
             type: 'notes'
+          });
+        }
+      }
+    }
+
+    // Process Now
+    const nowDir = path.join(CONTENT_DIR, 'now');
+    if (fs.existsSync(nowDir)) {
+      const files = fs.readdirSync(nowDir);
+      for (const file of files) {
+        if (!file.endsWith('.md') && !file.endsWith('.mdx')) continue;
+        
+        const content = fs.readFileSync(path.join(nowDir, file), 'utf-8');
+        const { data } = matter(content);
+        
+        if (data.language === locale) {
+          index.push({
+            title: data.title,
+            summary: data.summary || '',
+            tags: [],
+            url: locale === 'en' ? `/now` : `/pt-br/now`,
+            type: 'now'
+          });
+        }
+      }
+    }
+
+    // Process Portfolio Biography
+    const portfolioDir = path.join(CONTENT_DIR, 'portfolio');
+    if (fs.existsSync(portfolioDir)) {
+      const files = fs.readdirSync(portfolioDir);
+      for (const file of files) {
+        if (!file.endsWith('.md') && !file.endsWith('.mdx')) continue;
+        if (!file.startsWith('about')) continue;
+        
+        const content = fs.readFileSync(path.join(portfolioDir, file), 'utf-8');
+        const { data } = matter(content);
+        
+        if (data.language === locale) {
+          index.push({
+            title: data.title,
+            summary: data.summary || '',
+            tags: [],
+            url: locale === 'en' ? `/portfolio` : `/pt-br/portfolio`,
+            type: 'portfolio'
           });
         }
       }

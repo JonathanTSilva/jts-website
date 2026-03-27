@@ -43,5 +43,19 @@
     "category": "Real-Time Systems",
     "url": "/notes/rtos-scheduling.en",
     "type": "notes"
+  },
+  {
+    "title": "Now",
+    "summary": "Currently focused on industrial connectivity and mission-critical systems for Schneider Electric.",
+    "tags": [],
+    "url": "/now",
+    "type": "now"
+  },
+  {
+    "title": "Biography",
+    "summary": "Senior Embedded Software Engineer specializing in mission-critical systems and technical leadership.",
+    "tags": [],
+    "url": "/portfolio",
+    "type": "portfolio"
   }
 ]

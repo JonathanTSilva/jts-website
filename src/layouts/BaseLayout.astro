@@ -13,9 +13,10 @@ interface Props {
   title?: string | undefined;
   description?: string | undefined;
   locale?: Locale;
+  translations?: Partial<Record<Locale, string>> | undefined;
 }
 
-const { title, description, locale = 'en' } = Astro.props;
+const { title, description, locale = 'en', translations } = Astro.props;
 ---
 
 <!doctype html>
@@ -35,7 +36,7 @@ const { title, description, locale = 'en' } = Astro.props;
     <main id="main-content">
       <slot />
     </main>
-    <Footer locale={locale} currentPath={Astro.url.pathname} />
+    <Footer locale={locale} currentPath={Astro.url.pathname} translations={translations} />
     <SearchDialog locale={locale} />
     <Toast />
   </body>

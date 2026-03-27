@@ -5,6 +5,11 @@ import HomeSections from '../../components/home/HomeSections.astro';
 
 const locale = 'pt-br';
 
+const translations = {
+  en: '/',
+  'pt-br': '/pt-br',
+};
+
 const t = {
   projects: 'Projetos',
   publications: 'Publicações',
@@ -19,11 +24,7 @@ const t = {
 };
 ---
 
-<BaseLayout locale={locale} title="Início">
-  <Hero
-    locale="pt-br"
-    typewriterPrefix="nascido para "
-    typewriterPhrases={["construir sistemas confiáveis", "escrever código limpo", "resolver problemas difíceis", "entregar coisas que durem"]}
-  />
+<BaseLayout locale={locale} title="Início" translations={translations}>
+  <Hero locale="pt-br" />
   <HomeSections locale={locale} t={t} />
 </BaseLayout>

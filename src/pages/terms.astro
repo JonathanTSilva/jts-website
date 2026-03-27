@@ -1,8 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const translations = {
+  en: '/terms',
+  'pt-br': '/pt-br/terms',
+};
 ---
 
-<BaseLayout locale="en" title="Terms of Service">
+<BaseLayout locale="en" title="Terms of Service" translations={translations}>
   <h1>Terms of Service</h1>
   <p>This page is under construction.</p>
 </BaseLayout>

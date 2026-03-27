@@ -1,7 +1,7 @@
 import { type Locale, DEFAULT_LOCALE, LOCALES } from '../content/locale';
 
-export const SITE_NAME = 'Jonathan';
-export const SITE_DESCRIPTION = 'Senior Embedded Software Engineer Portfolio & Writing';
+export const SITE_NAME = 'Jonathan Tobias';
+export const SITE_DESCRIPTION = 'Senior Embedded Software Engineer & M.Sc. specializing in mission-critical systems and technical leadership.';
 
 export interface SeoProps {
   title?: string | undefined;
@@ -17,7 +17,8 @@ export function generateSeo(props: SeoProps) {
   const { title, description, canonical, ogType = 'website', image, locale, currentPath = '/' } = props;
   const baseUrl = 'https://www.jontobias.com';
   
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+  const profession = locale === 'pt-br' ? 'Engenheiro Sênior de Software Embarcado' : 'Senior Embedded Software Engineer';
+  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | ${profession}`;
   const fullDescription = description || SITE_DESCRIPTION;
   
   // Strip locale prefix from current path if it exists to find the base path

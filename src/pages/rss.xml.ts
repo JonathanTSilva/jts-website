@@ -11,7 +11,7 @@ export async function GET(context: any) {
   return rss({
     title: 'Jonathan’s Blog',
     description: 'Writings on firmware, embedded systems, and automation.',
-    site: context.site || 'https://example.com',
+    site: context.site || 'https://www.jontobias.com',
     items: sortedPosts.map((post) => ({
       title: post.data.title,
       pubDate: post.data.publishedAt,

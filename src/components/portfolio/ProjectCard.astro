@@ -18,7 +18,9 @@ const description = project.description[locale];
 >
   <div class="card-top">
     {project.icon && <span class="card-icon" aria-hidden="true">{project.icon}</span>}
-    <span class="card-status">{project.status ?? 'Active'}</span>
+    <span class="card-status" data-status={project.status ?? 'Active'}>
+      {project.status ?? 'Active'}
+    </span>
   </div>
 
   <div class="card-body">
@@ -106,10 +108,34 @@ const description = project.description[locale];
   .card-status {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
-    color: var(--text-muted);
-    background: var(--surface-high);
     padding: 2px var(--space-2);
     border-radius: var(--radius-sm);
+    font-weight: var(--weight-medium);
+  }
+
+  .card-status[data-status="Active"] {
+    color: var(--status-active);
+    background: var(--status-active-bg);
+  }
+
+  .card-status[data-status="In Progress"] {
+    color: var(--status-in-progress);
+    background: var(--status-in-progress-bg);
+  }
+
+  .card-status[data-status="Archived"] {
+    color: var(--status-archived);
+    background: var(--status-archived-bg);
+  }
+
+  .card-status[data-status="Featured"] {
+    color: var(--status-featured);
+    background: var(--status-featured-bg);
+  }
+
+  .card-status[data-status="Private"] {
+    color: var(--status-private);
+    background: var(--status-private-bg);
   }
 
   .card-body { flex: 1; }

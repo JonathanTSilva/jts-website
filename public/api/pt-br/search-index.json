@@ -20,5 +20,19 @@
     "category": "Engenharia",
     "url": "/pt-br/notes/debugging-habits.pt-br",
     "type": "notes"
+  },
+  {
+    "title": "Agora",
+    "summary": "Atualmente focado em conectividade industrial e sistemas de missão crítica para a Schneider Electric.",
+    "tags": [],
+    "url": "/pt-br/now",
+    "type": "now"
+  },
+  {
+    "title": "Biografia",
+    "summary": "Engenheiro Sênior de Software Embarcado especializado em sistemas críticos e liderança técnica.",
+    "tags": [],
+    "url": "/pt-br/portfolio",
+    "type": "portfolio"
   }
 ]
