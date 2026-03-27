@@ -1,4 +1,3 @@
-import { fa } from "zod/v4/locales";
 import type { ProjectEntry } from "./types";
 
 export const projects: ProjectEntry[] = [
