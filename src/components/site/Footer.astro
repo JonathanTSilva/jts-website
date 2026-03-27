@@ -4,9 +4,10 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
 interface Props {
   locale: 'en' | 'pt-br';
   currentPath: string;
+  translations?: Partial<Record<'en' | 'pt-br', string>> | undefined;
 }
 
-const { locale, currentPath } = Astro.props;
+const { locale, currentPath, translations } = Astro.props;
 const currentYear = new Date().getFullYear();
 
 const t = {
@@ -30,7 +31,7 @@ const t = {
       <!-- Logo + name -->
       <div class="footer-logo">
         <img src="/assets/images/jts-logo-circle-simple.png" alt="JTS logo" class="footer-logo-img" width="24" height="24" />
-        <span class="footer-name">Jonathan Tobias</span>
+        <span class="footer-name">Tobias</span>
       </div>
 
       <!-- Social icons -->
@@ -59,15 +60,15 @@ const t = {
       </div>
 
       <!-- Language switcher -->
-      <LanguageSwitcher currentLocale={locale} currentPath={currentPath} />
+      <LanguageSwitcher currentLocale={locale} currentPath={currentPath} translations={translations} />
     </div>
 
     <!-- Row 2: copyright | legal links -->
     <div class="footer-row footer-row-legal">
-      <p class="footer-copy">&copy; {currentYear} Jonathan Tobias. {t.rights}</p>
+      <p class="footer-copy">&copy; {currentYear} Jonathan Tobias da Silva. {t.rights}</p>
       <div class="footer-legal-links">
-        <a href="/privacy">{t.privacy}</a>
-        <a href="/terms">{t.terms}</a>
+        <a href={locale === 'en' ? '/privacy' : `/${locale}/privacy`}>{t.privacy}</a>
+        <a href={locale === 'en' ? '/terms' : `/${locale}/terms`}>{t.terms}</a>
       </div>
     </div>
   </div>
@@ -112,16 +113,17 @@ const t = {
     gap: var(--space-2);
   }
   .footer-logo-img {
-    width: 24px;
-    height: 24px;
+    width: var(--logo-size);
+    height: var(--logo-size);
     border-radius: var(--radius-full);
     flex-shrink: 0;
   }
   .footer-name {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
+    font-family: var(--font-logo);
+    font-size: var(--logo-size);
+    font-weight: var(--weight-bold);
     color: var(--text);
+    line-height: 1;
   }
 
   /* Social icons */

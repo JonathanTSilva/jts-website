@@ -57,7 +57,7 @@ test.describe('Homepage', () => {
 
 test('hero renders name, monospace label, CTA buttons, and typewriter', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Jonathan Tobias da Silva', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Jonathan Tobias', level: 1 })).toBeVisible();
   await expect(page.locator('.typewriter-prefix')).toBeVisible();
   await expect(page.locator('a[href="/portfolio"]').first()).toBeVisible();
   await expect(page.locator('a[href="/blog"]').first()).toBeVisible();
@@ -104,6 +104,7 @@ test('hero social contact row has email, linkedin, github links', async ({ page 
 test('hero CTA area has tagline text and three CTA buttons', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.hero-tagline')).toContainText('Leading the development of robust');
+  await expect(page.locator('.hero-tagline')).toContainText('Bridging the gap between hardware and software');
   await expect(page.locator('.hero-cta a')).toHaveCount(3);
   await expect(page.locator('.hero-cta .btn-ghost')).toBeVisible();
 });
@@ -112,6 +113,7 @@ test('pt-br hero tagline is in Portuguese', async ({ page }) => {
   await page.goto('/pt-br');
   const tagline = page.locator('.hero-tagline');
   await expect(tagline).toContainText('Liderando o desenvolvimento de soluções embarcadas');
+  await expect(tagline).toContainText('Unindo hardware e software');
 });
 
 test('mobile: hero left column renders before right column', async ({ page }) => {

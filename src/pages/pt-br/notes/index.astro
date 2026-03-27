@@ -6,6 +6,11 @@ import NotesFilters from '../../../components/notes/NotesFilters.astro';
 
 const locale = 'pt-br';
 
+const translations = {
+  en: '/notes',
+  'pt-br': '/pt-br/notes',
+};
+
 const t = {
   title: 'Notas',
   description: 'Uma coleção de notas técnicas, dicas e pedaços de conhecimento.',
@@ -38,7 +43,7 @@ const categoryCounts = categories.reduce((acc, cat) => {
 }, {} as Record<string, number>);
 ---
 
-<BaseLayout locale={locale} title={t.title} description={t.description}>
+<BaseLayout locale={locale} title={t.title} description={t.description} translations={translations}>
   <div class="container">
     <header class="page-header">
       <h1 class="page-title">{t.title}</h1>

@@ -68,7 +68,7 @@ const { typewriterPrefix, typewriterPhrases, achievements } = t;
     <div class="hero-right">
       <div class="profile-image-wrap">
         <img
-          src="/assets/images/profile_ai.png"
+          src="/assets/images/profile_ai_transparent2.png"
           alt={t.profileAlt}
           class="profile-image"
           onerror="this.style.display='none';this.parentElement.classList.add('profile-placeholder')"
@@ -246,12 +246,12 @@ const { typewriterPrefix, typewriterPhrases, achievements } = t;
   }
 
   .profile-image-wrap {
-    background: var(--surface-high);
+    background: var(--surface); /* or --surface-high */
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     aspect-ratio: 1 / 1;
-    max-height: 18rem; /* profile image height cap — no token for this one-off size */
+    max-height: 28rem; /* profile image height cap — no token for this one-off size */
     width: 100%;
     overflow: hidden;
   }

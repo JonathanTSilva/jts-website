@@ -1,3 +1,6 @@
+@import './tokens.css';
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&display=swap');
+
 /* ── Geist font-face declarations ───────────────────────── */
 @font-face {
   font-family: 'Geist';
@@ -14,8 +17,6 @@
   font-style: normal;
   font-display: swap;
 }
-
-@import './tokens.css';
 
 /* ── Reset ──────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }

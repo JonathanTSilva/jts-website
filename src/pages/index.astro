@@ -5,6 +5,11 @@ import HomeSections from '../components/home/HomeSections.astro';
 
 const locale = 'en';
 
+const translations = {
+  en: '/',
+  'pt-br': '/pt-br',
+};
+
 const t = {
   projects: 'Projects',
   publications: 'Publications',
@@ -19,7 +24,7 @@ const t = {
 };
 ---
 
-<BaseLayout locale={locale} title="Home">
+<BaseLayout locale={locale} title="Home" translations={translations}>
   <Hero locale="en" />
   <HomeSections locale={locale} t={t} />
 </BaseLayout>

@@ -17,8 +17,8 @@ const navItems = getNavigation(locale);
 <header class="site-header" id="site-header">
   <div class="header-inner">
     <a href={locale === 'en' ? '/' : `/${locale}`} class="logo" aria-label="Home">
-      <img src="/assets/images/jts-logo-circle-simple.png" alt="JTS logo" class="logo-img" width="28" height="28" />
-      <span class="logo-name">Jonathan Tobias</span>
+      <img src="/assets/images/jts-logo-circle-simple.png" alt="JTS logo" class="logo-img" width="24" height="24" />
+      <span class="logo-name">Tobias</span>
     </a>
 
     <nav class="main-nav" aria-label="Main navigation" id="main-nav">
@@ -227,17 +227,18 @@ const navItems = getNavigation(locale);
   }
   .logo:hover { text-decoration: none; }
   .logo-img {
-    width: 28px;
-    height: 28px;
+    width: var(--logo-size);
+    height: var(--logo-size);
     border-radius: var(--radius-full);
     flex-shrink: 0;
   }
   .logo-name {
-    font-family: var(--font-sans);
-    font-weight: var(--weight-semibold);
-    font-size: var(--text-base);
+    font-family: var(--font-logo);
+    font-weight: var(--weight-bold);
+    font-size: var(--logo-size);
     color: var(--text);
     transition: color var(--duration-fast) var(--ease-out);
+    line-height: 1;
   }
   .logo:hover .logo-name { color: var(--accent); }
 

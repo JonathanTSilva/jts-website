@@ -4,18 +4,19 @@ import { type Locale } from '../../lib/content/locale';
 interface Props {
   currentLocale: Locale;
   currentPath: string;
+  translations?: Partial<Record<Locale, string>> | undefined;
 }
 
-const { currentLocale, currentPath } = Astro.props;
+const { currentLocale, currentPath, translations } = Astro.props;
 
 // Compute target URL for each locale
-const enHref = currentPath.startsWith('/pt-br')
+const enHref = translations?.en || (currentPath.startsWith('/pt-br')
   ? currentPath.slice('/pt-br'.length) || '/'
-  : currentPath;
+  : currentPath);
 
-const ptHref = currentLocale === 'en'
+const ptHref = translations?.['pt-br'] || (currentLocale === 'en'
   ? `/pt-br${currentPath === '/' ? '' : currentPath}`
-  : currentPath;
+  : currentPath);
 ---
 
 <div class="lang-pill" role="group" aria-label="Language switcher">

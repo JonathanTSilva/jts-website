@@ -11,6 +11,11 @@ import SkillsCloud from '../../components/portfolio/SkillsCloud.astro';
 
 const locale = 'en';
 
+const translations = {
+  en: '/portfolio',
+  'pt-br': '/pt-br/portfolio',
+};
+
 const sortedExperience = [...experience].sort((a, b) =>
   b.startDate.localeCompare(a.startDate)
 );
@@ -26,7 +31,7 @@ const t = {
 };
 ---
 
-<BaseLayout locale={locale} title={t.title}>
+<BaseLayout locale={locale} title={t.title} translations={translations}>
   <div class="portfolio-wrapper">
     <div class="portfolio-header">
       <h1>{t.title}</h1>

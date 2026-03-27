@@ -30,19 +30,28 @@ export async function getStaticPaths() {
     const prevPost = idx >= 0 && idx < displayPosts.length - 1 ? displayPosts[idx + 1] : undefined;
     const nextPost = idx > 0 ? displayPosts[idx - 1] : undefined;
 
-    return translations.map(post => ({
-      params: { slug: post.data.slug },
-      props: {
-        post,
-        isTranslationFallback: post.data.language !== locale,
-        prev: prevPost ? { title: prevPost.data.title, slug: prevPost.data.slug } : undefined,
-        next: nextPost ? { title: nextPost.data.title, slug: nextPost.data.slug } : undefined,
-      },
-    }));
+    return translations.map(post => {
+      const enPost = translations.find(p => p.data.language === 'en');
+      const ptPost = translations.find(p => p.data.language === 'pt-br');
+
+      return {
+        params: { slug: post.data.slug },
+        props: {
+          post,
+          isTranslationFallback: post.data.language !== locale,
+          prev: prevPost ? { title: prevPost.data.title, slug: prevPost.data.slug } : undefined,
+          next: nextPost ? { title: nextPost.data.title, slug: nextPost.data.slug } : undefined,
+          translations: {
+            ...(enPost ? { en: `/blog/${enPost.data.slug}` } : {}),
+            ...(ptPost ? { 'pt-br': `/pt-br/blog/${ptPost.data.slug}` } : {}),
+          }
+        },
+      };
+    });
   });
 }
 
-const { post, isTranslationFallback, prev, next } = Astro.props;
+const { post, isTranslationFallback, prev, next, translations } = Astro.props;
 const { Content, headings } = await render(post);
 const locale = 'en';
 const readingTime = getReadingTime(post.body);
@@ -61,6 +70,7 @@ const t = {
   locale={locale}
   title={post.data.title}
   description={post.data.summary}
+  translations={translations}
 >
   <Fragment slot="head">
     <meta property="og:image" content={`/og/blog/${post.data.slug}.png`} />
@@ -222,6 +232,12 @@ const t = {
 
   .author-name {
     font-weight: var(--weight-semibold);
+    display: block;
+  }
+
+  .author-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
     display: block;
   }
 

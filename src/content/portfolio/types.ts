@@ -10,11 +10,14 @@ export interface Project {
   link?: string;
   github?: string;
   role?: LocalizedString;
-  year: number;
+  year?: number;
   featured?: boolean;           // spans 2 columns in bento grid
   icon?: string;                // emoji or single character, e.g. "⚙️"
-  status?: 'Active' | 'Archived' | 'Featured';
+  status?: 'Active' | 'Archived' | 'Featured' | 'Private' | 'In Progress'; // for filtering and display purposes
+  image?: string;
 }
+
+export type ProjectEntry = Project;
 
 export interface Publication {
   title: LocalizedString;
@@ -23,6 +26,8 @@ export interface Publication {
   link?: string;
   type: "article" | "paper" | "book" | "talk" | "conference" | "journal";
 }
+
+export type PublicationEntry = Publication;
 
 export interface ExperienceEntry {
   type: 'work' | 'education';   // required — backfill all work entries
