@@ -103,7 +103,7 @@ test('hero social contact row has email, linkedin, github links', async ({ page 
 
 test('hero CTA area has tagline text and three CTA buttons', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.hero-tagline')).toContainText('Leading the development of robust');
+  await expect(page.locator('.hero-tagline')).toContainText('Leading the development of software solutions');
   await expect(page.locator('.hero-tagline')).toContainText('Bridging the gap between hardware and software');
   await expect(page.locator('.hero-cta a')).toHaveCount(3);
   await expect(page.locator('.hero-cta .btn-ghost')).toBeVisible();
@@ -112,7 +112,7 @@ test('hero CTA area has tagline text and three CTA buttons', async ({ page }) =>
 test('pt-br hero tagline is in Portuguese', async ({ page }) => {
   await page.goto('/pt-br');
   const tagline = page.locator('.hero-tagline');
-  await expect(tagline).toContainText('Liderando o desenvolvimento de soluções embarcadas');
+  await expect(tagline).toContainText('Liderando o desenvolvimento de soluções de software');
   await expect(tagline).toContainText('Unindo hardware e software');
 });
 
