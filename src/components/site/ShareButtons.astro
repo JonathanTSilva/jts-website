@@ -119,14 +119,8 @@ const labels = {
         try {
           await navigator.clipboard.writeText(msg);
           (window as Window & { showToast?: (opts: { message: string; variant: string; duration: number }) => void }).showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
-        } catch {
-          const ta = document.createElement('textarea');
-          ta.value = msg;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          (window as Window & { showToast?: (opts: { message: string; variant: string; duration: number }) => void }).showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
+        } catch (err) {
+          console.error('Failed to copy: ', err);
         }
       });
     });

@@ -39,7 +39,7 @@ const t = {
   description={entry.data.summary}
   translations={translations}
 >
-  <main class="container">
+  <div class="container">
     <header class="now-header">
       <h1 class="now-title">{entry.data.title}</h1>
       {entry.data.status && (
@@ -63,7 +63,7 @@ const t = {
     <div class="prose">
       <Content />
     </div>
-  </main>
+  </div>
 </BaseLayout>
 
 <style>

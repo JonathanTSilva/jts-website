@@ -11,7 +11,9 @@
     "astro": "astro",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "test:e2e:install": "playwright install --with-deps chromium",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:update-missing": "playwright test --update-snapshots=missing",
+    "test:e2e:install": "playwright install --with-deps",
     "test": "pnpm test:unit && pnpm test:e2e",
     "lint:content": "tsx scripts/validate-content.ts",
     "sync:content": "tsx scripts/sync-content.ts",
@@ -29,6 +31,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
     "@playwright/test": "^1.50.1",
     "@types/fs-extra": "^11.0.4",
     "fs-extra": "^11.3.4",

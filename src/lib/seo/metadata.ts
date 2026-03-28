@@ -1,14 +1,14 @@
 import { type Locale, DEFAULT_LOCALE, LOCALES } from '../content/locale';
 
-export const SITE_NAME = 'Jonathan Tobias';
+export const SITE_NAME = 'Tobias';
 export const SITE_DESCRIPTION = 'Senior Embedded Software Engineer & M.Sc. specializing in mission-critical systems and technical leadership.';
 
 export interface SeoProps {
   title?: string | undefined;
   description?: string | undefined;
   canonical?: string;
-  ogType?: 'website' | 'article';
-  image?: string;
+  ogType?: 'website' | 'article' | undefined;
+  image?: string | undefined;
   locale: Locale;
   currentPath?: string;
 }

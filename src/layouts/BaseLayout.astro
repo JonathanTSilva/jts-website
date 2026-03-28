@@ -12,11 +12,13 @@ import { type Locale } from '../lib/content/locale';
 interface Props {
   title?: string | undefined;
   description?: string | undefined;
+  image?: string | undefined;
+  ogType?: 'website' | 'article' | undefined;
   locale?: Locale;
   translations?: Partial<Record<Locale, string>> | undefined;
 }
 
-const { title, description, locale = 'en', translations } = Astro.props;
+const { title, description, image, ogType, locale = 'en', translations } = Astro.props;
 ---
 
 <!doctype html>
@@ -27,7 +29,14 @@ const { title, description, locale = 'en', translations } = Astro.props;
     <link rel="icon" type="image/png" href="/assets/images/jts-logo-circle-simple.png" />
     <meta name="generator" content={Astro.generator} />
     <script is:inline set:html={themeInlineScript} />
-    <SeoHead title={title} description={description} locale={locale} currentPath={Astro.url.pathname} />
+    <SeoHead 
+      title={title} 
+      description={description} 
+      image={image} 
+      ogType={ogType} 
+      locale={locale} 
+      currentPath={Astro.url.pathname} 
+    />
     <slot name="head" />
   </head>
   <body class="site-wrapper">

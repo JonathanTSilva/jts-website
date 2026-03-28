@@ -7,7 +7,7 @@ const yearsOfExp = `${currentYear - startYear}+`;
 export const HERO_POSITIONING = {
   en: {
     label: '// SENIOR EMBEDDED SOFTWARE ENGINEER',
-    name: 'Jonathan Tobias',
+    name: 'Tobias',
     typewriterPrefix: 'dedicated to ',
     typewriterPhrases: [
       'software engineering',
@@ -34,7 +34,7 @@ export const HERO_POSITIONING = {
   },
   'pt-br': {
     label: '// ENGENHEIRO SÊNIOR DE SOFTWARE EMBARCADO',
-    name: 'Jonathan Tobias',
+    name: 'Tobias',
     typewriterPrefix: 'dedicado a ',
     typewriterPhrases: [
       'engenharia de software',
