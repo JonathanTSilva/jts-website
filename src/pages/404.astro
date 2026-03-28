@@ -1,0 +1,44 @@
+---
+// src/pages/404.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ErrorHero from '../components/site/ErrorHero.astro';
+---
+<BaseLayout title="404: Signal Lost" locale="en">
+  <div class="error-container">
+    <ErrorHero>
+      <span slot="title" data-en="Signal Lost" data-pt="Sinal Perdido">Signal Lost</span>
+      <span slot="text" data-en="The requested memory address is invalid or has been reallocated." data-pt="O endereço de memória solicitado é inválido ou foi realocado.">
+        The requested memory address is invalid or has been reallocated.
+      </span>
+    </ErrorHero>
+    <div class="actions">
+      <a href="/" class="btn-primary" id="back-home">Back to main branch</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+  }
+  .actions {
+    margin-top: var(--space-8);
+  }
+</style>
+
+<script>
+  // Simple client-side localization for 404 based on browser/previous URL
+  const isPt = window.location.pathname.startsWith('/pt-br') || navigator.language.startsWith('pt');
+  if (isPt) {
+    document.querySelectorAll('[data-pt]').forEach(el => {
+      const ptText = el.getAttribute('data-pt');
+      if (ptText) el.textContent = ptText;
+    });
+    const btn = document.querySelector('#back-home');
+    if (btn) btn.textContent = 'Voltar ao início';
+  }
+</script>

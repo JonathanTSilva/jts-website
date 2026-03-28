@@ -70,11 +70,10 @@ const t = {
   locale={locale}
   title={post.data.title}
   description={post.data.summary}
+  image={`/og/blog/${post.data.slug}.png`}
+  ogType="article"
   translations={translations}
 >
-  <Fragment slot="head">
-    <meta property="og:image" content={`/og/blog/${post.data.slug}.png`} />
-  </Fragment>
   <div class="post-wrapper" style={`--category-color: ${categoryColor}`}>
     <!-- PREAMBLE: full width -->
     <div class="post-preamble">

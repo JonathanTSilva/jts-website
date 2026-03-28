@@ -87,17 +87,23 @@ test.describe('Notes', () => {
     expect(Number(text?.trim())).toBeGreaterThan(0);
   });
 
-  test('notes index cards reflect category color', async ({ page }) => {
+    test('notes index cards reflect category color', async ({ page }) => {
     await page.goto('/notes');
-    // Notes with category "Engineering" → #22c55e, "Real-Time Systems" → #f59e0b
     const cards = page.locator('.note-card');
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
-    // At least one card should have a category-mapped color in its style
+
+    const expectedColors = [
+      'rgb(30, 58, 138)', // Blue 900
+      'rgb(6, 78, 59)',   // Green 900
+      'rgb(120, 53, 15)'  // Amber 900
+    ];
+
     let foundCategoryColor = false;
     for (let i = 0; i < count; i++) {
-      const style = await cards.nth(i).getAttribute('style');
-      if (style && (style.includes('#22c55e') || style.includes('#f59e0b'))) {
+      const card = cards.nth(i);
+      const borderTop = await card.evaluate((el) => window.getComputedStyle(el).borderTopColor);
+      if (expectedColors.includes(borderTop)) {
         foundCategoryColor = true;
         break;
       }

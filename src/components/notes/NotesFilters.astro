@@ -28,7 +28,7 @@ const labels = {
 
 <div class="notes-filters" id="notes-filters">
   <div class="filter-group">
-    <h3 class="filter-label">{labels.categories}</h3>
+    <h2 class="filter-label">{labels.categories}</h2>
     <div class="filter-options">
       <button class="filter-btn active" data-filter="category" data-value="all">{labels.all}</button>
       {categories.map(category => (
@@ -43,7 +43,7 @@ const labels = {
   </div>
 
   <div class="filter-group">
-    <h3 class="filter-label">{labels.tags}</h3>
+    <h2 class="filter-label">{labels.tags}</h2>
     <div class="filter-options">
       {tags.map(tag => (
         <button class="filter-btn" data-filter="tag" data-value={tag}>#{tag}</button>

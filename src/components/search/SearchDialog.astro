@@ -49,6 +49,7 @@ const t = {
 
 <script is:inline define:vars={{ locale, t }}>
   let searchIndex = null;
+  let activeIndex = -1;
   const dialog = document.getElementById('search-dialog');
   const backdrop = document.getElementById('search-backdrop');
   const input = document.getElementById('search-input');
@@ -59,6 +60,7 @@ const t = {
     dialog.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     input.focus();
+    activeIndex = -1;
     
     if (!searchIndex) {
       try {
@@ -77,9 +79,11 @@ const t = {
     document.body.style.overflow = '';
     input.value = '';
     resultsContainer.innerHTML = '';
+    activeIndex = -1;
   }
 
   function performSearch(query) {
+    activeIndex = -1;
     if (!searchIndex || !query) {
       resultsContainer.innerHTML = '';
       return;
@@ -106,6 +110,18 @@ const t = {
     `).join('');
   }
 
+  function updateActiveResult() {
+    const results = resultsContainer.querySelectorAll('.search-result-item');
+    results.forEach((el, i) => {
+      if (i === activeIndex) {
+        el.classList.add('active');
+        el.scrollIntoView({ block: 'nearest' });
+      } else {
+        el.classList.remove('active');
+      }
+    });
+  }
+
   // Keyboard shortcuts and focus trapping
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
@@ -114,8 +130,21 @@ const t = {
     }
     
     if (dialog.style.display === 'flex') {
+      const results = resultsContainer.querySelectorAll('.search-result-item');
+      
       if (e.key === 'Escape') {
         closeSearch();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, results.length - 1);
+        updateActiveResult();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, -1);
+        updateActiveResult();
+      } else if (e.key === 'Enter' && activeIndex >= 0) {
+        e.preventDefault();
+        results[activeIndex].click();
       }
       
       if (e.key === 'Tab') {
