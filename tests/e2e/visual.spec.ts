@@ -8,7 +8,9 @@ test.describe('Visual Regressions', () => {
     // .typewriter-text is dynamic
     // .typewriter-cursor is blinking
     // .hero-paths contains animated SVG backgrounds
-    await expect(page.locator('.hero')).toHaveScreenshot('hero-section.png', {
+    // Capture .hero-grid (content-driven height) instead of .hero (min-height: 100vh)
+    // to avoid CI flakiness from viewport height differences across environments.
+    await expect(page.locator('.hero-grid')).toHaveScreenshot('hero-section.png', {
       maxDiffPixelRatio: 0.2,
       maxDiffPixels: 50000,
       mask: [
