@@ -1,7 +1,9 @@
-name: Deploy
+name: Pipeline
 
 on:
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
 permissions:
@@ -10,11 +12,11 @@ permissions:
   id-token: write
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -27,19 +29,33 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
-      - name: Build search index
-        run: pnpm build:search
+      - name: Install Playwright Browsers
+        run: pnpm test:e2e:install
         
-      - name: Build Astro
+      - name: Check Astro
+        run: pnpm check
+        
+      - name: Lint Content
+        run: pnpm lint:content
+        
+      - name: Unit Tests
+        run: pnpm test:unit
+        
+      - name: Build
         run: pnpm build
+
+      - name: E2E Tests
+        run: pnpm test:e2e
         
       - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
   deploy:
-    needs: build
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
