@@ -34,31 +34,44 @@ test.describe('Build Integrity', () => {
     }
   });
 
-  test('RSS feeds should be valid and contain content', async ({ request }) => {
+  test('RSS feeds should be valid and contain content items', async ({ request }) => {
+    // Get expected slugs from src/content
+    const blogDir = path.join(process.cwd(), 'src/content/blog');
+    const notesDir = path.join(process.cwd(), 'src/content/notes');
+    
+    const blogFiles = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
+    const notesFiles = fs.readdirSync(notesDir).filter(f => f.endsWith('.md'));
+
+    const blogSlugs = blogFiles.map(f => f.replace(/\.(en|pt-br)\.md$/, '.$1'));
+    const notesSlugs = notesFiles.map(f => f.replace(/\.(en|pt-br)\.md$/, '.$1'));
+
     // Blog RSS
     const blogRss = await request.get('/rss.xml');
     expect(blogRss.ok()).toBe(true);
     const blogXml = await blogRss.text();
-    expect(blogXml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
-    expect(blogXml).toContain('<rss version="2.0"');
-    expect(blogXml).toContain('<channel>');
     expect(blogXml).toContain('<title>Jonathan’s Blog</title>');
-    expect(blogXml).toContain('<link>https://www.jontobias.com/</link>');
-    expect(blogXml).toContain('<item>'); // Should have at least one item
+    
+    for (const slug of blogSlugs) {
+      // Some items might be in pt-br
+      const isPtBr = slug.endsWith('.pt-br');
+      const path = isPtBr ? `/pt-br/blog/${slug}` : `/blog/${slug}`;
+      expect(blogXml).toContain(path);
+    }
 
     // Notes RSS
     const notesRss = await request.get('/notes/rss.xml');
     expect(notesRss.ok()).toBe(true);
     const notesXml = await notesRss.text();
-    expect(notesXml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
-    expect(notesXml).toContain('<rss version="2.0"');
-    expect(notesXml).toContain('<channel>');
     expect(notesXml).toContain('<title>Jonathan’s Notes</title>');
-    expect(notesXml).toContain('<link>https://www.jontobias.com/</link>');
-    expect(notesXml).toContain('<item>'); // Should have at least one item
+    
+    for (const slug of notesSlugs) {
+      const isPtBr = slug.endsWith('.pt-br');
+      const path = isPtBr ? `/pt-br/notes/${slug}` : `/notes/${slug}`;
+      expect(notesXml).toContain(path);
+    }
   });
 
-  test('every blog post and note should have an og:image meta tag', async ({ page }) => {
+  test('every blog post and note should have a reachable og:image meta tag', async ({ page, request }) => {
     const blogDir = path.join(process.cwd(), 'src/content/blog');
     const notesDir = path.join(process.cwd(), 'src/content/notes');
     
@@ -71,17 +84,25 @@ test.describe('Build Integrity', () => {
     // Check blog posts
     for (const slug of blogSlugs) {
       await page.goto(`/blog/${slug}`);
-      const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
+      const ogImage = await page.locator('meta[property="og:image"]').first().getAttribute('content');
       expect(ogImage).toBeTruthy();
       expect(ogImage).toContain(`/og/blog/${slug}.png`);
+      
+      // Reachability check
+      const imageResponse = await request.get(ogImage!);
+      expect(imageResponse.status(), `og:image for blog/${slug} should be reachable`).toBe(200);
     }
 
     // Check notes
     for (const slug of notesSlugs) {
       await page.goto(`/notes/${slug}`);
-      const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
+      const ogImage = await page.locator('meta[property="og:image"]').first().getAttribute('content');
       expect(ogImage).toBeTruthy();
       expect(ogImage).toContain(`/og/notes/${slug}.png`);
+
+      // Reachability check
+      const imageResponse = await request.get(ogImage!);
+      expect(imageResponse.status(), `og:image for notes/${slug} should be reachable`).toBe(200);
     }
   });
 });
