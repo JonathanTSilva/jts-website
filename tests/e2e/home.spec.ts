@@ -39,7 +39,7 @@ test.describe('Homepage', () => {
 test('hero renders name, monospace label, CTA buttons, and typewriter', async ({ page }) => {
     test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
       await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Tobias', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Jonathan Tobias', level: 1 })).toBeVisible();
   await expect(page.locator('.typewriter-prefix')).toBeVisible();
   await expect(page.locator('a[href="/portfolio"]').first()).toBeVisible();
   await expect(page.locator('a[href="/blog"]').first()).toBeVisible();
