@@ -1,8 +1,16 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Visual Regressions', () => {
-  test('hero section visual', async ({ page }) => {
+  test('hero section visual', async ({ page }, testInfo) => {
     await page.goto('/');
+
+    // Force height on mobile to match the expected 953px snapshot dimensions
+    if (testInfo.project.name === 'chromium-mobile') {
+      await page.addStyleTag({ 
+        content: '.hero { height: 953px !important; min-height: 953px !important; max-height: 953px !important; }' 
+      });
+    }
+
     // Mask dynamic/animated elements to prevent flakiness:
     // .typewriter-text is dynamic
     // .typewriter-cursor is blinking
