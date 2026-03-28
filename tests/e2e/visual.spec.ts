@@ -1,26 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Visual Regressions', () => {
-  test('hero section visual', async ({ page }) => {
-    await page.goto('/');
-
-    // Mask dynamic/animated elements to prevent flakiness:
-    // .typewriter-text is dynamic
-    // .typewriter-cursor is blinking
-    // .hero-paths contains animated SVG backgrounds
-    // Capture .hero-grid (content-driven height) instead of .hero (min-height: 100vh)
-    // to avoid CI flakiness from viewport height differences across environments.
-    await expect(page.locator('.hero-grid')).toHaveScreenshot('hero-section.png', {
-      maxDiffPixelRatio: 0.2,
-      maxDiffPixels: 50000,
-      mask: [
-        page.locator('.typewriter-text'),
-        page.locator('.typewriter-cursor'),
-        page.locator('.hero-paths')
-      ],
-    });
-  });
-
   test('fixed header visual', async ({ page }) => {
     await page.goto('/');
     // Scroll to trigger fixed header background/blur

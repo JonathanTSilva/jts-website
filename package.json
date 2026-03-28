@@ -12,6 +12,7 @@
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:update-missing": "playwright test --update-snapshots=missing",
     "test:e2e:install": "playwright install --with-deps",
     "test": "pnpm test:unit && pnpm test:e2e",
     "lint:content": "tsx scripts/validate-content.ts",
