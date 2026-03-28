@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Homepage', () => {
   test('en: homepage exposes portfolio, blog, notes, and now', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Desktop only');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
     await page.goto('/');
 
         await test.step('Header/Hero navigation', async () => {
-      if (page.viewportSize().width < 1024) {
+      if ((page.viewportSize()?.width || 0) < 1024) {
         test.skip(true, 'Mobile nav is hidden');
       }
       await expect(page.getByRole('link', { name: 'Portfolio' }).first()).toBeVisible();
@@ -37,7 +37,7 @@ test.describe('Homepage', () => {
 });
 
 test('hero renders name, monospace label, CTA buttons, and typewriter', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Desktop only');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
       await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Jonathan Tobias', level: 1 })).toBeVisible();
   await expect(page.locator('.typewriter-prefix')).toBeVisible();
@@ -56,7 +56,7 @@ test('hero does not render a nav element', async ({ page }) => {
 });
 
     test('homepage sections use monospace labels and token-based styles', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Desktop only');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
   await page.goto('/');
   const sectionLabel = page.locator('.section-label').first();
   await expect(sectionLabel).toBeVisible();
@@ -276,7 +276,7 @@ test.describe('Portfolio Page', () => {
     });
 
 test('hero has CPU architecture background', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Desktop only');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
   await page.goto('/');
   await expect(page.locator('.hero .hero-paths')).toBeVisible();
   await expect(page.locator('.hero .cpu-group')).toBeVisible();

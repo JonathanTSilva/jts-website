@@ -197,7 +197,7 @@ const words = ['Cybersecurity','Embedded','Software','AI','Automation','Networki
   }
 </style>
 
-<script define:vars={{ words }}>
+<script is:inline define:vars={{ words }}>
   const textEl = document.getElementById('cpu-word');
   let idx = 0;
   if (textEl) {

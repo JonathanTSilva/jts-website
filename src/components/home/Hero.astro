@@ -87,7 +87,7 @@ const { typewriterPrefix, typewriterPhrases, achievements } = t;
   </div>
 </section>
 
-<script define:vars={{ typewriterPhrases }}>
+<script is:inline define:vars={{ typewriterPhrases }}>
   const el = document.getElementById('typewriter-text');
   if (!el) throw new Error('typewriter-text element not found');
 

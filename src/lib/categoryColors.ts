@@ -9,7 +9,12 @@ export const categoryColors: Record<string, string> = {
   'default': '#1e3a8a'
 };
 
-export function getCategoryColor(category: string | undefined): string {
-  if (!category) return categoryColors.default;
-  return categoryColors[category] || categoryColors.default;
+export function getCategoryColor(
+  category: string | undefined,
+  colorToken?: string | undefined,
+): string {
+  const defaultColor = categoryColors.default || '#1e3a8a';
+  if (colorToken) return colorToken;
+  if (!category) return defaultColor;
+  return categoryColors[category] || defaultColor;
 }

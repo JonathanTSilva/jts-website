@@ -10,7 +10,7 @@ test.describe('Theme management', () => {
 
   test('toggles theme and persists choice', async ({ page }) => {
     await page.goto('/');
-    const isMobile = page.viewportSize().width < 1024;
+    const isMobile = (page.viewportSize()?.width || 0) < 1024;
     if (isMobile) {
       await page.click('#hamburger');
       await page.waitForSelector('#mobile-nav', { state: 'visible' });

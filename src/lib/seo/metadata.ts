@@ -7,8 +7,8 @@ export interface SeoProps {
   title?: string | undefined;
   description?: string | undefined;
   canonical?: string;
-  ogType?: 'website' | 'article';
-  image?: string;
+  ogType?: 'website' | 'article' | undefined;
+  image?: string | undefined;
   locale: Locale;
   currentPath?: string;
 }

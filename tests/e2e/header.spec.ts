@@ -31,7 +31,7 @@ test.describe('Header', () => {
   });
 
   test('header inner content is constrained by container-max', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Desktop only');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
     await page.goto('/');
     const inner = page.locator('.header-inner');
     // Verify max-width is set (any non-'none' value from the token is acceptable)
@@ -46,7 +46,7 @@ test.describe('Header', () => {
   });
 
       test('tubelight indicator does not move on hover', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Desktop only');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
     await page.goto('/');
     const indicator = page.locator('.nav-indicator');
 
@@ -74,7 +74,7 @@ test.describe('Header', () => {
   });
     
   test('nav links show hover background pill (CSS only)', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Hover not applicable on mobile');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Hover not applicable on mobile');
     await page.goto('/');
     const links = page.locator('.nav-list a');
     const firstLink = links.first();
@@ -90,7 +90,7 @@ test.describe('Header', () => {
       });
 
   test('search field is visible on desktop and opens dialog on click', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Desktop only');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
     await page.goto('/');
     const searchField = page.locator('.search-field');
     await expect(searchField).toBeVisible();
@@ -131,7 +131,7 @@ test.describe('Header', () => {
   });
 
   test('search input has readonly attribute to prevent mobile keyboard', async ({ page }) => {
-    test.skip(page.viewportSize().width < 1024, 'Desktop only');
+    test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
     await page.goto('/');
     const input = page.locator('.search-field input');
     await expect(input).toHaveAttribute('readonly', '');
