@@ -12,5 +12,5 @@ test('pt-br privacy policy page loads', async ({ page }) => {
 
 test('pt-br home page loads', async ({ page }) => {
   await page.goto('/pt-br/');
-  await expect(page.getByRole('heading', { name: 'Jonathan Tobias', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tobias', level: 1 })).toBeVisible();
 });

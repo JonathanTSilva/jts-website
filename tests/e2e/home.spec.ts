@@ -39,15 +39,15 @@ test.describe('Homepage', () => {
 test('hero renders name, monospace label, CTA buttons, and typewriter', async ({ page }) => {
     test.skip((page.viewportSize()?.width || 0) < 1024, 'Desktop only');
       await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Jonathan Tobias', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tobias', level: 1 })).toBeVisible();
   await expect(page.locator('.typewriter-prefix')).toBeVisible();
   await expect(page.locator('a[href="/portfolio"]').first()).toBeVisible();
   await expect(page.locator('a[href="/blog"]').first()).toBeVisible();
 });
 
-test('homepage title uses Jonathan Tobias site name', async ({ page }) => {
+test('homepage title uses Tobias site name', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveTitle('Home | Jonathan Tobias');
+  await expect(page).toHaveTitle('Home | Tobias');
 });
 
 test('hero does not render a nav element', async ({ page }) => {
@@ -223,7 +223,7 @@ test.describe('Footer', () => {
     await page.goto('/');
     await expect(page.locator('.footer-logo')).toBeVisible();
     await expect(page.locator('.footer-social')).toBeVisible();
-    await expect(page.locator('.footer-name')).toHaveText('Jonathan Tobias');
+    await expect(page.locator('.footer-name')).toHaveText('Tobias');
     await expect(page.locator('.footer-social a[href="mailto:jonathantosilva@hotmail.com"]')).toBeVisible();
     await expect(page.locator('.footer-social a[href="https://www.linkedin.com/in/jonathantsilva/"]')).toBeVisible();
     await expect(page.locator('.footer-social a[href="https://github.com/JonathanTSilva"]')).toBeVisible();
@@ -235,7 +235,7 @@ test.describe('Footer', () => {
     await page.goto('/');
     const legal = page.locator('.footer-row-legal');
     await expect(legal).toBeVisible();
-    await expect(legal).toContainText('Jonathan Tobias');
+    await expect(legal).toContainText('Tobias');
     await expect(legal.locator('a[href="/privacy"]')).toBeVisible();
     await expect(legal.locator('a[href="/terms"]')).toBeVisible();
   });

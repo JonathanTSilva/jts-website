@@ -1,6 +1,6 @@
 import { type Locale, DEFAULT_LOCALE, LOCALES } from '../content/locale';
 
-export const SITE_NAME = 'Jonathan Tobias';
+export const SITE_NAME = 'Tobias';
 export const SITE_DESCRIPTION = 'Senior Embedded Software Engineer & M.Sc. specializing in mission-critical systems and technical leadership.';
 
 export interface SeoProps {
