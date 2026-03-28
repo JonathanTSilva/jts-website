@@ -297,10 +297,13 @@ const { typewriterPrefix, typewriterPhrases, achievements } = t;
 
   @media (max-width: 48rem) {
     .hero-grid { grid-template-columns: 1fr; }
-    .hero-left  { order: 1; }
+    .hero-left  { order: 1; align-items: center; text-align: center; }
     .hero-right { order: 2; }
     .profile-image-wrap { max-height: none; }
     .achievement-grid { grid-template-columns: repeat(4, 1fr); }
+    .hero-social { justify-content: center; }
+    .hero-cta-area { align-items: center; }
+    .hero-cta { justify-content: center; }
   }
   @media (max-width: 36rem) {
     .achievement-grid { grid-template-columns: 1fr 1fr; }
