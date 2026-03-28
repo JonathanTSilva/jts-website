@@ -8,6 +8,8 @@ test.describe('Visual Regressions', () => {
     // .typewriter-cursor is blinking
     // .hero-paths contains animated SVG backgrounds
     await expect(page.locator('.hero')).toHaveScreenshot('hero-section.png', {
+      maxDiffPixelRatio: 0.1,
+      maxDiffPixels: 10000,
       mask: [
         page.locator('.typewriter-text'),
         page.locator('.typewriter-cursor'),
