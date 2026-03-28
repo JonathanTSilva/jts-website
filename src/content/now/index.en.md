@@ -13,5 +13,3 @@ status: "🚀 Senior Embedded Software Engineer"
 *   **Industrial Protocols:** I'm deep into implementing and optimizing industrial protocols like OPC UA, EtherNet/IP, and Modbus.
 *   **Technical Interests:** Exploring the potential of **Rust** in the embedded world, advocating for **TDD** in firmware development, and staying current with industrial cybersecurity (IEC 62443).
 *   **Personal Branding:** Refreshing my online presence to better reflect my journey as a Senior engineer and researcher.
-
-*This page was last updated on March 23, 2026.*
