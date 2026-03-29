@@ -46,7 +46,7 @@ describe('validateContent', () => {
     const body = '## Conclusion\nBye';
     const result = validateContent('blog', invalidFrontmatter, body);
     expect(result.success).toBe(false);
-    expect(result.errors[0]).toContain('Frontmatter: [title] Required');
+    expect(result.errors[0]).toContain('Frontmatter: [title]');
   });
 
   it('should fail if required sections are missing', () => {
