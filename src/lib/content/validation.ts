@@ -1,6 +1,8 @@
 import { blogSchema, notesSchema, nowSchema } from "./schemas";
 import { requireSections } from "./contracts";
-import type { z } from "zod";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SafeParseSchema = { safeParse: (data: unknown) => any };
 
 export type CollectionType = "blog" | "notes" | "now";
 
@@ -12,7 +14,7 @@ const CONTRACTS: Record<CollectionType, string[]> = {
   now: [],
 };
 
-const SCHEMAS: Record<CollectionType, z.ZodObject<any>> = {
+const SCHEMAS: Record<CollectionType, SafeParseSchema> = {
   blog: blogSchema,
   notes: notesSchema,
   now: nowSchema,
@@ -33,8 +35,8 @@ export function validateContent(
   // 1. Validate Frontmatter
   const schema = SCHEMAS[collection];
   const result = schema.safeParse(frontmatter);
-  if (!result.success) {
-    result.error.errors.forEach((err) => {
+  if (!result.success && result.error) {
+    result.error.errors.forEach((err: { path: (string | number)[]; message: string }) => {
       errors.push(`Frontmatter: [${err.path.join(".")}] ${err.message}`);
     });
   }
