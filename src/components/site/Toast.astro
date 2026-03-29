@@ -49,12 +49,22 @@
   .toast-card[data-variant='success'] { border-left: 4px solid #22c55e; }
   .toast-card[data-variant='error']   { border-left: 4px solid #ef4444; }
   .toast-card[data-variant='warning'] { border-left: 4px solid #f59e0b; }
+  .toast-card[data-variant='accent'] {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: var(--space-3) var(--space-5);
+    width: auto;
+  }
 
   .toast-icon { flex-shrink: 0; width: 16px; height: 16px; margin-top: 1px; }
   .toast-card[data-variant='default'] .toast-icon { color: var(--text-muted); }
   .toast-card[data-variant='success'] .toast-icon { color: #22c55e; }
   .toast-card[data-variant='error']   .toast-icon { color: #ef4444; }
   .toast-card[data-variant='warning'] .toast-icon { color: #f59e0b; }
+  .toast-card[data-variant='accent']  .toast-icon { color: var(--accent); }
 
   .toast-body { flex: 1; min-width: 0; }
   .toast-title {
@@ -67,6 +77,7 @@
   .toast-card[data-variant='success'] .toast-title { color: #22c55e; }
   .toast-card[data-variant='error']   .toast-title { color: #ef4444; }
   .toast-card[data-variant='warning'] .toast-title { color: #f59e0b; }
+  .toast-card[data-variant='accent']  .toast-title { color: var(--accent); }
 
   .toast-message {
     font-size: var(--text-xs);
@@ -86,10 +97,29 @@
     transition: color var(--duration-fast);
   }
   .toast-dismiss:hover { color: var(--text); }
+
+  .toast-accent-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .toast-accent-label {
+    font-size: var(--text-sm);
+    font-family: var(--font-mono);
+    color: var(--text);
+    white-space: nowrap;
+  }
 </style>
 
 <script>
-  type ToastVariant = 'default' | 'success' | 'error' | 'warning';
+  type ToastVariant = 'default' | 'success' | 'error' | 'warning' | 'accent';
 
   interface ToastOptions {
     message: string;
@@ -103,6 +133,7 @@
     success: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.354 5.354a.5.5 0 0 0-.708-.708L7 8.293 5.354 6.646a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l4-4Z"/></svg>`,
     error:   `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm-.354 5.354a.5.5 0 0 1 .708 0L8 6.293l-.354-.354a.5.5 0 0 1 .708-.708L8 5.586l.354-.354a.5.5 0 0 1 .708.708L8.707 6.5l.354.354a.5.5 0 0 1-.708.708L8 7.207l-.354.354a.5.5 0 0 1-.708-.708L7.293 6.5l-.354-.354a.5.5 0 0 1 0-.792ZM8 9a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/></svg>`,
     warning: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057Zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566ZM8 6c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 6.995A.905.905 0 0 1 8 6Zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"/></svg>`,
+    accent:  `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>`,
   };
 
   function showToast({ message, variant = 'default', title, duration = 4000 }: ToastOptions) {
@@ -114,37 +145,50 @@
     card.setAttribute('data-variant', variant);
     card.setAttribute('role', 'status');
 
-    // Build icon span (safe — ICONS values are hardcoded)
-    const iconSpan = document.createElement('span');
-    iconSpan.className = 'toast-icon';
-    iconSpan.setAttribute('aria-hidden', 'true');
-    iconSpan.innerHTML = ICONS[variant];
+    if (variant === 'accent') {
+      // Minimal: circle with checkmark + label below
+      const circle = document.createElement('div');
+      circle.className = 'toast-accent-circle';
+      circle.setAttribute('aria-hidden', 'true');
+      circle.innerHTML = `<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 8 6.5 11.5 13 5"/></svg>`;
 
-    // Build body
-    const body = document.createElement('div');
-    body.className = 'toast-body';
+      const label = document.createElement('span');
+      label.className = 'toast-accent-label';
+      label.textContent = message;
 
-    if (title) {
-      const titleEl = document.createElement('p');
-      titleEl.className = 'toast-title';
-      titleEl.textContent = title;
-      body.appendChild(titleEl);
+      card.appendChild(circle);
+      card.appendChild(label);
+    } else {
+      // Standard: icon + body + dismiss
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'toast-icon';
+      iconSpan.setAttribute('aria-hidden', 'true');
+      iconSpan.innerHTML = ICONS[variant];
+
+      const body = document.createElement('div');
+      body.className = 'toast-body';
+
+      if (title) {
+        const titleEl = document.createElement('p');
+        titleEl.className = 'toast-title';
+        titleEl.textContent = title;
+        body.appendChild(titleEl);
+      }
+
+      const msgEl = document.createElement('p');
+      msgEl.className = 'toast-message';
+      msgEl.textContent = message;
+      body.appendChild(msgEl);
+
+      const dismissBtn = document.createElement('button');
+      dismissBtn.className = 'toast-dismiss';
+      dismissBtn.setAttribute('aria-label', 'Dismiss');
+      dismissBtn.textContent = '×';
+
+      card.appendChild(iconSpan);
+      card.appendChild(body);
+      card.appendChild(dismissBtn);
     }
-
-    const msgEl = document.createElement('p');
-    msgEl.className = 'toast-message';
-    msgEl.textContent = message;
-    body.appendChild(msgEl);
-
-    // Build dismiss button
-    const dismissBtn = document.createElement('button');
-    dismissBtn.className = 'toast-dismiss';
-    dismissBtn.setAttribute('aria-label', 'Dismiss');
-    dismissBtn.textContent = '×';
-
-    card.appendChild(iconSpan);
-    card.appendChild(body);
-    card.appendChild(dismissBtn);
 
     function dismiss() {
       card.classList.add('toast-exit');

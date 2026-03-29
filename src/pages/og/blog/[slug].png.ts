@@ -1,6 +1,6 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
-import { DEFAULT_OG_AUTHOR, DEFAULT_OG_SITE_NAME, generateOGImage } from '../../../lib/ogImage';
+import { DEFAULT_OG_AUTHOR, DEFAULT_OG_AUTHOR_ROLE, generateOGImage } from '../../../lib/ogImage';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getCollection('blog');
@@ -14,8 +14,8 @@ export const GET: APIRoute = async ({ props }) => {
   const { post } = props as { post: Awaited<ReturnType<typeof getCollection<'blog'>>>[0] };
   const png = await generateOGImage({
     title: post.data.title,
-    siteName: DEFAULT_OG_SITE_NAME,
     author: DEFAULT_OG_AUTHOR,
+    authorRole: DEFAULT_OG_AUTHOR_ROLE,
     ...(post.data.category ? { category: post.data.category } : {}),
   });
 

@@ -39,7 +39,13 @@ const latestNotes = notes
   .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
   .slice(0, 3);
 
-const selectedProjects = projects.slice(0, 3);
+const featuredProjects = projects.filter(p => p.status === 'Featured');
+const selectedProjects = featuredProjects.length >= 4
+  ? featuredProjects.slice(0, 4)
+  : [
+      ...featuredProjects,
+      ...projects.filter(p => p.status !== 'Featured').slice(0, 4 - featuredProjects.length),
+    ];
 
 const projectsLabel = locale === 'pt-br' ? '// portfólio' : '// portfolio';
 const publicationsLabel = locale === 'pt-br' ? '// portfólio' : '// portfolio';
@@ -171,12 +177,14 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
     gap: var(--space-4);
   }
 
+  /* Home grid is always 2 columns — never let featured cards span full row */
+  .grid :global(.project-card[style*="span"]) {
+    grid-column: span 1 !important;
+  }
+
   @media (max-width: 48rem) {
     .grid {
       grid-template-columns: 1fr;
-    }
-    .grid :global(.project-card[style*="span"]) {
-      grid-column: span 1 !important;
     }
   }
 
