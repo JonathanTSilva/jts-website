@@ -44,32 +44,65 @@ const categoryCounts = categories.reduce((acc, cat) => {
 ---
 
 <BaseLayout locale={locale} title={t.title} description={t.description} translations={translations}>
-  <div class="container">
-    <header class="page-header">
-      <h1 class="page-title">{t.title}</h1>
-      <p class="page-description">{t.description}</p>
-    </header>
+  <header class="page-header">
+    <h1 class="page-title">{t.title}</h1>
+    <p class="page-description">{t.description}</p>
+  </header>
 
-    <NotesFilters categories={categories} categoryCounts={categoryCounts} tags={tags} locale={locale} />
-    <NotesGrid notes={notesToShow} locale={locale} />
+  <div class="notes-layout">
+    <aside class="notes-sidebar">
+      <NotesFilters categories={categories} categoryCounts={categoryCounts} tags={tags} locale={locale} />
+    </aside>
+    <div class="notes-content">
+      <NotesGrid notes={notesToShow} locale={locale} />
+    </div>
   </div>
 </BaseLayout>
 
-<style>
-  .container {
-    max-width: var(--container-max);
-    margin: 0 auto;
-    padding: var(--space-8) 0;
+<style is:global>
+  main:has(.notes-layout) {
+    max-width: 62rem;
   }
+</style>
+
+<style>
   .page-header {
     margin-bottom: var(--space-12);
   }
+
   .page-title {
     font-size: var(--text-4xl);
     margin-bottom: var(--space-4);
   }
+
   .page-description {
     font-size: var(--text-lg);
     color: var(--text-muted);
+  }
+
+  .notes-layout {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .notes-sidebar {
+    position: sticky;
+    top: var(--space-8);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+
+  @media (max-width: 48rem) {
+    .notes-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .notes-sidebar {
+      position: static;
+    }
   }
 </style>

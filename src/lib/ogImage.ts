@@ -10,26 +10,35 @@ const geistFont = readFileSync(
 const geistBoldFont = readFileSync(
   resolve('node_modules/geist/dist/fonts/geist-sans/Geist-Bold.ttf')
 );
-const geistMonoFont = readFileSync(
-  resolve('node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.ttf')
-);
+
+// Load images as base64 data URIs
+const logoBase64 = (() => {
+  const data = readFileSync(resolve('public/assets/images/jts-logo-rounded-square.png'));
+  return `data:image/png;base64,${data.toString('base64')}`;
+})();
+
+const avatarBase64 = (() => {
+  const data = readFileSync(resolve('public/assets/images/profile.jpg'));
+  return `data:image/jpeg;base64,${data.toString('base64')}`;
+})();
 
 export interface OGImageOptions {
   title: string;
   category?: string;
-  siteName?: string;
   author?: string;
+  authorRole?: string;
 }
 
-export const DEFAULT_OG_SITE_NAME = 'www.jontobias.com';
 export const DEFAULT_OG_AUTHOR = 'Jonathan Tobias';
+export const DEFAULT_OG_AUTHOR_ROLE = 'Senior Embedded Software Engineer';
+export const DEFAULT_OG_DOMAIN = 'jontobias.com';
 
 export async function generateOGImage(options: OGImageOptions): Promise<Buffer> {
   const {
     title,
     category,
-    siteName = DEFAULT_OG_SITE_NAME,
     author = DEFAULT_OG_AUTHOR,
+    authorRole = DEFAULT_OG_AUTHOR_ROLE,
   } = options;
 
   const svg = await satori(
@@ -49,22 +58,61 @@ export async function generateOGImage(options: OGImageOptions): Promise<Buffer> 
           overflow: 'hidden',
         },
         children: [
-          // Site name (top left)
+          // Background accent glow (top-right)
           {
-            type: 'p',
+            type: 'div',
             props: {
               style: {
                 position: 'absolute',
-                top: '40px',
-                left: '80px',
-                fontFamily: 'Geist',
-                fontSize: '16px',
-                color: '#888',
-                margin: '0',
+                top: '-120px',
+                right: '-80px',
+                width: '400px',
+                height: '400px',
+                borderRadius: '9999px',
+                background: 'radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%)',
+                display: 'flex',
               },
-              children: siteName,
             },
           },
+
+          // Top-left: logo + domain
+          {
+            type: 'div',
+            props: {
+              style: {
+                position: 'absolute',
+                top: '44px',
+                left: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+              },
+              children: [
+                {
+                  type: 'img',
+                  props: {
+                    src: logoBase64,
+                    width: 28,
+                    height: 28,
+                    style: { borderRadius: '6px' },
+                  },
+                },
+                {
+                  type: 'span',
+                  props: {
+                    style: {
+                      fontFamily: 'Geist',
+                      fontSize: '18px',
+                      fontWeight: '400',
+                      color: '#c0c0d0',
+                    },
+                    children: DEFAULT_OG_DOMAIN,
+                  },
+                },
+              ],
+            },
+          },
+
           // Category badge
           ...(category ? [{
             type: 'div',
@@ -76,42 +124,89 @@ export async function generateOGImage(options: OGImageOptions): Promise<Buffer> 
                 fontSize: '14px',
                 padding: '4px 16px',
                 borderRadius: '9999px',
-                marginBottom: '16px',
+                marginBottom: '20px',
                 display: 'flex',
               },
               children: category,
             },
           }] : []),
+
           // Title
           {
             type: 'h1',
             props: {
               style: {
                 fontFamily: 'Geist',
-                fontSize: '48px',
+                fontSize: title.length > 60 ? '40px' : '52px',
                 fontWeight: '700',
-                color: '#fff',
+                color: '#ffffff',
                 lineHeight: '1.2',
                 margin: '0',
-                maxWidth: '900px',
+                maxWidth: '960px',
               },
               children: title,
             },
           },
-          // Author (bottom right)
+
+          // Bottom-right: author block
           {
-            type: 'p',
+            type: 'div',
             props: {
               style: {
                 position: 'absolute',
-                bottom: '40px',
+                bottom: '44px',
                 right: '80px',
-                fontFamily: 'GeistMono',
-                fontSize: '14px',
-                color: '#888',
-                margin: '0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
               },
-              children: `${author} · ${siteName}`,
+              children: [
+                {
+                  type: 'img',
+                  props: {
+                    src: avatarBase64,
+                    width: 48,
+                    height: 48,
+                    style: { borderRadius: '9999px', objectFit: 'cover' },
+                  },
+                },
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '3px',
+                    },
+                    children: [
+                      {
+                        type: 'span',
+                        props: {
+                          style: {
+                            fontFamily: 'Geist',
+                            fontSize: '17px',
+                            fontWeight: '700',
+                            color: '#ffffff',
+                          },
+                          children: author,
+                        },
+                      },
+                      {
+                        type: 'span',
+                        props: {
+                          style: {
+                            fontFamily: 'Geist',
+                            fontSize: '13px',
+                            fontWeight: '400',
+                            color: '#888899',
+                          },
+                          children: authorRole,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
           },
         ],
@@ -123,7 +218,6 @@ export async function generateOGImage(options: OGImageOptions): Promise<Buffer> 
       fonts: [
         { name: 'Geist', data: geistFont, weight: 400, style: 'normal' },
         { name: 'Geist', data: geistBoldFont, weight: 700, style: 'normal' },
-        { name: 'GeistMono', data: geistMonoFont, weight: 400, style: 'normal' },
       ],
     }
   );

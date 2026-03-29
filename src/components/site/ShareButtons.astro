@@ -10,12 +10,12 @@ const { title, url, type, locale } = Astro.props;
 
 const messages = {
   en: {
-    post: `Check out this post: ${title} ${url}`,
-    note: `Check out this note: ${title} ${url}`,
+    post: `*${title}*\n${url}`,
+    note: `*${title}*\n${url}`,
   },
   'pt-br': {
-    post: `Confira este artigo: ${title} ${url}`,
-    note: `Confira esta nota: ${title} ${url}`,
+    post: `*${title}*\n${url}`,
+    note: `*${title}*\n${url}`,
   },
 };
 
@@ -98,7 +98,7 @@ const labels = {
     <button
       class="share-btn"
       data-platform="copy"
-      data-message={message}
+      data-url={url}
       data-copied-label={labels.copied}
       aria-label="Copy link"
     >
@@ -114,13 +114,14 @@ const labels = {
   function initShareButtons() {
     document.querySelectorAll<HTMLButtonElement>('.share-btn[data-platform="copy"]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        const msg = btn.dataset.message ?? '';
-        const copiedLabel = btn.dataset.copiedLabel ?? 'Link copied!';
+        const url = btn.dataset.url ?? '';
+        const copiedLabel = btn.dataset.copiedLabel ?? 'Link copied';
         try {
-          await navigator.clipboard.writeText(msg);
-          (window as Window & { showToast?: (opts: { message: string; variant: string; duration: number }) => void }).showToast?.({ message: copiedLabel, variant: 'success', duration: 2000 });
-        } catch (err) {
-          console.error('Failed to copy: ', err);
+          await navigator.clipboard.writeText(url);
+          (window as Window & { showToast?: (opts: { message: string; variant: string; duration: number }) => void })
+            .showToast?.({ message: copiedLabel, variant: 'accent', duration: 2000 });
+        } catch {
+          // clipboard not available — silent fail
         }
       });
     });

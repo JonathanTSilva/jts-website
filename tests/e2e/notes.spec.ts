@@ -37,7 +37,7 @@ test.describe('Notes', () => {
     const card = page.locator('.note-card').first();
     await expect(card).toBeVisible();
     // Filter pills should be present
-    const filterPill = page.locator('.filter-btn').first();
+    const filterPill = page.locator('.filter-item').first();
     await expect(filterPill).toBeVisible();
   });
 
@@ -81,7 +81,7 @@ test.describe('Notes', () => {
 
   test('notes category buttons have badge counts', async ({ page }) => {
     await page.goto('/notes');
-    const badge = page.locator('.filter-btn .badge-count').first();
+    const badge = page.locator('.filter-item .item-count').first();
     await expect(badge).toBeVisible();
     const text = await badge.textContent();
     expect(Number(text?.trim())).toBeGreaterThan(0);
