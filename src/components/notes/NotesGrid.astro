@@ -34,12 +34,12 @@ const translationMissingLabel = {
             {note.data.publishedAt.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: '2-digit' })}
           </time>
         </header>
-        <h3 class="note-title">
+        <h2 class="note-title">
           {note.data.title}
           {note.isTranslationMissing && (
             <span class="translation-missing-tag">({translationMissingLabel})</span>
           )}
-        </h3>
+        </h2>
         {note.data.summary && <p class="note-summary">{note.data.summary}</p>}
         {note.data.tags && note.data.tags.length > 0 && (
           <div class="note-tags">

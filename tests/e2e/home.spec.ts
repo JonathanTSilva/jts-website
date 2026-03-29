@@ -116,10 +116,10 @@ test('mobile: home projects in single column', async ({ page }) => {
   await expect(cards).toBeVisible();
 });
 
-test('projects section shows 3 project cards', async ({ page }) => {
+test('projects section shows 4 project cards', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('.project-card');
-  await expect(cards).toHaveCount(3);
+  await expect(cards).toHaveCount(4);
 });
 
 test('projects bento grid: first card spans full width on desktop', async ({ page }) => {
