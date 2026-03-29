@@ -28,7 +28,7 @@
     "geist": "^1.7.0",
     "gray-matter": "^4.0.3",
     "typescript": "^5.7.3",
-    "zod": "^3.24.2"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.1",

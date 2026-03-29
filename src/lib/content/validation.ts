@@ -36,7 +36,7 @@ export function validateContent(
   const schema = SCHEMAS[collection];
   const result = schema.safeParse(frontmatter);
   if (!result.success && result.error) {
-    result.error.errors.forEach((err: { path: (string | number)[]; message: string }) => {
+    result.error.issues.forEach((err: { path: (string | number)[]; message: string }) => {
       errors.push(`Frontmatter: [${err.path.join(".")}] ${err.message}`);
     });
   }
