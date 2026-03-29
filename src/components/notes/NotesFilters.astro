@@ -15,101 +15,117 @@ const labels = {
     all: 'All',
     categories: 'Categories',
     tags: 'Tags',
-    clear: 'Clear Filters'
+    clear: 'Clear filters',
+    collapse: 'Collapse',
+    expand: 'Expand',
   },
   'pt-br': {
     all: 'Tudo',
     categories: 'Categorias',
     tags: 'Tags',
-    clear: 'Limpar Filtros'
+    clear: 'Limpar filtros',
+    collapse: 'Recolher',
+    expand: 'Expandir',
   }
 }[locale];
 ---
 
-<div class="notes-filters" id="notes-filters">
-  <div class="filter-group">
-    <h2 class="filter-label">{labels.categories}</h2>
-    <div class="filter-options">
-      <button class="filter-btn active" data-filter="category" data-value="all">{labels.all}</button>
+<nav class="notes-filters" id="notes-filters" aria-label="Filter notes">
+
+  <details class="filter-section" open>
+    <summary class="filter-section-header">
+      <span class="filter-section-title">{labels.categories}</span>
+      <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </summary>
+    <div class="filter-items">
+      <button class="filter-item active" data-filter="category" data-value="all">
+        <span class="item-label">{labels.all}</span>
+      </button>
       {categories.map(category => (
-        <button class="filter-btn" data-filter="category" data-value={category}>
-          {category}
+        <button class="filter-item" data-filter="category" data-value={category}>
+          <span class="item-label">{category}</span>
           {categoryCounts[category] && (
-            <span class="badge-count">{categoryCounts[category]}</span>
+            <span class="item-count">{categoryCounts[category]}</span>
           )}
         </button>
       ))}
     </div>
-  </div>
+  </details>
 
-  <div class="filter-group">
-    <h2 class="filter-label">{labels.tags}</h2>
-    <div class="filter-options">
-      {tags.map(tag => (
-        <button class="filter-btn" data-filter="tag" data-value={tag}>#{tag}</button>
-      ))}
-    </div>
-  </div>
-  
+  {tags.length > 0 && (
+    <details class="filter-section" open>
+      <summary class="filter-section-header">
+        <span class="filter-section-title">{labels.tags}</span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </summary>
+      <div class="filter-items">
+        {tags.map(tag => (
+          <button class="filter-item" data-filter="tag" data-value={tag}>
+            <span class="item-tag-prefix">#</span>
+            <span class="item-label">{tag}</span>
+          </button>
+        ))}
+      </div>
+    </details>
+  )}
+
   <button id="clear-filters" class="clear-filters" style="display: none;">{labels.clear}</button>
-</div>
+</nav>
 
 <script>
   function initFilters() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
+    const filterButtons = document.querySelectorAll('.filter-btn, .filter-item');
     const clearBtn = document.getElementById('clear-filters');
     const notesGrid = document.getElementById('notes-grid');
     const noNotesMessage = document.getElementById('no-notes-message');
-    
+
     if (!notesGrid) return;
-    
+
     const notes = Array.from(notesGrid.querySelectorAll('.note-card')) as HTMLElement[];
-    
+
     let activeCategory = 'all';
     let activeTags = new Set<string>();
-    
+
     function updateFilters() {
       let visibleCount = 0;
-      
+
       notes.forEach(note => {
         const category = note.dataset.category;
         const noteTags = note.dataset.tags?.split(',') || [];
-        
+
         const categoryMatch = activeCategory === 'all' || category === activeCategory;
         const tagsMatch = activeTags.size === 0 || Array.from(activeTags).every(tag => noteTags.includes(tag));
-        
+
         if (categoryMatch && tagsMatch) {
-          note.style.display = 'block';
+          note.style.display = '';
           visibleCount++;
         } else {
           note.style.display = 'none';
         }
       });
-      
+
       if (noNotesMessage) {
         noNotesMessage.style.display = visibleCount === 0 ? 'block' : 'none';
       }
-      
+
       if (clearBtn) {
         clearBtn.style.display = (activeCategory !== 'all' || activeTags.size > 0) ? 'block' : 'none';
       }
     }
-    
-    filterButtons.forEach(btn => {
+
+    document.querySelectorAll<HTMLElement>('.filter-item').forEach(btn => {
       btn.addEventListener('click', () => {
-        const type = (btn as HTMLElement).dataset.filter;
-        const value = (btn as HTMLElement).dataset.value;
-        
+        const type = btn.dataset.filter;
+        const value = btn.dataset.value;
+
         if (type === 'category') {
-          if (value === 'all') {
-            activeCategory = 'all';
-          } else {
-            activeCategory = value!;
-          }
-          
-          // Update visual state for category buttons
-          document.querySelectorAll('.filter-btn[data-filter="category"]').forEach(b => {
-            b.classList.toggle('active', (b as HTMLElement).dataset.value === activeCategory);
+          activeCategory = value!;
+          document.querySelectorAll<HTMLElement>('.filter-item[data-filter="category"]').forEach(b => {
+            b.classList.toggle('active', b.dataset.value === activeCategory);
           });
         } else if (type === 'tag') {
           if (activeTags.has(value!)) {
@@ -120,31 +136,26 @@ const labels = {
             btn.classList.add('active');
           }
         }
-        
+
         updateFilters();
       });
     });
-    
+
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
         activeCategory = 'all';
         activeTags.clear();
-        
-        filterButtons.forEach(btn => {
-          const type = (btn as HTMLElement).dataset.filter;
-          const value = (btn as HTMLElement).dataset.value;
-          btn.classList.toggle('active', type === 'category' && value === 'all');
+
+        document.querySelectorAll<HTMLElement>('.filter-item').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.filter === 'category' && btn.dataset.value === 'all');
         });
-        
+
         updateFilters();
       });
     }
   }
 
-  // Initialize on page load
   initFilters();
-  
-  // Re-initialize when Astro swaps pages (if using View Transitions)
   document.addEventListener('astro:page-load', initFilters);
 </script>
 
@@ -152,83 +163,150 @@ const labels = {
   .notes-filters {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    padding: var(--space-4);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-8);
+    gap: var(--space-1);
   }
-  
-  .filter-group {
+
+  /* ── Collapsible section ── */
+  .filter-section {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .filter-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .filter-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    list-style: none;
+    padding: var(--space-1) 0;
+    user-select: none;
+    outline: none;
+  }
+
+  /* Remove default marker in all browsers */
+  .filter-section-header::-webkit-details-marker { display: none; }
+  .filter-section-header::marker { display: none; }
+
+  .filter-section-header:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  .filter-section-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .chevron {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  /* Rotate chevron when collapsed */
+  .filter-section:not([open]) .chevron {
+    transform: rotate(-90deg);
+  }
+
+  /* ── Filter items ── */
+  .filter-items {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: 1px;
+    padding-top: var(--space-2);
   }
-  
-  .filter-label {
-    font-size: var(--text-sm);
-    font-weight: bold;
-    color: var(--text-muted);
-    margin: 0;
-  }
-  
-  .filter-options {
+
+  .filter-item {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-muted);
+    transition: background var(--duration-fast) var(--ease-out),
+                color var(--duration-fast) var(--ease-out);
     gap: var(--space-2);
   }
-  
-  .filter-btn {
-    position: relative;
-    border-radius: var(--radius-full);
-    padding: var(--space-1) var(--space-4);
-    font-size: var(--text-sm);
-    border: 1px solid var(--border);
-    background: var(--surface);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-out);
+
+  .filter-item:hover {
+    background: var(--surface-high);
     color: var(--text);
   }
 
-  .badge-count {
-    position: absolute;
-    top: -0.375rem;
-    right: -0.375rem;
-    min-width: 1.25rem;
-    height: 1.25rem;
-    background: var(--accent);
-    color: #fff;
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    font-weight: var(--weight-bold);
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 var(--space-1);
-  }
-
-  .filter-btn:hover {
-    border-color: var(--accent);
+  .filter-item.active {
+    background: var(--accent-dim);
     color: var(--accent);
   }
 
-  .filter-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
+  .filter-item.active .item-count {
+    color: var(--accent);
   }
-  
-  .clear-filters {
-    align-self: flex-start;
-    padding: var(--space-1) var(--space-2);
+
+  .item-label {
+    font-size: var(--text-sm);
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .item-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    flex-shrink: 0;
+    min-width: 1.25rem;
+    text-align: right;
+  }
+
+  .item-tag-prefix {
+    font-family: var(--font-mono);
     font-size: var(--text-xs);
     color: var(--accent);
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .filter-item.active .item-tag-prefix {
+    opacity: 1;
+  }
+
+  /* ── Clear button ── */
+  .clear-filters {
+    margin-top: var(--space-4);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--text-muted);
     background: none;
-    border: none;
-    text-decoration: underline;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    margin-top: var(--space-2);
+    width: 100%;
+    text-align: center;
+    transition: color var(--duration-fast) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .clear-filters:hover {
+    color: var(--accent);
+    border-color: var(--accent);
   }
 </style>

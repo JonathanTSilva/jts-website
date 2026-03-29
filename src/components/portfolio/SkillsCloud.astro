@@ -15,7 +15,7 @@ const skills = getSkills();
   <h2>{skillsLabel}</h2>
   <div class="skills-cloud">
     {skills.map((skill, index) => {
-      const isTop = index === 0;
+      const isTop = index < 5;
       const isHigh = !isTop && skill.count >= 3;
       return (
         <span class:list={['skill-pill', isTop ? 'skill-pill--top' : isHigh ? 'skill-pill--high' : 'skill-pill--normal']}>
