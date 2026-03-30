@@ -4,44 +4,52 @@ test.describe('Blog', () => {
   test('en: blog index groups posts by year and month', async ({ page }) => {
     await page.goto('/blog');
 
-    // Check for year and month headings
     await expect(page.getByRole('heading', { name: '2026', level: 2 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'March', level: 3 })).toBeVisible();
-
-    // Check for specific post
-    await expect(page.getByText('THIS IS A TEST POST')).toBeVisible();
+    // At least one month heading should exist
+    await expect(page.locator('h3.blog-month').first()).toBeVisible();
+    // At least one post entry should exist
+    await expect(page.locator('a.blog-entry').first()).toBeVisible();
   });
 
   test('pt-br: blog index groups posts by year and month', async ({ page }) => {
     await page.goto('/pt-br/blog');
 
-    // Check for year and month headings
     await expect(page.getByRole('heading', { name: '2026', level: 2 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Março', level: 3 })).toBeVisible();
-
-    // Check for specific post (translated or fallback)
-    await expect(page.getByText('ESTE É UM POST DE TESTE')).toBeVisible();
+    await expect(page.locator('h3.blog-month').first()).toBeVisible();
+    await expect(page.locator('a.blog-entry').first()).toBeVisible();
   });
 
   test('en: blog detail page renders content', async ({ page }) => {
-    await page.goto('/blog/2026-03-everything-starts-here.en');
-    await expect(page.getByRole('heading', { name: 'THIS IS A TEST POST', level: 1 })).toBeVisible();
-    await expect(page.getByText(/Published on March 29, 2026/)).toBeVisible();
+    // Navigate to first available post rather than hardcoding a slug
+    await page.goto('/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    const href = await firstLink.getAttribute('href');
+    await page.goto(href!);
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('.post-meta')).toContainText(/Published on/);
     await expect(page.locator('.author-name')).toHaveText('Jonathan Tobias');
     await expect(page.locator('.author-subtitle')).toHaveText('Senior Embedded Software Engineer');
   });
 
   test('pt-br: blog detail page renders content', async ({ page }) => {
-    await page.goto('/pt-br/blog/2026-03-everything-starts-here.pt-br');
-    await expect(page.getByRole('heading', { name: 'ESTE É UM POST DE TESTE', level: 1 })).toBeVisible();
+    await page.goto('/pt-br/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    const href = await firstLink.getAttribute('href');
+    await page.goto(href!);
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(page.locator('.author-name')).toHaveText('Jonathan Tobias');
     await expect(page.locator('.author-subtitle')).toHaveText('Senior Embedded Software Engineer');
   });
 
   test('translation fallback notice is visible', async ({ page }) => {
-    // Navigate to an EN slug via the PT-BR route — isTranslationFallback = true
-    // because post.language ('en') !== locale ('pt-br')
-    await page.goto('/pt-br/blog/2026-03-everything-starts-here.en');
+    // Get the first EN post slug from the blog index and access it via the PT-BR route.
+    // isTranslationFallback = (post.language !== 'pt-br') = true for any EN slug.
+    await page.goto('/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    const href = await firstLink.getAttribute('href'); // e.g. /blog/2026-03-something.en
+    await page.goto('/pt-br' + href);
     await expect(page.getByText(/Este post não está disponível em Português/i)).toBeVisible();
   });
 
@@ -50,7 +58,7 @@ test.describe('Blog', () => {
     expect(response?.status()).toBe(200);
     const text = await response?.text();
     expect(text).toContain('<rss');
-    expect(text).toContain('THIS IS A TEST POST');
+    expect(text).toContain('<item>');
     expect(text).toContain('https://www.jontobias.com');
   });
 
@@ -66,7 +74,7 @@ test.describe('Blog', () => {
     await page.goto('/blog');
     const categoryBtns = page.locator('.filter-category-btn:not([data-category="all"])');
     const count = await categoryBtns.count();
-    if (count === 0) return; // no categories in test data — skip
+    if (count === 0) return;
     await categoryBtns.first().click();
     const visibleEntries = page.locator('.blog-entry:visible');
     await expect(visibleEntries.first()).toBeVisible();
@@ -88,7 +96,10 @@ test.describe('Blog', () => {
 
   test('blog post renders table of contents when headings exist', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('/blog/2026-03-everything-starts-here.en');
+    await page.goto('/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    const href = await firstLink.getAttribute('href');
+    await page.goto(href!);
     const toc = page.locator('.toc');
     const tocCount = await toc.count();
     if (tocCount > 0) {
@@ -116,13 +127,11 @@ test.describe('Blog', () => {
 
   test('blog list uses two-column year/entry layout', async ({ page }) => {
     await page.goto('/blog');
-    // Year column rendered with monospace font class
     const yearLabel = page.locator('.blog-year').first();
     await expect(yearLabel).toBeVisible();
   });
 
   test('blog post applies prose class', async ({ page }) => {
-    // Navigate to the first available post
     await page.goto('/blog');
     const firstLink = page.locator('a[href^="/blog/"]').first();
     await firstLink.click();
@@ -132,7 +141,10 @@ test.describe('Blog', () => {
 
   test('blog post: TOC starts below preamble separator', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('/blog/2026-03-everything-starts-here.en');
+    await page.goto('/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    const href = await firstLink.getAttribute('href');
+    await page.goto(href!);
     const separator = page.locator('.post-preamble hr, .preamble-divider').first();
     const toc = page.locator('.toc-sidebar');
     await expect(separator).toBeVisible();
@@ -143,7 +155,10 @@ test.describe('Blog', () => {
   });
 
   test('blog post: share buttons are visible', async ({ page }) => {
-    await page.goto('/blog/2026-03-everything-starts-here.en');
+    await page.goto('/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    const href = await firstLink.getAttribute('href');
+    await page.goto(href!);
     const shareSection = page.locator('.share-buttons');
     await expect(shareSection).toBeVisible();
     await expect(page.locator('.share-btn[data-platform="linkedin"]')).toBeVisible();
@@ -152,13 +167,14 @@ test.describe('Blog', () => {
 
   test('blog post: back to top button is present and hidden before scroll', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('/blog/2026-03-everything-starts-here.en');
+    await page.goto('/blog');
+    const firstLink = page.locator('a.blog-entry').first();
+    const href = await firstLink.getAttribute('href');
+    await page.goto(href!);
     const btn = page.locator('.back-to-top-btn');
-    // Button exists in DOM but is not visually active (opacity: 0, pointer-events: none)
     await expect(btn).toBeAttached();
     const opacity = await btn.evaluate(el => window.getComputedStyle(el).opacity);
     expect(opacity).toBe('0');
-    // After scrolling past 300px it gains the .visible class
     await page.evaluate(() => {
       window.dispatchEvent(new Event('scroll'));
       Object.defineProperty(window, 'scrollY', { value: 400, configurable: true });

@@ -14,19 +14,24 @@ test.describe('Notes', () => {
     await expect(page.getByText('Debugging Habits')).toBeVisible();
   });
 
-  test('search dialog functions correctly', async ({ page }) => {
+  test('search dialog functions correctly', async ({ page, request }) => {
+    // Derive a search term from the actual index so the test is content-agnostic
+    const indexRes = await request.get('/api/en/search-index.json');
+    const items: Array<{ title: string }> = await indexRes.json();
+    const searchTerm = items[0]?.title.split(' ')[0] ?? 'blog';
+
     await page.goto('/');
-    
+
     // Open search with shortcut
     await page.keyboard.press('/');
     await expect(page.getByRole('dialog')).toBeVisible();
-    
-    const input = page.getByPlaceholder('Search blog and notes...');
-    await input.fill('TEST');
 
-    // Wait for results
-    await expect(page.getByRole('dialog').getByText('THIS IS A TEST POST')).toBeVisible();
-    
+    const input = page.getByPlaceholder('Search blog and notes...');
+    await input.fill(searchTerm);
+
+    // Wait for at least one result
+    await expect(page.getByRole('dialog').locator('.search-result-item').first()).toBeVisible();
+
     // Close search
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).not.toBeVisible();
@@ -41,7 +46,11 @@ test.describe('Notes', () => {
     await expect(filterPill).toBeVisible();
   });
 
-  test('search dialog focus trapping and keyboard navigation', async ({ page }) => {
+  test('search dialog focus trapping and keyboard navigation', async ({ page, request }) => {
+    const indexRes = await request.get('/api/en/search-index.json');
+    const items: Array<{ title: string }> = await indexRes.json();
+    const searchTerm = items[0]?.title.split(' ')[0] ?? 'blog';
+
     await page.goto('/');
 
     // Open search
@@ -53,8 +62,8 @@ test.describe('Notes', () => {
     await expect(input).toBeFocused();
 
     // Fill something to get results
-    await input.fill('TEST');
-    await expect(page.getByRole('dialog').getByText('THIS IS A TEST POST')).toBeVisible();
+    await input.fill(searchTerm);
+    await expect(page.getByRole('dialog').locator('.search-result-item').first()).toBeVisible();
 
     // Tab through elements
     await page.keyboard.press('Tab'); // Should go to close button
