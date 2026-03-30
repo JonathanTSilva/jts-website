@@ -26,7 +26,7 @@ test.describe('Blog', () => {
     const href = await firstLink.getAttribute('href');
     await page.goto(href!);
 
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('.post-title')).toBeVisible();
     await expect(page.locator('.post-meta')).toContainText(/Published on/);
     await expect(page.locator('.author-name')).toHaveText('Jonathan Tobias');
     await expect(page.locator('.author-subtitle')).toHaveText('Senior Embedded Software Engineer');
@@ -38,7 +38,7 @@ test.describe('Blog', () => {
     const href = await firstLink.getAttribute('href');
     await page.goto(href!);
 
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('.post-title')).toBeVisible();
     await expect(page.locator('.author-name')).toHaveText('Jonathan Tobias');
     await expect(page.locator('.author-subtitle')).toHaveText('Senior Embedded Software Engineer');
   });
