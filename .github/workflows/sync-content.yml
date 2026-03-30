@@ -15,6 +15,7 @@ jobs:
       - name: Checkout website repo
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}
           path: website-repo
 
       - name: Checkout private content repo
@@ -52,7 +53,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           path: website-repo
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}
           commit-message: "chore: sync content from vault"
           title: "chore: sync content from vault"
           body: "This PR was automatically created to sync content from the private vault."
