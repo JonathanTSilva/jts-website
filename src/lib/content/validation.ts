@@ -9,7 +9,7 @@ export type CollectionType = "blog" | "notes" | "now";
 export const COLLECTIONS: CollectionType[] = ["blog", "notes", "now"];
 
 const CONTRACTS: Record<CollectionType, string[]> = {
-  blog: ["Conclusion"],
+  blog: ["Conclusion|Conclusão"],
   notes: [],
   now: [],
 };
@@ -45,7 +45,8 @@ export function validateContent(
   const required = CONTRACTS[collection];
   const missing = requireSections(body, required);
   missing.forEach((section) => {
-    errors.push(`Content: Missing required section "## ${section}"`);
+    const display = section.split("|")[0];
+    errors.push(`Content: Missing required section "## ${display}"`);
   });
 
   return {

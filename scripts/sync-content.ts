@@ -19,7 +19,8 @@ const MAPPINGS: SyncMapping[] = [
   { source: '08-Publish/Blog', dest: 'blog', isDir: true },
   { source: '08-Publish/Notes', dest: 'notes', isDir: true },
   // Mapping now.md to now/index.en.md specifically
-  { source: '08-Publish/now.md', dest: 'now/index.en.md', isDir: false },
+  { source: '08-Publish/Now.md', dest: 'now/index.en.md', isDir: false },
+  { source: '08-Publish/Now.pt-br.md', dest: 'now/index.pt-br.md', isDir: false },
 ];
 
 export async function syncContent(sourceDir: string, destDir: string) {

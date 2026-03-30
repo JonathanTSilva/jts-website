@@ -15,10 +15,28 @@ describe('requireSections', () => {
     expect(requireSections(body, headings)).toEqual(['Conclusion']);
   });
 
-  it('should be case sensitive and require exact match with ## prefix', () => {
-    const body = '# Intro\n## conclusion';
-    const headings = ['Intro', 'Conclusion'];
-    expect(requireSections(body, headings)).toEqual(['Intro', 'Conclusion']);
+  it('should be case sensitive', () => {
+    const body = '## conclusion';
+    const headings = ['Conclusion'];
+    expect(requireSections(body, headings)).toEqual(['Conclusion']);
+  });
+
+  it('should accept any heading level (H1–H6)', () => {
+    const body = '# Conclusion\nEnd';
+    const headings = ['Conclusion'];
+    expect(requireSections(body, headings)).toEqual([]);
+  });
+
+  it('should accept pipe-separated alternatives', () => {
+    const body = '# Conclusão\nFim';
+    const headings = ['Conclusion|Conclusão'];
+    expect(requireSections(body, headings)).toEqual([]);
+  });
+
+  it('should return missing when no alternative matches', () => {
+    const body = '## Outro\nTexto';
+    const headings = ['Conclusion|Conclusão'];
+    expect(requireSections(body, headings)).toEqual(['Conclusion|Conclusão']);
   });
 });
 
@@ -54,6 +72,24 @@ describe('validateContent', () => {
     const result = validateContent('blog', validBlogFrontmatter, body);
     expect(result.success).toBe(false);
     expect(result.errors).toContain('Content: Missing required section "## Conclusion"');
+  });
+
+  it('should accept H1 Conclusion', () => {
+    const body = '# Conclusion\nBye';
+    const result = validateContent('blog', validBlogFrontmatter, body);
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept H1 Conclusão', () => {
+    const body = '# Conclusão\nFim';
+    const result = validateContent('blog', validBlogFrontmatter, body);
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept ## Conclusão', () => {
+    const body = '## Conclusão\nFim';
+    const result = validateContent('blog', validBlogFrontmatter, body);
+    expect(result.success).toBe(true);
   });
 
   it('should validate valid note content (no required sections)', () => {

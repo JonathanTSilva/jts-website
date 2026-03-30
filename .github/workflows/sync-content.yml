@@ -17,7 +17,7 @@ jobs:
       - name: Checkout private content repo
         uses: actions/checkout@v4
         with:
-          repository: jts/personal-vault # Assumed path
+          repository: JonathanTSilva/jts-brain
           token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}
           path: content-repo
 

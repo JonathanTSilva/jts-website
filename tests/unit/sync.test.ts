@@ -27,8 +27,8 @@ describe('syncContent script', () => {
     fs.ensureDirSync(notesSrc);
     fs.writeFileSync(path.join(notesSrc, 'note1.md'), 'Content of note 1');
 
-    const nowSrc = path.join(SOURCE_DIR, '08-Publish/now.md');
-    fs.writeFileSync(nowSrc, 'Now index');
+    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.md'), 'Now index EN');
+    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.pt-br.md'), 'Now index PT-BR');
 
     // Run sync
     await syncContent(SOURCE_DIR, DEST_DIR);
@@ -38,6 +38,7 @@ describe('syncContent script', () => {
     expect(fs.readFileSync(path.join(DEST_DIR, 'blog/post1.md'), 'utf8')).toBe('Content of post 1');
     expect(fs.existsSync(path.join(DEST_DIR, 'notes/note1.md'))).toBe(true);
     expect(fs.existsSync(path.join(DEST_DIR, 'now/index.en.md'))).toBe(true);
+    expect(fs.existsSync(path.join(DEST_DIR, 'now/index.pt-br.md'))).toBe(true);
   });
 
   it('should remove files in destination that are not in source', async () => {
