@@ -22,10 +22,10 @@ test.describe('Notes', () => {
     await expect(page.getByRole('dialog')).toBeVisible();
     
     const input = page.getByPlaceholder('Search blog and notes...');
-    await input.fill('Firmware');
-    
+    await input.fill('TEST');
+
     // Wait for results
-    await expect(page.getByRole('dialog').getByText('Continuous Integration for Firmware')).toBeVisible();
+    await expect(page.getByRole('dialog').getByText('THIS IS A TEST POST')).toBeVisible();
     
     // Close search
     await page.keyboard.press('Escape');
@@ -53,8 +53,8 @@ test.describe('Notes', () => {
     await expect(input).toBeFocused();
 
     // Fill something to get results
-    await input.fill('Firmware');
-    await expect(page.getByRole('dialog').getByText('Continuous Integration for Firmware')).toBeVisible();
+    await input.fill('TEST');
+    await expect(page.getByRole('dialog').getByText('THIS IS A TEST POST')).toBeVisible();
 
     // Tab through elements
     await page.keyboard.press('Tab'); // Should go to close button

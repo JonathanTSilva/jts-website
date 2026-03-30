@@ -12,27 +12,26 @@ test.describe('Deep Search & Behavioral Tests', () => {
     await expect(dialog).toBeVisible();
     
     const input = page.locator('#search-input');
-    await input.fill('Firmware');
-    
+    await input.fill('TEST');
+
     // Wait for results to appear
     const results = page.locator('#search-results');
     const firstResult = results.locator('.search-result-item').first();
     await expect(firstResult).toBeVisible();
-    
+
     // Navigate via keyboard
     // Initial focus is on input. Pressing ArrowDown should highlight the first result.
     await page.keyboard.press('ArrowDown');
-    
+
     // We expect the first result to have an 'active' class or be focused
     // Looking at SearchDialog.astro, it has a .search-result-item.active style
     await expect(firstResult).toHaveClass(/active/);
-    
+
     // Press Enter to navigate
     await page.keyboard.press('Enter');
-    
+
     // Should navigate to the blog post
-    // The exact URL might depend on the slug, but it should contain 'ci-firmware'
-    await expect(page).toHaveURL(/\/blog\/2026-03-ci-firmware/);
+    await expect(page).toHaveURL(/\/blog\/2026-03-everything-starts-here/);
   });
 
   test('no results found UI', async ({ page }) => {
@@ -76,8 +75,8 @@ test.describe('Deep Search & Behavioral Tests', () => {
     await page.goto('/pt-br');
     await page.keyboard.press('/');
     const input = page.locator('#search-input');
-    await input.fill('Embarcados');
-    
+    await input.fill('TESTE');
+
     const results = page.locator('.search-result-item');
     await expect(results.first()).toBeVisible();
     

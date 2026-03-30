@@ -88,8 +88,10 @@ test.describe('Build Integrity', () => {
       expect(ogImage).toBeTruthy();
       expect(ogImage).toContain(`/og/blog/${slug}.png`);
       
-      // Reachability check
-      const imageResponse = await request.get(ogImage!);
+      // Reachability check — strip domain so the request hits the local test server,
+      // not the production site (which may not have this content yet).
+      const imagePath = new URL(ogImage!).pathname;
+      const imageResponse = await request.get(imagePath);
       expect(imageResponse.status(), `og:image for blog/${slug} should be reachable`).toBe(200);
     }
 
@@ -100,8 +102,9 @@ test.describe('Build Integrity', () => {
       expect(ogImage).toBeTruthy();
       expect(ogImage).toContain(`/og/notes/${slug}.png`);
 
-      // Reachability check
-      const imageResponse = await request.get(ogImage!);
+      // Reachability check — strip domain so the request hits the local test server.
+      const imagePath = new URL(ogImage!).pathname;
+      const imageResponse = await request.get(imagePath);
       expect(imageResponse.status(), `og:image for notes/${slug} should be reachable`).toBe(200);
     }
   });
