@@ -28,6 +28,7 @@
     "geist": "^1.7.0",
     "gray-matter": "^4.0.3",
     "katex": "^0.16.44",
+    "marked": "^17.0.5",
     "mermaid": "^11.13.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
