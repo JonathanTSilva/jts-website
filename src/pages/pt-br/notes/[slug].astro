@@ -131,6 +131,21 @@ const relatedNotes = allNotesForRelated
 
 <BackToTop />
 
+<script>
+  import('mermaid').then(({ default: mermaid }) => {
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]').forEach(pre => {
+      const code = pre.querySelector('code')?.textContent ?? pre.textContent ?? '';
+      const container = document.createElement('div');
+      container.className = 'mermaid-diagram';
+      pre.replaceWith(container);
+      mermaid.render(`mermaid-${Math.random().toString(36).slice(2)}`, code).then(({ svg }) => {
+        container.innerHTML = svg;
+      });
+    });
+  });
+</script>
+
 <style>
   .note-page {
     max-width: var(--container-max);

@@ -219,3 +219,293 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 
 /* ── Misc ───────────────────────────────────────────────── */
 .list-none { list-style: none; padding: 0; }
+
+/* ============================================================
+   SHIKI DUAL-THEME CODE BLOCKS
+   Light values are the default (set as inline styles by Shiki).
+   Dark values are stored as --shiki-dark-* CSS variables.
+   ============================================================ */
+[data-theme='dark'] .astro-code,
+[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+/* ============================================================
+   PROSE EXTENSIONS
+   ============================================================ */
+
+/* ── Tables ─────────────────────────────────────────────── */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  margin-block: var(--space-6);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.prose thead {
+  background: var(--surface-high);
+}
+.prose th {
+  font-weight: var(--weight-semibold);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 2px solid var(--border);
+  border-right: 1px solid var(--border);
+  color: var(--text);
+}
+.prose th:last-child { border-right: none; }
+.prose td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.prose td:last-child { border-right: none; }
+.prose tr:last-child td { border-bottom: none; }
+.prose tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-high) 50%, transparent);
+}
+
+/* ── Footnotes ──────────────────────────────────────────── */
+.prose .footnotes {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-6);
+  margin-top: var(--space-10, 2.5rem);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.prose .footnotes ol { padding-left: var(--space-6); }
+.prose .footnotes li { margin-bottom: var(--space-2); }
+.prose a[data-footnote-ref] {
+  font-size: 0.75em;
+  vertical-align: super;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  text-decoration: none;
+}
+.prose a[data-footnote-backref] { text-decoration: none; color: var(--text-muted); }
+
+/* ── Task list checkboxes ───────────────────────────────── */
+.prose ul:has(input[type='checkbox']) {
+  list-style: none;
+  padding-left: var(--space-2);
+}
+.prose li:has(> input[type='checkbox']) {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: 1px 0;
+}
+.prose input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1em;
+  height: 1em;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  flex-shrink: 0;
+  margin-top: 0.2em;
+  cursor: default;
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+.prose input[type='checkbox']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4l3 3 5-6' stroke='white' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 70%;
+}
+
+/* ── Default highlight (==text==) ───────────────────────── */
+.prose mark {
+  background: color-mix(in srgb, #f59e0b 28%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* ── Colored mark highlights (Better Highlights snippet) ── */
+mark.purple { background: color-mix(in srgb, #8b5cf6 28%, transparent); }
+mark.pink   { background: color-mix(in srgb, #ec4899 28%, transparent); }
+mark.green  { background: color-mix(in srgb, #22c55e 28%, transparent); }
+mark.blue   { background: color-mix(in srgb, #3b82f6 28%, transparent); }
+
+/* ── Colored text spans (foreground) ───────────────────── */
+span.gray   { color: #6b7280; }
+span.brown  { color: #a16207; }
+span.orange { color: #ea580c; }
+span.yellow { color: #ca8a04; }
+span.green  { color: #16a34a; }
+span.blue   { color: #2563eb; }
+span.purple { color: #7c3aed; }
+span.pink   { color: #db2777; }
+span.red    { color: #dc2626; }
+
+[data-theme='dark'] span.gray   { color: #9ca3af; }
+[data-theme='dark'] span.brown  { color: #ca8a04; }
+[data-theme='dark'] span.orange { color: #fb923c; }
+[data-theme='dark'] span.yellow { color: #facc15; }
+[data-theme='dark'] span.green  { color: #4ade80; }
+[data-theme='dark'] span.blue   { color: #60a5fa; }
+[data-theme='dark'] span.purple { color: #a78bfa; }
+[data-theme='dark'] span.pink   { color: #f472b6; }
+[data-theme='dark'] span.red    { color: #f87171; }
+
+/* ── Colored text spans (background) ───────────────────── */
+span.gray-bg   { background: color-mix(in srgb, #6b7280 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.brown-bg  { background: color-mix(in srgb, #a16207 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.orange-bg { background: color-mix(in srgb, #ea580c 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.yellow-bg { background: color-mix(in srgb, #ca8a04 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.green-bg  { background: color-mix(in srgb, #16a34a 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.blue-bg   { background: color-mix(in srgb, #2563eb 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.purple-bg { background: color-mix(in srgb, #7c3aed 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.pink-bg   { background: color-mix(in srgb, #db2777 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.red-bg    { background: color-mix(in srgb, #dc2626 18%, transparent); border-radius: 2px; padding: 0 2px; }
+
+/* ── Note blocks (notation-color-blocks.css snippet) ────── */
+/* These use custom Shiki language names that fall back to plaintext.
+   We restyle their <pre> containers using data-language. */
+.prose pre[data-language^='note-'] {
+  border-left: 4px solid;
+  font-family: var(--font-sans) !important;
+  font-size: var(--text-sm) !important;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+.prose pre[data-language^='note-'] code,
+.prose pre[data-language^='note-'] span {
+  font-family: var(--font-sans) !important;
+}
+/* Foreground variants */
+.prose pre[data-language='note-gray']   { border-color: #6b7280; background: color-mix(in srgb, #6b7280 10%, var(--surface)) !important; }
+.prose pre[data-language='note-brown']  { border-color: #a16207; background: color-mix(in srgb, #a16207 10%, var(--surface)) !important; }
+.prose pre[data-language='note-yellow'] { border-color: #ca8a04; background: color-mix(in srgb, #ca8a04 10%, var(--surface)) !important; }
+.prose pre[data-language='note-green']  { border-color: #16a34a; background: color-mix(in srgb, #16a34a 10%, var(--surface)) !important; }
+.prose pre[data-language='note-blue']   { border-color: #2563eb; background: color-mix(in srgb, #2563eb 10%, var(--surface)) !important; }
+.prose pre[data-language='note-purple'] { border-color: #7c3aed; background: color-mix(in srgb, #7c3aed 10%, var(--surface)) !important; }
+.prose pre[data-language='note-pink']   { border-color: #db2777; background: color-mix(in srgb, #db2777 10%, var(--surface)) !important; }
+.prose pre[data-language='note-red']    { border-color: #dc2626; background: color-mix(in srgb, #dc2626 10%, var(--surface)) !important; }
+/* Background variants */
+.prose pre[data-language='note-gray-background']   { border-color: #6b7280; background: color-mix(in srgb, #6b7280 20%, var(--surface)) !important; }
+.prose pre[data-language='note-brown-background']  { border-color: #a16207; background: color-mix(in srgb, #a16207 20%, var(--surface)) !important; }
+.prose pre[data-language='note-yellow-background'] { border-color: #ca8a04; background: color-mix(in srgb, #ca8a04 20%, var(--surface)) !important; }
+.prose pre[data-language='note-green-background']  { border-color: #16a34a; background: color-mix(in srgb, #16a34a 20%, var(--surface)) !important; }
+.prose pre[data-language='note-blue-background']   { border-color: #2563eb; background: color-mix(in srgb, #2563eb 20%, var(--surface)) !important; }
+.prose pre[data-language='note-purple-background'] { border-color: #7c3aed; background: color-mix(in srgb, #7c3aed 20%, var(--surface)) !important; }
+.prose pre[data-language='note-pink-background']   { border-color: #db2777; background: color-mix(in srgb, #db2777 20%, var(--surface)) !important; }
+.prose pre[data-language='note-red-background']    { border-color: #dc2626; background: color-mix(in srgb, #dc2626 20%, var(--surface)) !important; }
+
+/* ── Mermaid diagrams ───────────────────────────────────── */
+.mermaid-diagram {
+  margin-block: var(--space-6);
+  text-align: center;
+  overflow-x: auto;
+}
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+/* ── KaTeX math ─────────────────────────────────────────── */
+.katex-display {
+  margin-block: var(--space-6) !important;
+  overflow-x: auto;
+}
+.katex { font-size: 1.05em; }
+
+/* ============================================================
+   CALLOUTS
+   ============================================================ */
+.callout {
+  --callout-color: var(--accent);
+  border-radius: var(--radius-md);
+  margin-block: var(--space-6);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--callout-color) 30%, var(--border));
+}
+
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  background: color-mix(in srgb, var(--callout-color) 12%, var(--surface-high));
+  color: var(--callout-color);
+  border-left: 3px solid var(--callout-color);
+  user-select: none;
+}
+
+details.callout > summary.callout-title { cursor: pointer; }
+details.callout > summary.callout-title::marker,
+details.callout > summary.callout-title::-webkit-details-marker { display: none; }
+details.callout > summary.callout-title::after {
+  content: '›';
+  margin-left: auto;
+  font-size: 1.1em;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+details.callout[open] > summary.callout-title::after {
+  transform: rotate(90deg);
+}
+
+.callout-content {
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--callout-color) 5%, var(--surface));
+  border-left: 3px solid color-mix(in srgb, var(--callout-color) 35%, transparent);
+}
+.callout-content > *:first-child { margin-top: 0; }
+.callout-content > *:last-child  { margin-bottom: 0; }
+.callout-content p { margin-bottom: var(--space-2); }
+.callout-content p:last-child { margin-bottom: 0; }
+
+/* Icon base */
+.callout-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1em;
+  height: 1.1em;
+  font-size: 0.9em;
+  font-style: normal;
+  flex-shrink: 0;
+}
+.callout-icon::before {
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+/* Per-type colors and icons */
+.callout-note     { --callout-color: #4b6bfb; }
+.callout-abstract { --callout-color: #06b6d4; }
+.callout-info     { --callout-color: #0ea5e9; }
+.callout-tip      { --callout-color: #10b981; }
+.callout-success  { --callout-color: #22c55e; }
+.callout-question { --callout-color: #f59e0b; }
+.callout-warning  { --callout-color: #f97316; }
+.callout-failure  { --callout-color: #ef4444; }
+.callout-danger   { --callout-color: #dc2626; }
+.callout-bug      { --callout-color: #b91c1c; }
+.callout-example  { --callout-color: #8b5cf6; }
+.callout-quote    { --callout-color: #94a3b8; }
+
+.callout-note     .callout-icon::before { content: "ℹ"; }
+.callout-abstract .callout-icon::before { content: "≡"; }
+.callout-info     .callout-icon::before { content: "ℹ"; }
+.callout-tip      .callout-icon::before { content: "⚡"; }
+.callout-success  .callout-icon::before { content: "✓"; }
+.callout-question .callout-icon::before { content: "?"; font-weight: var(--weight-bold); }
+.callout-warning  .callout-icon::before { content: "⚠"; }
+.callout-failure  .callout-icon::before { content: "✗"; }
+.callout-danger   .callout-icon::before { content: "☇"; }
+.callout-bug      .callout-icon::before { content: "⊙"; }
+.callout-example  .callout-icon::before { content: "◈"; }
+.callout-quote    .callout-icon::before { content: "❝"; }
