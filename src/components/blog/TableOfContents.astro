@@ -28,17 +28,42 @@ const tocHeadings = headings.filter(h => h.depth === 1 || h.depth === 2);
     .map(l => document.getElementById(l.getAttribute('href')!.slice(1)))
     .filter((el): el is HTMLElement => el !== null);
 
-  function setActive(id: string | null) {
-    for (const link of links) {
-      link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+  const tocEl = document.querySelector<HTMLElement>('.toc');
+
+  // Keep the active TOC link visible within the TOC's own scroll container.
+  function scrollTocToLink(link: HTMLAnchorElement) {
+    if (!tocEl) return;
+    const linkRect = link.getBoundingClientRect();
+    const tocRect  = tocEl.getBoundingClientRect();
+    const pad = 32; // breathing room above/below
+
+    const relTop    = linkRect.top    - tocRect.top;
+    const relBottom = linkRect.bottom - tocRect.top;
+
+    if (relTop < pad) {
+      // Link is above the visible TOC area — scroll up
+      tocEl.scrollBy({ top: relTop - pad, behavior: 'smooth' });
+    } else if (relBottom > tocEl.clientHeight - pad) {
+      // Link is below the visible TOC area — scroll down
+      tocEl.scrollBy({ top: relBottom - tocEl.clientHeight + pad, behavior: 'smooth' });
     }
   }
 
+  function setActive(id: string | null) {
+    let activeLink: HTMLAnchorElement | null = null;
+    for (const link of links) {
+      const isActive = link.getAttribute('href') === `#${id}`;
+      link.classList.toggle('active', isActive);
+      if (isActive) activeLink = link;
+    }
+    if (activeLink) scrollTocToLink(activeLink);
+  }
+
   // Highlight the last heading that has scrolled past the top threshold.
-  // This never flickers because we always pick exactly one winner.
+  // Default to the first heading so something is always active on page load.
   function updateActive() {
-    const threshold = 130; // px from top — clears the sticky header
-    let activeId: string | null = null;
+    const threshold = 130; // px — clears the sticky header
+    let activeId: string | null = headingEls[0]?.id ?? null;
     for (const el of headingEls) {
       if (el.getBoundingClientRect().top <= threshold) {
         activeId = el.id;
