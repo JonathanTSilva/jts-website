@@ -4,7 +4,7 @@ interface Props {
 }
 
 const { headings } = Astro.props;
-const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+const tocHeadings = headings.filter(h => h.depth === 1 || h.depth === 2);
 ---
 
 {tocHeadings.length > 0 && (
@@ -12,7 +12,7 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
     <p class="toc-title">Contents</p>
     <ol class="toc-list">
       {tocHeadings.map(h => (
-        <li class:list={['toc-item', h.depth === 3 ? 'toc-item--sub' : '']}>
+        <li class:list={['toc-item', h.depth === 2 ? 'toc-item--sub' : '']}>
           <a class="toc-link" href={`#${h.slug}`}>{h.text}</a>
         </li>
       ))}
@@ -44,10 +44,26 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
 
 <style>
   .toc {
-    position: sticky;
-    top: calc(var(--space-16) + var(--space-4));
-    max-height: calc(100vh - var(--space-16) - var(--space-8));
     overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+
+    /* Theme-aware scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .toc::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .toc::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .toc::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-full);
   }
 
   .toc-title {
@@ -57,6 +73,7 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
     letter-spacing: 0.08em;
     color: var(--text-muted);
     margin: 0 0 var(--space-3) 0;
+    flex-shrink: 0;
   }
 
   .toc-list {
