@@ -6,6 +6,8 @@ import rehypeKatex from 'rehype-katex';
 import { rehypeCallouts } from './src/lib/rehype/callouts.ts';
 import { remarkHighlights } from './src/lib/remark/highlights.ts';
 import { remarkObsidianImages } from './src/lib/remark/obsidian-images.ts';
+import { remarkNoteBlocks } from './src/lib/remark/note-blocks.ts';
+import { remarkTaskItems } from './src/lib/remark/task-items.ts';
 
 export default defineConfig({
   site: 'https://www.jontobias.com',
@@ -21,9 +23,11 @@ export default defineConfig({
       },
     },
     remarkPlugins: [
+      remarkNoteBlocks,
       remarkHighlights,
       remarkObsidianImages,
       remarkMath,
+      remarkTaskItems,
     ],
     rehypePlugins: [
       rehypeCallouts,
