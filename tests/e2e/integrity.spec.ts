@@ -35,39 +35,63 @@ test.describe('Build Integrity', () => {
   });
 
   test('RSS feeds should be valid and contain content items', async ({ request }) => {
-    // Get expected slugs from src/content
     const blogDir = path.join(process.cwd(), 'src/content/blog');
     const notesDir = path.join(process.cwd(), 'src/content/notes');
-    
-    const blogFiles = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
-    const notesFiles = fs.readdirSync(notesDir).filter(f => f.endsWith('.md'));
 
-    const blogSlugs = blogFiles.map(f => f.replace(/\.(en|pt-br)\.md$/, '.$1'));
-    const notesSlugs = notesFiles.map(f => f.replace(/\.(en|pt-br)\.md$/, '.$1'));
+    const enBlogSlugs = fs.readdirSync(blogDir)
+      .filter(f => f.endsWith('.en.md'))
+      .map(f => f.replace(/\.en\.md$/, '.en'));
+    const ptBlogSlugs = fs.readdirSync(blogDir)
+      .filter(f => f.endsWith('.pt-br.md'))
+      .map(f => f.replace(/\.pt-br\.md$/, '.pt-br'));
+    const enNotesSlugs = fs.readdirSync(notesDir)
+      .filter(f => f.endsWith('.en.md'))
+      .map(f => f.replace(/\.en\.md$/, '.en'));
+    const ptNotesSlugs = fs.readdirSync(notesDir)
+      .filter(f => f.endsWith('.pt-br.md'))
+      .map(f => f.replace(/\.pt-br\.md$/, '.pt-br'));
 
-    // Blog RSS
+    // English Blog RSS
     const blogRss = await request.get('/rss.xml');
     expect(blogRss.ok()).toBe(true);
     const blogXml = await blogRss.text();
     expect(blogXml).toContain("<title>Jonathan&apos;s Blog</title>");
-    
-    for (const slug of blogSlugs) {
-      // Some items might be in pt-br
-      const isPtBr = slug.endsWith('.pt-br');
-      const path = isPtBr ? `/pt-br/blog/${slug}` : `/blog/${slug}`;
-      expect(blogXml).toContain(path);
+    for (const slug of enBlogSlugs) {
+      expect(blogXml).toContain(`/blog/${slug}`);
+    }
+    // PT-BR posts must NOT appear in the EN feed
+    for (const slug of ptBlogSlugs) {
+      expect(blogXml).not.toContain(`/pt-br/blog/${slug}`);
     }
 
-    // Notes RSS
+    // PT-BR Blog RSS
+    const ptBlogRss = await request.get('/pt-br/rss.xml');
+    expect(ptBlogRss.ok()).toBe(true);
+    const ptBlogXml = await ptBlogRss.text();
+    expect(ptBlogXml).toContain('<language>pt-br</language>');
+    for (const slug of ptBlogSlugs) {
+      expect(ptBlogXml).toContain(`/pt-br/blog/${slug}`);
+    }
+
+    // English Notes RSS
     const notesRss = await request.get('/notes/rss.xml');
     expect(notesRss.ok()).toBe(true);
     const notesXml = await notesRss.text();
     expect(notesXml).toContain("<title>Jonathan&apos;s Notes</title>");
-    
-    for (const slug of notesSlugs) {
-      const isPtBr = slug.endsWith('.pt-br');
-      const path = isPtBr ? `/pt-br/notes/${slug}` : `/notes/${slug}`;
-      expect(notesXml).toContain(path);
+    for (const slug of enNotesSlugs) {
+      expect(notesXml).toContain(`/notes/${slug}`);
+    }
+    for (const slug of ptNotesSlugs) {
+      expect(notesXml).not.toContain(`/pt-br/notes/${slug}`);
+    }
+
+    // PT-BR Notes RSS
+    const ptNotesRss = await request.get('/pt-br/notes/rss.xml');
+    expect(ptNotesRss.ok()).toBe(true);
+    const ptNotesXml = await ptNotesRss.text();
+    expect(ptNotesXml).toContain('<language>pt-br</language>');
+    for (const slug of ptNotesSlugs) {
+      expect(ptNotesXml).toContain(`/pt-br/notes/${slug}`);
     }
   });
 
