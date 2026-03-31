@@ -49,7 +49,7 @@ test.describe('Build Integrity', () => {
     const blogRss = await request.get('/rss.xml');
     expect(blogRss.ok()).toBe(true);
     const blogXml = await blogRss.text();
-    expect(blogXml).toContain('<title>Jonathan’s Blog</title>');
+    expect(blogXml).toContain("<title>Jonathan&apos;s Blog</title>");
     
     for (const slug of blogSlugs) {
       // Some items might be in pt-br
@@ -62,7 +62,7 @@ test.describe('Build Integrity', () => {
     const notesRss = await request.get('/notes/rss.xml');
     expect(notesRss.ok()).toBe(true);
     const notesXml = await notesRss.text();
-    expect(notesXml).toContain('<title>Jonathan’s Notes</title>');
+    expect(notesXml).toContain("<title>Jonathan&apos;s Notes</title>");
     
     for (const slug of notesSlugs) {
       const isPtBr = slug.endsWith('.pt-br');

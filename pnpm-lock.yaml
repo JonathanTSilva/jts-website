@@ -32,6 +32,9 @@ importers:
       katex:
         specifier: ^0.16.44
         version: 0.16.44
+      marked:
+        specifier: ^17.0.5
+        version: 17.0.5
       mermaid:
         specifier: ^11.13.0
         version: 11.13.0
@@ -1806,6 +1809,11 @@ packages:
 
   marked@16.4.2:
     resolution: {integrity: sha512-TI3V8YYWvkVf3KJe1dRkpnjs68JUPyEa5vjKrp1XEEJUAOaQc+Qj+L1qWbPd0SJuAdQkFU0h73sXXqwDYxsiDA==}
+    engines: {node: '>= 20'}
+    hasBin: true
+
+  marked@17.0.5:
+    resolution: {integrity: sha512-6hLvc0/JEbRjRgzI6wnT2P1XuM1/RrrDEX0kPt0N7jGm1133g6X7DlxFasUIx+72aKAr904GTxhSLDrd5DIlZg==}
     engines: {node: '>= 20'}
     hasBin: true
 
@@ -4682,6 +4690,8 @@ snapshots:
   markdown-table@3.0.4: {}
 
   marked@16.4.2: {}
+
+  marked@17.0.5: {}
 
   mdast-util-definitions@6.0.0:
     dependencies:
