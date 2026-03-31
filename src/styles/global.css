@@ -183,6 +183,14 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   border-radius: var(--radius-sm);
   padding: 1px 4px;
 }
+.prose blockquote {
+  border-left: 3px solid var(--text-muted);
+  padding-left: var(--space-4);
+  margin-left: 0;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: var(--space-4);
+}
 
 /* ── Accessibility ──────────────────────────────────────── */
 .sr-only, .visually-hidden {
@@ -219,3 +227,360 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 
 /* ── Misc ───────────────────────────────────────────────── */
 .list-none { list-style: none; padding: 0; }
+
+/* ============================================================
+   SHIKI DUAL-THEME CODE BLOCKS
+   Light values are the default (set as inline styles by Shiki).
+   Dark values are stored as --shiki-dark-* CSS variables.
+   ============================================================ */
+[data-theme='dark'] .astro-code,
+[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+/* ============================================================
+   PROSE EXTENSIONS
+   ============================================================ */
+
+/* ── Tables ─────────────────────────────────────────────── */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  margin-block: var(--space-6);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.prose thead {
+  background: var(--surface-high);
+}
+.prose th {
+  font-weight: var(--weight-semibold);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 2px solid var(--border);
+  border-right: 1px solid var(--border);
+  color: var(--text);
+}
+.prose th:last-child { border-right: none; }
+.prose td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.prose td:last-child { border-right: none; }
+.prose tr:last-child td { border-bottom: none; }
+.prose tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-high) 50%, transparent);
+}
+
+/* ── Footnotes ──────────────────────────────────────────── */
+.prose .footnotes {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-6);
+  margin-top: var(--space-10, 2.5rem);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.prose .footnotes ol { padding-left: var(--space-6); }
+.prose .footnotes li { margin-bottom: var(--space-2); }
+.prose a[data-footnote-ref] {
+  font-size: 0.75em;
+  vertical-align: super;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  text-decoration: none;
+}
+.prose a[data-footnote-backref] { text-decoration: none; color: var(--text-muted); }
+
+/* ── Task list checkboxes ───────────────────────────────── */
+/* Remove bullets for lists that contain any [data-task] items */
+.prose ul:has(li[data-task]),
+.prose .contains-task-list {
+  list-style: none;
+  padding-left: var(--space-2);
+}
+
+/* All task items: flex row, icon on the left */
+.prose li[data-task] {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: 2px 0;
+}
+
+/* Hide native checkbox produced by remark-gfm */
+.prose li[data-task] > input[type='checkbox'] {
+  display: none;
+}
+
+/* Shared icon box */
+.prose li[data-task]::before {
+  content: '';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.1em;
+  height: 1.1em;
+  min-width: 1.1em;
+  margin-top: 0.18em;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+/* Unchecked [ ] — empty box */
+.prose li[data-task="unchecked"]::before {
+  content: '';
+}
+
+/* Checked [x]/[X] — green checkmark */
+.prose li[data-task="checked"]::before {
+  content: '✓';
+  background: #22c55e;
+  border-color: #22c55e;
+  color: white;
+}
+
+/* Scheduled [>] — blue arrow */
+.prose li[data-task="scheduled"]::before {
+  content: '→';
+  background: color-mix(in srgb, #3b82f6 15%, var(--surface));
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* Cancelled [-] — red X, text struck through */
+.prose li[data-task="cancelled"]::before {
+  content: '✗';
+  background: color-mix(in srgb, #ef4444 15%, var(--surface));
+  border-color: #ef4444;
+  color: #ef4444;
+  text-decoration: none;
+}
+.prose li[data-task="cancelled"] {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+/* Prevent icon from being struck through */
+.prose li[data-task="cancelled"]::before {
+  text-decoration: none;
+}
+
+/* Question [?] — orange ? in circle */
+.prose li[data-task="question"]::before {
+  content: '?';
+  border-radius: 50%;
+  background: color-mix(in srgb, #f59e0b 15%, var(--surface));
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+/* Important [!] — yellow ! in square */
+.prose li[data-task="important"]::before {
+  content: '!';
+  background: color-mix(in srgb, #eab308 15%, var(--surface));
+  border-color: #eab308;
+  color: #eab308;
+}
+
+/* ── Default highlight (==text==) ───────────────────────── */
+.prose mark {
+  background: color-mix(in srgb, #f59e0b 28%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* ── Colored mark highlights (Better Highlights snippet) ── */
+mark.purple { background: color-mix(in srgb, #8b5cf6 28%, transparent); }
+mark.pink   { background: color-mix(in srgb, #ec4899 28%, transparent); }
+mark.green  { background: color-mix(in srgb, #22c55e 28%, transparent); }
+mark.blue   { background: color-mix(in srgb, #3b82f6 28%, transparent); }
+
+/* ── Colored text spans (foreground) ───────────────────── */
+span.gray   { color: #6b7280; }
+span.brown  { color: #a16207; }
+span.orange { color: #ea580c; }
+span.yellow { color: #ca8a04; }
+span.green  { color: #16a34a; }
+span.blue   { color: #2563eb; }
+span.purple { color: #7c3aed; }
+span.pink   { color: #db2777; }
+span.red    { color: #dc2626; }
+
+[data-theme='dark'] span.gray   { color: #9ca3af; }
+[data-theme='dark'] span.brown  { color: #ca8a04; }
+[data-theme='dark'] span.orange { color: #fb923c; }
+[data-theme='dark'] span.yellow { color: #facc15; }
+[data-theme='dark'] span.green  { color: #4ade80; }
+[data-theme='dark'] span.blue   { color: #60a5fa; }
+[data-theme='dark'] span.purple { color: #a78bfa; }
+[data-theme='dark'] span.pink   { color: #f472b6; }
+[data-theme='dark'] span.red    { color: #f87171; }
+
+/* ── Colored text spans (background) ───────────────────── */
+span.gray-bg   { background: color-mix(in srgb, #6b7280 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.brown-bg  { background: color-mix(in srgb, #a16207 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.orange-bg { background: color-mix(in srgb, #ea580c 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.yellow-bg { background: color-mix(in srgb, #ca8a04 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.green-bg  { background: color-mix(in srgb, #16a34a 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.blue-bg   { background: color-mix(in srgb, #2563eb 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.purple-bg { background: color-mix(in srgb, #7c3aed 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.pink-bg   { background: color-mix(in srgb, #db2777 18%, transparent); border-radius: 2px; padding: 0 2px; }
+span.red-bg    { background: color-mix(in srgb, #dc2626 18%, transparent); border-radius: 2px; padding: 0 2px; }
+
+/* ── Note blocks (notation-color-blocks.css snippet) ────── */
+/* Transformed by remarkNoteBlocks plugin into <div class="note-block note-COLOR">.
+   note-bg = background variant (stronger fill). */
+.prose .note-block {
+  --nb-color: #6b7280;
+  border-left: 4px solid var(--nb-color);
+  background: color-mix(in srgb, var(--nb-color) 10%, var(--surface));
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  margin-block: var(--space-4);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.prose .note-block.note-bg {
+  background: color-mix(in srgb, var(--nb-color) 22%, var(--surface));
+}
+
+/* Foreground color tokens */
+.prose .note-block.note-gray   { --nb-color: #6b7280; }
+.prose .note-block.note-brown  { --nb-color: #a16207; }
+.prose .note-block.note-orange { --nb-color: #ea580c; }
+.prose .note-block.note-yellow { --nb-color: #ca8a04; }
+.prose .note-block.note-green  { --nb-color: #16a34a; }
+.prose .note-block.note-blue   { --nb-color: #2563eb; }
+.prose .note-block.note-purple { --nb-color: #7c3aed; }
+.prose .note-block.note-pink   { --nb-color: #db2777; }
+.prose .note-block.note-red    { --nb-color: #dc2626; }
+/* Admonition aliases */
+.prose .note-block.note-tip     { --nb-color: #10b981; }
+.prose .note-block.note-warning { --nb-color: #f97316; }
+.prose .note-block.note-info    { --nb-color: #0ea5e9; }
+.prose .note-block.note-note    { --nb-color: #4b6bfb; }
+.prose .note-block.note-danger  { --nb-color: #dc2626; }
+
+/* ── Mermaid diagrams ───────────────────────────────────── */
+.mermaid-diagram {
+  margin-block: var(--space-6);
+  text-align: center;
+  overflow-x: auto;
+}
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+/* ── KaTeX math ─────────────────────────────────────────── */
+.katex-display {
+  margin-block: var(--space-6) !important;
+  overflow-x: auto;
+}
+.katex { font-size: 1.05em; }
+
+/* ============================================================
+   CALLOUTS
+   ============================================================ */
+.callout {
+  --callout-color: var(--accent);
+  border-radius: var(--radius-md);
+  margin-block: var(--space-6);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--callout-color) 30%, var(--border));
+}
+
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  background: color-mix(in srgb, var(--callout-color) 12%, var(--surface-high));
+  color: var(--callout-color);
+  border-left: 3px solid var(--callout-color);
+  user-select: none;
+}
+
+details.callout > summary.callout-title { cursor: pointer; }
+details.callout > summary.callout-title::marker,
+details.callout > summary.callout-title::-webkit-details-marker { display: none; }
+details.callout > summary.callout-title::after {
+  content: '›';
+  margin-left: auto;
+  font-size: 1.1em;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+details.callout[open] > summary.callout-title::after {
+  transform: rotate(90deg);
+}
+
+.callout-content {
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--callout-color) 5%, var(--surface));
+  border-left: 3px solid color-mix(in srgb, var(--callout-color) 35%, transparent);
+}
+.callout-content > *:first-child { margin-top: 0; }
+.callout-content > *:last-child  { margin-bottom: 0; }
+.callout-content p { margin-bottom: var(--space-2); }
+.callout-content p:last-child { margin-bottom: 0; }
+
+/* Icon base */
+.callout-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1em;
+  height: 1.1em;
+  font-size: 0.9em;
+  font-style: normal;
+  flex-shrink: 0;
+}
+.callout-icon::before {
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+/* Per-type colors and icons */
+.callout-note     { --callout-color: #4b6bfb; }
+.callout-abstract { --callout-color: #06b6d4; }
+.callout-info     { --callout-color: #0ea5e9; }
+.callout-tip      { --callout-color: #10b981; }
+.callout-success  { --callout-color: #22c55e; }
+.callout-question { --callout-color: #f59e0b; }
+.callout-warning  { --callout-color: #f97316; }
+.callout-failure  { --callout-color: #ef4444; }
+.callout-danger   { --callout-color: #dc2626; }
+.callout-bug      { --callout-color: #b91c1c; }
+.callout-example  { --callout-color: #8b5cf6; }
+.callout-quote    { --callout-color: #94a3b8; }
+
+.callout-note     .callout-icon::before { content: "ℹ"; }
+.callout-abstract .callout-icon::before { content: "≡"; }
+.callout-info     .callout-icon::before { content: "ℹ"; }
+.callout-tip      .callout-icon::before { content: "⚡"; }
+.callout-success  .callout-icon::before { content: "✓"; }
+.callout-question .callout-icon::before { content: "?"; font-weight: var(--weight-bold); }
+.callout-warning  .callout-icon::before { content: "⚠"; }
+.callout-failure  .callout-icon::before { content: "✗"; }
+.callout-danger   .callout-icon::before { content: "☇"; }
+.callout-bug      .callout-icon::before { content: "⊙"; }
+.callout-example  .callout-icon::before { content: "◈"; }
+.callout-quote    .callout-icon::before { content: "❝"; }

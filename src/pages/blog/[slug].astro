@@ -137,6 +137,43 @@ const t = {
   <BackToTop />
 </BaseLayout>
 
+<script>
+  import('mermaid').then(async ({ default: mermaid }) => {
+    const getTheme = () =>
+      document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+
+    // Transform pre elements into containers, storing the raw code for re-render.
+    document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]').forEach(pre => {
+      const code = (pre.querySelector('code')?.textContent ?? pre.textContent ?? '').trim();
+      if (!code) return;
+      const container = document.createElement('div');
+      container.className = 'mermaid-diagram';
+      container.dataset.mermaidCode = code;
+      pre.replaceWith(container);
+    });
+
+    async function renderAll() {
+      mermaid.initialize({ startOnLoad: false, theme: getTheme() });
+      for (const container of document.querySelectorAll<HTMLElement>('.mermaid-diagram[data-mermaid-code]')) {
+        const code = container.dataset.mermaidCode ?? '';
+        if (!code) continue;
+        try {
+          const { svg } = await mermaid.render(`mmd-${Math.random().toString(36).slice(2)}`, code);
+          container.innerHTML = svg;
+        } catch { /* invalid diagram — leave as-is */ }
+      }
+    }
+
+    await renderAll();
+
+    // Re-render when the user toggles light ↔ dark.
+    new MutationObserver(renderAll).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  });
+</script>
+
 <style>
   .post-wrapper {
     max-width: var(--wide-max);
@@ -277,6 +314,9 @@ const t = {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     padding: var(--space-4);
+    max-height: calc(100vh - var(--space-6) - 60px - var(--space-8));
+    display: flex;
+    flex-direction: column;
   }
 
   .fallback-notice {
@@ -349,7 +389,7 @@ const t = {
   }
 
   .prose :global(blockquote) {
-    border-left: 2px solid var(--accent);
+    border-left: 3px solid var(--text-muted);
     padding-left: var(--space-4);
     margin-left: 0;
     color: var(--text-muted);

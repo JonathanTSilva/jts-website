@@ -132,6 +132,41 @@ const relatedNotes = allNotesForRelated
 
 <BackToTop />
 
+<script>
+  import('mermaid').then(async ({ default: mermaid }) => {
+    const getTheme = () =>
+      document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+
+    document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]').forEach(pre => {
+      const code = (pre.querySelector('code')?.textContent ?? pre.textContent ?? '').trim();
+      if (!code) return;
+      const container = document.createElement('div');
+      container.className = 'mermaid-diagram';
+      container.dataset.mermaidCode = code;
+      pre.replaceWith(container);
+    });
+
+    async function renderAll() {
+      mermaid.initialize({ startOnLoad: false, theme: getTheme() });
+      for (const container of document.querySelectorAll<HTMLElement>('.mermaid-diagram[data-mermaid-code]')) {
+        const code = container.dataset.mermaidCode ?? '';
+        if (!code) continue;
+        try {
+          const { svg } = await mermaid.render(`mmd-${Math.random().toString(36).slice(2)}`, code);
+          container.innerHTML = svg;
+        } catch { /* invalid diagram — leave as-is */ }
+      }
+    }
+
+    await renderAll();
+
+    new MutationObserver(renderAll).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  });
+</script>
+
 <style>
   .note-page {
     max-width: var(--container-max);

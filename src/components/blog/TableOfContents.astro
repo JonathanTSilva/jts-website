@@ -4,7 +4,7 @@ interface Props {
 }
 
 const { headings } = Astro.props;
-const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+const tocHeadings = headings.filter(h => h.depth === 1 || h.depth === 2);
 ---
 
 {tocHeadings.length > 0 && (
@@ -12,7 +12,7 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
     <p class="toc-title">Contents</p>
     <ol class="toc-list">
       {tocHeadings.map(h => (
-        <li class:list={['toc-item', h.depth === 3 ? 'toc-item--sub' : '']}>
+        <li class:list={['toc-item', h.depth === 2 ? 'toc-item--sub' : '']}>
           <a class="toc-link" href={`#${h.slug}`}>{h.text}</a>
         </li>
       ))}
@@ -21,33 +21,77 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
 )}
 
 <script>
-  const links = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
-  if (links.length && 'IntersectionObserver' in window) {
-    const headingIds = Array.from(links)
-      .map(l => l.getAttribute('href')?.slice(1))
-      .filter((id): id is string => Boolean(id));
-    const headingEls = headingIds
-      .map(id => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc-link'));
+  if (!links.length) throw new Error();
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const id = entry.target.id;
-        const link = document.querySelector<HTMLElement>(`.toc-link[href="#${id}"]`);
-        if (link) link.classList.toggle('active', entry.isIntersecting);
-      });
-    }, { rootMargin: '-20% 0px -70% 0px' });
+  const headingEls = links
+    .map(l => document.getElementById(l.getAttribute('href')!.slice(1)))
+    .filter((el): el is HTMLElement => el !== null);
 
-    headingEls.forEach(el => observer.observe(el));
+  const tocEl = document.querySelector<HTMLElement>('.toc');
+
+  // Keep the active TOC link visible within the TOC's own scroll container.
+  function scrollTocToLink(link: HTMLAnchorElement) {
+    if (!tocEl) return;
+    const linkRect = link.getBoundingClientRect();
+    const tocRect  = tocEl.getBoundingClientRect();
+    const pad = 32; // breathing room above/below
+
+    const relTop    = linkRect.top    - tocRect.top;
+    const relBottom = linkRect.bottom - tocRect.top;
+
+    if (relTop < pad) {
+      // Link is above the visible TOC area — scroll up
+      tocEl.scrollBy({ top: relTop - pad, behavior: 'smooth' });
+    } else if (relBottom > tocEl.clientHeight - pad) {
+      // Link is below the visible TOC area — scroll down
+      tocEl.scrollBy({ top: relBottom - tocEl.clientHeight + pad, behavior: 'smooth' });
+    }
   }
+
+  function setActive(id: string | null) {
+    let activeLink: HTMLAnchorElement | null = null;
+    for (const link of links) {
+      const isActive = link.getAttribute('href') === `#${id}`;
+      link.classList.toggle('active', isActive);
+      if (isActive) activeLink = link;
+    }
+    if (activeLink) scrollTocToLink(activeLink);
+  }
+
+  // Highlight the last heading that has scrolled past the top threshold.
+  // Default to the first heading so something is always active on page load.
+  function updateActive() {
+    const threshold = 130; // px — clears the sticky header
+    let activeId: string | null = headingEls[0]?.id ?? null;
+    for (const el of headingEls) {
+      if (el.getBoundingClientRect().top <= threshold) {
+        activeId = el.id;
+      }
+    }
+    setActive(activeId);
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive(); // run on load (handles direct-link #hash navigation too)
 </script>
 
 <style>
   .toc {
-    position: sticky;
-    top: calc(var(--space-16) + var(--space-4));
-    max-height: calc(100vh - var(--space-16) - var(--space-8));
     overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+
+    /* Theme-aware scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .toc::-webkit-scrollbar { width: 4px; }
+  .toc::-webkit-scrollbar-track { background: transparent; }
+  .toc::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-full);
   }
 
   .toc-title {
@@ -57,6 +101,7 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
     letter-spacing: 0.08em;
     color: var(--text-muted);
     margin: 0 0 var(--space-3) 0;
+    flex-shrink: 0;
   }
 
   .toc-list {
@@ -65,27 +110,39 @@ const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    /* Left track — all items run alongside it */
+    border-left: 1px solid var(--border);
   }
 
-  .toc-item {
-    line-height: 1.3;
-  }
-
-  .toc-item--sub {
-    padding-left: var(--space-3);
-  }
+  .toc-item { line-height: 1.3; }
 
   .toc-link {
     font-size: var(--text-xs);
     color: var(--text-muted);
     text-decoration: none;
-    transition: color var(--duration-fast) var(--ease-out);
     display: block;
-    padding-block: 2px;
+    padding: 3px var(--space-2) 3px var(--space-3);
+    /* Shift -1px so the link's own left border overlaps the track */
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    transition: color var(--duration-fast) var(--ease-out),
+                border-left-color var(--duration-fast) var(--ease-out),
+                font-weight 0s;
   }
-  .toc-link:hover { color: var(--text); text-decoration: none; }
-  .toc-link.active { color: var(--accent); }
+  .toc-link:hover {
+    color: var(--text);
+    text-decoration: none;
+  }
+  .toc-link.active {
+    color: var(--accent);
+    font-weight: 600;
+    border-left-color: var(--accent);
+  }
+
+  /* Sub-items get extra indent */
+  .toc-item--sub .toc-link {
+    padding-left: var(--space-6);
+  }
 
   @media (max-width: 64rem) {
     .toc { display: none; }
