@@ -5,25 +5,25 @@ import { marked } from 'marked';
 export async function GET(context: any) {
   const blog = await getCollection('blog');
 
-  const enPosts = blog
-    .filter(post => post.data.language === 'en')
+  const ptPosts = blog
+    .filter(post => post.data.language === 'pt-br')
     .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
   const items = await Promise.all(
-    enPosts.map(async (post) => ({
+    ptPosts.map(async (post) => ({
       title: post.data.title,
       pubDate: post.data.publishedAt,
       description: post.data.summary,
-      link: `/blog/${post.data.slug}`,
+      link: `/pt-br/blog/${post.data.slug}`,
       content: await marked.parse(post.body ?? ''),
     }))
   );
 
   return rss({
-    title: "Jonathan's Blog",
-    description: 'Writings on firmware, embedded systems, and automation.',
+    title: 'Blog do Jonathan',
+    description: 'Escritos sobre firmware, sistemas embarcados e automação.',
     site: context.site || 'https://www.jontobias.com',
     items,
-    customData: `<language>en-us</language>`,
+    customData: `<language>pt-br</language>`,
   });
 }
