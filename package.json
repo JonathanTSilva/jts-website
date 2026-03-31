@@ -27,6 +27,7 @@
     "astro": "^6.1.1",
     "geist": "^1.7.0",
     "gray-matter": "^4.0.3",
+    "katex": "^0.16.44",
     "mermaid": "^11.13.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
