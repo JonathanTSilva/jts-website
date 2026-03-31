@@ -1,6 +1,5 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
-import { marked } from 'marked';
 
 export async function GET(context: any) {
   const notes = await getCollection('notes');
@@ -9,15 +8,13 @@ export async function GET(context: any) {
     .filter(note => note.data.language === 'en')
     .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
-  const items = await Promise.all(
-    enNotes.map(async (note) => ({
-      title: note.data.title,
-      pubDate: note.data.publishedAt,
-      description: note.data.summary || '',
-      link: `/notes/${note.data.slug}`,
-      content: await marked.parse(note.body ?? ''),
-    }))
-  );
+  const items = enNotes.map(note => ({
+    title: note.data.title,
+    pubDate: note.data.publishedAt,
+    description: note.data.summary || '',
+    link: `/notes/${note.data.slug}`,
+    content: note.rendered?.html ?? '',
+  }));
 
   return rss({
     title: "Jonathan's Notes",

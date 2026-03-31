@@ -1,6 +1,5 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
-import { marked } from 'marked';
 
 export async function GET(context: any) {
   const blog = await getCollection('blog');
@@ -9,15 +8,13 @@ export async function GET(context: any) {
     .filter(post => post.data.language === 'en')
     .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
-  const items = await Promise.all(
-    enPosts.map(async (post) => ({
-      title: post.data.title,
-      pubDate: post.data.publishedAt,
-      description: post.data.summary,
-      link: `/blog/${post.data.slug}`,
-      content: await marked.parse(post.body ?? ''),
-    }))
-  );
+  const items = enPosts.map(post => ({
+    title: post.data.title,
+    pubDate: post.data.publishedAt,
+    description: post.data.summary,
+    link: `/blog/${post.data.slug}`,
+    content: post.rendered?.html ?? '',
+  }));
 
   return rss({
     title: "Jonathan's Blog",
