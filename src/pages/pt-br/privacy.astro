@@ -8,6 +8,104 @@ const translations = {
 ---
 
 <BaseLayout locale="pt-br" title="Política de Privacidade" translations={translations}>
-  <h1>Política de Privacidade</h1>
-  <p>Esta página está em construção. Volte em breve.</p>
+  <article class="legal-page">
+    <header class="legal-header">
+      <p class="legal-meta">Data de vigência: 31 de março de 2026</p>
+      <h1>Política de Privacidade</h1>
+      <p>
+        Este site é um portfólio pessoal, blog e área de notas operado por Jonathan Tobias da Silva. Esta política
+        explica quais informações podem ser coletadas quando você usa o site e como elas são utilizadas.
+      </p>
+    </header>
+
+    <section>
+      <h2>Quais dados este site coleta</h2>
+      <p>
+        O site pode coletar dados limitados de uso, como visualizações de página, origem de tráfego, páginas mais
+        acessadas, informações de navegador ou dispositivo e interações com ações de contato importantes, como download
+        do CV, clique em e-mail e cliques para LinkedIn ou GitHub.
+      </p>
+      <p>O site não oferece contas de usuário, comentários, checkout nem envio direto de arquivos.</p>
+    </section>
+
+    <section>
+      <h2>Analytics e cookies</h2>
+      <p>
+        Analytics são usados para entender o tráfego, o desempenho do conteúdo e o interesse em ações de contato.
+        Analytics opcionais só são ativados depois que você faz uma escolha de consentimento no banner do site.
+      </p>
+      <p>
+        Se você aceitar analytics, o site pode armazenar um registro de consentimento no navegador e carregar um script
+        de analytics de terceiros. Se você recusar, analytics opcionais não são carregados.
+      </p>
+    </section>
+
+    <section>
+      <h2>Como as informações são usadas</h2>
+      <p>As informações coletadas são usadas para:</p>
+      <ul>
+        <li>entender quais páginas e temas são mais úteis para os visitantes</li>
+        <li>medir interesse em ações de contato, como downloads de CV e links de perfil</li>
+        <li>manter desempenho, segurança e qualidade do conteúdo</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Serviços de terceiros</h2>
+      <p>
+        O site pode usar serviços de terceiros para analytics, hospedagem e links externos. Quando você clica em links
+        como LinkedIn ou GitHub, esses serviços tratam seus dados de acordo com as próprias políticas.
+      </p>
+    </section>
+
+    <section>
+      <h2>Retenção de dados</h2>
+      <p>
+        Os dados de analytics são mantidos de acordo com a configuração e as regras de retenção do provedor utilizado.
+        As escolhas de consentimento armazenadas no navegador permanecem até você limpá-las ou alterar sua decisão.
+      </p>
+    </section>
+
+    <section>
+      <h2>Suas escolhas</h2>
+      <p>
+        Você pode recusar analytics opcionais no banner de consentimento. Também pode limpar o armazenamento local do
+        navegador ou bloquear cookies e requisições de terceiros pelas configurações do navegador.
+      </p>
+    </section>
+
+    <section>
+      <h2>Contato</h2>
+      <p>
+        Se você tiver uma dúvida sobre privacidade neste site, entre em contato por
+        <a href="mailto:jonathantosilva@hotmail.com">jonathantosilva@hotmail.com</a>.
+      </p>
+    </section>
+  </article>
 </BaseLayout>
+
+<style>
+  .legal-page {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .legal-header {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .legal-header h1,
+  .legal-page h2 {
+    margin-bottom: 0;
+  }
+
+  .legal-meta {
+    margin: 0;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+</style>

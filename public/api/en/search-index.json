@@ -1,24 +1,14 @@
 [
   {
-    "title": "Continuous Integration for Firmware",
-    "summary": "How to apply modern CI/CD practices to embedded development.",
+    "title": "Markdown Cheatsheet — Website Writing Reference",
+    "summary": "Complete reference of all markdown elements supported on this website: typography, links, code blocks, callouts, tables, diagrams, math, and custom Obsidian snippets.",
     "tags": [
-      "CI/CD",
-      "Firmware",
-      "Automation"
+      "Markdown",
+      "Obsidian",
+      "Reference",
+      "Writing"
     ],
-    "url": "/blog/2026-03-ci-firmware.en",
-    "type": "blog"
-  },
-  {
-    "title": "Hello Embedded Systems",
-    "summary": "Introduction to embedded programming with C and Rust.",
-    "tags": [
-      "C",
-      "Rust",
-      "Embedded"
-    ],
-    "url": "/blog/2026-03-hello-embedded-systems.en",
+    "url": "/blog/2026-03-markdown-cheatsheet.en",
     "type": "blog"
   },
   {

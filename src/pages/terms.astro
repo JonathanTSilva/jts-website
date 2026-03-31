@@ -8,6 +8,108 @@ const translations = {
 ---
 
 <BaseLayout locale="en" title="Terms of Service" translations={translations}>
-  <h1>Terms of Service</h1>
-  <p>This page is under construction.</p>
+  <article class="legal-page">
+    <header class="legal-header">
+      <p class="legal-meta">Effective date: March 31, 2026</p>
+      <h1>Terms of Service</h1>
+      <p>
+        These terms govern access to and use of this personal website, portfolio, blog, notes, and related public
+        materials made available by Jonathan Tobias da Silva.
+      </p>
+    </header>
+
+    <section>
+      <h2>Use of the site</h2>
+      <p>
+        You may browse, read, and share links to the public content on this site for lawful purposes. You may not use
+        the site in a way that disrupts its operation, attempts unauthorized access, or misrepresents the origin of the
+        content.
+      </p>
+    </section>
+
+    <section>
+      <h2>Content and intellectual property</h2>
+      <p>
+        Unless stated otherwise, the written content, design work, and original materials on this site belong to
+        Jonathan Tobias da Silva. Short quotations with attribution and normal link sharing are fine, but copying or
+        republishing substantial content requires permission.
+      </p>
+    </section>
+
+    <section>
+      <h2>Downloads and external links</h2>
+      <p>
+        This site may provide downloadable materials such as a CV and links to third-party services such as LinkedIn
+        and GitHub. External services are not controlled by this site and remain subject to their own terms and privacy
+        practices.
+      </p>
+    </section>
+
+    <section>
+      <h2>No professional advice or guarantee</h2>
+      <p>
+        The content on this site is provided for general information and professional presentation. It is not a
+        guarantee of availability, employment, project engagement, or any specific result.
+      </p>
+    </section>
+
+    <section>
+      <h2>Disclaimer of warranties</h2>
+      <p>
+        This site is provided on an “as is” and “as available” basis. While reasonable care is taken to keep the
+        information accurate and accessible, no warranty is made that the site will always be uninterrupted, error-free,
+        or complete.
+      </p>
+    </section>
+
+    <section>
+      <h2>Limitation of liability</h2>
+      <p>
+        To the maximum extent permitted by applicable law, Jonathan Tobias da Silva is not liable for damages arising
+        from use of, inability to use, or reliance on this site or any linked third-party service.
+      </p>
+    </section>
+
+    <section>
+      <h2>Changes</h2>
+      <p>
+        These terms may be updated from time to time. The effective date at the top of the page reflects the most
+        recent revision.
+      </p>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>
+        Questions about these terms can be sent to
+        <a href="mailto:jonathantosilva@hotmail.com">jonathantosilva@hotmail.com</a>.
+      </p>
+    </section>
+  </article>
 </BaseLayout>
+
+<style>
+  .legal-page {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .legal-header {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .legal-header h1,
+  .legal-page h2 {
+    margin-bottom: 0;
+  }
+
+  .legal-meta {
+    margin: 0;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+</style>

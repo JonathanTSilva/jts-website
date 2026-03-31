@@ -25,6 +25,14 @@ Bilingual, static-first personal website for a Senior Embedded Software Engineer
 pnpm install
 ```
 
+Optional environment variables for Phase 1 analytics:
+
+```bash
+PUBLIC_PLAUSIBLE_DOMAIN=www.jontobias.com
+PUBLIC_PLAUSIBLE_API_HOST=https://plausible.io
+PUBLIC_PLAUSIBLE_SCRIPT_SRC=https://plausible.io/js/script.js
+```
+
 ### Development
 
 Start the development server:
@@ -101,5 +109,6 @@ pnpm test:e2e:install
 
 - [Design Specification](docs/superpowers/specs/2026-03-19-personal-website-design.md)
 - [Implementation Plan](docs/superpowers/plans/2026-03-19-personal-website-implementation.md)
+- [Analytics & Consent Ops](docs/site-operations/analytics-and-consent.md)
 - [Content Templates](docs/content-contracts/)
 - [Automation Docs](docs/automation/)

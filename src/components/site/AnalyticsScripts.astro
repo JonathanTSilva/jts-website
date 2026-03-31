@@ -1,0 +1,109 @@
+---
+import { getAnalyticsConfig } from '../../lib/analytics/config';
+import { CONSENT_STORAGE_KEY } from '../../lib/analytics/consent';
+import { ANALYTICS_EVENT_NAMES } from '../../lib/analytics/events';
+
+const analyticsConfig = getAnalyticsConfig();
+---
+
+<script
+  is:inline
+  define:vars={{
+    analyticsConfig,
+    consentStorageKey: CONSENT_STORAGE_KEY,
+    allowedEventNames: ANALYTICS_EVENT_NAMES,
+  }}
+>
+  const plausibleWindow = window;
+  const analyticsScriptId = 'jts-plausible-script';
+
+  const parseConsent = () => {
+    try {
+      const raw = window.localStorage.getItem(consentStorageKey);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const hasAnalyticsConsent = () => {
+    const consent = parseConsent();
+    return Boolean(consent && consent.analytics === true);
+  };
+
+  const bootstrapPlausible = () => {
+    if (typeof plausibleWindow.plausible !== 'function') {
+      plausibleWindow.plausible = function () {
+        (plausibleWindow.plausible.q = plausibleWindow.plausible.q || []).push(arguments);
+      };
+    }
+  };
+
+  const loadAnalytics = () => {
+    if (!analyticsConfig.enabled || !hasAnalyticsConsent()) {
+      return;
+    }
+
+    if (document.getElementById(analyticsScriptId)) {
+      return;
+    }
+
+    bootstrapPlausible();
+
+    const script = document.createElement('script');
+    script.id = analyticsScriptId;
+    script.defer = true;
+    script.dataset.analyticsScript = analyticsConfig.provider;
+    script.dataset.domain = analyticsConfig.domain;
+    if (analyticsConfig.apiHost !== 'https://plausible.io') {
+      script.dataset.api = `${analyticsConfig.apiHost}/api/event`;
+    }
+    script.src = analyticsConfig.scriptSrc;
+    document.head.appendChild(script);
+  };
+
+  const trackEvent = (eventName, props) => {
+    if (!allowedEventNames.includes(eventName) || !hasAnalyticsConsent()) {
+      return;
+    }
+
+    bootstrapPlausible();
+    plausibleWindow.plausible(eventName, props ? { props } : undefined);
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const trigger = target.closest('[data-analytics-event]');
+    if (!(trigger instanceof HTMLElement)) {
+      return;
+    }
+
+    const eventName = trigger.dataset.analyticsEvent;
+    if (!eventName) {
+      return;
+    }
+
+    const rawProps = trigger.dataset.analyticsProps;
+    let props = undefined;
+
+    if (rawProps) {
+      try {
+        props = JSON.parse(rawProps);
+      } catch {
+        props = undefined;
+      }
+    }
+
+    trackEvent(eventName, props);
+  });
+
+  window.addEventListener('jts:consent-changed', () => {
+    loadAnalytics();
+  });
+
+  loadAnalytics();
+</script>

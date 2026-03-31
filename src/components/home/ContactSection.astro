@@ -25,9 +25,24 @@ const t = {
 }[locale];
 
 const contacts = [
-  { label: t.email, href: 'mailto:jonathantosilva@hotmail.com', external: false },
-  { label: t.linkedin, href: 'https://www.linkedin.com/in/jonathantsilva/', external: true },
-  { label: t.github, href: 'https://github.com/JonathanTSilva', external: true },
+  {
+    label: t.email,
+    href: 'mailto:jonathantosilva@hotmail.com',
+    external: false,
+    eventName: 'email_click',
+  },
+  {
+    label: t.linkedin,
+    href: 'https://www.linkedin.com/in/jonathantsilva/',
+    external: true,
+    eventName: 'linkedin_click',
+  },
+  {
+    label: t.github,
+    href: 'https://github.com/JonathanTSilva',
+    external: true,
+    eventName: 'github_click',
+  },
 ];
 ---
 
@@ -43,6 +58,8 @@ const contacts = [
         class="btn-secondary"
         target={contact.external ? '_blank' : undefined}
         rel={contact.external ? 'noopener noreferrer' : undefined}
+        data-analytics-event={contact.eventName}
+        data-analytics-props={`{"surface":"contact-section","locale":"${locale}"}`}
       >
         {contact.label}
       </a>

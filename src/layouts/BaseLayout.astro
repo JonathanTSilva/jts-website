@@ -5,6 +5,8 @@ import Header from '../components/site/Header.astro';
 import Footer from '../components/site/Footer.astro';
 import SearchDialog from '../components/search/SearchDialog.astro';
 import Toast from '../components/site/Toast.astro';
+import ConsentBanner from '../components/site/ConsentBanner.astro';
+import AnalyticsScripts from '../components/site/AnalyticsScripts.astro';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import 'katex/dist/katex.min.css';
@@ -60,6 +62,8 @@ const { title, description, image, ogType, locale = 'en', translations } = Astro
     <Footer locale={locale} currentPath={Astro.url.pathname} translations={translations} />
     <SearchDialog locale={locale} />
     <Toast />
+    <ConsentBanner locale={locale} />
+    <AnalyticsScripts />
   </body>
 </html>
 

@@ -8,6 +8,108 @@ const translations = {
 ---
 
 <BaseLayout locale="pt-br" title="Termos de Serviço" translations={translations}>
-  <h1>Termos de Serviço</h1>
-  <p>Esta página está em construção. Volte em breve.</p>
+  <article class="legal-page">
+    <header class="legal-header">
+      <p class="legal-meta">Data de vigência: 31 de março de 2026</p>
+      <h1>Termos de Serviço</h1>
+      <p>
+        Estes termos regem o acesso e o uso deste site pessoal, portfólio, blog, notas e demais materiais públicos
+        disponibilizados por Jonathan Tobias da Silva.
+      </p>
+    </header>
+
+    <section>
+      <h2>Uso do site</h2>
+      <p>
+        Você pode navegar, ler e compartilhar links para o conteúdo público deste site para fins lícitos. Não é
+        permitido usar o site de forma que prejudique sua operação, tente acesso não autorizado ou deturpe a origem do
+        conteúdo.
+      </p>
+    </section>
+
+    <section>
+      <h2>Conteúdo e propriedade intelectual</h2>
+      <p>
+        Salvo indicação em contrário, os textos, o design e os materiais originais deste site pertencem a Jonathan
+        Tobias da Silva. Citações curtas com atribuição e compartilhamento normal por link são permitidos, mas copiar ou
+        republicar conteúdo substancial exige autorização.
+      </p>
+    </section>
+
+    <section>
+      <h2>Downloads e links externos</h2>
+      <p>
+        Este site pode disponibilizar materiais para download, como um CV, e links para serviços de terceiros, como
+        LinkedIn e GitHub. Serviços externos não são controlados por este site e seguem seus próprios termos e práticas
+        de privacidade.
+      </p>
+    </section>
+
+    <section>
+      <h2>Sem aconselhamento profissional ou garantia</h2>
+      <p>
+        O conteúdo deste site é fornecido para informação geral e apresentação profissional. Ele não representa garantia
+        de disponibilidade, contratação, projeto ou qualquer resultado específico.
+      </p>
+    </section>
+
+    <section>
+      <h2>Isenção de garantias</h2>
+      <p>
+        Este site é fornecido “como está” e “conforme disponível”. Embora exista cuidado razoável para manter as
+        informações corretas e acessíveis, não há garantia de que o site estará sempre disponível, sem erros ou completo.
+      </p>
+    </section>
+
+    <section>
+      <h2>Limitação de responsabilidade</h2>
+      <p>
+        Na máxima extensão permitida pela lei aplicável, Jonathan Tobias da Silva não se responsabiliza por danos
+        decorrentes do uso, da impossibilidade de uso ou da confiança depositada neste site ou em qualquer serviço de
+        terceiro acessado por link.
+      </p>
+    </section>
+
+    <section>
+      <h2>Alterações</h2>
+      <p>
+        Estes termos podem ser atualizados periodicamente. A data de vigência no topo da página indica a revisão mais
+        recente.
+      </p>
+    </section>
+
+    <section>
+      <h2>Contato</h2>
+      <p>
+        Dúvidas sobre estes termos podem ser enviadas para
+        <a href="mailto:jonathantosilva@hotmail.com">jonathantosilva@hotmail.com</a>.
+      </p>
+    </section>
+  </article>
 </BaseLayout>
+
+<style>
+  .legal-page {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .legal-header {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .legal-header h1,
+  .legal-page h2 {
+    margin-bottom: 0;
+  }
+
+  .legal-meta {
+    margin: 0;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+</style>

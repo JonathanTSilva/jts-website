@@ -19,6 +19,14 @@ test('pt-br portfolio CV link points to the public PDF', async ({ page }) => {
   await expect(cvLink).toHaveAttribute('download', '');
 });
 
+test('portfolio CV links expose analytics event metadata in both locales', async ({ page }) => {
+  await page.goto('/portfolio');
+  await expect(page.getByRole('link', { name: 'Download CV (PDF)' })).toHaveAttribute('data-analytics-event', 'cv_download');
+
+  await page.goto('/pt-br/portfolio');
+  await expect(page.getByRole('link', { name: 'Baixar CV (PDF)' })).toHaveAttribute('data-analytics-event', 'cv_download');
+});
+
 test('portfolio bento grid renders project cards', async ({ page }) => {
   await page.goto('/portfolio');
   const bentoGrid = page.locator('.bento-grid');

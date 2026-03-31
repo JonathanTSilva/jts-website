@@ -8,6 +8,7 @@ test('pt-br privacy policy page loads', async ({ page }) => {
   const response = await page.goto('/pt-br/privacy');
   expect(response?.status()).toBe(200);
   await expect(page.getByRole('heading', { name: /Política de Privacidade/i })).toBeVisible();
+  await expect(page.getByText(/data de vigência: 31 de março de 2026/i)).toBeVisible();
 });
 
 test('pt-br home page loads', async ({ page }) => {

@@ -1,13 +1,14 @@
 [
   {
-    "title": "Olá Sistemas Embarcados",
-    "summary": "Introdução a sistemas embarcados com C e Rust.",
+    "title": "Cheatsheet de Markdown — Referência para Escrita no Site",
+    "summary": "Referência completa de todos os elementos markdown suportados neste site: tipografia, links, blocos de código, callouts, tabelas, diagramas, matemática e snippets personalizados do Obsidian.",
     "tags": [
-      "C",
-      "Rust",
-      "Embarcados"
+      "Escrita",
+      "Markdown",
+      "Obsidian",
+      "Referência"
     ],
-    "url": "/pt-br/blog/2026-03-hello-embedded-systems.pt-br",
+    "url": "/pt-br/blog/2026-03-markdown-cheatsheet.pt-br",
     "type": "blog"
   },
   {
