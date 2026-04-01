@@ -9,6 +9,7 @@ import '../styles/tokens.css';
 import '../styles/global.css';
 import 'katex/dist/katex.min.css';
 import { type Locale } from '../lib/content/locale';
+import StructuredData from '../components/site/StructuredData.astro';
 
 interface Props {
   title?: string | undefined;
@@ -17,9 +18,10 @@ interface Props {
   ogType?: 'website' | 'article' | undefined;
   locale?: Locale;
   translations?: Partial<Record<Locale, string>> | undefined;
+  structuredData?: object | object[] | undefined;
 }
 
-const { title, description, image, ogType, locale = 'en', translations } = Astro.props;
+const { title, description, image, ogType, locale = 'en', translations, structuredData } = Astro.props;
 ---
 
 <!doctype html>
@@ -50,6 +52,9 @@ const { title, description, image, ogType, locale = 'en', translations } = Astro
       </>
     )}
     <slot name="head" />
+    {structuredData && (Array.isArray(structuredData) ? structuredData : [structuredData]).map(d => (
+      <StructuredData data={d} />
+    ))}
   </head>
   <body class="site-wrapper">
     <a href="#main-content" class="skip-link">Skip to content</a>

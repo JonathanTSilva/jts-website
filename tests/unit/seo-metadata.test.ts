@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateSeo, SITE_NAME } from '../../src/lib/seo/metadata';
+import { generatePersonSchema, generateWebSiteSchema, generateArticleSchema } from '../../src/lib/seo/schema';
 
 const BASE_URL = 'https://www.jontobias.com';
 
@@ -151,5 +152,57 @@ describe('generateSeo — page-type-aware title/description defaults', () => {
     const resultGeneric = generateSeo({ locale: 'en', pageType: 'generic' });
     expect(resultGeneric.title).toBe(resultNoType.title);
     expect(resultGeneric.description).toBe(resultNoType.description);
+  });
+});
+
+describe('schema generation', () => {
+  it('generatePersonSchema returns a valid Person JSON-LD object', () => {
+    const schema = generatePersonSchema();
+    expect(schema['@context']).toBe('https://schema.org');
+    expect(schema['@type']).toBe('Person');
+    expect(schema.name).toBe('Jonathan Tobias');
+    expect(schema.url).toBe('https://www.jontobias.com');
+    expect(schema.jobTitle).toBeTruthy();
+    expect(Array.isArray(schema.sameAs)).toBe(true);
+    expect(schema.sameAs.some((u: string) => u.includes('linkedin.com'))).toBe(true);
+    expect(schema.sameAs.some((u: string) => u.includes('github.com'))).toBe(true);
+  });
+
+  it('generateWebSiteSchema returns a valid WebSite JSON-LD object', () => {
+    const schema = generateWebSiteSchema();
+    expect(schema['@context']).toBe('https://schema.org');
+    expect(schema['@type']).toBe('WebSite');
+    expect(schema.name).toBe('Tobias');
+    expect(schema.url).toBe('https://www.jontobias.com');
+  });
+
+  it('generateArticleSchema returns a valid BlogPosting JSON-LD object', () => {
+    const publishedAt = new Date('2024-06-15T00:00:00Z');
+    const input = {
+      title: 'Test Article',
+      description: 'A test description',
+      url: 'https://www.jontobias.com/blog/test-article',
+      publishedAt,
+      image: 'https://www.jontobias.com/og/test.png',
+    };
+    const schema = generateArticleSchema(input);
+    expect(schema['@context']).toBe('https://schema.org');
+    expect(schema['@type']).toBe('BlogPosting');
+    expect(schema.headline).toBe(input.title);
+    expect(schema.description).toBe(input.description);
+    expect(schema.url).toBe(input.url);
+    expect(schema.datePublished).toBe(publishedAt.toISOString());
+    expect(schema.image).toBe(input.image);
+  });
+
+  it('generateArticleSchema works without optional image field', () => {
+    const schema = generateArticleSchema({
+      title: 'No Image Post',
+      description: 'Description',
+      url: 'https://www.jontobias.com/blog/no-image',
+      publishedAt: new Date('2024-01-01T00:00:00Z'),
+    });
+    expect(schema['@type']).toBe('BlogPosting');
+    expect(schema.image).toBeUndefined();
   });
 });
