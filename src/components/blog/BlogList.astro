@@ -133,6 +133,12 @@ const translationMissingLabel = {
   </>
 )}
 
+<div class="cross-section-link">
+  <a href={contentLocalePath(locale, '/notes')} class="cross-section-nav">
+    {locale === 'pt-br' ? 'Ver notas →' : 'Browse Notes →'}
+  </a>
+</div>
+
 <style>
   .empty-state {
     color: var(--text-muted);
@@ -259,6 +265,22 @@ const translationMissingLabel = {
     align-items: center;
     justify-content: center;
     padding: 0 var(--space-1);
+  }
+
+  .cross-section-link {
+    margin-top: var(--space-12);
+    text-align: center;
+  }
+
+  .cross-section-nav {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .cross-section-nav:hover {
+    color: var(--accent);
   }
 </style>
 

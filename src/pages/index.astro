@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/home/Hero.astro';
 import HomeSections from '../components/home/HomeSections.astro';
+import { generateWebSiteSchema, generatePersonSchema } from '../lib/seo/schema';
 
 const locale = 'en';
 
@@ -24,7 +25,7 @@ const t = {
 };
 ---
 
-<BaseLayout locale={locale} title="Home" translations={translations}>
+<BaseLayout locale={locale} pageType="home" translations={translations} structuredData={[generateWebSiteSchema(), generatePersonSchema()]}>
   <Hero locale="en" />
   <HomeSections locale={locale} t={t} />
 </BaseLayout>

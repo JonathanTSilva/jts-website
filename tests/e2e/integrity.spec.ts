@@ -2,6 +2,27 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
+test.describe('Indexing surfaces', () => {
+  test('robots.txt returns 200 with correct directives', async ({ request }) => {
+    const response = await request.get('/robots.txt');
+    expect(response.status()).toBe(200);
+    const text = await response.text();
+    expect(text).toContain('User-agent: *');
+    expect(text).toContain('Allow: /');
+    expect(text).toContain('Sitemap: https://www.jontobias.com/sitemap-index.xml');
+  });
+
+  test('sitemap-index.xml returns 200', async ({ request }) => {
+    const response = await request.get('/sitemap-index.xml');
+    expect(response.status()).toBe(200);
+  });
+
+  test('sitemap-0.xml returns 200', async ({ request }) => {
+    const response = await request.get('/sitemap-0.xml');
+    expect(response.status()).toBe(200);
+  });
+});
+
 test.describe('Build Integrity', () => {
   test('sitemap should contain all content slugs', async ({ request }) => {
     const response = await request.get('/sitemap-0.xml');
