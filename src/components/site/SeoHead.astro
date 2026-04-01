@@ -10,9 +10,13 @@ const seo = generateSeo(Astro.props);
 <meta name="description" content={seo.description} />
 <link rel="canonical" href={seo.canonical} />
 
-{seo.alternateLocales.map((alt) => (
+{seo.alternateLocales.filter((alt) => alt.locale !== 'x-default').map((alt) => (
   <link rel="alternate" hreflang={alt.locale} href={alt.href} />
 ))}
+{(() => {
+  const xDefault = seo.alternateLocales.find((alt) => alt.locale === 'x-default');
+  return xDefault ? <link rel="alternate" hreflang="x-default" href={xDefault.href} /> : null;
+})()}
 
 <!-- Open Graph -->
 <meta property="og:title" content={seo.og.title} />
