@@ -25,7 +25,7 @@ const t = {
 };
 ---
 
-<BaseLayout locale={locale} title="Início" translations={translations} structuredData={[generateWebSiteSchema(), generatePersonSchema()]}>
+<BaseLayout locale={locale} pageType="home" translations={translations} structuredData={[generateWebSiteSchema(), generatePersonSchema()]}>
   <Hero locale="pt-br" />
   <HomeSections locale={locale} t={t} />
 </BaseLayout>

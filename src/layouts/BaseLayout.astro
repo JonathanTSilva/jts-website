@@ -9,6 +9,7 @@ import '../styles/tokens.css';
 import '../styles/global.css';
 import 'katex/dist/katex.min.css';
 import { type Locale } from '../lib/content/locale';
+import { type PageType } from '../lib/seo/metadata';
 import StructuredData from '../components/site/StructuredData.astro';
 
 interface Props {
@@ -19,9 +20,10 @@ interface Props {
   locale?: Locale;
   translations?: Partial<Record<Locale, string>> | undefined;
   structuredData?: object | object[] | undefined;
+  pageType?: PageType | undefined;
 }
 
-const { title, description, image, ogType, locale = 'en', translations, structuredData } = Astro.props;
+const { title, description, image, ogType, locale = 'en', translations, structuredData, pageType } = Astro.props;
 ---
 
 <!doctype html>
@@ -32,13 +34,14 @@ const { title, description, image, ogType, locale = 'en', translations, structur
     <link rel="icon" type="image/png" href="/assets/images/jts-logo-circle-simple.png" />
     <meta name="generator" content={Astro.generator} />
     <script is:inline set:html={themeInlineScript} />
-    <SeoHead 
-      title={title} 
-      description={description} 
-      image={image} 
-      ogType={ogType} 
-      locale={locale} 
-      currentPath={Astro.url.pathname} 
+    <SeoHead
+      title={title}
+      description={description}
+      image={image}
+      ogType={ogType}
+      locale={locale}
+      currentPath={Astro.url.pathname}
+      pageType={pageType}
     />
     {locale === 'en' ? (
       <>
