@@ -165,6 +165,16 @@ test.describe('Blog', () => {
     await expect(page.locator('.share-btn[data-platform="copy"]')).toBeVisible();
   });
 
+  test('en: blog index has cross-section link to notes', async ({ page }) => {
+    await page.goto('/blog');
+    await expect(page.locator('a.cross-section-nav[href="/notes"]')).toBeVisible();
+  });
+
+  test('pt-br: blog index has cross-section link to notes', async ({ page }) => {
+    await page.goto('/pt-br/blog');
+    await expect(page.locator('a.cross-section-nav[href="/pt-br/notes"]')).toBeVisible();
+  });
+
   test('blog post: back to top button is present and hidden before scroll', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
     await page.goto('/blog');

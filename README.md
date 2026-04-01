@@ -112,3 +112,4 @@ pnpm test:e2e:install
 - [Analytics & Consent Ops](docs/site-operations/analytics-and-consent.md)
 - [Content Templates](docs/content-contracts/)
 - [Automation Docs](docs/automation/)
+- [SEO Checklist](docs/site-operations/seo-checklist.md) — metadata rules, structured data, multilingual SEO invariants

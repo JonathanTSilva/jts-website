@@ -43,7 +43,7 @@ const categoryCounts = categories.reduce((acc, cat) => {
 }, {} as Record<string, number>);
 ---
 
-<BaseLayout locale={locale} title={t.title} description={t.description} translations={translations}>
+<BaseLayout locale={locale} pageType="notes-index" translations={translations}>
   <header class="page-header">
     <h1 class="page-title">{t.title}</h1>
     <p class="page-description">{t.description}</p>
