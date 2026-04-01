@@ -18,7 +18,7 @@ export function generatePersonSchema() {
     url: BASE_URL,
     jobTitle: 'Senior Embedded Software Engineer',
     sameAs: [
-      'https://www.linkedin.com/in/jonathan-tobias-silva',
+      'https://www.linkedin.com/in/jonathantsilva/',
       'https://github.com/JonathanTSilva',
     ],
   };

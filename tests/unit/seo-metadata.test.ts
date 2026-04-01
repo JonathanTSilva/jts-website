@@ -164,6 +164,7 @@ describe('schema generation', () => {
     expect(schema.url).toBe('https://www.jontobias.com');
     expect(schema.jobTitle).toBeTruthy();
     expect(Array.isArray(schema.sameAs)).toBe(true);
+    expect(schema.sameAs).toContain('https://www.linkedin.com/in/jonathantsilva/');
     expect(schema.sameAs.some((u: string) => u.includes('linkedin.com'))).toBe(true);
     expect(schema.sameAs.some((u: string) => u.includes('github.com'))).toBe(true);
   });
