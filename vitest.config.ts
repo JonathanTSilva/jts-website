@@ -5,6 +5,6 @@ export default getViteConfig({
   // @ts-ignore
   test: {
     environment: 'node',
-    exclude: ['tests/e2e/**', 'node_modules/**'],
+    exclude: ['tests/e2e/**', 'node_modules/**', '.worktrees/**', 'dist/**'],
   },
 });
