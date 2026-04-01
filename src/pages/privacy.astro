@@ -7,7 +7,105 @@ const translations = {
 };
 ---
 
-<BaseLayout locale="en" title="Privacy Policy" pageType="legal" translations={translations}>
-  <h1>Privacy Policy</h1>
-  <p>This page is under construction.</p>
+<BaseLayout locale="en" title="Privacy Policy" translations={translations}>
+  <article class="legal-page">
+    <header class="legal-header">
+      <p class="legal-meta">Effective date: March 31, 2026</p>
+      <h1>Privacy Policy</h1>
+      <p>
+        This website is a personal portfolio, blog, and notes site operated by Jonathan Tobias da Silva.
+        This policy explains what information is collected when you use the site and how it is used.
+      </p>
+    </header>
+
+    <section>
+      <h2>What this site collects</h2>
+      <p>
+        The site may collect limited usage data such as pageviews, referrers, top pages, device or browser information,
+        and interactions with high-value contact actions such as CV downloads, email clicks, and outbound clicks to
+        LinkedIn or GitHub.
+      </p>
+      <p>The site does not provide user accounts, comments, checkout flows, or direct file uploads.</p>
+    </section>
+
+    <section>
+      <h2>Analytics and cookies</h2>
+      <p>
+        Analytics are used to understand traffic, content performance, and contact intent. Optional analytics are only
+        activated after you make a consent choice through the site banner.
+      </p>
+      <p>
+        If you accept analytics, the site may store a consent record in your browser and load a third-party analytics
+        script. If you reject analytics, optional analytics are not loaded.
+      </p>
+    </section>
+
+    <section>
+      <h2>How information is used</h2>
+      <p>Collected information is used to:</p>
+      <ul>
+        <li>understand which pages and topics are most useful to visitors</li>
+        <li>measure interest in contact-oriented actions such as CV downloads and profile links</li>
+        <li>maintain site performance, security, and content quality</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Third-party services</h2>
+      <p>
+        The site may rely on third-party services for analytics, hosting, and external links. When you click outbound
+        links such as LinkedIn or GitHub, those services handle your information under their own policies.
+      </p>
+    </section>
+
+    <section>
+      <h2>Data retention</h2>
+      <p>
+        Analytics data is retained according to the configuration and retention rules of the analytics provider in use.
+        Consent choices stored in your browser remain until you clear them or change your decision.
+      </p>
+    </section>
+
+    <section>
+      <h2>Your choices</h2>
+      <p>
+        You can reject optional analytics in the consent banner. You can also clear local browser storage or block
+        cookies and third-party requests through your browser settings.
+      </p>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>
+        If you have a privacy question about this website, contact
+        <a href="mailto:jonathantosilva@hotmail.com">jonathantosilva@hotmail.com</a>.
+      </p>
+    </section>
+  </article>
 </BaseLayout>
+
+<style>
+  .legal-page {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .legal-header {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .legal-header h1,
+  .legal-page h2 {
+    margin-bottom: 0;
+  }
+
+  .legal-meta {
+    margin: 0;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+</style>

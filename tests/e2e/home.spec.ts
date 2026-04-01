@@ -84,6 +84,15 @@ test('hero social contact row has email, linkedin, github links', async ({ page 
   await expect(social.locator('a[href="https://github.com/JonathanTSilva"]')).toBeVisible();
 });
 
+test('homepage contact surfaces expose analytics event metadata', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.locator('.hero-social a[href="mailto:jonathantosilva@hotmail.com"]')).toHaveAttribute('data-analytics-event', 'email_click');
+  await expect(page.locator('.hero-social a[href="https://www.linkedin.com/in/jonathantsilva/"]')).toHaveAttribute('data-analytics-event', 'linkedin_click');
+  await expect(page.locator('.hero-social a[href="https://github.com/JonathanTSilva"]')).toHaveAttribute('data-analytics-event', 'github_click');
+  await expect(page.locator('.footer-social a[href="mailto:jonathantosilva@hotmail.com"]')).toHaveAttribute('data-analytics-event', 'email_click');
+});
+
 test('hero CTA area has tagline text and three CTA buttons', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.hero-tagline')).toContainText('Leading the development of software solutions');
@@ -301,15 +310,17 @@ test('container max width is 68rem', async ({ page }) => {
 });
 
 test.describe('Legal placeholder pages', () => {
-  test('/privacy renders with correct heading', async ({ page }) => {
+  test('/privacy renders production content', async ({ page }) => {
     await page.goto('/privacy');
     await expect(page.getByRole('heading', { name: 'Privacy Policy' })).toBeVisible();
-    await expect(page.getByText('under construction')).toBeVisible();
+    await expect(page.getByText(/effective date: march 31, 2026/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Analytics and cookies' })).toBeVisible();
   });
 
-  test('/terms renders with correct heading', async ({ page }) => {
+  test('/terms renders production content', async ({ page }) => {
     await page.goto('/terms');
     await expect(page.getByRole('heading', { name: 'Terms of Service' })).toBeVisible();
-    await expect(page.getByText('under construction')).toBeVisible();
+    await expect(page.getByText(/effective date: march 31, 2026/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Downloads and external links' })).toBeVisible();
   });
 });
