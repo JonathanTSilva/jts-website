@@ -47,7 +47,7 @@ test('hero renders name, monospace label, CTA buttons, and typewriter', async ({
 
 test('homepage title uses Tobias site name', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveTitle('Home | Tobias');
+  await expect(page).toHaveTitle('Tobias | Senior Embedded Software Engineer');
 });
 
 test('hero does not render a nav element', async ({ page }) => {

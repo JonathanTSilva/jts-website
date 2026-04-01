@@ -138,4 +138,14 @@ test.describe('Notes', () => {
     expect(text).toContain('<rss');
     expect(text).toContain('https://www.jontobias.com');
   });
+
+  test('en: notes index has link to blog section', async ({ page }) => {
+    await page.goto('/notes');
+    await expect(page.locator('a.cross-section-nav[href="/blog"]')).toBeVisible();
+  });
+
+  test('pt-br: notes index has link to blog section', async ({ page }) => {
+    await page.goto('/pt-br/notes');
+    await expect(page.locator('a.cross-section-nav[href="/pt-br/blog"]')).toBeVisible();
+  });
 });
