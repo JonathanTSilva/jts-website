@@ -128,6 +128,27 @@ test.describe('Page metadata quality', () => {
   });
 });
 
+test.describe('Multilingual alternate links', () => {
+  test('EN blog index has hreflang pt-br pointing to PT-BR blog', async ({ page }) => {
+    await page.goto('/blog');
+    const href = await page.locator('link[rel="alternate"][hreflang="pt-br"]').getAttribute('href');
+    expect(href).toBe('https://www.jontobias.com/pt-br/blog/');
+  });
+
+  test('PT-BR blog index has hreflang en pointing to EN blog', async ({ page }) => {
+    await page.goto('/pt-br/blog');
+    const href = await page.locator('link[rel="alternate"][hreflang="en"]').getAttribute('href');
+    expect(href).toBe('https://www.jontobias.com/blog/');
+  });
+
+  test('EN blog index has x-default hreflang pointing to EN URL', async ({ page }) => {
+    await page.goto('/blog');
+    const href = await page.locator('link[rel="alternate"][hreflang="x-default"]').getAttribute('href');
+    expect(href).toBeTruthy();
+    expect(href).not.toContain('/pt-br');
+  });
+});
+
 test.describe('Structured Data (JSON-LD)', () => {
   test('homepage (/) has WebSite JSON-LD', async ({ page }) => {
     await page.goto('/');
