@@ -6,6 +6,12 @@ async function getJsonLdTypes(page: import('@playwright/test').Page): Promise<st
   return jsonLd.map(j => JSON.parse(j!)).map(d => d['@type']);
 }
 
+async function getFirstContentLink(page: import('@playwright/test').Page, selector: string): Promise<string> {
+  const href = await page.locator(selector).first().getAttribute('href');
+  expect(href).toBeTruthy();
+  return href!;
+}
+
 test.describe('Page metadata quality', () => {
   test('EN homepage has correct title', async ({ page }) => {
     await page.goto('/');
@@ -125,6 +131,25 @@ test.describe('Page metadata quality', () => {
     const title = await page.title();
     expect(title).toBeTruthy();
     expect(title).toContain('Tobias');
+  });
+
+  test('EN note detail page has canonical and non-empty description', async ({ page }) => {
+    await page.goto('/notes');
+    await page.goto(await getFirstContentLink(page, 'a.note-link'));
+
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+    const desc = await page.locator('meta[name="description"]').getAttribute('content');
+
+    expect(canonical).toContain('/notes/');
+    expect(desc).toBeTruthy();
+  });
+
+  test('PT-BR note detail page exposes article og:type', async ({ page }) => {
+    await page.goto('/pt-br/notes');
+    await page.goto(await getFirstContentLink(page, 'a.note-link'));
+
+    const ogType = await page.locator('meta[property="og:type"]').getAttribute('content');
+    expect(ogType).toBe('article');
   });
 });
 
