@@ -103,3 +103,4 @@ pnpm test:e2e:install
 - [Implementation Plan](docs/superpowers/plans/2026-03-19-personal-website-implementation.md)
 - [Content Templates](docs/content-contracts/)
 - [Automation Docs](docs/automation/)
+- [SEO Checklist](docs/site-operations/seo-checklist.md) — metadata rules, structured data, multilingual SEO invariants
