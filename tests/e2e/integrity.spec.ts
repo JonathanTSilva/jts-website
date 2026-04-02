@@ -21,6 +21,17 @@ test.describe('Indexing surfaces', () => {
     const response = await request.get('/sitemap-0.xml');
     expect(response.status()).toBe(200);
   });
+
+  test('sitemap includes bilingual legal pages', async ({ request }) => {
+    const response = await request.get('/sitemap-0.xml');
+    expect(response.ok()).toBe(true);
+
+    const xml = await response.text();
+    expect(xml).toContain('https://www.jontobias.com/privacy/');
+    expect(xml).toContain('https://www.jontobias.com/terms/');
+    expect(xml).toContain('https://www.jontobias.com/pt-br/privacy/');
+    expect(xml).toContain('https://www.jontobias.com/pt-br/terms/');
+  });
 });
 
 test.describe('Build Integrity', () => {

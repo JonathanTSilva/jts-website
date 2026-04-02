@@ -110,6 +110,8 @@ pnpm test:e2e:install
 - [Design Specification](docs/superpowers/specs/2026-03-19-personal-website-design.md)
 - [Implementation Plan](docs/superpowers/plans/2026-03-19-personal-website-implementation.md)
 - [Analytics & Consent Ops](docs/site-operations/analytics-and-consent.md)
+- [Analytics Review Routine](docs/site-operations/analytics-review-routine.md)
+- [Site Governance](docs/site-operations/site-governance.md)
 - [Content Templates](docs/content-contracts/)
 - [Automation Docs](docs/automation/)
 - [SEO Checklist](docs/site-operations/seo-checklist.md) — metadata rules, structured data, multilingual SEO invariants

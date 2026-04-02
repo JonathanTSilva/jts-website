@@ -151,6 +151,18 @@ test.describe('Page metadata quality', () => {
     const ogType = await page.locator('meta[property="og:type"]').getAttribute('content');
     expect(ogType).toBe('article');
   });
+
+  test('EN privacy page has hreflang pt-br pointing to the translated legal page', async ({ page }) => {
+    await page.goto('/privacy');
+    const href = await page.locator('link[rel="alternate"][hreflang="pt-br"]').getAttribute('href');
+    expect(href).toBe('https://www.jontobias.com/pt-br/privacy/');
+  });
+
+  test('PT-BR terms page has hreflang en pointing to the translated legal page', async ({ page }) => {
+    await page.goto('/pt-br/terms');
+    const href = await page.locator('link[rel="alternate"][hreflang="en"]').getAttribute('href');
+    expect(href).toBe('https://www.jontobias.com/terms/');
+  });
 });
 
 test.describe('Multilingual alternate links', () => {

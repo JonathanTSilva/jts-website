@@ -20,14 +20,27 @@
 
 ## Tracked Events
 
+- Taxonomy version: `2026-04-01`
+- Current event categories:
+  - `lead`: high-value actions that indicate hiring or contact intent
 - `cv_download`
+  - category: `lead`
   - surfaces: portfolio header download button in EN and PT-BR
 - `email_click`
+  - category: `lead`
   - surfaces: homepage hero, footer, future contact surfaces using the same attribute pattern
 - `linkedin_click`
+  - category: `lead`
   - surfaces: homepage hero and footer
 - `github_click`
+  - category: `lead`
   - surfaces: homepage hero and footer
+
+## Taxonomy Decisions
+
+- `contact_section_view` is intentionally not tracked
+- passive section impressions are lower-signal than explicit outbound or download actions
+- if a future contact form is added, define its event name here before wiring the UI
 
 ## Implementation Notes
 
@@ -45,5 +58,6 @@ Update this file when:
 - the analytics provider changes
 - the consent model changes
 - a new tracked event is added or removed
+- an event category changes
 - a new third-party script is introduced
 - the legal pages are updated to reflect changed data collection behavior

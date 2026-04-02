@@ -53,4 +53,30 @@ test.describe('Consent Banner', () => {
 
     await expect(page.locator('[data-testid="consent-banner"]')).toBeHidden();
   });
+
+  test('lead contact surfaces expose only the approved analytics event names', async ({ page }) => {
+    await page.goto('/');
+
+    await expect(page.locator('.hero-social a[href="mailto:jonathantosilva@hotmail.com"]')).toHaveAttribute(
+      'data-analytics-event',
+      'email_click',
+    );
+    await expect(page.locator('.hero-social a[href="https://www.linkedin.com/in/jonathantsilva/"]')).toHaveAttribute(
+      'data-analytics-event',
+      'linkedin_click',
+    );
+    await expect(page.locator('.hero-social a[href="https://github.com/JonathanTSilva"]')).toHaveAttribute(
+      'data-analytics-event',
+      'github_click',
+    );
+
+    await page.goto('/portfolio');
+    await expect(page.getByRole('link', { name: 'Download CV (PDF)' })).toHaveAttribute(
+      'data-analytics-event',
+      'cv_download',
+    );
+
+    const unsupportedEventTriggers = page.locator('[data-analytics-event="contact_section_view"]');
+    await expect(unsupportedEventTriggers).toHaveCount(0);
+  });
 });
