@@ -29,3 +29,6 @@ test-results/
 .env.production.local
 .vercel
 .netlify
+
+# Private operational notes
+docs/private/
