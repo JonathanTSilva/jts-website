@@ -70,6 +70,12 @@ In GitHub:
 
 If you prefer, you can store them as Actions secrets instead, but plain repository variables are enough for this configuration.
 
+Important:
+
+- Astro reads these values at build time through `import.meta.env`
+- GitHub repository variables must be explicitly passed into the workflow environment
+- this repository's pipeline already exports these variables in `.github/workflows/pipeline.yml`
+
 ## Step 5: Redeploy
 
 After adding the variables:
