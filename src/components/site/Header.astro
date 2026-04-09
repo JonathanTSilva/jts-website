@@ -90,10 +90,11 @@ const navItems = getNavigation(locale);
   <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
     <ul class="mobile-nav-list">
       {navItems.map((item) => (
-        <li><a href={item.href}>{item.label}</a></li>
+        <li class="mobile-nav-item"><a href={item.href}>{item.label}</a></li>
       ))}
     </ul>
     <div class="mobile-actions">
+      <span class="mobile-actions-label">Appearance</span>
       <ThemeToggle />
     </div>
   </div>
@@ -141,6 +142,13 @@ const navItems = getNavigation(locale);
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && mobileNav?.classList.contains('open')) setDrawer(false);
+  });
+
+  // Close mobile drawer when clicking outside the header
+  document.addEventListener('click', (e) => {
+    if (mobileNav?.classList.contains('open') && !header?.contains(e.target as Node)) {
+      setDrawer(false);
+    }
   });
 
   // ── Search icon button (mobile) ──────────────────────────
@@ -362,11 +370,13 @@ const navItems = getNavigation(locale);
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--text);
-    padding: var(--space-2);
+    color: var(--text-muted);
+    padding: var(--space-1);
     border-radius: var(--radius-sm);
     transition: color var(--duration-fast) var(--ease-out);
     display: none; /* hidden by default (desktop) */
+    width: var(--space-8);
+    height: var(--space-8);
   }
   .search-icon-btn:hover { color: var(--accent); }
 
@@ -419,28 +429,48 @@ const navItems = getNavigation(locale);
 
   .mobile-nav-list {
     list-style: none;
-    padding: var(--space-4) var(--space-6);
+    padding: var(--space-2) 0;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+  }
+  .mobile-nav-item {
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-nav-item:first-child {
+    border-top: 1px solid var(--border);
   }
   .mobile-nav-list a {
     display: block;
-    padding: var(--space-2) 0;
+    padding: var(--space-3) var(--space-6);
     font-size: var(--text-base);
     color: var(--text-muted);
     text-decoration: none;
     font-weight: var(--weight-medium);
+    text-align: center;
+    transition: color var(--duration-fast) var(--ease-out),
+                background var(--duration-fast) var(--ease-out);
   }
-  .mobile-nav-list a:hover { color: var(--text); text-decoration: none; }
+  .mobile-nav-list a:hover {
+    color: var(--text);
+    background: var(--surface);
+    text-decoration: none;
+  }
 
   .mobile-actions {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6) var(--space-6);
     border-top: 1px solid var(--border);
+  }
+
+  .mobile-actions-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
   }
 </style>

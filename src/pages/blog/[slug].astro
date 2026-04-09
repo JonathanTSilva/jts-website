@@ -415,8 +415,17 @@ const t = {
     margin-block: var(--space-8);
   }
 
-  /* Mobile: hide TOC, single column */
-  @media (max-width: 48rem) {
+  /* Headings must clear the fixed header when jumped to via anchor */
+  .prose :global(h1),
+  .prose :global(h2),
+  .prose :global(h3),
+  .prose :global(h4) {
+    scroll-margin-top: calc(var(--space-16) + var(--space-6));
+  }
+
+  /* Hide TOC sidebar at the same breakpoint the TOC itself hides (64rem).
+     Below 48rem the sidebar also collapses to single column. */
+  @media (max-width: 64rem) {
     .post-body-grid {
       grid-template-columns: 1fr;
     }
