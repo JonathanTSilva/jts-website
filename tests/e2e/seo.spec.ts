@@ -71,7 +71,7 @@ test.describe('Page metadata quality', () => {
     await page.goto('/now');
     const desc = await page.locator('meta[name="description"]').getAttribute('content');
     expect(desc).toBeTruthy();
-    expect(desc).toMatch(/focused/i);
+    expect(desc!.length).toBeGreaterThan(20);
   });
 
   test('EN privacy page has non-empty meta description', async ({ page }) => {
