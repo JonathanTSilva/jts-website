@@ -12,6 +12,10 @@ const EN_SLUG = '/blog/2026-03-markdown-cheatsheet.en';
 const PT_SLUG = '/pt-br/blog/2026-03-markdown-cheatsheet.pt-br';
 
 test.describe('Markdown Rendering — Cheatsheet Post', () => {
+  // The cheatsheet is a large page (Shiki highlighting, Mermaid, math).
+  // Mobile emulation under CI load needs extra navigation headroom.
+  test.use({ navigationTimeout: 60_000 });
+
   test.describe('EN: post loads and has correct metadata', () => {
     test('post title and meta are visible', async ({ page }) => {
       await page.goto(EN_SLUG);
