@@ -1,15 +1,18 @@
 ---
+tags: []
 title: "Now"
 language: "en"
 translationKey: "now"
-updatedAt: 2026-03-23
-summary: "Currently focused on industrial connectivity and mission-critical systems for Schneider Electric."
-status: "🚀 Senior Embedded Software Engineer"
+updatedAt: 2026-04-10
+summary: "Bridging the gap between modern software practices and mission-critical industrial systems."
+status: "Catholic, Husband, Father, Senior Engineer & Entrepreneur"
 ---
 
-## What I'm Doing Now
+## What I'm doing now
 
-*   **act digital | Schneider Electric:** I am currently leading the development of mission-critical embedded software for industrial connectivity. My daily focus is on RTOS (VxWorks) and Embedded Linux (Yocto) for industrial switches and PLCs.
-*   **Industrial Protocols:** I'm deep into implementing and optimizing industrial protocols like OPC UA, EtherNet/IP, and Modbus.
-*   **Technical Interests:** Exploring the potential of **Rust** in the embedded world, advocating for **TDD** in firmware development, and staying current with industrial cybersecurity (IEC 62443).
-*   **Personal Branding:** Refreshing my online presence to better reflect my journey as a Senior engineer and researcher.
+* **Act Digital | Schneider Electric:** Leading the development of mission-critical embedded software for industrial connectivity. My daily stack involves RTOS and Embedded Linux, focusing on high-availability switches and PLCs.
+* **Industrial Protocols:** Deep diving into the implementation and optimization of protocols such as **EtherNet/IP, DLR, RSTP, OPC UA**, and **Modbus**.
+* **Technical Interests:** Exploring **Rust** for memory-safe embedded systems, **Python** for automation, integrating **AI** into development workflows, and advocating for **TDD** in firmware to move beyond "code and pray".
+* **Personal Branding:** Refining my digital garden and online presence to share insights from my journey in the R&D.
+* **Life Balance:** Prioritizing quality time with my wife and daughter, ensuring that professional growth supports my family life.
+* **Beyond the Screen:** Tinkering with my **Homelab**, playing chess, drawing, and playing music. I make it a point to learn something new every single day..
