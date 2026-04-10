@@ -23,5 +23,9 @@ status: "Active"
 ---
 ```
 
+## Heading Structure
+
+**H2-first rule**: Never use `#` (H1) in Now page prose. The page title comes from the `title` frontmatter field. Start all sections with `##` (H2). This is enforced by the Obsidian Linter.
+
 ## Required Sections
 The now page should present a concise snapshot of current focus, work, learning, and active directions.

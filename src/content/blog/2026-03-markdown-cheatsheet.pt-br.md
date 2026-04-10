@@ -9,7 +9,7 @@ tags: [Escrita, Markdown, Obsidian, Referência]
 category: "Reference"
 ---
 
-# Introdução
+## Introdução
 
 Este post é a referência definitiva para escrever posts e notas neste site. Cobre todos os elementos markdown suportados—desde tipografia básica até snippets personalizados do Obsidian—com seus resultados renderizados. Mantenha este post aberto enquanto escreve conteúdo.
 
@@ -17,11 +17,11 @@ Este post é a referência definitiva para escrever posts e notas neste site. Co
 
 ---
 
-# Tipografia Básica
+## Tipografia Básica
 
 ## Títulos (Headings)
 
-Títulos usam prefixos `#` (H1–H6). Em corpos de posts, H1 é reservado para títulos de seções principais; H2–H4 são os mais comuns.
+Títulos usam prefixos `#` (H1–H6). Em corpos de posts, H2 é o título de seção de nível superior; H3–H4 são os mais comuns para sub-seções. H1 é reservado para o título da página e nunca aparece no corpo do texto.
 
 ### Título 3—subtópico De Seção
 
@@ -58,7 +58,7 @@ Para crases dentro de código inline, use crases duplas: ``use `crases` aqui``
 
 ---
 
-# Links E Mídia
+## Links E Mídia
 
 ## Links Externos
 
@@ -107,7 +107,7 @@ Wiki-links do Obsidian são locais do vault e não são suportados no site. Use 
 
 ---
 
-# Elementos Em Bloco
+## Elementos Em Bloco
 
 ## Parágrafos
 
@@ -297,7 +297,7 @@ Isto é visível. %%Este comentário está oculto no site.%%
 
 ---
 
-# Blocos De Código
+## Blocos De Código
 
 Blocos de código delimitados usam três crases com um identificador de linguagem opcional para destaque de sintaxe.
 
@@ -384,7 +384,7 @@ jobs:
 
 ---
 
-# Tabelas
+## Tabelas
 
 ## Tabela Básica
 
@@ -427,7 +427,7 @@ jobs:
 
 ---
 
-# Diagramas (Mermaid)
+## Diagramas (Mermaid)
 
 Diagramas Mermaid usam um bloco de código com a linguagem `mermaid`. Serão renderizados como diagramas interativos quando a integração for adicionada.
 
@@ -481,7 +481,7 @@ erDiagram
 
 ---
 
-# Matemática—LaTeX
+## Matemática—LaTeX
 
 Expressões matemáticas usam MathJax com notação LaTeX. Matemática em bloco usa `$$`, inline usa `$`.
 
@@ -517,7 +517,7 @@ A fórmula quadrática é $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
 
 ---
 
-# Snippets Personalizados (CSS Do Obsidian)
+## Snippets Personalizados (CSS Do Obsidian)
 
 Estes elementos usam classes CSS personalizadas de arquivos de snippet do Obsidian. Estão incluídos aqui como especificação para implementação no site.
 
@@ -669,7 +669,7 @@ Use a sintaxe nativa `> [!warning]` para conteúdo que será publicado.
 
 ---
 
-# Conclusão
+## Conclusão
 
 Este cheatsheet é um documento vivo. À medida que novos recursos de renderização forem adicionados ao site—estilização de callouts, integração com Mermaid, MathJax e tokens de cor personalizados—este post servirá tanto como especificação quanto como teste de regressão visual. Cada seção acima pode ser visitada no navegador para verificar se a saída renderizada corresponde ao design pretendido.
 

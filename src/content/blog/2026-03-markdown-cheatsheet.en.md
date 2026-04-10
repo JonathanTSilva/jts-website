@@ -9,7 +9,7 @@ tags: [Markdown, Obsidian, Reference, Writing]
 category: "Reference"
 ---
 
-# Introduction
+## Introduction
 
 This post is the authoritative reference for writing blog posts and notes on this website. It covers every supported markdown element—from basic typography to custom Obsidian snippets—along with their rendered output. Keep this open when drafting content.
 
@@ -17,11 +17,11 @@ This post is the authoritative reference for writing blog posts and notes on thi
 
 ---
 
-# Basic Typography
+## Basic Typography
 
 ## Headings
 
-Headings use `#` prefixes (H1–H6). In post bodies, H1 is reserved for major section titles; H2–H4 are most common.
+Headings use `#` prefixes (H1–H6). In post bodies, H2 is the top-level section heading; H3–H4 are most common for sub-sections. H1 is reserved for the page title and never appears in prose.
 
 ### Heading 3—section Sub-topic
 
@@ -58,7 +58,7 @@ For backticks inside inline code, use double backticks: ``use `backticks` here``
 
 ---
 
-# Links and Media
+## Links and Media
 
 ## External Links
 
@@ -107,7 +107,7 @@ Obsidian wiki-links are vault-local and not supported on the website. Use standa
 
 ---
 
-# Block Elements
+## Block Elements
 
 ## Paragraphs
 
@@ -297,7 +297,7 @@ This is visible. %%This comment is hidden on the website.%%
 
 ---
 
-# Code Blocks
+## Code Blocks
 
 Fenced code blocks use triple backticks with an optional language identifier for syntax highlighting.
 
@@ -392,7 +392,7 @@ echo "nested code block example"
 
 ---
 
-# Tables
+## Tables
 
 ## Basic Table
 
@@ -435,7 +435,7 @@ echo "nested code block example"
 
 ---
 
-# Diagrams (Mermaid)
+## Diagrams (Mermaid)
 
 Mermaid diagrams use a `mermaid` fenced code block. They will be rendered as interactive diagrams once the integration is added.
 
@@ -489,7 +489,7 @@ erDiagram
 
 ---
 
-# Math—LaTeX
+## Math—LaTeX
 
 Math expressions use MathJax with LaTeX notation. Block math uses `$$`, inline uses `$`.
 
@@ -525,7 +525,7 @@ The quadratic formula is $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
 
 ---
 
-# Custom Snippets (Obsidian CSS)
+## Custom Snippets (Obsidian CSS)
 
 These elements use custom CSS classes from Obsidian snippet files. They are included here as the specification for website implementation.
 
@@ -677,7 +677,7 @@ Use the native `> [!warning]` callout syntax for content intended to be publishe
 
 ---
 
-# Conclusion
+## Conclusion
 
 This cheatsheet is a living document. As new rendering features are added to the website—callout styling, Mermaid integration, MathJax, and custom color tokens—this post will serve as both the specification and the visual regression test. Each section above can be visited in the browser to verify that the rendered output matches the intended design.
 
