@@ -26,7 +26,7 @@ const t = {
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <!-- Row 1: brand | social | lang -->
+    <!-- Row 1: logo | social (center) | lang -->
     <div class="footer-row footer-row-brand">
       <!-- Logo + name -->
       <div class="footer-logo">
@@ -82,7 +82,9 @@ const t = {
       </div>
 
       <!-- Language switcher -->
-      <LanguageSwitcher currentLocale={locale} currentPath={currentPath} translations={translations} />
+      <div class="footer-lang">
+        <LanguageSwitcher currentLocale={locale} currentPath={currentPath} translations={translations} />
+      </div>
     </div>
 
     <!-- Row 2: copyright | legal links -->
@@ -148,6 +150,12 @@ const t = {
     line-height: 1;
   }
 
+  /* Language wrapper */
+  .footer-lang {
+    display: flex;
+    align-items: center;
+  }
+
   /* Social icons */
   .footer-social {
     display: flex;
@@ -182,16 +190,29 @@ const t = {
   }
   .footer-legal-links a:hover { color: var(--accent); text-decoration: none; }
 
-  /* Mobile */
+  /* Mobile: row 1 = logo (left) + lang (right); row 2 = social (centered) */
   @media (max-width: 48rem) {
-    .footer-row {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+    .footer-row-brand {
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-3);
     }
+
+    /* Push social to its own row by giving it full width */
+    .footer-social {
+      order: 3;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Logo and lang keep default order (0) so they share the first row */
+    .footer-logo { order: 1; }
+    .footer-lang  { order: 2; }
+
     .footer-row-legal {
       flex-direction: column;
       align-items: center;
+      text-align: center;
     }
   }
 </style>

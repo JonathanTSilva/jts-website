@@ -15,6 +15,10 @@ This contract defines the required structure and metadata for blog posts.
 | `tags` | string[] | List of relevant tags. | No (default: []) |
 | `updatedAt` | date (YYYY-MM-DD) | Last significant update date. | No |
 
+## Heading Structure
+
+**H2-first rule**: Never use `#` (H1) in post prose. H1 is generated from the `title` frontmatter field. Start all sections with `##` (H2); use `###` (H3) and `####` (H4) for sub-sections. This is enforced by the Obsidian Linter.
+
 ## Content Sections
 
 - **Lead Paragraph**: A strong opening that expands on the summary.

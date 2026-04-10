@@ -15,6 +15,10 @@ This contract defines the required structure and metadata for short-form notes.
 | `tags` | string[] | List of relevant tags. | No (default: []) |
 | `colorToken` | string | Design token for accent color. | No |
 
+## Heading Structure
+
+**H2-first rule**: Never use `#` (H1) in note prose. Start any sections with `##` (H2). This is enforced by the Obsidian Linter.
+
 ## Content Sections
 
 Notes are informal and do not require fixed sections.

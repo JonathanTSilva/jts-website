@@ -21,7 +21,7 @@ This post is the authoritative reference for writing blog posts and notes on thi
 
 ### Headings (this is H3—section sub-topic)
 
-Headings use `#` prefixes (H1–H6). In post bodies, H2 is reserved for major section titles; H3–H5 are most common.
+Headings use `#` prefixes (H1–H6). In post bodies, H2 is reserved for major section titles; H3–H4 are most common for sub-sections. H1 is reserved for the page title and never appears in prose.
 
 #### Heading 4—fine-grained breakdown
 
