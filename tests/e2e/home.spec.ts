@@ -183,9 +183,10 @@ test('notes section cards show category badge when category exists', async ({ pa
 });
 
 test.describe('LanguageSwitcher pill', () => {
+  // Target the footer pill — the mobile drawer pill is hidden by default
   test('EN page: pill shows EN active and PT as link', async ({ page }) => {
     await page.goto('/');
-    const switcher = page.locator('.lang-pill');
+    const switcher = page.locator('.footer-row-brand .lang-pill');
     await expect(switcher).toBeVisible();
     // Active button for EN
     const enBtn = switcher.locator('[data-locale="en"]');
@@ -197,7 +198,7 @@ test.describe('LanguageSwitcher pill', () => {
 
   test('PT page: pill shows PT active and EN as link', async ({ page }) => {
     await page.goto('/pt-br/');
-    const switcher = page.locator('.lang-pill');
+    const switcher = page.locator('.footer-row-brand .lang-pill');
     await expect(switcher).toBeVisible();
     const ptBtn = switcher.locator('[data-locale="pt-br"]');
     await expect(ptBtn).toBeVisible();
@@ -207,15 +208,14 @@ test.describe('LanguageSwitcher pill', () => {
 
   test('switching from EN to PT navigates to /pt-br', async ({ page }) => {
     await page.goto('/');
-    // There may be multiple lang-pill instances (header + footer)
-    const ptLink = page.locator('.lang-pill a[data-locale="pt-br"]').first();
+    const ptLink = page.locator('.footer-row-brand .lang-pill a[data-locale="pt-br"]');
     await ptLink.click();
     await expect(page).toHaveURL('/pt-br');
   });
 
   test('switching from PT to EN navigates to /', async ({ page }) => {
     await page.goto('/pt-br/');
-    const enLink = page.locator('.lang-pill a[data-locale="en"]').first();
+    const enLink = page.locator('.footer-row-brand .lang-pill a[data-locale="en"]');
     await enLink.click();
     await expect(page).toHaveURL('/');
   });

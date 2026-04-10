@@ -115,10 +115,26 @@ test.describe('Header', () => {
     await page.click('#hamburger');
     const mobileActions = page.locator('.mobile-actions');
     await expect(mobileActions).toBeVisible();
-    const toggleBox = await mobileActions.locator('> *').first().boundingBox();
+    // The ThemeToggle is the last child of the first .mobile-action-row (Appearance row)
+    const appearanceRow = mobileActions.locator('.mobile-action-row').first();
+    const toggleBox = await appearanceRow.locator('> *').last().boundingBox();
     const viewport = page.viewportSize()!;
     // Toggle center should be in the right half of the viewport
     expect(toggleBox!.x + toggleBox!.width / 2).toBeGreaterThan(viewport.width / 2);
+  });
+
+  test('mobile: language switcher is visible in drawer', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+    await page.click('#hamburger');
+    const mobileActions = page.locator('.mobile-actions');
+    await expect(mobileActions).toBeVisible();
+    // Language switcher (.lang-pill) should be visible in the Language row
+    await expect(mobileActions.locator('.lang-pill')).toBeVisible();
+    // The lang-pill should be in the right half of the viewport
+    const langBox = await mobileActions.locator('.lang-pill').boundingBox();
+    const viewport = page.viewportSize()!;
+    expect(langBox!.x + langBox!.width / 2).toBeGreaterThan(viewport.width / 2);
   });
 
   test('mobile: search shows icon only, opens dialog on click', async ({ page }) => {
@@ -161,16 +177,17 @@ test.describe('Header', () => {
     await expect(closeIcon).toBeVisible();
   });
 
-  test('language switcher is not present in the header', async ({ page }) => {
+  test('language switcher is absent from desktop header actions but present in mobile drawer', async ({ page }) => {
+    // Desktop: lang-pill should not appear in the top header actions bar
     await page.goto('/');
-    // The language switcher renders EN / PT links
     const headerActions = page.locator('.header-actions');
-    await expect(headerActions.locator('.lang-switcher')).not.toBeVisible();
+    await expect(headerActions.locator('.lang-pill')).not.toBeVisible();
 
+    // Mobile: lang-pill should appear inside the mobile drawer
     await page.setViewportSize({ width: 375, height: 812 });
     await page.locator('#hamburger').click();
     const mobileActions = page.locator('.mobile-actions');
-    await expect(mobileActions.locator('.lang-switcher')).not.toBeVisible();
+    await expect(mobileActions.locator('.lang-pill')).toBeVisible();
   });
 
   test('tubelight indicator lands on correct link on PT-BR route', async ({ page }) => {

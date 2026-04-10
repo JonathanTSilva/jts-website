@@ -215,15 +215,15 @@ test.describe('Markdown Rendering — Cheatsheet Post', () => {
   test.describe('Cross-locale: translation link between EN and PT-BR', () => {
     test('EN post links to PT-BR translation via language switcher', async ({ page }) => {
       await page.goto(EN_SLUG);
-      // The language switcher should have a PT link pointing to the pt-br version
-      const ptLink = page.locator('a[href*="pt-br/blog"]');
-      await expect(ptLink.first()).toBeVisible();
+      // The footer language switcher has a PT link pointing to the pt-br version
+      const ptLink = page.locator('.footer-row-brand a[href*="pt-br/blog"]');
+      await expect(ptLink).toBeVisible();
     });
 
     test('PT-BR post links to EN translation via language switcher', async ({ page }) => {
       await page.goto(PT_SLUG);
-      const enLink = page.locator('a[href*="/blog/2026-03-markdown-cheatsheet.en"]');
-      await expect(enLink.first()).toBeVisible();
+      const enLink = page.locator('.footer-row-brand a[href*="/blog/2026-03-markdown-cheatsheet.en"]');
+      await expect(enLink).toBeVisible();
     });
   });
 });
