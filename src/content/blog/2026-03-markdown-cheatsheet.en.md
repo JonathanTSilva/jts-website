@@ -9,7 +9,7 @@ tags: [Markdown, Obsidian, Reference, Writing]
 category: "Reference"
 ---
 
-# Introduction
+## Introduction
 
 This post is the authoritative reference for writing blog posts and notes on this website. It covers every supported markdown element—from basic typography to custom Obsidian snippets—along with their rendered output. Keep this open when drafting content.
 
@@ -17,21 +17,19 @@ This post is the authoritative reference for writing blog posts and notes on thi
 
 ---
 
-# Basic Typography
+## Basic typography (this is H2—section)
 
-## Headings
+### Headings (this is H3—section sub-topic)
 
-Headings use `#` prefixes (H1–H6). In post bodies, H1 is reserved for major section titles; H2–H4 are most common.
+Headings use `#` prefixes (H1–H6). In post bodies, H2 is reserved for major section titles; H3–H5 are most common.
 
-### Heading 3—section Sub-topic
+#### Heading 4—fine-grained breakdown
 
-#### Heading 4—fine-grained Breakdown
+##### Heading 5—rarely used
 
-##### Heading 5—rarely Used
+###### Heading 6—deepest level
 
-###### Heading 6—deepest Level
-
-## Text Formatting
+### Text formatting
 
 | Style         | Syntax                   | Output                |
 | ------------- | ------------------------ | --------------------- |
@@ -42,13 +40,13 @@ Headings use `#` prefixes (H1–H6). In post bodies, H1 is reserved for major se
 | Inline code   | `` `code` ``             | `inline code`         |
 | Highlight     | `==text==`               | ==highlighted text==  |
 
-## Inline Code
+### Inline code
 
 Use single backticks for inline code: `const x = 42;`
 
 For backticks inside inline code, use double backticks: ``use `backticks` here``
 
-## Highlights (Better Highlights snippet)
+### Highlights (Better Highlights snippet)
 
 - **Default highlight:** ==lorem ipsum dolor sit amet, consectetur adipiscing elit.==
 - **Purple:** <mark class="purple">lorem ipsum dolor sit amet, consectetur adipiscing elit.</mark>
@@ -58,9 +56,9 @@ For backticks inside inline code, use double backticks: ``use `backticks` here``
 
 ---
 
-# Links and Media
+## Links and media
 
-## External Links
+### External links
 
 ```md
 [Link text](https://example.com)
@@ -69,14 +67,14 @@ For backticks inside inline code, use double backticks: ``use `backticks` here``
 
 Example: [Astro documentation](https://docs.astro.build)
 
-## Escaping Spaces in URLs
+### Escaping spaces in URLs
 
 ```md
 [My File](obsidian://open?vault=Vault&file=My%20File.md)
 [My File](<obsidian://open?vault=Vault&file=My File.md>)
 ```
 
-## Images
+### Images
 
 ```md
 ![Alt text](https://example.com/image.jpg)
@@ -92,7 +90,7 @@ Resized to 200px wide:
 
 ![Engelbart|200](https://history-computer.com/ModernComputer/Basis/images/Engelbart.jpg)
 
-## Internal Links (Obsidian)
+### Internal links (Obsidian)
 
 Obsidian wiki-links are vault-local and not supported on the website. Use standard markdown links for content that will be published.
 
@@ -107,9 +105,9 @@ Obsidian wiki-links are vault-local and not supported on the website. Use standa
 
 ---
 
-# Block Elements
+## Block elements
 
-## Paragraphs
+### Paragraphs
 
 Separate paragraphs with a blank line. A single line break within a paragraph is treated as a space.
 
@@ -117,7 +115,7 @@ This is the first paragraph. It has multiple sentences.
 
 This is the second paragraph, separated by a blank line above.
 
-## Blockquotes
+### Blockquotes
 
 ```md
 > Single-line quote.
@@ -132,7 +130,7 @@ This is the second paragraph, separated by a blank line above.
 >
 > —Doug Engelbart, 1961
 
-## Callouts
+### Callouts
 
 Callouts extend blockquotes with a `[!type]` tag. All types below use the same syntax:
 
@@ -192,9 +190,9 @@ Callouts extend blockquotes with a `[!type]` tag. All types below use the same s
 > [!tip]- Collapsed callout (click to expand)  
 > This content is hidden until the callout is opened.
 
-## Lists
+### Lists
 
-### Unordered List
+#### Unordered list
 
 ```md
 - Item one
@@ -210,7 +208,7 @@ Callouts extend blockquotes with a `[!type]` tag. All types below use the same s
 - Second item
 - Third item
 
-### Ordered List
+#### Ordered list
 
 ```md
 1. First step
@@ -224,14 +222,14 @@ Callouts extend blockquotes with a `[!type]` tag. All types below use the same s
 2. Second step
 3. Third step
 
-### Mixed Nesting
+#### Mixed nesting
 
 1. Ordered item
    - Unordered nested
    - Another unordered
 2. Back to ordered
 
-### Task Lists (Checkboxes)
+#### Task lists (Checkboxes)
 
 ```md
 - [ ] Unchecked item
@@ -251,8 +249,6 @@ Callouts extend blockquotes with a `[!type]` tag. All types below use the same s
 - [?] Needs more info
 - [!] Important
 
-## Horizontal Rule
-
 Three or more hyphens, asterisks, or underscores on their own line:
 
 ```md
@@ -263,7 +259,7 @@ ___
 
 ---
 
-## Footnotes
+### Footnotes
 
 ```md
 This sentence has a footnote.[^1]
@@ -280,7 +276,7 @@ This sentence has a footnote.[^1]
 
 Here is a named footnote reference.[^2]
 
-## Comments
+### Comments
 
 Obsidian comments are stripped from the rendered output:
 
@@ -297,11 +293,11 @@ This is visible. %%This comment is hidden on the website.%%
 
 ---
 
-# Code Blocks
+## Code blocks
 
 Fenced code blocks use triple backticks with an optional language identifier for syntax highlighting.
 
-## Bash / Shell
+### Bash / Shell
 
 ```bash
 #!/usr/bin/env bash
@@ -311,7 +307,7 @@ echo "Deploying to production..."
 git pull origin main && npm run build
 ```
 
-## Python
+### Python
 
 ```python
 import random
@@ -326,7 +322,7 @@ data = generate_data(10)
 print(data)
 ```
 
-## TypeScript
+### TypeScript
 
 ```typescript
 interface Post {
@@ -341,7 +337,7 @@ function formatDate(date: Date): string {
 }
 ```
 
-## C / Embedded
+### C / Embedded
 
 ```c
 #include <stdint.h>
@@ -358,7 +354,7 @@ void uart_init(const uart_config_t *cfg) {
 }
 ```
 
-## YAML / TOML / JSON
+### YAML / TOML / JSON
 
 ```yaml
 name: Deploy Website
@@ -382,7 +378,7 @@ jobs:
 }
 ```
 
-## Markdown (Nested)
+### Markdown (Nested)
 
 ````md
 ```bash
@@ -392,9 +388,9 @@ echo "nested code block example"
 
 ---
 
-# Tables
+## Tables
 
-## Basic Table
+### Basic table
 
 ```md
 | Column 1 | Column 2 | Column 3 |
@@ -408,7 +404,7 @@ echo "nested code block example"
 | A | B | C |
 | D | E | F |
 
-## Aligned Columns
+### Aligned columns
 
 ```md
 | Left-aligned | Centered | Right-aligned |
@@ -422,7 +418,7 @@ echo "nested code block example"
 | Text | Text | Text |
 | Longer text | Longer text | Longer text |
 
-## Table with Formatting
+### Table with formatting
 
 | Feature | Status | Notes |
 | --- |:---: | --- |
@@ -435,11 +431,11 @@ echo "nested code block example"
 
 ---
 
-# Diagrams (Mermaid)
+## Diagrams (Mermaid)
 
 Mermaid diagrams use a `mermaid` fenced code block. They will be rendered as interactive diagrams once the integration is added.
 
-## Flowchart
+### Flowchart
 
 ```mermaid
 graph TD
@@ -452,7 +448,7 @@ graph TD
     F --> G[Deploy to jontobias.com]
 ```
 
-## Sequence Diagram
+### Sequence diagram
 
 ```mermaid
 sequenceDiagram
@@ -470,7 +466,7 @@ sequenceDiagram
     Website->>Website: Deploys to production
 ```
 
-## Entity Relationship Diagram
+### Entity relationship diagram
 
 ```mermaid
 erDiagram
@@ -489,11 +485,11 @@ erDiagram
 
 ---
 
-# Math—LaTeX
+## Math—LaTeX
 
 Math expressions use MathJax with LaTeX notation. Block math uses `$$`, inline uses `$`.
 
-## Block Math
+### Block math
 
 ```md
 $$
@@ -515,7 +511,7 @@ $$
 \begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc
 $$
 
-## Inline Math
+### Inline math
 
 ```md
 The quadratic formula is $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
@@ -525,11 +521,11 @@ The quadratic formula is $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
 
 ---
 
-# Custom Snippets (Obsidian CSS)
+## Custom snippets (Obsidian CSS)
 
 These elements use custom CSS classes from Obsidian snippet files. They are included here as the specification for website implementation.
 
-## Colored Spans—Foreground Text
+### Colored spans—Foreground text
 
 Use `<span class="COLOR">text</span>` to apply foreground colors:
 
@@ -551,7 +547,7 @@ Use `<span class="COLOR">text</span>` to apply foreground colors:
 
 <span class="red">Red foreground text—lorem ipsum dolor sit amet.</span>
 
-## Colored Spans—Background
+### Colored spans—Background
 
 Use `<span class="COLOR-bg">text</span>` for colored background highlights:
 
@@ -573,7 +569,7 @@ Use `<span class="COLOR-bg">text</span>` for colored background highlights:
 
 <span class="red-bg">Red background—lorem ipsum dolor sit amet.</span>
 
-## Note Blocks—Foreground (notation-color-blocks.css)
+### Note blocks—Foreground (notation-color-blocks.css)
 
 Use a fenced code block with a `note-COLOR` language identifier:
 
@@ -617,7 +613,7 @@ Red note block
 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 ```
 
-## Note Blocks—Background (notation-color-blocks.css)
+### Note blocks—Background (notation-color-blocks.css)
 
 Use a fenced code block with a `note-COLOR-background` language identifier:
 
@@ -661,23 +657,9 @@ Red background note block
 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 ```
 
-## Admonition Code Blocks (Admonition plugin)
-
-An older alternative to callouts using code blocks with an `ad-TYPE` language identifier:
-
-```ad-tip
-title: Tip via Admonition plugin
-This is rendered by the Admonition plugin in Obsidian. On the website, it will render as a standard code block until the integration is implemented.
-```
-
-```ad-warning
-title: Warning via Admonition plugin
-Use the native `> [!warning]` callout syntax for content intended to be published.
-```
-
 ---
 
-# Conclusion
+## Conclusion
 
 This cheatsheet is a living document. As new rendering features are added to the website—callout styling, Mermaid integration, MathJax, and custom color tokens—this post will serve as both the specification and the visual regression test. Each section above can be visited in the browser to verify that the rendered output matches the intended design.
 
