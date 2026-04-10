@@ -17,21 +17,19 @@ Este post é a referência definitiva para escrever posts e notas neste site. Co
 
 ---
 
-## Tipografia Básica
+## Tipografia básica (este é H2—seção)
 
-## Títulos (Headings)
+### Títulos (este é H3—subtópico de seção)
 
 Títulos usam prefixos `#` (H1–H6). Em corpos de posts, H2 é o título de seção de nível superior; H3–H4 são os mais comuns para sub-seções. H1 é reservado para o título da página e nunca aparece no corpo do texto.
 
-### Título 3—subtópico De Seção
+#### Título 4—divisão detalhada
 
-#### Título 4—divisão Detalhada
+##### Título 5—raramente usado
 
-##### Título 5—raramente Usado
+###### Título 6—nível mais profundo
 
-###### Título 6—nível Mais Profundo
-
-## Formatação De Texto
+### Formatação de texto
 
 | Estilo | Sintaxe | Resultado |
 | --- | --- | --- |
@@ -42,13 +40,13 @@ Títulos usam prefixos `#` (H1–H6). Em corpos de posts, H2 é o título de se�
 | Código inline | `` `código` `` | `código inline` |
 | Destaque | `==texto==` | ==texto destacado== |
 
-## Código Inline
+### Código inline
 
 Use crases simples para código inline: `const x = 42;`
 
 Para crases dentro de código inline, use crases duplas: ``use `crases` aqui``
 
-## Destaques (snippet Better Highlights)
+### Destaques (snippet Better Highlights)
 
 - **Destaque padrão:** ==lorem ipsum dolor sit amet, consectetur adipiscing elit.==
 - **Roxo:** <mark class="purple">lorem ipsum dolor sit amet, consectetur adipiscing elit.</mark>
@@ -58,9 +56,9 @@ Para crases dentro de código inline, use crases duplas: ``use `crases` aqui``
 
 ---
 
-## Links E Mídia
+## Links e mídia
 
-## Links Externos
+### Links externos
 
 ```md
 [Texto do link](https://exemplo.com)
@@ -69,14 +67,14 @@ Para crases dentro de código inline, use crases duplas: ``use `crases` aqui``
 
 Exemplo: [Documentação do Astro](https://docs.astro.build)
 
-## Escapando Espaços Em URLs
+### Escapando espaços em URLs
 
 ```md
 [Meu Arquivo](obsidian://open?vault=Vault&file=Meu%20Arquivo.md)
 [Meu Arquivo](<obsidian://open?vault=Vault&file=Meu Arquivo.md>)
 ```
 
-## Imagens
+### Imagens
 
 ```md
 ![Texto alternativo](https://exemplo.com/imagem.jpg)
@@ -92,7 +90,7 @@ Redimensionada para 200px de largura:
 
 ![Engelbart|200](https://history-computer.com/ModernComputer/Basis/images/Engelbart.jpg)
 
-## Links Internos (Obsidian)
+### Links internos (Obsidian)
 
 Wiki-links do Obsidian são locais do vault e não são suportados no site. Use links markdown padrão para conteúdo que será publicado.
 
@@ -107,9 +105,9 @@ Wiki-links do Obsidian são locais do vault e não são suportados no site. Use 
 
 ---
 
-## Elementos Em Bloco
+## Elementos em bloco
 
-## Parágrafos
+### Parágrafos
 
 Separe parágrafos com uma linha em branco. Uma quebra de linha simples dentro de um parágrafo é tratada como espaço.
 
@@ -117,7 +115,7 @@ Este é o primeiro parágrafo com várias frases.
 
 Este é o segundo parágrafo, separado por uma linha em branco acima.
 
-## Citações (Blockquotes)
+### Citações (Blockquotes)
 
 ```md
 > Citação de uma linha.
@@ -132,7 +130,7 @@ Este é o segundo parágrafo, separado por uma linha em branco acima.
 >
 > —Doug Engelbart, 1961
 
-## Callouts
+### Callouts
 
 Callouts estendem as citações com uma tag `[!tipo]`. Todos os tipos abaixo usam a mesma sintaxe:
 
@@ -192,9 +190,9 @@ Callouts estendem as citações com uma tag `[!tipo]`. Todos os tipos abaixo usa
 > [!tip]- Callout recolhido (clique para expandir)  
 > Este conteúdo fica oculto até o callout ser aberto.
 
-## Listas
+### Listas
 
-### Lista Não Ordenada
+#### Lista não ordenada
 
 ```md
 - Item um
@@ -210,7 +208,7 @@ Callouts estendem as citações com uma tag `[!tipo]`. Todos os tipos abaixo usa
 - Segundo item
 - Terceiro item
 
-### Lista Ordenada
+#### Lista ordenada
 
 ```md
 1. Primeiro passo
@@ -224,14 +222,14 @@ Callouts estendem as citações com uma tag `[!tipo]`. Todos os tipos abaixo usa
 2. Segundo passo
 3. Terceiro passo
 
-### Aninhamento Misto
+#### Aninhamento misto
 
 1. Item ordenado
    - Não ordenado aninhado
    - Outro não ordenado
 2. De volta ao ordenado
 
-### Listas De Tarefas (Checkboxes)
+#### Listas de tarefas (Checkboxes)
 
 ```md
 - [ ] Item não marcado
@@ -251,7 +249,7 @@ Callouts estendem as citações com uma tag `[!tipo]`. Todos os tipos abaixo usa
 - [?] Precisa de mais informações
 - [!] Importante
 
-## Régua Horizontal
+### Régua horizontal
 
 Três ou mais hífens, asteriscos ou underscores em sua própria linha:
 
@@ -263,7 +261,7 @@ ___
 
 ---
 
-## Notas De Rodapé
+### Notas de rodapé
 
 ```md
 Esta frase tem uma nota de rodapé.[^1]
@@ -280,7 +278,7 @@ Esta frase tem uma nota de rodapé.[^1]
 
 Aqui está uma referência de nota nomeada.[^2]
 
-## Comentários
+### Comentários
 
 Comentários do Obsidian são removidos da saída renderizada:
 
@@ -297,11 +295,11 @@ Isto é visível. %%Este comentário está oculto no site.%%
 
 ---
 
-## Blocos De Código
+## Blocos de código
 
 Blocos de código delimitados usam três crases com um identificador de linguagem opcional para destaque de sintaxe.
 
-## Bash / Shell
+### Bash / Shell
 
 ```bash
 #!/usr/bin/env bash
@@ -311,7 +309,7 @@ echo "Fazendo deploy para produção..."
 git pull origin main && npm run build
 ```
 
-## Python
+### Python
 
 ```python
 import random
@@ -326,7 +324,7 @@ dados = gerar_dados(10)
 print(dados)
 ```
 
-## TypeScript
+### TypeScript
 
 ```typescript
 interface Post {
@@ -341,7 +339,7 @@ function formatarData(data: Date): string {
 }
 ```
 
-## C / Embarcado
+### C / Embarcado
 
 ```c
 #include <stdint.h>
@@ -358,7 +356,7 @@ void uart_init(const uart_config_t *cfg) {
 }
 ```
 
-## YAML / JSON
+### YAML / JSON
 
 ```yaml
 name: Deploy do Site
@@ -386,7 +384,7 @@ jobs:
 
 ## Tabelas
 
-## Tabela Básica
+### Tabela básica
 
 ```md
 | Coluna 1 | Coluna 2 | Coluna 3 |
@@ -400,7 +398,7 @@ jobs:
 | A | B | C |
 | D | E | F |
 
-## Colunas Alinhadas
+### Colunas alinhadas
 
 ```md
 | Alinhado à esquerda | Centralizado | Alinhado à direita |
@@ -414,7 +412,7 @@ jobs:
 | Texto | Texto | Texto |
 | Texto mais longo | Texto mais longo | Texto mais longo |
 
-## Tabela Com Formatação
+### Tabela com formatação
 
 | Funcionalidade | Status | Notas |
 | --- |:---: | --- |
@@ -431,7 +429,7 @@ jobs:
 
 Diagramas Mermaid usam um bloco de código com a linguagem `mermaid`. Serão renderizados como diagramas interativos quando a integração for adicionada.
 
-## Fluxograma
+### Fluxograma
 
 ```mermaid
 graph TD
@@ -444,7 +442,7 @@ graph TD
     F --> G[Deploy para jontobias.com]
 ```
 
-## Diagrama De Sequência
+### Diagrama de sequência
 
 ```mermaid
 sequenceDiagram
@@ -462,7 +460,7 @@ sequenceDiagram
     Site->>Site: Deploy para produção
 ```
 
-## Diagrama Entidade-Relacionamento
+### Diagrama entidade-relacionamento
 
 ```mermaid
 erDiagram
@@ -485,7 +483,7 @@ erDiagram
 
 Expressões matemáticas usam MathJax com notação LaTeX. Matemática em bloco usa `$$`, inline usa `$`.
 
-## Matemática Em Bloco
+### Matemática em bloco
 
 ```md
 $$
@@ -507,7 +505,7 @@ $$
 \begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc
 $$
 
-## Matemática Inline
+### Matemática Inline
 
 ```md
 A fórmula quadrática é $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
@@ -517,11 +515,11 @@ A fórmula quadrática é $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
 
 ---
 
-## Snippets Personalizados (CSS Do Obsidian)
+## Snippets personalizados
 
 Estes elementos usam classes CSS personalizadas de arquivos de snippet do Obsidian. Estão incluídos aqui como especificação para implementação no site.
 
-## Spans Coloridos—Texto (Cor De Frente)
+### Spans coloridos—Texto (cor do texto)
 
 Use `<span class="COR">texto</span>` para aplicar cores de frente:
 
@@ -543,7 +541,7 @@ Use `<span class="COR">texto</span>` para aplicar cores de frente:
 
 <span class="red">Texto vermelho—lorem ipsum dolor sit amet.</span>
 
-## Spans Coloridos—Fundo
+### Spans coloridos—Fundo
 
 Use `<span class="COR-bg">texto</span>` para fundos coloridos:
 
@@ -565,7 +563,7 @@ Use `<span class="COR-bg">texto</span>` para fundos coloridos:
 
 <span class="red-bg">Fundo vermelho—lorem ipsum dolor sit amet.</span>
 
-## Blocos De Nota—Cor De Frente (notation-color-blocks.css)
+### Blocos de nota—Texto (notation-color-blocks.css)
 
 Use um bloco de código com o identificador de linguagem `note-COR`:
 
@@ -609,7 +607,7 @@ Bloco vermelho
 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 ```
 
-## Blocos De Nota—Fundo (notation-color-blocks.css)
+### Blocos de nota—Fundo (notation-color-blocks.css)
 
 Use um bloco de código com o identificador de linguagem `note-COR-background`:
 
@@ -651,20 +649,6 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 ```note-red-background
 Bloco com fundo vermelho
 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-```
-
-## Blocos De Admonition (plugin Admonition)
-
-Uma alternativa mais antiga aos callouts, usando blocos de código com identificador `ad-TIPO`:
-
-```ad-tip
-title: Dica via plugin Admonition
-Renderizado pelo plugin Admonition no Obsidian. No site, será renderizado como bloco de código padrão até que a integração seja implementada.
-```
-
-```ad-warning
-title: Aviso via plugin Admonition
-Use a sintaxe nativa `> [!warning]` para conteúdo que será publicado.
 ```
 
 ---
