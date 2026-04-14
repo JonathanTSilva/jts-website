@@ -21,10 +21,22 @@ export const notesSchema = z.object({
   language: languageEnum,
   translationKey: z.string().min(1),
   publishedAt: z.coerce.date(),
+  noteType: z.enum(["note", "book", "mindmap", "whiteboard"]).default("note"),
   summary: z.string().optional(),
   category: z.string().optional(),
   tags: z.array(z.string()).default([]),
   colorToken: z.string().optional(),
+  // book only
+  author: z.array(z.string()).optional(),
+  cover: z.string().url().optional(),
+  pages: z.number().int().positive().optional(),
+  rating: z.string().optional(),
+  status: z.array(z.string()).optional(),
+  dateRead: z.coerce.date().optional(),
+  publishDate: z.coerce.date().optional(),
+  relatedTo: z.array(z.string()).optional(),
+  previousBook: z.string().optional(),
+  nextBook: z.string().optional(),
 });
 
 export const nowSchema = z.object({
