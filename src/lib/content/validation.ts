@@ -23,6 +23,7 @@ const SCHEMAS: Record<CollectionType, SafeParseSchema> = {
 export interface ValidationResult {
   success: boolean;
   errors: string[];
+  warnings: string[];
 }
 
 export function validateContent(
@@ -31,6 +32,7 @@ export function validateContent(
   body: string
 ): ValidationResult {
   const errors: string[] = [];
+  const warnings: string[] = [];
 
   // 1. Validate Frontmatter
   const schema = SCHEMAS[collection];
@@ -49,8 +51,30 @@ export function validateContent(
     errors.push(`Content: Missing required section "## ${display}"`);
   });
 
+  // 3. Type-specific validation
+  if (collection === 'notes') {
+    const noteType = frontmatter.noteType ?? 'note';
+
+    if (noteType === 'book') {
+      if (!frontmatter.author || (Array.isArray(frontmatter.author) && frontmatter.author.length === 0)) {
+        errors.push('Book note missing required field: author');
+      }
+      if (!frontmatter.cover) {
+        errors.push('Book note missing required field: cover');
+      }
+    }
+
+    if (noteType === 'mindmap') {
+      const hasH1 = /^#\s+\S/m.test(body);
+      if (!hasH1) {
+        warnings.push('Mindmap note has no H1 — the mindmap tree needs a root node (# Root Title)');
+      }
+    }
+  }
+
   return {
     success: errors.length === 0,
     errors,
+    warnings,
   };
 }
