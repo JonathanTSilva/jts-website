@@ -26,7 +26,7 @@ export const notesSchema = z.object({
   category: z.string().optional(),
   tags: z.array(z.string()).default([]),
   colorToken: z.string().optional(),
-  // book only
+  // --- book only ---
   author: z.array(z.string()).optional(),
   cover: z.string().url().optional(),
   pages: z.number().int().positive().optional(),
