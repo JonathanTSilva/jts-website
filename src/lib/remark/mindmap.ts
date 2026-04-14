@@ -1,4 +1,5 @@
-import type { Root, Heading, List, ListItem, PhrasingContent } from 'mdast';
+import type { Root, Heading, List, ListItem, PhrasingContent, Html } from 'mdast';
+import type { VFile } from 'vfile';
 
 interface MindmapNode {
   text: string;
@@ -43,7 +44,11 @@ function escapeHtml(str: string): string {
 }
 
 export function remarkMindmap() {
-  return (tree: Root) => {
+  return (tree: Root, file: VFile) => {
+    // Only transform mindmap notes
+    const frontmatter = (file.data as any)?.astro?.frontmatter;
+    if (frontmatter?.noteType !== 'mindmap') return;
+
     const children = tree.children;
     if (children.length === 0) return;
 
@@ -77,6 +82,6 @@ export function remarkMindmap() {
     const html = `<ul class="mindmap-tree"><li class="mindmap-node mindmap-root" data-depth="0"><span class="mindmap-label">${escapeHtml(rootText)}</span>${roots.length ? `<ul class="mindmap-children">${roots.map(renderNode).join('')}</ul>` : ''}</li></ul>`;
 
     // Replace entire tree with single html node
-    tree.children = [{ type: 'html', value: html } as any];
+    tree.children = [{ type: 'html', value: html } as unknown as Html];
   };
 }

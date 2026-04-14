@@ -4,12 +4,15 @@ import remarkParse from 'remark-parse';
 import remarkHtml from 'remark-html';
 import { remarkMindmap } from '../../../src/lib/remark/mindmap';
 
-async function transform(markdown: string): Promise<string> {
+async function transform(markdown: string, noteType = 'mindmap'): Promise<string> {
   const result = await unified()
     .use(remarkParse)
     .use(remarkMindmap)
     .use(remarkHtml, { sanitize: false })
-    .process(markdown);
+    .process({
+      value: markdown,
+      data: { astro: { frontmatter: { noteType } } } as any,
+    });
   return String(result);
 }
 
@@ -44,5 +47,11 @@ describe('remarkMindmap', () => {
   it('produces no output for empty content', async () => {
     const output = await transform('');
     expect(output.trim()).toBe('');
+  });
+
+  it('does not transform notes with noteType other than mindmap', async () => {
+    const output = await transform('# Root\n\n## Branch\n', 'note');
+    expect(output).not.toContain('class="mindmap-tree"');
+    expect(output).toContain('<h1>Root</h1>');
   });
 });
