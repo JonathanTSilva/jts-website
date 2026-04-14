@@ -151,11 +151,12 @@ describe('validateContent — mindmap notes', () => {
   it('accepts a mindmap note with H1', () => {
     const result = validateContent('notes', baseMindmap, '# Root\n\n## Branch');
     expect(result.success).toBe(true);
-    expect(result.warnings ?? []).toHaveLength(0);
+    expect(result.warnings).toHaveLength(0);
   });
 
   it('warns when mindmap has no H1', () => {
     const result = validateContent('notes', baseMindmap, '## Branch\n\nNo root');
-    expect(result.warnings?.some(w => w.includes('H1'))).toBe(true);
+    expect(result.success).toBe(true);
+    expect(result.warnings.some(w => w.includes('H1'))).toBe(true);
   });
 });

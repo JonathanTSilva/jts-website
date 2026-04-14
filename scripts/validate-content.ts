@@ -10,7 +10,7 @@ function validateFile(collection: CollectionType, filePath: string) {
   const { data, content } = matter(fileContent);
 
   const result = validateContent(collection, data, content);
-  return result.errors;
+  return { errors: result.errors, warnings: result.warnings };
 }
 
 function main() {
@@ -25,7 +25,12 @@ function main() {
     
     for (const file of files) {
       const filePath = path.join(dirPath, file);
-      const errors = validateFile(collection, filePath);
+      const { errors, warnings } = validateFile(collection, filePath);
+
+      if (warnings.length > 0) {
+        const relativePath = path.relative(process.cwd(), filePath);
+        warnings.forEach(warn => console.log(`⚠️  ${relativePath}: ${warn}`));
+      }
 
       if (errors.length > 0) {
         hasErrors = true;
