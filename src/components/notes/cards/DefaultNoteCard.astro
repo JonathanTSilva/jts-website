@@ -81,7 +81,7 @@ const { note, locale, translationMissingLabel } = Astro.props;
 
   .note-category {
     text-transform: uppercase;
-    font-weight: bold;
+    font-weight: var(--weight-bold);
     letter-spacing: 0.05em;
     color: var(--accent-hover);
   }
@@ -100,7 +100,7 @@ const { note, locale, translationMissingLabel } = Astro.props;
 
   .translation-missing-tag {
     font-size: var(--text-xs);
-    color: #000000;
+    color: var(--text-muted);
     font-style: italic;
     font-weight: normal;
     display: block;
