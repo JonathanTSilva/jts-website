@@ -25,7 +25,7 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
 
   <div class="whiteboard-frame" data-whiteboard>
     <div class="whiteboard-toolbar">
-      <span class="whiteboard-title-label">{note.data.title}</span>
+      <h1 class="whiteboard-title-label">{note.data.title}</h1>
       <button
         class="whiteboard-copy-btn"
         data-copy-label={t.copyImage}
@@ -66,10 +66,17 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
           // @ts-ignore — html2canvas is an optional progressive-enhancement dep; graceful fallback below
           const { default: html2canvas } = await import('html2canvas');
           const canvasEl = await html2canvas(canvas);
-          canvasEl.toBlob(async (blob: Blob | null) => {
-            if (!blob) return;
-            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-            (window as any).showToast?.({ message: copiedLabel, variant: 'accent', duration: 2000 });
+          await new Promise<void>((resolve, reject) => {
+            canvasEl.toBlob(async (blob: Blob | null) => {
+              if (!blob) { reject(new Error('toBlob returned null')); return; }
+              try {
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                (window as any).showToast?.({ message: copiedLabel, variant: 'accent', duration: 2000 });
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            });
           });
         } catch {
           // Fallback: copy page URL
@@ -121,6 +128,7 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
     font-size: var(--text-lg);
     color: #4a3f35;
     font-weight: var(--weight-semibold);
+    margin: 0;
   }
 
   .whiteboard-copy-btn {
@@ -147,7 +155,7 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
     min-height: 40vh;
     font-family: 'Caveat', cursive;
     color: #1a1a1a;
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     line-height: 1.7;
   }
 
