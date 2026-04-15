@@ -23,9 +23,10 @@ interface Props {
   translations?: Partial<Record<Locale, string>> | undefined;
   structuredData?: object | object[] | undefined;
   pageType?: PageType | undefined;
+  noteType?: string | undefined;
 }
 
-const { title, description, image, ogType, locale = 'en', translations, structuredData, pageType } = Astro.props;
+const { title, description, image, ogType, locale = 'en', translations, structuredData, pageType, noteType } = Astro.props;
 ---
 
 <!doctype html>
@@ -57,6 +58,13 @@ const { title, description, image, ogType, locale = 'en', translations, structur
       </>
     )}
     <slot name="head" />
+    {noteType === 'whiteboard' && (
+      <>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap" rel="stylesheet" />
+      </>
+    )}
     {structuredData && (Array.isArray(structuredData) ? structuredData : [structuredData]).map(d => (
       <StructuredData data={d} />
     ))}
