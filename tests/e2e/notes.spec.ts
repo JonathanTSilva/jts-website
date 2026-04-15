@@ -148,4 +148,45 @@ test.describe('Notes', () => {
     await page.goto('/pt-br/notes');
     await expect(page.locator('a.cross-section-nav[href="/pt-br/blog"]')).toBeVisible();
   });
+
+  test('book note: renders cover image and metadata', async ({ page }) => {
+    await page.goto('/notes/book-a-system-for-writing.en');
+    await expect(page.locator('.book-cover')).toBeVisible();
+    await expect(page.locator('.book-author')).toBeVisible();
+    await expect(page.locator('.book-rating')).toBeVisible();
+    await expect(page.locator('.book-status')).toBeVisible();
+  });
+
+  test('mindmap note: renders mindmap-tree element with root node', async ({ page }) => {
+    await page.goto('/notes/zettelkasten-overview.en');
+    await expect(page.locator('.mindmap-tree')).toBeVisible();
+    const root = page.locator('.mindmap-root .mindmap-label').first();
+    await expect(root).toBeVisible();
+    await expect(root).toContainText('Zettelkasten');
+  });
+
+  test('whiteboard note: applies whiteboard canvas and Caveat font', async ({ page }) => {
+    await page.goto('/notes/auth-flow.en');
+    await expect(page.locator('[data-whiteboard]')).toBeVisible();
+    await expect(page.locator('.whiteboard-canvas')).toBeVisible();
+    const fontFamily = await page.locator('.whiteboard-canvas').evaluate(
+      el => window.getComputedStyle(el).fontFamily
+    );
+    expect(fontFamily).toContain('Caveat');
+  });
+
+  test('book note card: shows cover thumbnail and rating in index', async ({ page }) => {
+    await page.goto('/notes');
+    const bookCard = page.locator('.book-note-card').first();
+    await expect(bookCard).toBeVisible();
+    await expect(bookCard.locator('.book-card-cover')).toBeVisible();
+    await expect(bookCard.locator('.book-card-rating')).toBeVisible();
+  });
+
+  test('mindmap card: shows type badge in index', async ({ page }) => {
+    await page.goto('/notes');
+    const mindmapCard = page.locator('.mindmap-note-card').first();
+    await expect(mindmapCard).toBeVisible();
+    await expect(mindmapCard.locator('.type-badge')).toBeVisible();
+  });
 });
