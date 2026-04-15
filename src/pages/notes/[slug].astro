@@ -2,6 +2,9 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import DefaultNoteLayout from '../../components/notes/layouts/DefaultNoteLayout.astro';
+import BookNoteLayout from '../../components/notes/layouts/BookNoteLayout.astro';
+import MindmapLayout from '../../components/notes/layouts/MindmapLayout.astro';
+import WhiteboardLayout from '../../components/notes/layouts/WhiteboardLayout.astro';
 
 export async function getStaticPaths() {
   const allNotes = await getCollection('notes');
@@ -18,7 +21,7 @@ export async function getStaticPaths() {
         translations: {
           ...(enNote ? { en: `/notes/${enNote.data.slug}` } : {}),
           ...(ptNote ? { 'pt-br': `/pt-br/notes/${ptNote.data.slug}` } : {}),
-        }
+        },
       },
     };
   });
@@ -27,6 +30,15 @@ export async function getStaticPaths() {
 const { note, translations } = Astro.props;
 const { Content } = await render(note);
 const locale = 'en';
+
+const layouts = {
+  note:       DefaultNoteLayout,
+  book:       BookNoteLayout,
+  mindmap:    MindmapLayout,
+  whiteboard: WhiteboardLayout,
+} as const;
+
+const NoteLayout = layouts[note.data.noteType ?? 'note'];
 ---
 
 <BaseLayout
@@ -36,6 +48,7 @@ const locale = 'en';
   image={`/og/notes/${note.data.slug}.png`}
   ogType="article"
   translations={translations}
+  noteType={note.data.noteType}
 >
-  <DefaultNoteLayout note={note} Content={Content} locale={locale} />
+  <NoteLayout note={note} Content={Content} locale={locale} />
 </BaseLayout>

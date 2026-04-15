@@ -8,6 +8,7 @@ import { remarkHighlights } from './src/lib/remark/highlights.ts';
 import { remarkObsidianImages } from './src/lib/remark/obsidian-images.ts';
 import { remarkObsidianWikilinks } from './src/lib/remark/obsidian-wikilinks.ts';
 import { remarkNoteBlocks } from './src/lib/remark/note-blocks.ts';
+import { remarkMindmap } from './src/lib/remark/mindmap.ts';
 import { remarkTaskItems } from './src/lib/remark/task-items.ts';
 
 export default defineConfig({
@@ -28,6 +29,7 @@ export default defineConfig({
       remarkHighlights,
       remarkObsidianImages,
       remarkObsidianWikilinks,
+      remarkMindmap,
       remarkMath,
       remarkTaskItems,
     ],
