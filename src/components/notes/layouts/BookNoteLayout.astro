@@ -96,7 +96,7 @@ const dateStr = note.data.dateRead
   )}
 
   {(note.data.previousBook || note.data.nextBook) && (
-    <nav class="book-nav">
+    <div class="book-nav">
       {note.data.previousBook
         ? <span class="book-nav-prev">{t.previous}: {note.data.previousBook}</span>
         : <span />
@@ -104,7 +104,7 @@ const dateStr = note.data.dateRead
       {note.data.nextBook && (
         <span class="book-nav-next">{note.data.nextBook} {t.next}</span>
       )}
-    </nav>
+    </div>
   )}
 
   <ShareButtons title={note.data.title} url={Astro.url.href} type="note" locale={locale as 'en' | 'pt-br'} />

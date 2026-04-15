@@ -98,6 +98,9 @@ const { note, locale, translationMissingLabel } = Astro.props;
     gap: var(--space-3);
     align-items: start;
   }
+  .book-card-inner:not(:has(.book-card-cover)) {
+    grid-template-columns: 1fr;
+  }
   .book-card-cover {
     width: 3rem;
     border-radius: var(--radius-sm);
