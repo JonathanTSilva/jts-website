@@ -17,6 +17,7 @@ const { note, locale, translationMissingLabel } = Astro.props;
   class="note-card mindmap-note-card"
   data-category={note.data.category || 'uncategorized'}
   data-tags={note.data.tags.join(',')}
+  data-type="mindmap"
   style={`border-top: 3px solid ${getNoteAccentColor(note.data.colorToken, note.data.category)}`}
 >
   <a href={contentLocalePath(locale, `/notes/${note.data.slug}`)} class="note-link">

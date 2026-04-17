@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import type { Locale } from '../../lib/content/locale';
 import { contentLocalePath } from '../../lib/content/locale';
 import { getReadingTime } from '../../lib/readingTime';
+import { buildCategoryMap } from '../../lib/content/i18n';
 
 interface Props {
   locale: Locale;
@@ -11,6 +12,9 @@ interface Props {
 const { locale } = Astro.props;
 
 const allPosts = await getCollection('blog');
+
+// Build a map to normalise fallback-locale categories into the current locale
+const categoryMap = buildCategoryMap(allPosts, locale === 'en' ? 'pt-br' : 'en', locale);
 
 // Get all posts for the current locale, and all posts missing a translation in the current locale
 const uniqueTranslationKeys = Array.from(new Set(allPosts.map(p => p.data.translationKey)));
@@ -24,7 +28,9 @@ const postsToShow = uniqueTranslationKeys.map(key => {
     // Return the default locale post (or the first one available if default is not there)
     const fallbackPost = translations.find(p => p.data.language === 'en') || translations[0];
     if (!fallbackPost) return null;
-    return { ...fallbackPost, isTranslationMissing: true };
+    const rawCategory = fallbackPost.data.category;
+    const normalizedCategory = rawCategory ? (categoryMap.get(rawCategory) ?? rawCategory) : rawCategory;
+    return { ...fallbackPost, isTranslationMissing: true, data: { ...fallbackPost.data, category: normalizedCategory } };
   }
 }).filter((p): p is NonNullable<typeof p> => p !== null)
   .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());

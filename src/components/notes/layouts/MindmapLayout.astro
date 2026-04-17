@@ -35,12 +35,6 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
     {note.data.publishedAt.toLocaleDateString(locale === 'en' ? 'en-US' : 'pt-BR', { dateStyle: 'long' })}
   </time>
 
-  <div class="mindmap-legend" aria-hidden="true">
-    {t.depthLegend.map((label, i) => (
-      <span class="legend-item" data-depth={i}>{label}</span>
-    ))}
-  </div>
-
   <div class="mindmap-wrapper">
     <Content />
   </div>
@@ -93,108 +87,176 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
     margin-bottom: var(--space-8);
   }
 
-  .mindmap-legend {
-    display: flex;
-    gap: var(--space-4);
-    flex-wrap: wrap;
-    margin-bottom: var(--space-8);
-    font-size: var(--text-xs);
-    font-family: var(--font-mono);
-  }
-  .legend-item { display: flex; align-items: center; gap: var(--space-2); color: var(--text-muted); }
-  .legend-item[data-depth="0"]::before { content: ''; display: inline-block; width: 12px; height: 12px; border-radius: var(--radius-full); background: var(--note-accent); }
-  .legend-item[data-depth="1"]::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--note-accent) 70%, var(--bg)); }
-  .legend-item[data-depth="2"]::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--note-accent) 40%, var(--bg)); }
-  .legend-item[data-depth="3"]::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--text-muted); }
-
+  /* ── Mindmap container ── */
   .mindmap-wrapper {
     overflow-x: auto;
-    padding: var(--space-6) 0;
+    padding: var(--space-6) 0 var(--space-8);
+    --mm-line: color-mix(in srgb, var(--note-accent) 35%, var(--border));
   }
 
-  /* Mindmap tree styles */
+  /* ── Tree root list ── */
   .mindmap-wrapper :global(.mindmap-tree) {
     list-style: none;
-    padding: 0;
+    padding: var(--space-2);
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
+    display: inline-flex;
   }
 
+  /* ── Every node: horizontal flex (label → children) ── */
   .mindmap-wrapper :global(.mindmap-node) {
     list-style: none;
     display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    position: relative;
+    align-items: center;
   }
 
-  .mindmap-wrapper :global(.mindmap-label) {
-    display: inline-block;
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
-    white-space: nowrap;
-    transition: box-shadow var(--duration-base) var(--ease-out);
-  }
-
+  /* ── Root node ── */
   .mindmap-wrapper :global(.mindmap-root > .mindmap-label) {
+    display: inline-flex;
+    align-items: center;
     background: var(--note-accent);
     color: #fff;
-    font-size: var(--text-base);
-    font-weight: var(--weight-bold);
-    padding: var(--space-3) var(--space-6);
-    box-shadow: var(--shadow-md);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    padding: var(--space-2) var(--space-6);
+    border-radius: var(--radius-full);
+    box-shadow: 0 2px 12px color-mix(in srgb, var(--note-accent) 35%, transparent);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
-  .mindmap-wrapper :global(.mindmap-node[data-depth="1"] > .mindmap-label) {
-    background: color-mix(in srgb, var(--note-accent) 70%, var(--bg));
-    color: var(--text);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .mindmap-wrapper :global(.mindmap-node[data-depth="2"] > .mindmap-label) {
-    background: color-mix(in srgb, var(--note-accent) 25%, var(--surface));
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-
-  .mindmap-wrapper :global(.mindmap-node[data-depth="3"] > .mindmap-label),
-  .mindmap-wrapper :global(.mindmap-node[data-depth="4"] > .mindmap-label),
-  .mindmap-wrapper :global(.mindmap-node[data-depth="5"] > .mindmap-label) {
-    background: var(--surface-high);
-    color: var(--text-muted);
-    font-size: var(--text-xs);
-    border: 1px solid var(--border);
-  }
-
-  .mindmap-wrapper :global(.mindmap-label:hover) {
-    box-shadow: var(--shadow-md);
-  }
-
+  /* ── All children containers ── */
   .mindmap-wrapper :global(.mindmap-children) {
     list-style: none;
-    padding: 0;
-    margin: 0;
-    padding-left: var(--space-8);
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    border-left: 2px solid color-mix(in srgb, var(--note-accent) 30%, var(--border));
-    margin-left: var(--space-4);
-    padding-top: var(--space-2);
-    padding-bottom: var(--space-2);
+    position: relative;
+    padding: 0;
+    margin: 0 0 0 1.75rem;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .mindmap-wrapper :global(.mindmap-children) {
-      transition: border-color var(--duration-base) var(--ease-out);
-    }
-    .mindmap-wrapper :global(.mindmap-node:hover > .mindmap-children) {
-      border-color: var(--note-accent);
-    }
+  /* Horizontal bridge from parent label to vertical spine */
+  .mindmap-wrapper :global(.mindmap-children)::before {
+    content: '';
+    position: absolute;
+    left: -1.75rem;
+    top: 50%;
+    width: 1.75rem;
+    border-top: 2px solid var(--mm-line);
+  }
+
+  /* ── Each child in a children list ── */
+  .mindmap-wrapper :global(.mindmap-children > .mindmap-node) {
+    position: relative;
+    padding: var(--space-1) 0 var(--space-1) 1.25rem;
+  }
+
+  /* Horizontal connector: vertical spine → label */
+  .mindmap-wrapper :global(.mindmap-children > .mindmap-node)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 1.25rem;
+    border-top: 2px solid var(--mm-line);
+  }
+
+  /* Vertical spine segment (each node draws its portion) */
+  .mindmap-wrapper :global(.mindmap-children > .mindmap-node)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border-left: 2px solid var(--mm-line);
+  }
+
+  /* First child: vertical starts at center */
+  .mindmap-wrapper :global(.mindmap-children > .mindmap-node:first-child)::after {
+    top: 50%;
+    height: 50%;
+  }
+
+  /* Last child: vertical ends at center */
+  .mindmap-wrapper :global(.mindmap-children > .mindmap-node:last-child)::after {
+    height: 50%;
+  }
+
+  /* Only child: no vertical spine */
+  .mindmap-wrapper :global(.mindmap-children > .mindmap-node:only-child)::after {
+    display: none;
+  }
+
+  /* ──── Label styles per depth ──── */
+
+  /* Branch (depth 1) — accent-tinted pill */
+  .mindmap-wrapper :global(.mindmap-node[data-depth="1"] > .mindmap-label) {
+    display: inline-flex;
+    align-items: center;
+    background: color-mix(in srgb, var(--note-accent) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--note-accent) 25%, var(--border));
+    color: var(--text);
+    font-weight: 600;
+    font-size: var(--text-base);
+    padding: var(--space-1) var(--space-4);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: box-shadow var(--duration-fast) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .mindmap-wrapper :global(.mindmap-node[data-depth="1"]:hover > .mindmap-label) {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--note-accent) 18%, transparent);
+    border-color: color-mix(in srgb, var(--note-accent) 50%, var(--border));
+  }
+
+  /* Sub-branch (depth 2) — dot + text */
+  .mindmap-wrapper :global(.mindmap-node[data-depth="2"] > .mindmap-label) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--text);
+    padding: 2px 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .mindmap-wrapper :global(.mindmap-node[data-depth="2"] > .mindmap-label)::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--note-accent) 55%, var(--bg));
+    flex-shrink: 0;
+  }
+
+  /* Leaf (depth 3+) — small muted text */
+  .mindmap-wrapper :global(.mindmap-node[data-depth="3"] > .mindmap-label),
+  .mindmap-wrapper :global(.mindmap-node[data-depth="4"] > .mindmap-label) {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    padding: 1px 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Taper deeper levels ── */
+  .mindmap-wrapper :global(.mindmap-node[data-depth="2"] > .mindmap-children),
+  .mindmap-wrapper :global(.mindmap-node[data-depth="3"] > .mindmap-children) {
+    margin-left: 1.25rem;
+  }
+  .mindmap-wrapper :global(.mindmap-node[data-depth="2"] > .mindmap-children)::before,
+  .mindmap-wrapper :global(.mindmap-node[data-depth="3"] > .mindmap-children)::before {
+    left: -1.25rem;
+    width: 1.25rem;
+  }
+  .mindmap-wrapper :global(.mindmap-node[data-depth="2"] > .mindmap-children > .mindmap-node),
+  .mindmap-wrapper :global(.mindmap-node[data-depth="3"] > .mindmap-children > .mindmap-node) {
+    padding-left: 1rem;
+  }
+  .mindmap-wrapper :global(.mindmap-node[data-depth="2"] > .mindmap-children > .mindmap-node)::before,
+  .mindmap-wrapper :global(.mindmap-node[data-depth="3"] > .mindmap-children > .mindmap-node)::before {
+    width: 1rem;
   }
 </style>

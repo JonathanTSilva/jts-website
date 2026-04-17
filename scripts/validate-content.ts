@@ -22,7 +22,7 @@ function main() {
     if (!fs.existsSync(dirPath)) continue;
 
     const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.md') || f.endsWith('.mdx'));
-    
+
     for (const file of files) {
       const filePath = path.join(dirPath, file);
       const { errors, warnings } = validateFile(collection, filePath);
