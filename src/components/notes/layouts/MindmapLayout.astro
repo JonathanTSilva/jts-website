@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '../../../lib/content/locale';
 import BackToTop from '../../site/BackToTop.astro';
 import ShareButtons from '../../site/ShareButtons.astro';
+import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import { getNoteAccentColor } from '../../../lib/notes';
 
 interface Props {
@@ -14,8 +15,12 @@ interface Props {
 const { note, Content, locale } = Astro.props;
 
 const t = locale === 'en'
-  ? { back: '← Back to notes', backHref: '/notes', depthLegend: ['Root', 'Branch', 'Sub-branch', 'Leaf'] }
-  : { back: '← Voltar para notas', backHref: '/pt-br/notes', depthLegend: ['Raiz', 'Ramo', 'Sub-ramo', 'Folha'] };
+  ? { back: '← Back to notes', backHref: '/notes', depthLegend: ['Root', 'Branch', 'Sub-branch', 'Leaf'],
+      fallbackNotice: 'This mindmap is not available in English. Showing the original version.' }
+  : { back: '← Voltar para notas', backHref: '/pt-br/notes', depthLegend: ['Raiz', 'Ramo', 'Sub-ramo', 'Folha'],
+      fallbackNotice: 'Este mapa mental não está disponível em Português. Mostrando a versão original.' };
+
+const isTranslationFallback = note.data.language !== locale;
 
 const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
 ---
@@ -36,6 +41,9 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
   </time>
 
   <div class="mindmap-wrapper">
+    {isTranslationFallback && (
+      <TranslationFallbackNotice message={t.fallbackNotice} />
+    )}
     <Content />
   </div>
 

@@ -4,6 +4,7 @@ import type { Locale } from '../../lib/content/locale';
 import { contentLocalePath } from '../../lib/content/locale';
 import { getReadingTime } from '../../lib/readingTime';
 import { buildCategoryMap } from '../../lib/content/i18n';
+import TranslationStatusTag from '../site/TranslationStatusTag.astro';
 
 interface Props {
   locale: Locale;
@@ -117,7 +118,7 @@ const translationMissingLabel = {
                         <span class="blog-entry-title">
                           {post.data.title}
                           {post.isTranslationMissing && (
-                            <span class="translation-missing-tag">({translationMissingLabel})</span>
+                            <TranslationStatusTag text={translationMissingLabel} />
                           )}
                         </span>
                         <span class="blog-entry-date">
@@ -202,14 +203,6 @@ const translationMissingLabel = {
 
   .blog-entry-title {
     flex: 1;
-  }
-
-  .translation-missing-tag {
-    font-size: var(--text-xs);
-    color: #000000;
-    margin-left: var(--space-2);
-    font-style: italic;
-    white-space: nowrap;
   }
 
   .blog-entry-date {

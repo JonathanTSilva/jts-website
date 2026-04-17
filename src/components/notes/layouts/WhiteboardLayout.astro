@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '../../../lib/content/locale';
 import BackToTop from '../../site/BackToTop.astro';
 import ShareButtons from '../../site/ShareButtons.astro';
+import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import { getNoteAccentColor } from '../../../lib/notes';
 
 interface Props {
@@ -14,14 +15,22 @@ interface Props {
 const { note, Content, locale } = Astro.props;
 
 const t = locale === 'en'
-  ? { back: '← Back to notes', backHref: '/notes', copyImage: 'Copy as image', copied: 'Copied!' }
-  : { back: '← Voltar para notas', backHref: '/pt-br/notes', copyImage: 'Copiar como imagem', copied: 'Copiado!' };
+  ? { back: '← Back to notes', backHref: '/notes', copyImage: 'Copy as image', copied: 'Copied!',
+      fallbackNotice: 'This whiteboard is not available in English. Showing the original version.' }
+  : { back: '← Voltar para notas', backHref: '/pt-br/notes', copyImage: 'Copiar como imagem', copied: 'Copiado!',
+      fallbackNotice: 'Este quadro não está disponível em Português. Mostrando a versão original.' };
+
+const isTranslationFallback = note.data.language !== locale;
 
 const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
 ---
 
 <article class="whiteboard-page" style={`--note-accent: ${accent}`}>
   <a href={t.backHref} class="back-link">{t.back}</a>
+
+  {isTranslationFallback && (
+    <TranslationFallbackNotice message={t.fallbackNotice} />
+  )}
 
   <div class="whiteboard-frame" data-whiteboard>
     <div class="whiteboard-board">
@@ -115,6 +124,7 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
     margin-bottom: var(--space-6);
     background: #e2e4e8;
     padding: 8px;
+    overflow-x: auto;
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.08),
       0 6px 24px rgba(0, 0, 0, 0.12);
@@ -235,6 +245,17 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
     line-height: 1.7;
     color: var(--wb-ink);
     padding: 0 var(--space-2);
+  }
+  @media (max-width: 48rem) {
+    .whiteboard-columns {
+      height: auto;
+      overflow: visible;
+      columns: 1;
+      column-rule: none;
+    }
+    .whiteboard-board {
+      padding: var(--space-6) var(--space-6) var(--space-8);
+    }
   }
   [data-theme='dark'] .whiteboard-columns {
     --wb-ink:    #d1fae5;

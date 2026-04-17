@@ -4,6 +4,8 @@ import type { Locale } from '../../../lib/content/locale';
 import { contentLocalePath } from '../../../lib/content/locale';
 import BackToTop from '../../site/BackToTop.astro';
 import ShareButtons from '../../site/ShareButtons.astro';
+import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
+import MermaidRenderer from '../../site/MermaidRenderer.astro';
 import { getNoteAccentColor } from '../../../lib/notes';
 import { getCollection } from 'astro:content';
 
@@ -71,9 +73,7 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
   <hr class="preamble-divider" />
 
   {isTranslationFallback && (
-    <div class="fallback-notice">
-      <p>{t.fallbackNotice}</p>
-    </div>
+    <TranslationFallbackNotice message={t.fallbackNotice} />
   )}
 
   <div class="note-content prose">
@@ -110,40 +110,7 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 
 <BackToTop />
 
-<script>
-  import('mermaid').then(async ({ default: mermaid }) => {
-    const getTheme = () =>
-      document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-
-    document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]').forEach(pre => {
-      const code = (pre.querySelector('code')?.textContent ?? pre.textContent ?? '').trim();
-      if (!code) return;
-      const container = document.createElement('div');
-      container.className = 'mermaid-diagram';
-      container.dataset.mermaidCode = code;
-      pre.replaceWith(container);
-    });
-
-    async function renderAll() {
-      mermaid.initialize({ startOnLoad: false, theme: getTheme() });
-      for (const container of document.querySelectorAll<HTMLElement>('.mermaid-diagram[data-mermaid-code]')) {
-        const code = container.dataset.mermaidCode ?? '';
-        if (!code) continue;
-        try {
-          const { svg } = await mermaid.render(`mmd-${Math.random().toString(36).slice(2)}`, code);
-          container.innerHTML = svg;
-        } catch { /* invalid diagram — leave as-is */ }
-      }
-    }
-
-    await renderAll();
-
-    new MutationObserver(renderAll).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
-  });
-</script>
+<MermaidRenderer />
 
 <style>
   .note-page {
@@ -218,14 +185,6 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
     border-top: 1px solid var(--note-accent);
     margin: var(--space-6) 0;
     opacity: 0.5;
-  }
-
-  .fallback-notice {
-    background-color: color-mix(in srgb, #f59e0b 12%, var(--surface));
-    border-left: 4px solid #f59e0b;
-    padding: var(--space-4);
-    margin-bottom: var(--space-8);
-    color: var(--text);
   }
 
   .note-content {

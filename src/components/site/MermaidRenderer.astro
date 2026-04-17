@@ -1,0 +1,109 @@
+<script>
+  let cleanup = () => {};
+
+  function getThemeVariables(root: HTMLElement) {
+    const styles = getComputedStyle(root);
+    const getVar = (name: string) => styles.getPropertyValue(name).trim();
+
+    return {
+      background: getVar('--bg'),
+      primaryColor: getVar('--surface-high'),
+      primaryTextColor: getVar('--text'),
+      primaryBorderColor: getVar('--border'),
+      secondaryColor: getVar('--surface'),
+      tertiaryColor: getVar('--surface-high'),
+      textColor: getVar('--text'),
+      lineColor: getVar('--text-muted'),
+      nodeBorder: getVar('--border'),
+      clusterBkg: getVar('--surface-high'),
+      clusterBorder: getVar('--border'),
+      defaultLinkColor: getVar('--text-muted'),
+      fontFamily: getVar('--font-sans') || 'sans-serif',
+    };
+  }
+
+  async function initMermaid() {
+    cleanup();
+
+    const root = document.documentElement;
+    const preBlocks = Array.from(document.querySelectorAll('pre[data-language="mermaid"]'));
+
+    if (preBlocks.length === 0 && document.querySelectorAll('.mermaid-diagram[data-mermaid-code]').length === 0) {
+      cleanup = () => {};
+      return;
+    }
+
+    const { default: mermaid } = await import('mermaid');
+
+    preBlocks.forEach((pre) => {
+      const codeNode = pre.querySelector('code');
+      const code = (codeNode?.textContent || pre.textContent || '').trim();
+      if (!code) return;
+
+      const container = document.createElement('div');
+      container.className = 'mermaid-diagram';
+      container.dataset.mermaidCode = code;
+      pre.replaceWith(container);
+    });
+
+    let frame = 0;
+    let renderVersion = 0;
+
+    const renderAll = async () => {
+      renderVersion += 1;
+      const currentVersion = renderVersion;
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        themeVariables: getThemeVariables(root),
+      });
+
+      const containers = Array.from(document.querySelectorAll<HTMLElement>('.mermaid-diagram[data-mermaid-code]'));
+
+      for (const [index, container] of containers.entries()) {
+        const code = container.dataset.mermaidCode || '';
+        if (!code) continue;
+
+        try {
+          const { svg } = await mermaid.render(`mmd-${currentVersion}-${index}`, code);
+          if (currentVersion !== renderVersion) {
+            return;
+          }
+          container.innerHTML = svg;
+        } catch {
+          container.textContent = code;
+        }
+      }
+    };
+
+    const scheduleRender = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        void renderAll();
+      });
+    };
+
+    await renderAll();
+
+    const observer = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.attributeName === 'data-theme')) {
+        scheduleRender();
+      }
+    });
+
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+
+    cleanup = () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }
+
+  void initMermaid();
+  document.addEventListener('astro:page-load', initMermaid);
+  document.addEventListener('astro:before-swap', () => cleanup());
+</script>

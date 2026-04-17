@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '../../../lib/content/locale';
 import { contentLocalePath } from '../../../lib/content/locale';
 import { getNoteAccentColor } from '../../../lib/notes';
+import TranslationStatusTag from '../../site/TranslationStatusTag.astro';
 
 interface Props {
   note: CollectionEntry<'notes'> & { isTranslationMissing?: boolean };
@@ -31,12 +32,10 @@ const { note, locale, translationMissingLabel } = Astro.props;
         </svg>
       </span>
     </header>
-    <h2 class="note-title">
-      {note.data.title}
-      {note.isTranslationMissing && (
-        <span class="translation-missing-tag">({translationMissingLabel})</span>
-      )}
-    </h2>
+    <h2 class="note-title">{note.data.title}</h2>
+    {note.isTranslationMissing && (
+      <TranslationStatusTag text={translationMissingLabel} />
+    )}
     {note.data.summary && <p class="note-summary">{note.data.summary}</p>}
     {note.data.tags && note.data.tags.length > 0 && (
       <div class="note-tags">
@@ -86,14 +85,6 @@ const { note, locale, translationMissingLabel } = Astro.props;
     font-size: var(--text-lg);
     margin: 0 0 var(--space-2) 0;
     line-height: 1.3;
-  }
-  .translation-missing-tag {
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-    font-style: italic;
-    font-weight: var(--weight-normal);
-    display: block;
-    margin-top: var(--space-1);
   }
   .note-summary {
     font-size: var(--text-sm);
