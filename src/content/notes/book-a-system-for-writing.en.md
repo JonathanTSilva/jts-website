@@ -14,7 +14,7 @@ status:
   - finished
 dateRead: "2025-02-24"
 publishDate: "2024-07-09"
-tags: [book, note-taking, zettelkasten, pkm]
+tags: [note-taking, zettelkasten, pkm]
 category: "Productivity"
 relatedTo:
   - "[[How to Take Smart Notes]]"

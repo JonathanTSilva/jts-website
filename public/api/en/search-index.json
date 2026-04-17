@@ -12,6 +12,30 @@
     "type": "blog"
   },
   {
+    "title": "Auth Flow Sketch",
+    "summary": "",
+    "tags": [
+      "architecture",
+      "auth",
+      "design"
+    ],
+    "category": "Engineering",
+    "url": "/notes/auth-flow.en",
+    "type": "notes"
+  },
+  {
+    "title": "A System for Writing",
+    "summary": "",
+    "tags": [
+      "note-taking",
+      "zettelkasten",
+      "pkm"
+    ],
+    "category": "Productivity",
+    "url": "/notes/book-a-system-for-writing.en",
+    "type": "notes"
+  },
+  {
     "title": "Good Debugging Habits",
     "summary": "",
     "tags": [
@@ -35,8 +59,20 @@
     "type": "notes"
   },
   {
+    "title": "Zettelkasten Overview",
+    "summary": "",
+    "tags": [
+      "pkm",
+      "zettelkasten",
+      "note-taking"
+    ],
+    "category": "Productivity",
+    "url": "/notes/zettelkasten-overview.en",
+    "type": "notes"
+  },
+  {
     "title": "Now",
-    "summary": "Currently focused on industrial connectivity and mission-critical systems for Schneider Electric.",
+    "summary": "Bridging the gap between modern software practices and mission-critical industrial systems.",
     "tags": [],
     "url": "/now",
     "type": "now"
