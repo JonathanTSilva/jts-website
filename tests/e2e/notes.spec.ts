@@ -121,13 +121,13 @@ test.describe('Notes', () => {
   });
 
   test('note page: has back to notes button', async ({ page }) => {
-    await page.goto('/notes/debugging-habits.en');
+    await page.goto('/notes/note-cheatsheet.en');
     await expect(page.locator('.back-link')).toBeVisible();
     await expect(page.locator('.back-link')).toContainText('Back to notes');
   });
 
   test('note page: has share buttons', async ({ page }) => {
-    await page.goto('/notes/debugging-habits.en');
+    await page.goto('/notes/note-cheatsheet.en');
     await expect(page.locator('.share-buttons')).toBeVisible();
   });
 
@@ -150,7 +150,7 @@ test.describe('Notes', () => {
   });
 
   test('book note: renders cover image and metadata', async ({ page }) => {
-    await page.goto('/notes/book-a-system-for-writing.en');
+    await page.goto('/notes/book-cheatsheet.en');
     await expect(page.locator('.book-cover')).toBeVisible();
     await expect(page.locator('.book-author')).toBeVisible();
     await expect(page.locator('.book-rating')).toBeVisible();
@@ -158,15 +158,15 @@ test.describe('Notes', () => {
   });
 
   test('mindmap note: renders mindmap-tree element with root node', async ({ page }) => {
-    await page.goto('/notes/zettelkasten-overview.en');
+    await page.goto('/notes/mindmap-cheatsheet.en');
     await expect(page.locator('.mindmap-tree')).toBeVisible();
     const root = page.locator('.mindmap-root .mindmap-label').first();
     await expect(root).toBeVisible();
-    await expect(root).toContainText('Zettelkasten');
+    await expect(root).toContainText('Note System');
   });
 
   test('whiteboard note: applies whiteboard canvas and Patrick Hand font', async ({ page }) => {
-    await page.goto('/notes/auth-flow.en');
+    await page.goto('/notes/whiteboard-cheatsheet.en');
     await expect(page.locator('[data-whiteboard]')).toBeVisible();
     await expect(page.locator('.whiteboard-columns')).toBeVisible();
     const fontFamily = await page.locator('.whiteboard-columns').evaluate(

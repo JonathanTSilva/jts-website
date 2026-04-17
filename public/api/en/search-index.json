@@ -12,62 +12,52 @@
     "type": "blog"
   },
   {
-    "title": "Auth Flow Sketch",
-    "summary": "",
-    "tags": [
-      "architecture",
-      "auth",
-      "design"
-    ],
-    "category": "Engineering",
-    "url": "/notes/auth-flow.en",
-    "type": "notes"
-  },
-  {
-    "title": "A System for Writing",
-    "summary": "",
-    "tags": [
-      "note-taking",
-      "zettelkasten",
-      "pkm"
-    ],
-    "category": "Productivity",
-    "url": "/notes/book-a-system-for-writing.en",
-    "type": "notes"
-  },
-  {
-    "title": "Good Debugging Habits",
-    "summary": "",
-    "tags": [
-      "Debugging",
-      "Productivity"
-    ],
-    "category": "Engineering",
-    "url": "/notes/debugging-habits.en",
-    "type": "notes"
-  },
-  {
-    "title": "Understanding RTOS Scheduling",
-    "summary": "",
-    "tags": [
-      "RTOS",
-      "Scheduling",
-      "FreeRTOS"
-    ],
-    "category": "Real-Time Systems",
-    "url": "/notes/rtos-scheduling.en",
-    "type": "notes"
-  },
-  {
-    "title": "Zettelkasten Overview",
-    "summary": "",
+    "title": "Building a Second Brain",
+    "summary": "A proven method to organise your digital life and unlock your creative potential.",
     "tags": [
       "pkm",
-      "zettelkasten",
-      "note-taking"
+      "second-brain",
+      "note-taking",
+      "creativity"
     ],
     "category": "Productivity",
-    "url": "/notes/zettelkasten-overview.en",
+    "url": "/notes/book-cheatsheet.en",
+    "type": "notes"
+  },
+  {
+    "title": "Note Types — Mind Map",
+    "summary": "A mind map of all note types supported on this site, with their key fields and use cases.",
+    "tags": [
+      "cheatsheet",
+      "note-types",
+      "reference"
+    ],
+    "category": "Engineering",
+    "url": "/notes/mindmap-cheatsheet.en",
+    "type": "notes"
+  },
+  {
+    "title": "Default Note — Cheatsheet",
+    "summary": "Reference template for the default note format. Covers every supported frontmatter field and Markdown feature available in note pages.",
+    "tags": [
+      "cheatsheet",
+      "reference",
+      "markdown"
+    ],
+    "category": "Engineering",
+    "url": "/notes/note-cheatsheet.en",
+    "type": "notes"
+  },
+  {
+    "title": "Whiteboard Note — Cheatsheet",
+    "summary": "Reference layout for whiteboard notes. Content flows into two CSS columns at fixed height, styled with Patrick Hand font.",
+    "tags": [
+      "cheatsheet",
+      "reference",
+      "whiteboard"
+    ],
+    "category": "Engineering",
+    "url": "/notes/whiteboard-cheatsheet.en",
     "type": "notes"
   },
   {
