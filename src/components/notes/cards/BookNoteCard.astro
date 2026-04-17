@@ -43,9 +43,6 @@ const statusLabel = statusKey
       )}
       <div class="book-card-body">
         <h2 class="note-title">{note.data.title}</h2>
-        {note.isTranslationMissing && (
-          <TranslationStatusTag text={translationMissingLabel} />
-        )}
         <div class="book-card-footer">
           {note.data.author && note.data.author.length > 0 && (
             <span class="book-card-author">{note.data.author.join(', ')}</span>
@@ -56,6 +53,9 @@ const statusLabel = statusKey
         </div>
       </div>
     </div>
+    {note.isTranslationMissing && (
+      <TranslationStatusTag text={translationMissingLabel} />
+    )}
   </a>
 </article>
 
@@ -124,6 +124,11 @@ const statusLabel = statusKey
     line-height: 1.3;
     flex: 1;
   }
+
+  .book-card-inner + :global(.translation-status-tag) {
+    margin-top: var(--space-2);
+  }
+
   .book-card-footer {
     display: flex;
     justify-content: space-between;
