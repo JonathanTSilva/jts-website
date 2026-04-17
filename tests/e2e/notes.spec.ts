@@ -165,22 +165,22 @@ test.describe('Notes', () => {
     await expect(root).toContainText('Zettelkasten');
   });
 
-  test('whiteboard note: applies whiteboard canvas and Caveat font', async ({ page }) => {
+  test('whiteboard note: applies whiteboard canvas and Patrick Hand font', async ({ page }) => {
     await page.goto('/notes/auth-flow.en');
     await expect(page.locator('[data-whiteboard]')).toBeVisible();
-    await expect(page.locator('.whiteboard-canvas')).toBeVisible();
-    const fontFamily = await page.locator('.whiteboard-canvas').evaluate(
+    await expect(page.locator('.whiteboard-columns')).toBeVisible();
+    const fontFamily = await page.locator('.whiteboard-columns').evaluate(
       el => window.getComputedStyle(el).fontFamily
     );
-    expect(fontFamily).toContain('Caveat');
+    expect(fontFamily).toContain('Patrick Hand');
   });
 
-  test('book note card: shows cover thumbnail and rating in index', async ({ page }) => {
+  test('book note card: shows author and status metadata in index', async ({ page }) => {
     await page.goto('/notes');
     const bookCard = page.locator('.book-note-card').first();
     await expect(bookCard).toBeVisible();
-    await expect(bookCard.locator('.book-card-cover')).toBeVisible();
-    await expect(bookCard.locator('.book-card-rating')).toBeVisible();
+    await expect(bookCard.locator('.book-author')).toBeVisible();
+    await expect(bookCard.locator('.book-status')).toBeVisible();
   });
 
   test('mindmap card: shows type badge in index', async ({ page }) => {
