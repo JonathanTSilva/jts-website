@@ -100,6 +100,10 @@ const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
     overflow-x: auto;
     padding: var(--space-6) 0 var(--space-8);
     --mm-line: color-mix(in srgb, var(--note-accent) 35%, var(--border));
+    /* Scrollbar matches current theme */
+    background: var(--bg);
+    scrollbar-color: var(--text-muted) var(--bg);
+    scrollbar-width: thin;
   }
 
   /* ── Tree root list ── */
