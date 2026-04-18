@@ -121,8 +121,6 @@ const t = {
         <div class="prose">
           <Content />
         </div>
-
-        <ShareButtons title={post.data.title} url={Astro.url.href} type="post" locale={locale as 'en' | 'pt-br'} />
       </div>
 
       <aside class="toc-sidebar">
@@ -130,8 +128,9 @@ const t = {
       </aside>
     </div>
 
-    <!-- FULL-WIDTH: divider + older/newer navigation -->
+    <!-- FULL-WIDTH: divider + share + older/newer navigation -->
     <hr class="post-end-divider" />
+    <ShareButtons title={post.data.title} url={Astro.url.href} type="post" locale={locale as 'en' | 'pt-br'} />
     <PostNav locale={locale} prev={prev} next={next} />
   </div>
 

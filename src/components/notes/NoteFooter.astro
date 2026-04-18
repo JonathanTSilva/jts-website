@@ -1,0 +1,286 @@
+---
+/**
+ * NoteFooter — unified bottom section for every note detail page.
+ * One top divider, then: share row · related cards · prev/next nav.
+ */
+import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '../../lib/content/locale';
+import { contentLocalePath } from '../../lib/content/locale';
+
+interface Props {
+  note: CollectionEntry<'notes'>;
+  relatedNotes: CollectionEntry<'notes'>[];
+  prev: CollectionEntry<'notes'> | undefined;
+  next: CollectionEntry<'notes'> | undefined;
+  locale: Locale;
+}
+
+const { note, relatedNotes, prev, next, locale } = Astro.props;
+const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
+
+const t = locale === 'en' ? {
+  share: 'Share',
+  related: 'Related Notes',
+  prev: '← Previous',
+  next: 'Next →',
+  navLabel: 'Note navigation',
+  copied: 'Link copied!',
+} : {
+  share: 'Compartilhar',
+  related: 'Notas Relacionadas',
+  prev: '← Anterior',
+  next: 'Próximo →',
+  navLabel: 'Navegação de notas',
+  copied: 'Link copiado!',
+};
+
+/* Share URLs */
+const url = Astro.url.href;
+const encodedUrl = encodeURIComponent(url);
+const encodedMsg = encodeURIComponent(`*${note.data.title}*\n${url}`);
+const shareLinks = {
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  twitter: `https://twitter.com/intent/tweet?text=${encodedMsg}`,
+  whatsapp: `https://wa.me/?text=${encodedMsg}`,
+};
+---
+
+<footer class="note-footer">
+  <!-- ─── Share row ─── -->
+  <div class="nf-share">
+    <span class="nf-share-label">{t.share}</span>
+    <div class="nf-share-icons">
+      <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" class="nf-icon" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      </a>
+      <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" class="nf-icon" aria-label="Twitter / X">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" class="nf-icon" aria-label="WhatsApp">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a13 13 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.484 2 12.017c0 1.99.583 3.842 1.59 5.395L2 22l4.705-1.232A10 10 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" fill-rule="evenodd" clip-rule="evenodd"/></svg>
+      </a>
+      <button class="nf-icon" data-platform="copy" data-url={url} data-copied-label={t.copied} aria-label="Copy link">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Related notes ─── -->
+  {relatedNotes.length > 0 && (
+    <div class="nf-related">
+      <h2 class="nf-heading">{t.related}</h2>
+      <div class="nf-related-grid">
+        {relatedNotes.map((r) => (
+          <a href={contentLocalePath(locale, `/notes/${r.id}`)} class="nf-card">
+            <span class="nf-card-date">
+              {r.data.publishedAt.toLocaleDateString(dateLocale, { dateStyle: 'medium' })}
+            </span>
+            <span class="nf-card-title">{r.data.title}</span>
+            {r.data.category && (
+              <span class="nf-card-category">{r.data.category}</span>
+            )}
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- ─── Prev / Next ─── -->
+  {(prev || next) && (
+    <nav class="nf-nav" aria-label={t.navLabel}>
+      <div class="nf-nav-side">
+        {prev ? (
+          <a href={contentLocalePath(locale, `/notes/${prev.id}`)} class="nf-nav-link">
+            <span class="nf-nav-dir">{t.prev}</span>
+            <span class="nf-nav-title">{prev.data.title}</span>
+          </a>
+        ) : <span />}
+      </div>
+      <div class="nf-nav-side nf-nav-side--right">
+        {next ? (
+          <a href={contentLocalePath(locale, `/notes/${next.id}`)} class="nf-nav-link nf-nav-link--right">
+            <span class="nf-nav-dir">{t.next}</span>
+            <span class="nf-nav-title">{next.data.title}</span>
+          </a>
+        ) : <span />}
+      </div>
+    </nav>
+  )}
+</footer>
+
+<script>
+  function initNoteFooterCopy() {
+    document.querySelectorAll<HTMLButtonElement>('.nf-icon[data-platform="copy"]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const url = btn.dataset.url ?? '';
+        const copiedLabel = btn.dataset.copiedLabel ?? 'Link copied';
+        try {
+          await navigator.clipboard.writeText(url);
+          (window as Window & { showToast?: (opts: { message: string; variant: string; duration: number }) => void })
+            .showToast?.({ message: copiedLabel, variant: 'accent', duration: 2000 });
+        } catch { /* clipboard not available */ }
+      });
+    });
+  }
+  initNoteFooterCopy();
+  document.addEventListener('astro:page-load', initNoteFooterCopy);
+</script>
+
+<style>
+  /* ── Container ── */
+  .note-footer {
+    margin-top: var(--space-12);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+  }
+
+  /* ── Share section (centered) ── */
+  .nf-share {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .nf-share-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .nf-share-icons {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .nf-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out),
+                background var(--duration-fast) var(--ease-out);
+  }
+  .nf-icon:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* ── Related notes ── */
+  .nf-heading {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-4);
+  }
+
+  .nf-related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .nf-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    transition: box-shadow var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out);
+  }
+  .nf-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nf-card-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+  .nf-card-title {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+  }
+  .nf-card-category {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    margin-top: auto;
+  }
+
+  /* ── Prev / Next nav ── */
+  .nf-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-6);
+  }
+
+  .nf-nav-side {
+    flex: 1;
+    min-width: 0;
+  }
+  .nf-nav-side--right {
+    text-align: right;
+  }
+
+  .nf-nav-link {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    text-decoration: none;
+    color: var(--text);
+    transition: color var(--duration-fast) var(--ease-out);
+    max-width: 100%;
+  }
+  .nf-nav-link:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nf-nav-dir {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .nf-nav-title {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .nf-related-grid {
+      grid-template-columns: 1fr;
+    }
+    .nf-nav {
+      flex-direction: column;
+    }
+    .nf-nav-side--right {
+      text-align: left;
+    }
+  }
+</style>

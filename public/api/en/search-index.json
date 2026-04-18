@@ -3,10 +3,10 @@
     "title": "Markdown Cheatsheet — Website Writing Reference",
     "summary": "Complete reference of all markdown elements supported on this website: typography, links, code blocks, callouts, tables, diagrams, math, and custom Obsidian snippets.",
     "tags": [
-      "Markdown",
-      "Obsidian",
-      "Reference",
-      "Writing"
+      "markdown",
+      "obsidian",
+      "reference",
+      "writing"
     ],
     "url": "/blog/2026-03-markdown-cheatsheet.en",
     "type": "blog"

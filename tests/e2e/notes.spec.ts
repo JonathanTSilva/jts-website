@@ -128,7 +128,7 @@ test.describe('Notes', () => {
 
   test('note page: has share buttons', async ({ page }) => {
     await page.goto('/notes/note-cheatsheet.en');
-    await expect(page.locator('.share-buttons')).toBeVisible();
+    await expect(page.locator('.nf-share')).toBeVisible();
   });
 
   test('notes RSS feed uses canonical www domain', async ({ page }) => {

@@ -2,13 +2,11 @@
 import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '../../../lib/content/locale';
 import BackToTop from '../../site/BackToTop.astro';
-import ShareButtons from '../../site/ShareButtons.astro';
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import MermaidRenderer from '../../site/MermaidRenderer.astro';
 import { getNoteAccentColor } from '../../../lib/notes';
 import { getCollection } from 'astro:content';
-import RelatedNoteCards from '../RelatedNoteCards.astro';
-import NoteNavigation from '../NoteNavigation.astro';
+import NoteFooter from '../NoteFooter.astro';
 
 interface Props {
   note: CollectionEntry<'notes'>;
@@ -22,12 +20,10 @@ const t = locale === 'en' ? {
   fallbackNotice: 'This note is not available in English. Showing the original version.',
   back: '← Back to notes',
   backHref: '/notes',
-  relatedNotes: 'Related Notes',
 } : {
   fallbackNotice: 'Esta nota não está disponível em Português. Mostrando a versão original.',
   back: '← Voltar para notas',
   backHref: '/pt-br/notes',
-  relatedNotes: 'Notas Relacionadas',
 };
 
 const isTranslationFallback = note.data.language !== locale;
@@ -90,15 +86,7 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
     <Content />
   </div>
 
-  <ShareButtons
-    title={note.data.title}
-    url={Astro.url.href}
-    type="note"
-    locale={locale as 'en' | 'pt-br'}
-  />
-
-  <RelatedNoteCards notes={relatedNotes} locale={locale} heading={t.relatedNotes} />
-  <NoteNavigation prev={prevNote} next={nextNote} locale={locale} />
+  <NoteFooter note={note} relatedNotes={relatedNotes} prev={prevNote} next={nextNote} locale={locale} />
 
 </article>
 
