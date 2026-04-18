@@ -8,7 +8,7 @@ noteType: mindmap
 summary: "Um mapa mental de todos os tipos de nota suportados neste site, com seus principais campos e casos de uso."
 category: "Engenharia"
 tags: [cheatsheet, tipos-de-nota, referência]
-colorToken: "#10b981"
+colorToken: "#065f46"
 ---
 
 # Sistema de Notas

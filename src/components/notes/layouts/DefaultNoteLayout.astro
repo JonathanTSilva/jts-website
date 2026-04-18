@@ -1,13 +1,14 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '../../../lib/content/locale';
-import { contentLocalePath } from '../../../lib/content/locale';
 import BackToTop from '../../site/BackToTop.astro';
 import ShareButtons from '../../site/ShareButtons.astro';
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import MermaidRenderer from '../../site/MermaidRenderer.astro';
 import { getNoteAccentColor } from '../../../lib/notes';
 import { getCollection } from 'astro:content';
+import RelatedNoteCards from '../RelatedNoteCards.astro';
+import NoteNavigation from '../NoteNavigation.astro';
 
 interface Props {
   note: CollectionEntry<'notes'>;
@@ -31,15 +32,24 @@ const t = locale === 'en' ? {
 
 const isTranslationFallback = note.data.language !== locale;
 
-const allNotesForRelated = await getCollection('notes');
-const relatedNotes = allNotesForRelated
-  .filter(n =>
-    n.data.slug !== note.data.slug &&
-    n.data.language === locale &&
-    n.data.category === note.data.category
-  )
-  .sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime())
-  .slice(-3);
+const allNotes = await getCollection('notes');
+const sameLangNotes = allNotes
+  .filter(n => n.data.language === locale)
+  .sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
+
+const currentIdx = sameLangNotes.findIndex(n => n.id === note.id);
+const prevNote = currentIdx > 0 ? sameLangNotes[currentIdx - 1] : undefined;
+const nextNote = currentIdx < sameLangNotes.length - 1 ? sameLangNotes[currentIdx + 1] : undefined;
+
+const relatedNotes = allNotes
+  .filter(n => {
+    if (n.id === note.id || n.data.language !== locale) return false;
+    const sameCategory = note.data.category && n.data.category === note.data.category;
+    const sharedTags = note.data.tags?.some(tag => n.data.tags?.includes(tag)) ?? false;
+    return sameCategory || sharedTags;
+  })
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+  .slice(0, 3);
 
 const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 ---
@@ -87,24 +97,8 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
     locale={locale as 'en' | 'pt-br'}
   />
 
-  {relatedNotes.length > 0 && (
-    <section class="related-notes">
-      <h2 class="related-title">{t.relatedNotes}</h2>
-      <div class="related-grid">
-        {relatedNotes.map((related: any) => (
-          <a
-            href={contentLocalePath(locale, `/notes/${related.data.slug}`)}
-            class="related-card"
-            data-category={related.data.category ?? ''}
-          >
-            <span class="note-date">{related.data.publishedAt.toLocaleDateString(dateLocale, { dateStyle: 'medium' })}</span>
-            <h3>{related.data.title}</h3>
-            {related.data.category && <span class="note-category">{related.data.category}</span>}
-          </a>
-        ))}
-      </div>
-    </section>
-  )}
+  <RelatedNoteCards notes={relatedNotes} locale={locale} heading={t.relatedNotes} />
+  <NoteNavigation prev={prevNote} next={nextNote} locale={locale} />
 
 </article>
 
@@ -208,58 +202,5 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
   .note-content.prose :global(ul) {
     margin-bottom: var(--space-4);
     padding-left: var(--space-6);
-  }
-
-  .related-notes {
-    margin-top: var(--space-12);
-    padding-top: var(--space-8);
-    border-top: 1px solid var(--border);
-  }
-
-  .related-title {
-    font-size: var(--text-xl);
-    margin-bottom: var(--space-6);
-  }
-
-  .related-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-4);
-  }
-
-  @media (max-width: 48rem) {
-    .related-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .related-card {
-    display: block;
-    padding: var(--space-4);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    transition: border-color var(--duration-fast) var(--ease-out),
-                box-shadow var(--duration-fast) var(--ease-out);
-  }
-  .related-card:hover {
-    border-color: var(--accent);
-    box-shadow: var(--shadow-sm);
-  }
-  .related-card .note-date {
-    display: block;
-    margin-bottom: var(--space-2);
-  }
-  .related-card h3 {
-    font-size: var(--text-base);
-    font-weight: var(--weight-semibold);
-    margin-bottom: var(--space-2);
-    color: var(--text);
-  }
-  .note-category {
-    font-size: var(--text-xs);
-    color: var(--accent);
-    font-family: var(--font-mono);
   }
 </style>

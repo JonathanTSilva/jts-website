@@ -11,7 +11,7 @@ test.describe('Notes', () => {
     await expect(page.getByRole('button', { name: 'All' })).toBeVisible();
 
     // Check for specific note card
-    await expect(page.getByText('Debugging Habits')).toBeVisible();
+    await expect(page.getByText('Default Note — Cheatsheet')).toBeVisible();
   });
 
   test('search dialog functions correctly', async ({ page, request }) => {

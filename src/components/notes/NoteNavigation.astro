@@ -1,0 +1,109 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '../../lib/content/locale';
+import { contentLocalePath } from '../../lib/content/locale';
+
+interface Props {
+  prev: CollectionEntry<'notes'> | undefined;
+  next: CollectionEntry<'notes'> | undefined;
+  locale: Locale;
+}
+
+const { prev, next, locale } = Astro.props;
+const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
+const t = locale === 'en'
+  ? { prev: '← Previous', next: 'Next →' }
+  : { prev: '← Anterior', next: 'Próximo →' };
+---
+
+{(prev || next) && (
+  <nav class="note-nav" aria-label={locale === 'en' ? 'Note navigation' : 'Navegação de notas'}>
+    <div class="note-nav-prev">
+      {prev ? (
+        <a href={contentLocalePath(locale, `/notes/${prev.id}`)} class="note-nav-link">
+          <span class="note-nav-dir">{t.prev}</span>
+          <span class="note-nav-date">
+            {prev.data.publishedAt.toLocaleDateString(dateLocale, { dateStyle: 'medium' })}
+          </span>
+          <span class="note-nav-title">{prev.data.title}</span>
+        </a>
+      ) : <span />}
+    </div>
+    <div class="note-nav-next">
+      {next ? (
+        <a href={contentLocalePath(locale, `/notes/${next.id}`)} class="note-nav-link note-nav-link--right">
+          <span class="note-nav-dir">{t.next}</span>
+          <span class="note-nav-date">
+            {next.data.publishedAt.toLocaleDateString(dateLocale, { dateStyle: 'medium' })}
+          </span>
+          <span class="note-nav-title">{next.data.title}</span>
+        </a>
+      ) : <span />}
+    </div>
+  </nav>
+)}
+
+<style>
+  .note-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-6);
+    margin-top: var(--space-10);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .note-nav-prev,
+  .note-nav-next {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .note-nav-next {
+    text-align: right;
+  }
+
+  .note-nav-link {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    text-decoration: none;
+    color: var(--text);
+    transition: color var(--duration-fast) var(--ease-out);
+    max-width: 100%;
+  }
+
+  .note-nav-link:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .note-nav-dir {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .note-nav-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .note-nav-title {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 40rem) {
+    .note-nav {
+      flex-direction: column;
+    }
+    .note-nav-next {
+      text-align: left;
+    }
+  }
+</style>

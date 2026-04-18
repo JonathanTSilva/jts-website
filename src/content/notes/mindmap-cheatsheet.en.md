@@ -8,7 +8,7 @@ noteType: mindmap
 summary: "A mind map of all note types supported on this site, with their key fields and use cases."
 category: "Engineering"
 tags: [cheatsheet, note-types, reference]
-colorToken: "#10b981"
+colorToken: "#065f46"
 ---
 
 # Note System
