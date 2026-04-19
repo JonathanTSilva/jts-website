@@ -66,12 +66,18 @@ importers:
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
+      '@types/mdast':
+        specifier: ^4.0.4
+        version: 4.0.4
       fs-extra:
         specifier: ^11.3.4
         version: 11.3.4
       remark-html:
         specifier: ^16.0.1
         version: 16.0.1
+      remark-parse:
+        specifier: ^11.0.0
+        version: 11.0.0
       satori:
         specifier: ^0.26.0
         version: 0.26.0
@@ -81,6 +87,12 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
       vitest:
         specifier: ^3.0.7
         version: 3.2.4(@types/debug@4.1.13)(@types/node@24.12.0)(tsx@4.21.0)(yaml@2.8.2)
