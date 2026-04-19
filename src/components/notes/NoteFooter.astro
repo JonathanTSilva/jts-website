@@ -1,0 +1,198 @@
+---
+/**
+ * NoteFooter — unified bottom section for every note detail page.
+ * One top divider, then: share row · related cards · prev/next nav.
+ */
+import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '../../lib/content/locale';
+import { contentLocalePath } from '../../lib/content/locale';
+import ShareButtons from '../site/ShareButtons.astro';
+
+interface Props {
+  note: CollectionEntry<'notes'>;
+  relatedNotes: CollectionEntry<'notes'>[];
+  prev: CollectionEntry<'notes'> | undefined;
+  next: CollectionEntry<'notes'> | undefined;
+  locale: Locale;
+}
+
+const { note, relatedNotes, prev, next, locale } = Astro.props;
+const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
+
+const t = locale === 'en' ? {
+  related: 'Related Notes',
+  prev: '← Previous',
+  next: 'Next →',
+  navLabel: 'Note navigation',
+} : {
+  related: 'Notas Relacionadas',
+  prev: '← Anterior',
+  next: 'Próximo →',
+  navLabel: 'Navegação de notas',
+};
+
+const url = Astro.url.href;
+---
+
+<footer class="note-footer">
+  <!-- ─── Share row ─── -->
+  <ShareButtons title={note.data.title} url={url} type="note" locale={locale} />
+
+  <!-- ─── Related notes ─── -->
+  {relatedNotes.length > 0 && (
+    <div class="nf-related">
+      <h2 class="nf-heading">{t.related}</h2>
+      <div class="nf-related-grid">
+        {relatedNotes.map((r) => (
+          <a href={contentLocalePath(locale, `/notes/${r.id}`)} class="nf-card">
+            <span class="nf-card-date">
+              {r.data.publishedAt.toLocaleDateString(dateLocale, { dateStyle: 'medium' })}
+            </span>
+            <span class="nf-card-title">{r.data.title}</span>
+            {r.data.category && (
+              <span class="nf-card-category">{r.data.category}</span>
+            )}
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- ─── Prev / Next ─── -->
+  {(prev || next) && (
+    <nav class="nf-nav" aria-label={t.navLabel}>
+      <div class="nf-nav-side">
+        {prev ? (
+          <a href={contentLocalePath(locale, `/notes/${prev.id}`)} class="nf-nav-link">
+            <span class="nf-nav-dir">{t.prev}</span>
+            <span class="nf-nav-title">{prev.data.title}</span>
+          </a>
+        ) : <span />}
+      </div>
+      <div class="nf-nav-side nf-nav-side--right">
+        {next ? (
+          <a href={contentLocalePath(locale, `/notes/${next.id}`)} class="nf-nav-link nf-nav-link--right">
+            <span class="nf-nav-dir">{t.next}</span>
+            <span class="nf-nav-title">{next.data.title}</span>
+          </a>
+        ) : <span />}
+      </div>
+    </nav>
+  )}
+</footer>
+
+<style>
+  /* ── Container ── */
+  .note-footer {
+    margin-top: var(--space-12);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+  }
+
+  /* ── Related notes ── */
+  .nf-heading {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-4);
+  }
+
+  .nf-related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .nf-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    transition: box-shadow var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out);
+  }
+  .nf-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nf-card-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+  .nf-card-title {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+  }
+  .nf-card-category {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    margin-top: auto;
+  }
+
+  /* ── Prev / Next nav ── */
+  .nf-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-6);
+  }
+
+  .nf-nav-side {
+    flex: 1;
+    min-width: 0;
+  }
+  .nf-nav-side--right {
+    text-align: right;
+  }
+
+  .nf-nav-link {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    text-decoration: none;
+    color: var(--text);
+    transition: color var(--duration-fast) var(--ease-out);
+    max-width: 100%;
+  }
+  .nf-nav-link:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nf-nav-dir {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .nf-nav-title {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .nf-related-grid {
+      grid-template-columns: 1fr;
+    }
+    .nf-nav {
+      flex-direction: column;
+    }
+    .nf-nav-side--right {
+      text-align: left;
+    }
+  }
+</style>

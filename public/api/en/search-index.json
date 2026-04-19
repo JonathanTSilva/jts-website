@@ -3,40 +3,66 @@
     "title": "Markdown Cheatsheet — Website Writing Reference",
     "summary": "Complete reference of all markdown elements supported on this website: typography, links, code blocks, callouts, tables, diagrams, math, and custom Obsidian snippets.",
     "tags": [
-      "Markdown",
-      "Obsidian",
-      "Reference",
-      "Writing"
+      "markdown",
+      "obsidian",
+      "reference",
+      "writing"
     ],
     "url": "/blog/2026-03-markdown-cheatsheet.en",
     "type": "blog"
   },
   {
-    "title": "Good Debugging Habits",
-    "summary": "",
+    "title": "Building a Second Brain",
+    "summary": "A proven method to organise your digital life and unlock your creative potential.",
     "tags": [
-      "Debugging",
-      "Productivity"
+      "pkm",
+      "second-brain",
+      "note-taking",
+      "creativity"
     ],
-    "category": "Engineering",
-    "url": "/notes/debugging-habits.en",
+    "category": "Productivity",
+    "url": "/notes/book-cheatsheet.en",
     "type": "notes"
   },
   {
-    "title": "Understanding RTOS Scheduling",
-    "summary": "",
+    "title": "Note Types — Mind Map",
+    "summary": "A mind map of all note types supported on this site, with their key fields and use cases.",
     "tags": [
-      "RTOS",
-      "Scheduling",
-      "FreeRTOS"
+      "cheatsheet",
+      "note-types",
+      "reference"
     ],
-    "category": "Real-Time Systems",
-    "url": "/notes/rtos-scheduling.en",
+    "category": "Engineering",
+    "url": "/notes/mindmap-cheatsheet.en",
+    "type": "notes"
+  },
+  {
+    "title": "Default Note — Cheatsheet",
+    "summary": "Reference template for the default note format. Covers every supported frontmatter field and Markdown feature available in note pages.",
+    "tags": [
+      "cheatsheet",
+      "reference",
+      "markdown"
+    ],
+    "category": "Engineering",
+    "url": "/notes/note-cheatsheet.en",
+    "type": "notes"
+  },
+  {
+    "title": "Whiteboard Note — Cheatsheet",
+    "summary": "Reference layout for whiteboard notes. Content flows into two CSS columns at fixed height, styled with Patrick Hand font.",
+    "tags": [
+      "cheatsheet",
+      "reference",
+      "whiteboard"
+    ],
+    "category": "Engineering",
+    "url": "/notes/whiteboard-cheatsheet.en",
     "type": "notes"
   },
   {
     "title": "Now",
-    "summary": "Currently focused on industrial connectivity and mission-critical systems for Schneider Electric.",
+    "summary": "Bridging the gap between modern software practices and mission-critical industrial systems.",
     "tags": [],
     "url": "/now",
     "type": "now"

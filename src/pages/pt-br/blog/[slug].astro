@@ -5,6 +5,8 @@ import TableOfContents from '../../../components/blog/TableOfContents.astro';
 import PostNav from '../../../components/blog/PostNav.astro';
 import BackToTop from '../../../components/site/BackToTop.astro';
 import ShareButtons from '../../../components/site/ShareButtons.astro';
+import TranslationFallbackNotice from '../../../components/site/TranslationFallbackNotice.astro';
+import MermaidRenderer from '../../../components/site/MermaidRenderer.astro';
 import { getReadingTime } from '../../../lib/readingTime';
 import { getCategoryColor } from '../../../lib/categoryColors';
 import { generateArticleSchema } from '../../../lib/seo/schema';
@@ -113,16 +115,12 @@ const t = {
     <div class="post-body-grid">
       <div class="post-content">
         {isTranslationFallback && (
-          <div class="fallback-notice">
-            <p>{t.fallbackNotice}</p>
-          </div>
+          <TranslationFallbackNotice message={t.fallbackNotice} />
         )}
 
         <div class="prose">
           <Content />
         </div>
-
-        <ShareButtons title={post.data.title} url={Astro.url.href} type="post" locale={locale as 'en' | 'pt-br'} />
       </div>
 
       <aside class="toc-sidebar">
@@ -130,48 +128,16 @@ const t = {
       </aside>
     </div>
 
-    <!-- FULL-WIDTH: divider + older/newer navigation -->
+    <!-- FULL-WIDTH: divider + share + older/newer navigation -->
     <hr class="post-end-divider" />
+    <ShareButtons title={post.data.title} url={Astro.url.href} type="post" locale={locale as 'en' | 'pt-br'} />
     <PostNav locale={locale} prev={prev} next={next} />
   </div>
 
   <BackToTop />
 </BaseLayout>
 
-<script>
-  import('mermaid').then(async ({ default: mermaid }) => {
-    const getTheme = () =>
-      document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-
-    document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]').forEach(pre => {
-      const code = (pre.querySelector('code')?.textContent ?? pre.textContent ?? '').trim();
-      if (!code) return;
-      const container = document.createElement('div');
-      container.className = 'mermaid-diagram';
-      container.dataset.mermaidCode = code;
-      pre.replaceWith(container);
-    });
-
-    async function renderAll() {
-      mermaid.initialize({ startOnLoad: false, theme: getTheme() });
-      for (const container of document.querySelectorAll<HTMLElement>('.mermaid-diagram[data-mermaid-code]')) {
-        const code = container.dataset.mermaidCode ?? '';
-        if (!code) continue;
-        try {
-          const { svg } = await mermaid.render(`mmd-${Math.random().toString(36).slice(2)}`, code);
-          container.innerHTML = svg;
-        } catch { /* invalid diagram — leave as-is */ }
-      }
-    }
-
-    await renderAll();
-
-    new MutationObserver(renderAll).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
-  });
-</script>
+<MermaidRenderer />
 
 <style>
   .post-wrapper {
@@ -318,14 +284,6 @@ const t = {
     flex-direction: column;
   }
 
-  .fallback-notice {
-    background-color: #fef3c7;
-    border-left: 4px solid #f59e0b;
-    padding: var(--space-4);
-    margin-bottom: var(--space-8);
-    color: #92400e;
-  }
-
   .prose {
     line-height: 1.6;
   }
@@ -376,6 +334,8 @@ const t = {
     border-radius: var(--radius-md);
     padding: var(--space-4);
     overflow-x: auto;
+    scrollbar-color: var(--text-muted) var(--surface-high);
+    scrollbar-width: thin;
     margin-bottom: var(--space-6);
   }
 
@@ -412,8 +372,17 @@ const t = {
     margin-block: var(--space-8);
   }
 
-  /* Mobile: hide TOC, single column */
-  @media (max-width: 48rem) {
+  /* Headings must clear the fixed header when jumped to via anchor */
+  .prose :global(h1),
+  .prose :global(h2),
+  .prose :global(h3),
+  .prose :global(h4) {
+    scroll-margin-top: calc(var(--space-16) + var(--space-6));
+  }
+
+  /* Hide TOC sidebar at the same breakpoint the TOC itself hides (64rem).
+     Below 48rem the sidebar also collapses to single column. */
+  @media (max-width: 64rem) {
     .post-body-grid {
       grid-template-columns: 1fr;
     }

@@ -171,6 +171,8 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   border-radius: var(--radius-md);
   padding: var(--space-4);
   overflow-x: auto;
+  scrollbar-color: var(--text-muted) var(--surface);
+  scrollbar-width: thin;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   margin-bottom: var(--space-4);

@@ -3,15 +3,15 @@ import { test, expect } from '@playwright/test';
 test.describe('Notes', () => {
   test('en: notes index and filtering', async ({ page }) => {
     await page.goto('/notes');
-    
+
     await expect(page.getByRole('heading', { name: 'Notes', level: 1 })).toBeVisible();
-    
+
     // Check for filters
     await expect(page.getByText('Categories')).toBeVisible();
     await expect(page.getByRole('button', { name: 'All' })).toBeVisible();
-    
+
     // Check for specific note card
-    await expect(page.getByText('Debugging Habits')).toBeVisible();
+    await expect(page.getByText('Default Note — Cheatsheet')).toBeVisible();
   });
 
   test('search dialog functions correctly', async ({ page, request }) => {
@@ -121,13 +121,13 @@ test.describe('Notes', () => {
   });
 
   test('note page: has back to notes button', async ({ page }) => {
-    await page.goto('/notes/debugging-habits.en');
+    await page.goto('/notes/note-cheatsheet.en');
     await expect(page.locator('.back-link')).toBeVisible();
     await expect(page.locator('.back-link')).toContainText('Back to notes');
   });
 
   test('note page: has share buttons', async ({ page }) => {
-    await page.goto('/notes/debugging-habits.en');
+    await page.goto('/notes/note-cheatsheet.en');
     await expect(page.locator('.share-buttons')).toBeVisible();
   });
 
@@ -147,5 +147,46 @@ test.describe('Notes', () => {
   test('pt-br: notes index has link to blog section', async ({ page }) => {
     await page.goto('/pt-br/notes');
     await expect(page.locator('a.cross-section-nav[href="/pt-br/blog"]')).toBeVisible();
+  });
+
+  test('book note: renders cover image and metadata', async ({ page }) => {
+    await page.goto('/notes/book-cheatsheet.en');
+    await expect(page.locator('.book-cover')).toBeVisible();
+    await expect(page.locator('.book-author')).toBeVisible();
+    await expect(page.locator('.book-rating')).toBeVisible();
+    await expect(page.locator('.book-status')).toBeVisible();
+  });
+
+  test('mindmap note: renders mindmap-tree element with root node', async ({ page }) => {
+    await page.goto('/notes/mindmap-cheatsheet.en');
+    await expect(page.locator('.mindmap-tree')).toBeVisible();
+    const root = page.locator('.mindmap-root .mindmap-label').first();
+    await expect(root).toBeVisible();
+    await expect(root).toContainText('Note System');
+  });
+
+  test('whiteboard note: applies whiteboard canvas and Patrick Hand font', async ({ page }) => {
+    await page.goto('/notes/whiteboard-cheatsheet.en');
+    await expect(page.locator('[data-whiteboard]')).toBeVisible();
+    await expect(page.locator('.whiteboard-columns')).toBeVisible();
+    const fontFamily = await page.locator('.whiteboard-columns').evaluate(
+      el => window.getComputedStyle(el).fontFamily
+    );
+    expect(fontFamily).toContain('Patrick Hand');
+  });
+
+  test('book note card: shows author and status metadata in index', async ({ page }) => {
+    await page.goto('/notes');
+    const bookCard = page.locator('.book-note-card').first();
+    await expect(bookCard).toBeVisible();
+    await expect(bookCard.locator('.book-author')).toBeVisible();
+    await expect(bookCard.locator('.book-status')).toBeVisible();
+  });
+
+  test('mindmap card: shows type badge in index', async ({ page }) => {
+    await page.goto('/notes');
+    const mindmapCard = page.locator('.mindmap-note-card').first();
+    await expect(mindmapCard).toBeVisible();
+    await expect(mindmapCard.locator('.type-badge')).toBeVisible();
   });
 });

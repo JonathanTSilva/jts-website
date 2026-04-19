@@ -5,16 +5,26 @@ interface Props {
   categories: string[];
   categoryCounts: Record<string, number>;
   tags: string[];
+  noteTypes: string[];
+  noteTypeCounts: Record<string, number>;
   locale: Locale;
 }
 
-const { categories, categoryCounts, tags, locale } = Astro.props;
+const { categories, categoryCounts, tags, noteTypes, noteTypeCounts, locale } = Astro.props;
+
+const typeLabels: Record<string, string> = {
+  note: locale === 'en' ? 'Note' : 'Nota',
+  book: locale === 'en' ? 'Book' : 'Livro',
+  mindmap: locale === 'en' ? 'Mind Map' : 'Mapa Mental',
+  whiteboard: locale === 'en' ? 'Whiteboard' : 'Quadro',
+};
 
 const labels = {
   en: {
     all: 'All',
     categories: 'Categories',
     tags: 'Tags',
+    types: 'Types',
     clear: 'Clear filters',
     collapse: 'Collapse',
     expand: 'Expand',
@@ -23,6 +33,7 @@ const labels = {
     all: 'Tudo',
     categories: 'Categorias',
     tags: 'Tags',
+    types: 'Tipos',
     clear: 'Limpar filtros',
     collapse: 'Recolher',
     expand: 'Expandir',
@@ -54,8 +65,32 @@ const labels = {
     </div>
   </details>
 
+  {noteTypes.length > 1 && (
+    <details class="filter-section">
+      <summary class="filter-section-header">
+        <span class="filter-section-title">{labels.types}</span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </summary>
+      <div class="filter-items">
+        <button class="filter-item active" data-filter="type" data-value="all">
+          <span class="item-label">{labels.all}</span>
+        </button>
+        {noteTypes.map(t => (
+          <button class="filter-item" data-filter="type" data-value={t}>
+            <span class="item-label">{typeLabels[t] ?? t}</span>
+            {noteTypeCounts[t] && (
+              <span class="item-count">{noteTypeCounts[t]}</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </details>
+  )}
+
   {tags.length > 0 && (
-    <details class="filter-section" open>
+    <details class="filter-section">
       <summary class="filter-section-header">
         <span class="filter-section-title">{labels.tags}</span>
         <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -87,6 +122,7 @@ const labels = {
     const notes = Array.from(notesGrid.querySelectorAll('.note-card')) as HTMLElement[];
 
     let activeCategory = 'all';
+    let activeType = 'all';
     let activeTags = new Set<string>();
 
     function updateFilters() {
@@ -94,12 +130,14 @@ const labels = {
 
       notes.forEach(note => {
         const category = note.dataset.category;
-        const noteTags = note.dataset.tags?.split(',') || [];
+        const noteType = note.dataset.type;
+        const noteTags = note.dataset.tags?.split(',').filter(Boolean) || [];
 
         const categoryMatch = activeCategory === 'all' || category === activeCategory;
+        const typeMatch = activeType === 'all' || noteType === activeType;
         const tagsMatch = activeTags.size === 0 || Array.from(activeTags).every(tag => noteTags.includes(tag));
 
-        if (categoryMatch && tagsMatch) {
+        if (categoryMatch && typeMatch && tagsMatch) {
           note.style.display = '';
           visibleCount++;
         } else {
@@ -112,21 +150,26 @@ const labels = {
       }
 
       if (clearBtn) {
-        clearBtn.style.display = (activeCategory !== 'all' || activeTags.size > 0) ? 'block' : 'none';
+        clearBtn.style.display = (activeCategory !== 'all' || activeType !== 'all' || activeTags.size > 0) ? 'block' : 'none';
       }
     }
 
     document.querySelectorAll<HTMLElement>('.filter-item').forEach(btn => {
       btn.addEventListener('click', () => {
-        const type = btn.dataset.filter;
+        const filterKind = btn.dataset.filter;
         const value = btn.dataset.value;
 
-        if (type === 'category') {
+        if (filterKind === 'category') {
           activeCategory = value!;
           document.querySelectorAll<HTMLElement>('.filter-item[data-filter="category"]').forEach(b => {
             b.classList.toggle('active', b.dataset.value === activeCategory);
           });
-        } else if (type === 'tag') {
+        } else if (filterKind === 'type') {
+          activeType = value!;
+          document.querySelectorAll<HTMLElement>('.filter-item[data-filter="type"]').forEach(b => {
+            b.classList.toggle('active', b.dataset.value === activeType);
+          });
+        } else if (filterKind === 'tag') {
           if (activeTags.has(value!)) {
             activeTags.delete(value!);
             btn.classList.remove('active');
@@ -143,10 +186,14 @@ const labels = {
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
         activeCategory = 'all';
+        activeType = 'all';
         activeTags.clear();
 
         document.querySelectorAll<HTMLElement>('.filter-item').forEach(btn => {
-          btn.classList.toggle('active', btn.dataset.filter === 'category' && btn.dataset.value === 'all');
+          const isDefaultActive =
+            (btn.dataset.filter === 'category' && btn.dataset.value === 'all') ||
+            (btn.dataset.filter === 'type' && btn.dataset.value === 'all');
+          btn.classList.toggle('active', isDefaultActive);
         });
 
         updateFilters();

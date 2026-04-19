@@ -1,59 +1,25 @@
 import { defineCollection } from "astro:content";
-import { z } from "zod";
 import { glob } from 'astro/loaders';
-
-const language = z.enum(["en", "pt-br"]);
+import { blogSchema, notesSchema, nowSchema, portfolioAboutSchema } from "./lib/content/schemas";
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/blog" }),
-  schema: z.object({
-    slug: z.string().min(1),
-    title: z.string(),
-    language,
-    translationKey: z.string().min(1),
-    publishedAt: z.coerce.date(),
-    summary: z.string(),
-    tags: z.array(z.string()).default([]),
-    updatedAt: z.coerce.date().optional(),
-    category: z.string().optional(),
-  }),
+  schema: blogSchema,
 });
 
 const notes = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/notes" }),
-  schema: z.object({
-    slug: z.string().min(1),
-    title: z.string(),
-    language,
-    translationKey: z.string().min(1),
-    publishedAt: z.coerce.date(),
-    summary: z.string().optional(),
-    category: z.string().optional(),
-    tags: z.array(z.string()).default([]),
-    colorToken: z.string().optional(),
-  }),
+  schema: notesSchema,
 });
 
 const now = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/now" }),
-  schema: z.object({
-    title: z.string(),
-    language,
-    translationKey: z.string().min(1),
-    updatedAt: z.coerce.date(),
-    summary: z.string().optional(),
-    status: z.string().optional(),
-  }),
+  schema: nowSchema,
 });
 
 const portfolio = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/portfolio" }),
-  schema: z.object({
-    title: z.string(),
-    language,
-    translationKey: z.string().min(1),
-    summary: z.string().optional(),
-  }),
+  schema: portfolioAboutSchema,
 });
 
 export const collections = {

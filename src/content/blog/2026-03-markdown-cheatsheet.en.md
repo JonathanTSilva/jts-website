@@ -5,7 +5,7 @@ language: "en"
 translationKey: "markdown-cheatsheet"
 publishedAt: "2026-03-30"
 summary: "Complete reference of all markdown elements supported on this website: typography, links, code blocks, callouts, tables, diagrams, math, and custom Obsidian snippets."
-tags: [Markdown, Obsidian, Reference, Writing]
+tags: [markdown, obsidian, reference, writing]
 category: "Reference"
 ---
 

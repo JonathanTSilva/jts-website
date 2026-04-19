@@ -3,28 +3,66 @@
     "title": "Cheatsheet de Markdown — Referência para Escrita no Site",
     "summary": "Referência completa de todos os elementos markdown suportados neste site: tipografia, links, blocos de código, callouts, tabelas, diagramas, matemática e snippets personalizados do Obsidian.",
     "tags": [
-      "Escrita",
-      "Markdown",
-      "Obsidian",
-      "Referência"
+      "escrita",
+      "markdown",
+      "obsidian",
+      "referência"
     ],
     "url": "/pt-br/blog/2026-03-markdown-cheatsheet.pt-br",
     "type": "blog"
   },
   {
-    "title": "Bons Hábitos de Depuração",
-    "summary": "",
+    "title": "Construindo um Segundo Cérebro",
+    "summary": "Um método comprovado para organizar sua vida digital e liberar seu potencial criativo.",
     "tags": [
-      "Depuração",
-      "Produtividade"
+      "pkm",
+      "segundo-cérebro",
+      "anotações",
+      "criatividade"
+    ],
+    "category": "Produtividade",
+    "url": "/pt-br/notes/book-cheatsheet.pt-br",
+    "type": "notes"
+  },
+  {
+    "title": "Tipos de Nota — Mapa Mental",
+    "summary": "Um mapa mental de todos os tipos de nota suportados neste site, com seus principais campos e casos de uso.",
+    "tags": [
+      "cheatsheet",
+      "tipos-de-nota",
+      "referência"
     ],
     "category": "Engenharia",
-    "url": "/pt-br/notes/debugging-habits.pt-br",
+    "url": "/pt-br/notes/mindmap-cheatsheet.pt-br",
+    "type": "notes"
+  },
+  {
+    "title": "Nota Padrão — Cheatsheet",
+    "summary": "Modelo de referência para o formato de nota padrão. Cobre todos os campos de frontmatter e recursos de Markdown disponíveis.",
+    "tags": [
+      "cheatsheet",
+      "referência",
+      "markdown"
+    ],
+    "category": "Engenharia",
+    "url": "/pt-br/notes/note-cheatsheet.pt-br",
+    "type": "notes"
+  },
+  {
+    "title": "Nota de Quadro Branco — Cheatsheet",
+    "summary": "Layout de referência para notas de quadro branco. O conteúdo flui em duas colunas CSS com altura fixa, estilizado com a fonte Patrick Hand.",
+    "tags": [
+      "cheatsheet",
+      "referência",
+      "quadro-branco"
+    ],
+    "category": "Engenharia",
+    "url": "/pt-br/notes/whiteboard-cheatsheet.pt-br",
     "type": "notes"
   },
   {
     "title": "Agora",
-    "summary": "Atualmente focado em conectividade industrial e sistemas de missão crítica para a Schneider Electric.",
+    "summary": "Conectando o que há de melhor no desenvolvimento de software moderno e IA ao rigor dos sistemas industriais de missão crítica.",
     "tags": [],
     "url": "/pt-br/now",
     "type": "now"

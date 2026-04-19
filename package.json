@@ -27,6 +27,7 @@
     "astro": "^6.1.1",
     "geist": "^1.7.0",
     "gray-matter": "^4.0.3",
+    "html2canvas": "^1.4.1",
     "katex": "^0.16.44",
     "marked": "^17.0.5",
     "mermaid": "^11.13.0",
@@ -40,10 +41,15 @@
     "@axe-core/playwright": "^4.11.1",
     "@playwright/test": "^1.50.1",
     "@types/fs-extra": "^11.0.4",
+    "@types/mdast": "^4.0.4",
     "fs-extra": "^11.3.4",
+    "remark-html": "^16.0.1",
+    "remark-parse": "^11.0.0",
     "satori": "^0.26.0",
     "sharp": "^0.34.5",
     "tsx": "^4.19.2",
+    "unified": "^11.0.5",
+    "vfile": "^6.0.3",
     "vitest": "^3.0.7"
   }
 }

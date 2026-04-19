@@ -1,0 +1,365 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '../../../lib/content/locale';
+import BackToTop from '../../site/BackToTop.astro';
+import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
+import { getNoteAccentColor } from '../../../lib/notes';
+import { getCollection } from 'astro:content';
+import NoteFooter from '../NoteFooter.astro';
+
+interface Props {
+  note: CollectionEntry<'notes'>;
+  Content: any;
+  locale: Locale;
+}
+
+const { note, Content, locale } = Astro.props;
+
+const t = locale === 'en'
+  ? { back: '← Back to notes', backHref: '/notes', copyImage: 'Copy as image', copied: 'Copied!',
+      relatedNotes: 'Related Notes',
+      fallbackNotice: 'This whiteboard is not available in English. Showing the original version.' }
+  : { back: '← Voltar para notas', backHref: '/pt-br/notes', copyImage: 'Copiar como imagem', copied: 'Copiado!',
+      relatedNotes: 'Notas Relacionadas',
+      fallbackNotice: 'Este quadro não está disponível em Português. Mostrando a versão original.' };
+
+const isTranslationFallback = note.data.language !== locale;
+
+const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
+
+const allNotes = await getCollection('notes');
+const sameLangNotes = allNotes
+  .filter(n => n.data.language === locale)
+  .sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
+
+const currentIdx = sameLangNotes.findIndex(n => n.id === note.id);
+const prevNote = currentIdx > 0 ? sameLangNotes[currentIdx - 1] : undefined;
+const nextNote = currentIdx < sameLangNotes.length - 1 ? sameLangNotes[currentIdx + 1] : undefined;
+
+const relatedNotes = allNotes
+  .filter(n => {
+    if (n.id === note.id || n.data.language !== locale) return false;
+    const sameCategory = note.data.category && n.data.category === note.data.category;
+    const sharedTags = note.data.tags?.some(tag => n.data.tags?.includes(tag)) ?? false;
+    return sameCategory || sharedTags;
+  })
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+  .slice(0, 3);
+---
+
+<article class="whiteboard-page" style={`--note-accent: ${accent}`}>
+  <a href={t.backHref} class="back-link">{t.back}</a>
+
+  {isTranslationFallback && (
+    <TranslationFallbackNotice message={t.fallbackNotice} />
+  )}
+
+  <div class="whiteboard-frame" data-whiteboard>
+    <div class="whiteboard-board">
+      <button
+        class="whiteboard-copy-btn"
+        data-copy-label={t.copyImage}
+        data-copied-label={t.copied}
+        aria-label={t.copyImage}
+      >
+        <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        <span class="copy-label">{t.copyImage}</span>
+      </button>
+
+      <h1 class="whiteboard-title">{note.data.title}</h1>
+
+      <div class="whiteboard-columns">
+        <Content />
+      </div>
+    </div>
+  </div>
+
+  {note.data.tags && note.data.tags.length > 0 && (
+    <div class="note-tags below-board">
+      {note.data.tags.map((tag: string) => <span class="tag-pill">#{tag}</span>)}
+    </div>
+  )}
+
+  <NoteFooter note={note} relatedNotes={relatedNotes} prev={prevNote} next={nextNote} locale={locale} />
+</article>
+
+<BackToTop />
+
+<script>
+  function initWhiteboardCopy() {
+    document.querySelectorAll<HTMLButtonElement>('.whiteboard-copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const canvas = btn.closest('.whiteboard-frame')?.querySelector<HTMLElement>('.whiteboard-board');
+        if (!canvas) return;
+        const copiedLabel = btn.dataset.copiedLabel ?? 'Copied!';
+        try {
+          // @ts-ignore — html2canvas is an optional progressive-enhancement dep; graceful fallback below
+          const { default: html2canvas } = await import('html2canvas');
+          const canvasEl = await html2canvas(canvas);
+          await new Promise<void>((resolve, reject) => {
+            canvasEl.toBlob(async (blob: Blob | null) => {
+              if (!blob) { reject(new Error('toBlob returned null')); return; }
+              try {
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                (window as any).showToast?.({ message: copiedLabel, variant: 'accent', duration: 2000 });
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            });
+          });
+        } catch {
+          // Fallback: copy page URL
+          await navigator.clipboard.writeText(window.location.href).catch(() => {});
+        }
+      });
+    });
+  }
+
+  initWhiteboardCopy();
+  document.addEventListener('astro:page-load', initWhiteboardCopy);
+</script>
+
+<style>
+  .whiteboard-page {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: var(--space-10) var(--space-6);
+  }
+
+  .back-link {
+    display: block;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    margin-bottom: var(--space-6);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  .back-link:hover { color: var(--note-accent); }
+
+  /* ── Frame — subtle rounded border with soft shadow ── */
+  .whiteboard-frame {
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-6);
+    background: #e2e4e8;
+    padding: 8px;
+    overflow-x: auto;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.08),
+      0 6px 24px rgba(0, 0, 0, 0.12);
+  }
+  /* In dark mode: slightly darker surround */
+  [data-theme='dark'] .whiteboard-frame {
+    background: #2a2d33;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      0 6px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  /* ── Board surface ── */
+  .whiteboard-board {
+    position: relative;
+    background: #fdfdfe;
+    border-radius: 3px;
+    padding: var(--space-6) var(--space-6) var(--space-8);
+    /* Subtle inner depth */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  [data-theme='dark'] .whiteboard-board {
+    background: #1b2a1d;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ── Copy button — icon only, expand on hover ── */
+  .whiteboard-copy-btn {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 28px;
+    padding: 0 7px;
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-sm);
+    color: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    transition:
+      gap var(--duration-base) var(--ease-out),
+      padding var(--duration-base) var(--ease-out),
+      background var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+    z-index: 1;
+  }
+  .copy-icon {
+    flex-shrink: 0;
+  }
+  .copy-label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    transition:
+      max-width var(--duration-base) var(--ease-out),
+      opacity var(--duration-base) var(--ease-out);
+  }
+  /* Expand-on-hover only on pointer devices — not on touch */
+  @media (hover: hover) {
+    .whiteboard-copy-btn:hover {
+      gap: var(--space-2);
+      padding: 0 10px;
+      background: rgba(0, 0, 0, 0.05);
+      color: rgba(0, 0, 0, 0.6);
+    }
+    .whiteboard-copy-btn:hover .copy-label {
+      max-width: 10rem;
+      opacity: 1;
+    }
+    [data-theme='dark'] .whiteboard-copy-btn:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+  [data-theme='dark'] .whiteboard-copy-btn {
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* ── Title — centered uppercase ── */
+  .whiteboard-title {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.55rem;
+    font-weight: 400;
+    color: #0f172a;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 0 auto var(--space-6);
+    padding: 0 var(--space-6);
+  }
+  [data-theme='dark'] .whiteboard-title {
+    color: #d1fae5;
+  }
+
+  /* ── Two-column body ── */
+  .whiteboard-columns {
+    /* Fixed height — content fills left column then wraps to right */
+    height: 52vh;
+    overflow: hidden;
+
+    columns: 2;
+    column-gap: 3rem;
+    column-rule: 1px solid rgba(0, 0, 0, 0.08);
+
+    /* Ink palette */
+    --wb-ink:    #1e293b;
+    --wb-strong: #1d4ed8;  /* blue marker */
+    --wb-em:     #dc2626;  /* red marker */
+    --wb-h:      #1d4ed8;
+
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: var(--wb-ink);
+    padding: 0 var(--space-2);
+  }
+  @media (max-width: 48rem) {
+    .whiteboard-columns {
+      height: auto;
+      overflow: visible;
+      columns: 1;
+      column-rule: none;
+    }
+  }
+  [data-theme='dark'] .whiteboard-columns {
+    --wb-ink:    #d1fae5;
+    --wb-strong: #93c5fd;
+    --wb-em:     #fca5a5;
+    --wb-h:      #86efac;
+    column-rule-color: rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── Marker ink colours ── */
+  .whiteboard-columns :global(strong) {
+    color: var(--wb-strong);
+    font-weight: 400;
+  }
+  .whiteboard-columns :global(em) {
+    color: var(--wb-em);
+    font-style: normal;
+  }
+
+  /* ── h1 hidden (title is in the layout) ── */
+  .whiteboard-columns :global(h1) {
+    display: none;
+  }
+
+  /* ── Section headings ── */
+  .whiteboard-columns :global(h2),
+  .whiteboard-columns :global(h3) {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--wb-h);
+    margin: var(--space-4) 0 var(--space-2);
+    break-after: avoid;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+    text-decoration-color: color-mix(in srgb, var(--wb-h) 40%, transparent);
+  }
+
+  /* ── Lists ── */
+  .whiteboard-columns :global(ul),
+  .whiteboard-columns :global(ol) {
+    padding-left: 1.3rem;
+    margin: 0 0 var(--space-3);
+  }
+  .whiteboard-columns :global(li) {
+    font-size: 1.05rem;
+    margin-bottom: var(--space-1);
+    break-inside: avoid;
+  }
+
+  /* ── HR — column-scoped ── */
+  .whiteboard-columns :global(hr) {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin: var(--space-4) 0;
+  }
+  [data-theme='dark'] .whiteboard-columns :global(hr) {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* ── Paragraphs ── */
+  .whiteboard-columns :global(p) {
+    margin: 0 0 var(--space-3);
+    break-inside: avoid;
+  }
+
+  /* ── Tags below board ── */
+  .note-tags.below-board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+  .tag-pill {
+    display: inline-block;
+    background: var(--surface-high);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+</style>

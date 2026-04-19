@@ -105,3 +105,58 @@ describe('validateContent', () => {
     expect(result.success).toBe(true);
   });
 });
+
+describe('validateContent — book notes', () => {
+  const baseBook = {
+    slug: 'test-book',
+    title: 'Test Book',
+    language: 'en',
+    translationKey: 'test-book',
+    publishedAt: '2026-01-01',
+    noteType: 'book',
+    author: ['Author Name'],
+    cover: 'https://example.com/cover.jpg',
+  };
+
+  it('accepts a valid book note', () => {
+    const result = validateContent('notes', baseBook, 'Some content');
+    expect(result.success).toBe(true);
+  });
+
+  it('fails when author is missing', () => {
+    const { author: _, ...noAuthor } = baseBook;
+    const result = validateContent('notes', noAuthor, 'Some content');
+    expect(result.success).toBe(false);
+    expect(result.errors.some(e => e.includes('author'))).toBe(true);
+  });
+
+  it('fails when cover is missing', () => {
+    const { cover: _, ...noCover } = baseBook;
+    const result = validateContent('notes', noCover, 'Some content');
+    expect(result.success).toBe(false);
+    expect(result.errors.some(e => e.includes('cover'))).toBe(true);
+  });
+});
+
+describe('validateContent — mindmap notes', () => {
+  const baseMindmap = {
+    slug: 'test-map',
+    title: 'Test Map',
+    language: 'en',
+    translationKey: 'test-map',
+    publishedAt: '2026-01-01',
+    noteType: 'mindmap',
+  };
+
+  it('accepts a mindmap note with H1', () => {
+    const result = validateContent('notes', baseMindmap, '# Root\n\n## Branch');
+    expect(result.success).toBe(true);
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('warns when mindmap has no H1', () => {
+    const result = validateContent('notes', baseMindmap, '## Branch\n\nNo root');
+    expect(result.success).toBe(true);
+    expect(result.warnings.some(w => w.includes('H1'))).toBe(true);
+  });
+});
