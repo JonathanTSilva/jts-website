@@ -33,5 +33,3 @@
 | 1 | Conditional `<MermaidRenderer />` | 15 min | -133 KB/page |
 | 2 | Self-host whiteboard fonts | 30 min | -100-300ms FCP |
 | 3 | Centralize prev/next in `getStaticPaths` | 45 min | Cleaner, faster at scale |
-
-Want me to implement any of these fixes?
