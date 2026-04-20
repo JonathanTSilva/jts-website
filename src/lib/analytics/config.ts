@@ -1,4 +1,4 @@
-export interface AnalyticsConfig {
+interface AnalyticsConfig {
   provider: 'plausible';
   domain: string;
   apiHost: string;

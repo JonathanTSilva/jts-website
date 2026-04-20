@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { LOCALES } from "./locale";
 
-export const languageEnum = z.enum(LOCALES);
+const languageEnum = z.enum(LOCALES);
 
 export const blogSchema = z.object({
   slug: z.string().min(1),

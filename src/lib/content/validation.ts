@@ -20,7 +20,7 @@ const SCHEMAS: Record<CollectionType, SafeParseSchema> = {
   now: nowSchema,
 };
 
-export interface ValidationResult {
+interface ValidationResult {
   success: boolean;
   errors: string[];
   warnings: string[];

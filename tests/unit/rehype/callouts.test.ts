@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkHtml from 'remark-html';
 import { rehypeCallouts } from '../../../src/lib/rehype/callouts';
 
 // rehype plugin needs rehype pipeline, but we can test via the remark→rehype chain

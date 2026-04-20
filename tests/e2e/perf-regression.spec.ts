@@ -16,9 +16,7 @@ test.describe('Performance regression guards', () => {
   test('note detail page renders related notes section when matches exist', async ({ page }) => {
     await page.goto('/notes/note-cheatsheet.en');
     // Related notes section may or may not be visible depending on content,
-    // but the footer container should always render
-    const footer = page.locator('.note-footer, .note-end');
-    // At minimum the share buttons should always be in the footer area
+    // but the share buttons should always be present in the footer area
     await expect(page.locator('.share-buttons')).toBeVisible();
   });
 
