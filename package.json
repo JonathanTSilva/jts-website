@@ -45,6 +45,8 @@
     "@types/fs-extra": "^11.0.4",
     "@types/mdast": "^4.0.4",
     "fs-extra": "^11.3.4",
+    "rehype-parse": "^9.0.1",
+    "rehype-stringify": "^10.0.1",
     "remark-html": "^16.0.1",
     "remark-parse": "^11.0.0",
     "satori": "^0.26.0",
