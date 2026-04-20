@@ -21,6 +21,24 @@ export default defineConfig({
         // It degrades gracefully to URL copy when absent — mark external so the build
         // does not fail if the package is not installed.
         external: ['html2canvas'],
+        output: {
+          // Mermaid 11.x produces 50+ micro-chunks (one per diagram type + cytoscape etc.).
+          // Merge all of them into a single lazy vendor chunk to eliminate the waterfall
+          // of parallel requests on pages that actually render diagrams.
+          manualChunks(id) {
+            if (
+              id.includes('/node_modules/mermaid/') ||
+              id.includes('/node_modules/cytoscape/') ||
+              id.includes('/node_modules/khroma/') ||
+              id.includes('/node_modules/dagre-d3-es/') ||
+              id.includes('/node_modules/@braintree/sanitize-url/') ||
+              id.includes('/node_modules/d3') ||
+              id.includes('/node_modules/elkjs/')
+            ) {
+              return 'mermaid-vendor';
+            }
+          },
+        },
       },
     },
   },

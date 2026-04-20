@@ -4,16 +4,18 @@ import type { Locale } from '../../../lib/content/locale';
 import BackToTop from '../../site/BackToTop.astro';
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import { getNoteAccentColor } from '../../../lib/notes';
-import { getCollection } from 'astro:content';
 import NoteFooter from '../NoteFooter.astro';
 
 interface Props {
   note: CollectionEntry<'notes'>;
   Content: any;
   locale: Locale;
+  prev: CollectionEntry<'notes'> | undefined;
+  next: CollectionEntry<'notes'> | undefined;
+  relatedNotes: CollectionEntry<'notes'>[];
 }
 
-const { note, Content, locale } = Astro.props;
+const { note, Content, locale, prev: prevNote, next: nextNote, relatedNotes } = Astro.props;
 
 const t = locale === 'en'
   ? { back: '← Back to notes', backHref: '/notes', depthLegend: ['Root', 'Branch', 'Sub-branch', 'Leaf'],
@@ -26,25 +28,6 @@ const t = locale === 'en'
 const isTranslationFallback = note.data.language !== locale;
 
 const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
-
-const allNotes = await getCollection('notes');
-const sameLangNotes = allNotes
-  .filter(n => n.data.language === locale)
-  .sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
-
-const currentIdx = sameLangNotes.findIndex(n => n.id === note.id);
-const prevNote = currentIdx > 0 ? sameLangNotes[currentIdx - 1] : undefined;
-const nextNote = currentIdx < sameLangNotes.length - 1 ? sameLangNotes[currentIdx + 1] : undefined;
-
-const relatedNotes = allNotes
-  .filter(n => {
-    if (n.id === note.id || n.data.language !== locale) return false;
-    const sameCategory = note.data.category && n.data.category === note.data.category;
-    const sharedTags = note.data.tags?.some(tag => n.data.tags?.includes(tag)) ?? false;
-    return sameCategory || sharedTags;
-  })
-  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-  .slice(0, 3);
 ---
 
 <article class="mindmap-page" style={`--note-accent: ${accent}`}>
