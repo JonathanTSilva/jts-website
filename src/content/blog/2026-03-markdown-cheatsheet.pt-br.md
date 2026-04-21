@@ -5,7 +5,7 @@ language: "pt-br"
 translationKey: "markdown-cheatsheet"
 publishedAt: "2026-03-30"
 summary: "Referência completa de todos os elementos markdown suportados neste site: tipografia, links, blocos de código, callouts, tabelas, diagramas, matemática e snippets personalizados do Obsidian."
-tags: [escrita, markdown, obsidian, referência]
+tags: [Escrita, Markdown, Obsidian, Referência]
 category: "Reference"
 ---
 
@@ -21,7 +21,7 @@ Este post é a referência definitiva para escrever posts e notas neste site. Co
 
 ### Títulos (este é H3—subtópico de seção)
 
-Títulos usam prefixos `#` (H1–H6). Em corpos de posts, H2 é o título de seção de nível superior; H3–H4 são os mais comuns para sub-seções. H1 é reservado para o título da página e nunca aparece no corpo do texto.
+Títulos usam prefixos `#` (H1–H6). Em corpos de posts, H2 é reservado para títulos de seções principais; H3–H5 são os mais comuns.
 
 #### Título 4—divisão detalhada
 
