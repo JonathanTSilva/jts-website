@@ -1,22 +1,25 @@
 # jts-website
 
-Bilingual, static-first personal website for a Senior Embedded Software Engineer. Built with [Astro](https://astro.build/).
+Personal website for [Jonathan T. Silva](https://www.jontobias.com) — Senior Embedded Software Engineer. Bilingual (English / Brazilian Portuguese), statically generated with [Astro](https://astro.build/) and deployed to GitHub Pages.
+
+Live at **[www.jontobias.com](https://www.jontobias.com)**.
 
 ## Features
 
-- **Bilingual Support:** English (default) and Brazilian Portuguese (`/pt-br`).
-- **Content Collections:** Blog, Notes, and Now page synced from a private Obsidian vault.
-- **Strict Validation:** Frontmatter and content structure enforced via Zod and custom validation scripts.
-- **Search:** Fast, locale-aware client-side search for blog and notes.
-- **RSS Feeds:** Separate feeds for blog posts and notes.
-- **Theme Support:** Light and dark modes with system preference detection and manual override.
-- **Static First:** Entirely static build for performance and low operational cost.
+- **Bilingual:** English at `/`, Brazilian Portuguese at `/pt-br/`. Translation pairs linked via `translationKey`; missing translations fall back gracefully.
+- **Content Collections:** Blog, Notes, Portfolio, and Now page — content authored in Obsidian, synced from a private vault.
+- **Strict Content Validation:** Zod schemas + custom validation scripts block builds on malformed frontmatter.
+- **Client-Side Search:** Locale-aware, statically pre-built search index for blog and notes.
+- **RSS Feeds:** Separate feeds for blog posts and notes, one per locale.
+- **Light / Dark Theme:** System preference detection with persistent manual override via `localStorage`.
+- **Analytics (opt-in):** Plausible Analytics with explicit consent gate — no cookies, no tracking by default.
+- **Static First:** Pure static build. No runtime services, no server, no database.
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or later)
+- [Node.js](https://nodejs.org/) v18+
 - [pnpm](https://pnpm.io/)
 
 ### Installation
@@ -25,7 +28,9 @@ Bilingual, static-first personal website for a Senior Embedded Software Engineer
 pnpm install
 ```
 
-Optional environment variables for Phase 1 analytics:
+### Environment Variables
+
+Optional — required for Plausible Analytics:
 
 ```bash
 PUBLIC_PLAUSIBLE_DOMAIN=www.jontobias.com
@@ -35,37 +40,28 @@ PUBLIC_PLAUSIBLE_SCRIPT_SRC=https://plausible.io/js/script.js
 
 ### Development
 
-Start the development server:
-
 ```bash
-pnpm dev
+pnpm dev        # starts dev server at http://localhost:4321
+pnpm build      # builds search index then static site → dist/
+pnpm preview    # serves the built output locally
 ```
-
-The site will be available at `http://localhost:4321`.
-
-### Build
-
-To build the static site (including search index generation):
-
-```bash
-pnpm build
-```
-
-The output will be in the `dist/` directory.
 
 ## Content Workflow
 
-### Structure
+Content lives in `src/content/`:
 
-Content is stored in `src/content/`:
-- `blog/`: Long-form articles.
-- `notes/`: Short-form notes and snippets.
-- `now/`: Current status and focus.
-- `portfolio/`: Bio, experience, projects, and publications.
+| Collection  | Path                     | Description                              |
+| ----------- | ------------------------ | ---------------------------------------- |
+| `blog`      | `src/content/blog/`      | Long-form articles                       |
+| `notes`     | `src/content/notes/`     | Short-form notes, book notes, whiteboards |
+| `now`       | `src/content/now/`       | Current focus and status                 |
+| `portfolio` | `src/content/portfolio/` | Bio, experience, projects, publications  |
 
-### Syncing Content
+File naming convention: `YYYY-MM-{slug}.{lang}.md` for blog and notes (e.g. `2026-04-welcome.en.md`).
 
-Content is synced from a private Obsidian repository. This is handled automatically via GitHub Actions but can be triggered manually.
+### Syncing from Obsidian
+
+Content is authored in a private Obsidian vault and synced via GitHub Actions or manually:
 
 ```bash
 pnpm sync:content
@@ -73,37 +69,40 @@ pnpm sync:content
 
 ### Validation
 
-All synced content is validated against strict contracts. If a file is malformed, the build will fail.
-
-Run validation manually:
+Frontmatter is validated against Zod schemas before every build. To run manually:
 
 ```bash
 pnpm lint:content
 ```
 
-Validation rules are defined in `src/lib/content/contracts.ts` and enforced in `src/content/config.ts`.
-
 ## Localization
 
-- **English (en):** Primary language, served at root paths (e.g., `/blog/my-post`).
-- **Portuguese (pt-br):** Secondary language, served at `/pt-br/` paths (e.g., `/pt-br/blog/my-post`).
+| Locale    | Path prefix | Example                     |
+| --------- | ----------- | --------------------------- |
+| English   | *(none)*    | `/blog/my-post`             |
+| PT-BR     | `/pt-br/`   | `/pt-br/blog/my-post`       |
 
-Translation pairs are linked via a `translationKey` in the frontmatter. If a translation is missing, the site provides a notice and links to the available version.
+Translation pairs are linked via a shared `translationKey` in frontmatter. If a translation is missing, the site shows a notice and links to the available version.
 
-## Theme Behavior
+## Architecture Notes
 
-The site follows the user's system preference by default. A manual toggle in the header allows users to override this. The choice is persisted in `localStorage`.
+- **`src/lib/content/staticPaths.ts`** — Factory functions (`makeNoteStaticPaths`, `makeBlogStaticPaths`, `buildNoteIndex`) shared by EN and PT-BR page pairs to eliminate routing duplication.
+- **`src/components/notes/layouts/NoteLayoutWrapper.astro`** — Shared wrapper for all 4 note layout types (default, book, mindmap, whiteboard).
+- **`src/lib/analytics/consent.ts`** — Single source of truth for consent state parsing and checking.
+- **`src/styles/tokens.css`** — All design tokens (colors, spacing, typography, radii, motion). No hardcoded values elsewhere.
 
 ## Testing
 
-- **Unit Tests:** `pnpm test:unit` (Vitest)
-- **E2E Tests:** `pnpm test:e2e` (Playwright)
-
-Install Playwright browsers:
-
 ```bash
-pnpm test:e2e:install
+pnpm test:unit          # Vitest unit tests (src/lib, scripts)
+pnpm test:e2e           # Playwright E2E tests (requires built site)
+pnpm test:e2e:install   # Install Playwright browsers (first run)
+pnpm run check          # Astro + TypeScript type check
 ```
+
+## Deployment
+
+Deployed to [GitHub Pages](https://pages.github.com/) via GitHub Actions on push to `main`. The build pipeline runs content validation, then `pnpm build`, then deploys `dist/` to the `gh-pages` branch.
 
 ## Documentation
 

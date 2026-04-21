@@ -1,17 +1,25 @@
 ## Project Source of Truth
 **GEMINI.md is the entry point.** For all detailed logic, task breakdowns, and architectural rationale, you MUST always refer to:
-* **Brainstorming & Design Spec:** `@docs/superpowers/specs/2026-03-19-personal-website-design.md`
+* **Design Spec:** `@docs/superpowers/specs/2026-03-19-personal-website-design.md`
+* **Frontend Redesign Spec:** `@docs/superpowers/specs/2026-03-19-frontend-redesign-design.md`
 * **Implementation Plan:** `@docs/superpowers/plans/2026-03-19-personal-website-implementation.md`
-
-All tasks must be executed following the step-by-step checkboxes in the implementation plan.
+* **Frontend Redesign Plan:** `@docs/superpowers/plans/2026-03-20-frontend-redesign.md`
 
 ## Engineering Core Principles
 You must adhere to these preferences in every interaction:
 * **Static-First Architecture:** Minimize runtime complexity and backend services. The site must rely on deterministic static builds using Astro.
 * **Content as Contract:** Treat all synced markdown content (Blog, Notes, Now) as contract-driven input. Strict-fail validation via Zod schemas is mandatory before any build or deploy.
 * **Bilingual by Design:** English is default, Brazilian Portuguese (`/pt-br/`) is secondary. Fallback gracefully to original-language pages with clear notices; never generate synthetic translation pages.
-* **Component Discipline:** Keep Astro layout and UI components small, responsibility-focused, and styled via repo-local CSS variables. 
+* **Component Discipline:** Keep Astro layout and UI components small, responsibility-focused, and styled via CSS variables from `src/styles/tokens.css`. No hardcoded values, no Tailwind.
 * **Accessibility & UX First:** Ensure semantic markup, keyboard navigation (especially search and theme toggles), and correct visual contrast for both light and dark themes.
+
+## Architecture Facts
+* **`src/lib/content/staticPaths.ts`** — shared factory functions (`makeNoteStaticPaths`, `makeBlogStaticPaths`, `buildNoteIndex`) used by all EN and PT-BR note/blog page pairs.
+* **`src/components/notes/layouts/NoteLayoutWrapper.astro`** — shared wrapper for all 4 note layout types.
+* **`src/lib/analytics/consent.ts`** — single source of truth for consent state; used by both `AnalyticsScripts.astro` and the consent dialog.
+* **`src/styles/tokens.css`** — all design tokens. Intentional hardcoded exceptions: toast status colors and ThemeToggle thumb backgrounds only.
+* **File naming:** `YYYY-MM-{slug}.{lang}.md` for blog/notes (e.g. `2026-04-welcome.en.md`).
+* **Layout:** `--container-max` is 68rem (prose), `--wide-max` is 88rem (portfolio/bento).
 
 ## Plan Mode Protocol (MANDATORY)
 Before making any code changes or processing content syncs, you must conduct a thorough review across these four pillars:
