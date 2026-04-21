@@ -9,7 +9,7 @@ tags: [meta, pessoal]
 category: "Personal"
 ---
 
-Olá, seja bem-vindo.
+## Olá, seja bem-vindo.
 
 Se você está lendo isso, o site está no ar, eu publiquei em algum lugar (provavelmente no LinkedIn, que é a minha única rede social nesse momento) e este é o post que vou sempre apontar quando alguém perguntar onde tudo começou.
 
@@ -29,6 +29,10 @@ Ahh, e se você for a pessoa do RSS, tem feed para o blog e para as notas, tanto
 - Portuguese Blog RSS: `https://jontobias.com/pt-br/rss.xml`
 - English Notes RSS: `https://jontobias.com/notes/rss.xml`
 - Portuguese Notes RSS: `https://jontobias.com/pt-br/notes/rss.xml`
+
+## Conclusão
+
+Este é o post número um. Que venham muitos mais.
 
 Obrigado por aparecer.
 

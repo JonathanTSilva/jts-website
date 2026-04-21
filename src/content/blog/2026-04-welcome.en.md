@@ -9,7 +9,7 @@ tags: [meta, personal]
 category: "Personal"
 ---
 
-Hello, welcome.
+## Hello, welcome.
 
 If you're reading this, the site is live — I posted it somewhere (probably LinkedIn, my only social network at the moment) — and this is the post I'll always point to when someone asks where it all started.
 
@@ -29,6 +29,10 @@ Oh, and if you're an RSS person — there are feeds for the blog and for the not
 - Portuguese Blog RSS: `https://jontobias.com/pt-br/rss.xml`
 - English Notes RSS: `https://jontobias.com/notes/rss.xml`
 - Portuguese Notes RSS: `https://jontobias.com/pt-br/notes/rss.xml`
+
+## Conclusion
+
+This is post number one. Here's to many more.
 
 Thanks for stopping by.
 
