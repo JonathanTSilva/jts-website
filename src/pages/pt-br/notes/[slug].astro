@@ -1,53 +1,13 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
+import { makeNoteStaticPaths } from '../../../lib/content/staticPaths';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import DefaultNoteLayout from '../../../components/notes/layouts/DefaultNoteLayout.astro';
 import BookNoteLayout from '../../../components/notes/layouts/BookNoteLayout.astro';
 import MindmapLayout from '../../../components/notes/layouts/MindmapLayout.astro';
 import WhiteboardLayout from '../../../components/notes/layouts/WhiteboardLayout.astro';
 
-export async function getStaticPaths() {
-  const allNotes = await getCollection('notes');
-  const locale = 'pt-br';
-
-  const sameLangNotes = allNotes
-    .filter(n => n.data.language === locale)
-    .sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
-
-  return allNotes.map(note => {
-    const translations = allNotes.filter(n => n.data.translationKey === note.data.translationKey);
-    const enNote = translations.find(n => n.data.language === 'en');
-    const ptNote = translations.find(n => n.data.language === 'pt-br');
-
-    const currentIdx = sameLangNotes.findIndex(n => n.id === note.id);
-    const prev = currentIdx > 0 ? sameLangNotes[currentIdx - 1] : undefined;
-    const next = currentIdx < sameLangNotes.length - 1 ? sameLangNotes[currentIdx + 1] : undefined;
-
-    const relatedNotes = allNotes
-      .filter(n => {
-        if (n.id === note.id || n.data.language !== locale) return false;
-        const sameCategory = note.data.category && n.data.category === note.data.category;
-        const sharedTags = note.data.tags?.some(tag => n.data.tags?.includes(tag)) ?? false;
-        return sameCategory || sharedTags;
-      })
-      .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-      .slice(0, 3);
-
-    return {
-      params: { slug: note.data.slug },
-      props: {
-        note,
-        prev,
-        next,
-        relatedNotes,
-        translations: {
-          ...(enNote ? { en: `/notes/${enNote.data.slug}` } : {}),
-          ...(ptNote ? { 'pt-br': `/pt-br/notes/${ptNote.data.slug}` } : {}),
-        },
-      },
-    };
-  });
-}
+export const getStaticPaths = makeNoteStaticPaths('pt-br');
 
 const { note, translations, prev, next, relatedNotes } = Astro.props;
 const { Content } = await render(note);

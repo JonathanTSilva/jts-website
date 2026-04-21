@@ -1,0 +1,53 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '../../../lib/content/locale';
+import BackToTop from '../../site/BackToTop.astro';
+import { getNoteAccentColor } from '../../../lib/notes';
+import NoteFooter from '../NoteFooter.astro';
+
+/**
+ * Shared Props interface for all note layout components.
+ * Each layout does: `type Props = NoteLayoutProps;`
+ */
+export interface NoteLayoutProps {
+  note: CollectionEntry<'notes'>;
+  Content: any;
+  locale: Locale;
+  prev: CollectionEntry<'notes'> | undefined;
+  next: CollectionEntry<'notes'> | undefined;
+  relatedNotes: CollectionEntry<'notes'>[];
+}
+
+interface Props extends NoteLayoutProps {
+  /** CSS class applied to the root <article> element. */
+  articleClass: string;
+}
+
+const { note, locale, prev, next, relatedNotes, articleClass } = Astro.props;
+
+const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
+const backHref = locale === 'en' ? '/notes' : '/pt-br/notes';
+const backLabel = locale === 'en' ? '← Back to notes' : '← Voltar para notas';
+---
+
+<article class={articleClass} style={`--note-accent: ${accent}`}>
+  <a href={backHref} class="back-link">{backLabel}</a>
+  <slot />
+  <NoteFooter note={note} relatedNotes={relatedNotes} prev={prev} next={next} locale={locale} />
+</article>
+
+<BackToTop />
+
+<slot name="after" />
+
+<style>
+  .back-link {
+    display: block;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    margin-bottom: var(--space-6);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  .back-link:hover { color: var(--note-accent); }
+</style>

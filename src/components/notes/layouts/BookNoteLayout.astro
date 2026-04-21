@@ -1,43 +1,25 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import type { Locale } from '../../../lib/content/locale';
-import BackToTop from '../../site/BackToTop.astro';
-import { getNoteAccentColor } from '../../../lib/notes';
-import NoteFooter from '../NoteFooter.astro';
+import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
-interface Props {
-  note: CollectionEntry<'notes'>;
-  Content: any;
-  locale: Locale;
-  prev: CollectionEntry<'notes'> | undefined;
-  next: CollectionEntry<'notes'> | undefined;
-  relatedNotes: CollectionEntry<'notes'>[];
-}
+type Props = NoteLayoutProps;
 
-const { note, Content, locale, prev: prevNote, next: nextNote, relatedNotes } = Astro.props;
+const { note, Content, locale, prev, next, relatedNotes } = Astro.props;
 
 const t = locale === 'en' ? {
-  back: '← Back to notes',
-  backHref: '/notes',
   by: 'by',
   pages: 'pages',
   readOn: 'Read on',
   status: { finished: 'Finished', reading: 'Reading', abandoned: 'Abandoned' },
-  relatedNotes: 'Related Notes',
   fallbackNotice: 'This note is not available in English. Showing the original version.',
 } : {
-  back: '← Voltar para notas',
-  backHref: '/pt-br/notes',
   by: 'por',
   pages: 'páginas',
   readOn: 'Lido em',
   status: { finished: 'Concluído', reading: 'Lendo', abandoned: 'Abandonado' },
-  relatedNotes: 'Notas Relacionadas',
   fallbackNotice: 'Esta nota não está disponível em Português. Mostrando a versão original.',
 };
 
 const isTranslationFallback = note.data.language !== locale;
-const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
 const statusKey = note.data.status?.[0] as 'finished' | 'reading' | 'abandoned' | undefined;
 const statusLabel = statusKey ? t.status[statusKey] ?? statusKey : undefined;
 const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
@@ -46,9 +28,15 @@ const dateStr = note.data.dateRead
   : undefined;
 ---
 
-<article class="book-note-page" style={`--note-accent: ${accent}`}>
-  <a href={t.backHref} class="back-link">{t.back}</a>
-
+<NoteLayoutWrapper
+  note={note}
+  Content={Content}
+  locale={locale}
+  prev={prev}
+  next={next}
+  relatedNotes={relatedNotes}
+  articleClass="book-note-page"
+>
   <div class="book-header">
     {note.data.cover && (
       <img src={note.data.cover} alt={`Cover of ${note.data.title}`} class="book-cover" loading="lazy" />
@@ -82,11 +70,7 @@ const dateStr = note.data.dateRead
   <div class="note-content prose">
     <Content />
   </div>
-
-  <NoteFooter note={note} relatedNotes={relatedNotes} prev={prevNote} next={nextNote} locale={locale} />
-</article>
-
-<BackToTop />
+</NoteLayoutWrapper>
 
 <style>
   .book-note-page {
@@ -94,16 +78,6 @@ const dateStr = note.data.dateRead
     margin: 0 auto;
     padding: var(--space-10) var(--space-6);
   }
-
-  .back-link {
-    display: block;
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-    text-decoration: none;
-    margin-bottom: var(--space-6);
-    transition: color var(--duration-fast) var(--ease-out);
-  }
-  .back-link:hover { color: var(--note-accent); }
 
   .book-header {
     display: grid;
