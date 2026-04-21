@@ -70,8 +70,10 @@ export function makeNoteStaticPaths(locale: Locale) {
       const ptNote = translations.find(n => n.data.language === 'pt-br');
 
       const currentIdx = sameLangNotes.findIndex(n => n.id === note.id);
+      // Guard currentIdx >= 0: cross-locale notes (language !== locale) return -1,
+      // and sameLangNotes[-1 + 1] = sameLangNotes[0] would produce a phantom next link.
       const prev = currentIdx > 0 ? sameLangNotes[currentIdx - 1] : undefined;
-      const next = currentIdx < sameLangNotes.length - 1 ? sameLangNotes[currentIdx + 1] : undefined;
+      const next = currentIdx >= 0 && currentIdx < sameLangNotes.length - 1 ? sameLangNotes[currentIdx + 1] : undefined;
 
       const relatedNotes = allNotes
         .filter(n => {
