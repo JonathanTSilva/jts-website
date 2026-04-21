@@ -4,7 +4,7 @@ const startYear = 2020;
 const currentYear = new Date().getFullYear();
 const yearsOfExp = `${currentYear - startYear}+`;
 
-export const HERO_POSITIONING = {
+const HERO_POSITIONING = {
   en: {
     label: '// SENIOR EMBEDDED SOFTWARE ENGINEER',
     name: 'Jonathan Tobias',

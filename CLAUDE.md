@@ -24,7 +24,7 @@ Key tokens:
 - Colors: `--bg`, `--surface`, `--surface-high`, `--border`, `--text`, `--text-muted`, `--accent`, `--accent-hover`, `--accent-dim`
 - Typography: `--font-sans` (Geist), `--font-mono` (Geist Mono), `--text-xs` through `--text-4xl`
 - Spacing: `--space-1` through `--space-24`, `--section-gap`, `--content-gap`, `--card-padding`
-- Layout: `--container-max` (52rem prose), `--wide-max` (72rem portfolio)
+- Layout: `--container-max` (68rem prose), `--wide-max` (88rem portfolio)
 - Radii: `--radius-sm` (4px) / `--radius-md` (8px) / `--radius-lg` (12px) / `--radius-full` (9999px)
 - Motion: `--duration-fast` (150ms) / `--duration-base` (250ms) / `--duration-slow` (350ms)
 - Easing: `--ease-out` / `--ease-in-out`

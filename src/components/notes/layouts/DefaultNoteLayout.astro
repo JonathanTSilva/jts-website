@@ -1,42 +1,29 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import type { Locale } from '../../../lib/content/locale';
-import BackToTop from '../../site/BackToTop.astro';
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import MermaidRenderer from '../../site/MermaidRenderer.astro';
-import { getNoteAccentColor } from '../../../lib/notes';
-import NoteFooter from '../NoteFooter.astro';
+import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
-interface Props {
-  note: CollectionEntry<'notes'>;
-  Content: any;
-  locale: Locale;
-  prev: CollectionEntry<'notes'> | undefined;
-  next: CollectionEntry<'notes'> | undefined;
-  relatedNotes: CollectionEntry<'notes'>[];
-}
+type Props = NoteLayoutProps;
 
-const { note, Content, locale, prev: prevNote, next: nextNote, relatedNotes } = Astro.props;
+const { note, Content, locale, prev, next, relatedNotes } = Astro.props;
 
-const t = locale === 'en' ? {
-  fallbackNotice: 'This note is not available in English. Showing the original version.',
-  back: '← Back to notes',
-  backHref: '/notes',
-} : {
-  fallbackNotice: 'Esta nota não está disponível em Português. Mostrando a versão original.',
-  back: '← Voltar para notas',
-  backHref: '/pt-br/notes',
-};
+const fallbackNotice = locale === 'en'
+  ? 'This note is not available in English. Showing the original version.'
+  : 'Esta nota não está disponível em Português. Mostrando a versão original.';
 
 const isTranslationFallback = note.data.language !== locale;
-
 const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 ---
 
-<article class="container note-page" style={`--note-accent: ${getNoteAccentColor(note.data.colorToken, note.data.category)}`}>
-
-  <a href={t.backHref} class="back-link">{t.back}</a>
-
+<NoteLayoutWrapper
+  note={note}
+  Content={Content}
+  locale={locale}
+  prev={prev}
+  next={next}
+  relatedNotes={relatedNotes}
+  articleClass="container note-page"
+>
   {note.data.category && (
     <span class="note-category-badge">{note.data.category}</span>
   )}
@@ -62,20 +49,17 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
   <hr class="preamble-divider" />
 
   {isTranslationFallback && (
-    <TranslationFallbackNotice message={t.fallbackNotice} />
+    <TranslationFallbackNotice message={fallbackNotice} />
   )}
 
   <div class="note-content prose">
     <Content />
   </div>
 
-  <NoteFooter note={note} relatedNotes={relatedNotes} prev={prevNote} next={nextNote} locale={locale} />
-
-</article>
-
-<BackToTop />
-
-{note.body?.includes('```mermaid') && <MermaidRenderer />}
+  <Fragment slot="after">
+    {note.body?.includes('```mermaid') && <MermaidRenderer />}
+  </Fragment>
+</NoteLayoutWrapper>
 
 <style>
   .note-page {
@@ -83,16 +67,6 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
     margin: 0 auto;
     padding: var(--space-10) var(--space-6);
   }
-
-  .back-link {
-    display: block;
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-    text-decoration: none;
-    margin-bottom: var(--space-6);
-    transition: color var(--duration-fast) var(--ease-out);
-  }
-  .back-link:hover { color: var(--note-accent); }
 
   .note-category-badge {
     display: inline-block;

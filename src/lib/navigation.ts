@@ -1,6 +1,6 @@
 import { contentLocalePath, type Locale } from './content/locale';
 
-export interface NavLink {
+interface NavLink {
   href: string;
   label: string;
 }

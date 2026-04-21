@@ -1,7 +1,7 @@
 import { projects } from '../content/portfolio/projects';
 import { experience } from '../content/portfolio/experience';
 
-export interface SkillEntry {
+interface SkillEntry {
   tag: string;
   count: number;
 }

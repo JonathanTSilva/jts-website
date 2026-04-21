@@ -1,41 +1,39 @@
 ---
-import { getAnalyticsConfig } from '../../lib/analytics/config';
-import { CONSENT_STORAGE_KEY } from '../../lib/analytics/consent';
-import { ANALYTICS_EVENT_NAMES } from '../../lib/analytics/events';
-
-const analyticsConfig = getAnalyticsConfig();
 ---
 
-<script
-  is:inline
-  define:vars={{
-    analyticsConfig,
-    consentStorageKey: CONSENT_STORAGE_KEY,
-    allowedEventNames: ANALYTICS_EVENT_NAMES,
-  }}
->
+<script>
+  import { getAnalyticsConfig } from '../../lib/analytics/config';
+  import {
+    CONSENT_STORAGE_KEY,
+    parseConsentState,
+    hasAnalyticsConsent as checkConsentState,
+  } from '../../lib/analytics/consent';
+  import { ANALYTICS_EVENT_NAMES } from '../../lib/analytics/events';
+
+  // Plausible attaches to window — declare the minimal shape we use.
+  declare global {
+    interface Window {
+      plausible?: ((eventName: string, opts?: { props?: Record<string, unknown> }) => void) & {
+        q?: IArguments[];
+      };
+    }
+  }
+
+  const analyticsConfig = getAnalyticsConfig();
   const plausibleWindow = window;
   const analyticsScriptId = 'jts-plausible-script';
 
-  const parseConsent = () => {
-    try {
-      const raw = window.localStorage.getItem(consentStorageKey);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  };
+  const readConsent = () =>
+    parseConsentState(window.localStorage.getItem(CONSENT_STORAGE_KEY));
 
-  const hasAnalyticsConsent = () => {
-    const consent = parseConsent();
-    return Boolean(consent && consent.analytics === true);
-  };
+  const hasAnalyticsConsent = () => checkConsentState(readConsent());
 
   const bootstrapPlausible = () => {
     if (typeof plausibleWindow.plausible !== 'function') {
-      plausibleWindow.plausible = function () {
-        (plausibleWindow.plausible.q = plausibleWindow.plausible.q || []).push(arguments);
-      };
+      const stub = function () {
+        (stub.q = stub.q || []).push(arguments);
+      } as NonNullable<Window['plausible']>;
+      plausibleWindow.plausible = stub;
     }
   };
 
@@ -62,13 +60,13 @@ const analyticsConfig = getAnalyticsConfig();
     document.head.appendChild(script);
   };
 
-  const trackEvent = (eventName, props) => {
-    if (!allowedEventNames.includes(eventName) || !hasAnalyticsConsent()) {
+  const trackEvent = (eventName: string, props?: Record<string, unknown>) => {
+    if (!ANALYTICS_EVENT_NAMES.includes(eventName as never) || !hasAnalyticsConsent()) {
       return;
     }
 
     bootstrapPlausible();
-    plausibleWindow.plausible(eventName, props ? { props } : undefined);
+    plausibleWindow.plausible?.(eventName, props ? { props } : undefined);
   };
 
   document.addEventListener('click', (event) => {
@@ -88,7 +86,7 @@ const analyticsConfig = getAnalyticsConfig();
     }
 
     const rawProps = trigger.dataset.analyticsProps;
-    let props = undefined;
+    let props: Record<string, unknown> | undefined;
 
     if (rawProps) {
       try {

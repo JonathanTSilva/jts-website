@@ -2,7 +2,7 @@ import { SITE_NAME } from './metadata';
 
 const BASE_URL = 'https://www.jontobias.com';
 
-export interface ArticleSchemaInput {
+interface ArticleSchemaInput {
   title: string;
   description: string;
   url: string;

@@ -22,7 +22,7 @@ const avatarBase64 = (() => {
   return `data:image/jpeg;base64,${data.toString('base64')}`;
 })();
 
-export interface OGImageOptions {
+interface OGImageOptions {
   title: string;
   category?: string;
   author?: string;
