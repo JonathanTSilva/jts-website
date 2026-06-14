@@ -5,7 +5,7 @@ language: "en"
 translationKey: "markdown-cheatsheet"
 publishedAt: "2026-03-30"
 summary: "Complete reference of all markdown elements supported on this website: typography, links, code blocks, callouts, tables, diagrams, math, and custom Obsidian snippets."
-tags: [markdown, obsidian, reference, writing]
+tags: [Markdown, Obsidian, Reference, Writing]
 category: "Reference"
 ---
 
@@ -21,7 +21,7 @@ This post is the authoritative reference for writing blog posts and notes on thi
 
 ### Headings (this is H3—section sub-topic)
 
-Headings use `#` prefixes (H1–H6). In post bodies, H2 is reserved for major section titles; H3–H4 are most common for sub-sections. H1 is reserved for the page title and never appears in prose.
+Headings use `#` prefixes (H1–H6). In post bodies, H2 is reserved for major section titles; H3–H5 are most common.
 
 #### Heading 4—fine-grained breakdown
 
