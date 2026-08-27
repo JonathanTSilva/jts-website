@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { generateSeo, SITE_NAME } from '../../src/lib/seo/metadata';
-import { generatePersonSchema, generateWebSiteSchema, generateArticleSchema } from '../../src/lib/seo/schema';
+import {
+  generateArticleSchema,
+  generatePersonSchema,
+  generateWebSiteSchema,
+  getPersonLink,
+} from '../../src/lib/seo/schema';
+import { career } from '../../src/content/portfolio/career';
 
 const BASE_URL = 'https://www.jontobias.com';
 
@@ -156,15 +162,26 @@ describe('generateSeo — page-type-aware title/description defaults', () => {
 });
 
 describe('schema generation', () => {
+  it('throws when a required canonical person link is missing', () => {
+    const personWithoutLinkedIn = {
+      ...career.person,
+      links: career.person.links.filter((link) => link.kind !== 'linkedin'),
+    };
+
+    expect(() => getPersonLink(personWithoutLinkedIn, 'linkedin')).toThrow(/linkedin/i);
+  });
+
   it('generatePersonSchema returns a valid Person JSON-LD object', () => {
-    const schema = generatePersonSchema();
+    const schema = generatePersonSchema(career.person);
     expect(schema['@context']).toBe('https://schema.org');
     expect(schema['@type']).toBe('Person');
-    expect(schema.name).toBe('Jonathan Tobias');
+    expect(schema.name).toBe(career.person.fullName);
     expect(schema.url).toBe('https://www.jontobias.com');
-    expect(schema.jobTitle).toBeTruthy();
+    expect(schema.jobTitle).toBe(career.person.headline.en);
     expect(Array.isArray(schema.sameAs)).toBe(true);
-    expect(schema.sameAs).toContain('https://www.linkedin.com/in/jonathantsilva/');
+    expect(schema.sameAs).toContain(
+      career.person.links.find((link) => link.kind === 'linkedin')?.url,
+    );
     expect(schema.sameAs.some((u: string) => u.includes('linkedin.com'))).toBe(true);
     expect(schema.sameAs.some((u: string) => u.includes('github.com'))).toBe(true);
   });
