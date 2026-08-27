@@ -6,8 +6,10 @@ import {
   careerDateSchema,
   careerHighlightSchema,
   careerLinkSchema,
+  employerSchema,
   localizedStringSchema,
   projectSchema,
+  publicationSchema,
 } from '../../../src/content/portfolio/schema';
 
 const text = (en = 'English', pt = 'Português') => ({ en, 'pt-br': pt });
@@ -85,6 +87,32 @@ describe('career schema', () => {
     expect(() => careerLinkSchema.parse({ kind: 'github', label: 'GitHub', url: 'mailto:me@example.com' })).toThrow();
   });
 
+  it('returns a validation failure instead of throwing for a malformed HTTPS link', () => {
+    expect(() => careerLinkSchema.safeParse({
+      kind: 'website', label: 'Site', url: 'not a url',
+    })).not.toThrow();
+    expect(careerLinkSchema.safeParse({
+      kind: 'website', label: 'Site', url: 'not a url',
+    }).success).toBe(false);
+  });
+
+  it('rejects unsafe employer and publication URLs', () => {
+    expect(() => employerSchema.parse({
+      id: 'example-inc', name: 'Example Inc', website: 'javascript:alert(1)',
+    })).toThrow();
+    expect(() => publicationSchema.parse({
+      id: 'example-paper',
+      title: text(),
+      authors: ['Example Author'],
+      venue: 'Example Journal',
+      date: { value: '2025', precision: 'year' },
+      type: 'journal',
+      url: 'javascript:alert(1)',
+      themes: ['research'],
+      priority: 50,
+    })).toThrow();
+  });
+
   it('enforces declared date precision', () => {
     expect(() => careerDateSchema.parse({ value: '2025-01', precision: 'year' })).toThrow(/year precision/i);
     expect(() => careerDateSchema.parse({ value: '2025', precision: 'month' })).toThrow(/month precision/i);
@@ -99,7 +127,7 @@ describe('career schema', () => {
 
   it('validates URLs', () => {
     expect(() => projectSchema.parse({
-      id: 'example-project', title: text(), description: text(), links: [{ label: 'Demo', url: 'not a url' }],
+      id: 'example-project', title: text(), description: text(), links: [{ kind: 'website', label: 'Demo', url: 'not a url' }],
       highlights: [], tags: [], themes: ['general'], priority: 50,
     })).toThrow();
   });

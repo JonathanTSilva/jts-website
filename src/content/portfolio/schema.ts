@@ -43,9 +43,7 @@ export const careerDateRangeSchema = z.object({
   }
 });
 
-const httpsUrlSchema = z.url().refine((url) => new URL(url).protocol === 'https:', {
-  message: 'link requires an HTTPS URL',
-});
+const httpsUrlSchema = z.url({ protocol: /^https$/ });
 const mailtoUrlSchema = z.string().refine((url) => {
   if (!url.startsWith('mailto:')) return false;
   return z.email().safeParse(url.slice('mailto:'.length)).success;
@@ -72,7 +70,7 @@ export const employerSchema = z.object({
   id: stableIdSchema,
   name: nonEmptyStringSchema,
   location: localizedStringSchema.optional(),
-  website: z.url().optional(),
+  website: httpsUrlSchema.optional(),
 }).strict();
 
 export const workPositionSchema = z.object({
@@ -115,7 +113,7 @@ export const publicationSchema = z.object({
   venue: nonEmptyStringSchema,
   date: careerDateSchema,
   type: z.enum(['article', 'paper', 'book', 'talk', 'conference', 'journal']),
-  url: z.url().optional(),
+  url: httpsUrlSchema.optional(),
   themes: z.array(themeSchema).min(1),
   priority: z.number().int().min(0).max(100),
 }).strict();
