@@ -12,6 +12,8 @@ The proposed canonical values below are provisional migrations, not owner-approv
 | Nova Smar internship title and dates | Not separately represented | R&D Intern; 2021 | R&D Intern; 2021 (provisional) | — | Pending |
 | Industrial cybersecurity article title | “Strengthening Industrial Automation: Best Practices in Cybersecurity” | “Fortifying industrial automation: Best practices in cybersecurity” | Website title retained pending review | — | Pending |
 | Motor-drive sizing paper date | 2019-10 | CONICT 2020 | 2019-10 retained pending review | — | Pending |
+| Sizer historical live URL | `http://sizer.ti.srt.ifsp.edu.br/` | Not listed | Preserved as a non-renderable legacy HTTP reference; HTTPS availability and continued publication require review | — | Pending |
+| IFSP paper historical URL | `http://ocs.ifsp.edu.br/index.php/conict/xconict/paper/view/5795/1289` | Publication listed without a URL | Preserved as a non-renderable legacy HTTP reference; HTTPS replacement requires review | — | Pending |
 
 ## Facts preserved without conflict
 

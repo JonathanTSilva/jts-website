@@ -132,6 +132,30 @@ describe('career schema', () => {
     })).toThrow();
   });
 
+  it('accepts only HTTP historical references as non-renderable project links', () => {
+    const project = {
+      id: 'legacy-project', title: text(), description: text(), links: [], highlights: [], tags: [],
+      themes: ['general'], priority: 50,
+      legacyLinks: [{ label: 'Historical demo', url: 'http://legacy.example.com/demo' }],
+    };
+    expect(projectSchema.parse(project).legacyLinks).toEqual(project.legacyLinks);
+    for (const url of ['https://example.com', 'javascript:alert(1)', 'data:text/plain,unsafe']) {
+      expect(() => projectSchema.parse({ ...project, legacyLinks: [{ label: 'Unsafe', url }] })).toThrow();
+    }
+  });
+
+  it('accepts only HTTP historical references as non-renderable publication URLs', () => {
+    const publication = {
+      id: 'legacy-paper', title: text(), authors: ['Example Author'], venue: 'Example Venue',
+      date: { value: '2020', precision: 'year' }, type: 'paper', themes: ['research'], priority: 50,
+      legacyHttpUrl: 'http://legacy.example.com/paper',
+    };
+    expect(publicationSchema.parse(publication).legacyHttpUrl).toBe(publication.legacyHttpUrl);
+    for (const legacyHttpUrl of ['https://example.com', 'javascript:alert(1)', 'data:text/plain,unsafe']) {
+      expect(() => publicationSchema.parse({ ...publication, legacyHttpUrl })).toThrow();
+    }
+  });
+
   it('rejects duplicate IDs across the aggregate', () => {
     const career = validCareer();
     career.employers[0]!.id = career.person.id;

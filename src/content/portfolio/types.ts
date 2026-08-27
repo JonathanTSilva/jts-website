@@ -7,17 +7,9 @@ export type Theme = import('./schema').CareerHighlight['themes'][number];
 import type { LocalizedString, Project as CanonicalProject, Publication as CanonicalPublication } from './schema';
 
 export interface LegacyProjectFields {
-  title: LocalizedString;
-  description: LocalizedString;
-  tags: string[];
   link?: string;
   github?: string;
-  role?: LocalizedString;
-  year?: number;
-  featured?: boolean;           // spans 2 columns in bento grid
   icon?: string;                // emoji or single character, e.g. "⚙️"
-  status?: 'Active' | 'Archived' | 'Featured' | 'Private' | 'In Progress'; // for filtering and display purposes
-  image?: string;
 }
 
 export type Project = CanonicalProject & LegacyProjectFields;

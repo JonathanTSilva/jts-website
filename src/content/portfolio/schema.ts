@@ -44,6 +44,9 @@ export const careerDateRangeSchema = z.object({
 });
 
 const httpsUrlSchema = z.url({ protocol: /^https$/ });
+// Historical references are retained for factual review only and must never be rendered as safe links.
+const legacyHttpUrlSchema = z.url({ protocol: /^http$/ });
+const legacyLinkSchema = z.object({ label: nonEmptyStringSchema, url: legacyHttpUrlSchema }).strict();
 const mailtoUrlSchema = z.string().refine((url) => {
   if (!url.startsWith('mailto:')) return false;
   return z.email().safeParse(url.slice('mailto:'.length)).success;
@@ -104,6 +107,11 @@ export const projectSchema = z.object({
   tags: z.array(nonEmptyStringSchema),
   themes: z.array(themeSchema).min(1),
   priority: z.number().int().min(0).max(100),
+  featured: z.boolean().optional(),
+  status: z.enum(['Active', 'Archived', 'Featured', 'Private', 'In Progress']).optional(),
+  image: nonEmptyStringSchema.optional(),
+  year: z.number().int().optional(),
+  legacyLinks: z.array(legacyLinkSchema).optional(),
 }).strict();
 
 export const publicationSchema = z.object({
@@ -114,6 +122,7 @@ export const publicationSchema = z.object({
   date: careerDateSchema,
   type: z.enum(['article', 'paper', 'book', 'talk', 'conference', 'journal']),
   url: httpsUrlSchema.optional(),
+  legacyHttpUrl: legacyHttpUrlSchema.optional(),
   themes: z.array(themeSchema).min(1),
   priority: z.number().int().min(0).max(100),
 }).strict();

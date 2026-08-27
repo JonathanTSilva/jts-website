@@ -1,8 +1,9 @@
 import type { Project as CanonicalProject } from './schema';
-import type { LegacyProjectFields, Theme } from './types';
+import type { Project as LegacyProject } from './types';
 
-const sourceProjects: LegacyProjectFields[] = [
+export const canonicalProjects: CanonicalProject[] = [
   {
+    id: 'project-forgenv',
     title: {
       en: "Forgenv",
       "pt-br": "Forgenv",
@@ -13,7 +14,8 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "🛠️",
     tags: ["Rust", "Linux"],
-    github: "https://github.com/JonathanTSilva/forgenv",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/forgenv' }],
+    highlights: [], themes: ['general'], priority: 90,
     featured: true,
     status: "In Progress",
     role: {
@@ -22,6 +24,7 @@ const sourceProjects: LegacyProjectFields[] = [
     }
   },
   {
+    id: 'project-qemulab',
     title: {
       en: "Qemulab",
       "pt-br": "Qemulab",
@@ -32,10 +35,12 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "🧪",
     tags: ["Python", "Automation", "QEMU", "TUI"],
+    links: [], highlights: [], themes: ['general', 'embedded', 'devops'], priority: 60,
     featured: false,
     status: "Private",
   },
   {
+    id: 'project-dlr-supervisor-simulator',
     title: {
       en: "DLR Supervisor Simulator",
       "pt-br": "DLR Supervisor Simulator",
@@ -46,10 +51,12 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "💍",
     tags: ["Python", "L2 Protocols", "DLR", "Industrial Automation"],
+    links: [], highlights: [], themes: ['general', 'embedded'], priority: 60,
     featured: false,
     status: "Private",
   },
   {
+    id: 'project-uanalyzer',
     title: {
       en: "UAnalyzer",
       "pt-br": "UAnalyzer",
@@ -60,11 +67,13 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "🛡️",
     tags: ["Python", "OPC UA", "Cybersecurity", "Industrial Automation"],
-    github: "https://github.com/JonathanTSilva/uanalyser",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/uanalyser' }],
+    highlights: [], themes: ['general', 'embedded', 'research'], priority: 90,
     featured: true,
     status: "Featured",
   },
   {
+    id: 'project-leetsheet',
     title: {
       en: "Leetsheet",
       "pt-br": "Leetsheet",
@@ -75,11 +84,13 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "📝",
     tags: ["Go", "TUI"],
-    github: "https://github.com/JonathanTSilva/leetsheet",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/leetsheet' }],
+    highlights: [], themes: ['general'], priority: 90,
     featured: true,
     status: "Featured",
   },
   {
+    id: 'project-scriptize',
     title: {
       en: "Scriptize",
       "pt-br": "Scriptize",
@@ -90,10 +101,12 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "📜",
     tags: ["Shellscript", "Python"],
-    github: "https://github.com/JonathanTSilva/scriptize",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/scriptize' }],
+    highlights: [], themes: ['general', 'devops'], priority: 60,
     status: "Active",
   },
   {
+    id: 'project-custom-embedded-linux-yocto',
     title: {
       en: "Custom Embedded Linux (Yocto)",
       "pt-br": "Linux Embarcado Customizado (Yocto)",
@@ -104,9 +117,11 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "🐧",
     tags: ["Yocto Project", "Embedded Linux", "Kernel", "Kernel Module", "Industrial Automation"],
+    links: [], highlights: [], themes: ['general', 'embedded'], priority: 60,
     status: "Private",
   },
   {
+    id: 'project-sentminer',
     title: {
       en: "Sentminer",
       "pt-br": "Sentminer",
@@ -117,10 +132,12 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "⛏️",
     tags: ["Python", "Qt"],
-    github: "https://github.com/JonathanTSilva",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva' }],
+    highlights: [], themes: ['general'], priority: 60,
     status: "In Progress",
   },
   {
+    id: 'project-cloudcavitation',
     title: {
       en: "CloudCavitation",
       "pt-br": "CloudCavitation",
@@ -131,11 +148,13 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "☁️",
     tags: ["Node.js", "JavaScript", "Python", "Machine Learning", "Cloud Computing", "Industrial Automation"],
-    github: "https://github.com/JonathanTSilva/FP-CloudCavitation",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/FP-CloudCavitation' }],
+    highlights: [], themes: ['general', 'embedded', 'research'], priority: 60,
     featured: false,
     status: "Archived",
   },
   {
+    id: 'project-pump-diagnostics-machine-learning',
     title: {
       en: "Pump Diagnostics with Machine Learning",
       "pt-br": "Diagnóstico de Bombas com Aprendizado de Máquina",
@@ -146,11 +165,13 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "🩺",
     tags: ["Matlab", "Python", "Machine Learning", "Industrial Automation"],
-    github: "https://github.com/JonathanTSilva/SI-Cavitation",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/SI-Cavitation' }],
+    highlights: [], themes: ['general', 'embedded', 'research'], priority: 60,
     featured: false,
     status: "Active",
   },
   {
+    id: 'project-ifsp-latex-template',
     title: {
       en: "Official LaTeX Template for IFSP",
       "pt-br": "Template LaTeX Oficial para IFSP",
@@ -161,10 +182,12 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "🎓",
     tags: ["LaTeX"],
-    github: "https://github.com/JonathanTSilva/TP-IFSP",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/TP-IFSP' }],
+    highlights: [], themes: ['general', 'research'], priority: 60,
     status: "Active",
   },
   {
+    id: 'project-dimfot',
     title: {
       en: "Dimfot",
       "pt-br": "Dimfot",
@@ -175,10 +198,12 @@ const sourceProjects: LegacyProjectFields[] = [
     },
     // icon: "☀️",
     tags: ["Android", "Kotlin"],
-    github: "https://github.com/JonathanTSilva/Dimfot",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/Dimfot' }],
+    highlights: [], themes: ['general'], priority: 60,
     status: "Archived",
   },
   {
+    id: 'project-sizer',
     title: {
       en: "Sizer",
       "pt-br": "Sizer",
@@ -190,38 +215,16 @@ const sourceProjects: LegacyProjectFields[] = [
     // icon: "📏",
     image: "/assets/images/projects/sizer.png",
     tags: ["Web Development", "JavaScript", "React", "Node.js", "Data Engineering"],
-    github: "https://github.com/JonathanTSilva/SI-Sizer",
-    link: "http://sizer.ti.srt.ifsp.edu.br/",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/SI-Sizer' }],
+    legacyLinks: [{ label: 'Historical live site', url: 'http://sizer.ti.srt.ifsp.edu.br/' }],
+    highlights: [], themes: ['general'], priority: 60,
     status: "Archived",
   }
 ];
 
-const projectIds = [
-  'project-forgenv', 'project-qemulab', 'project-dlr-supervisor-simulator', 'project-uanalyzer',
-  'project-leetsheet', 'project-scriptize', 'project-custom-embedded-linux-yocto', 'project-sentminer',
-  'project-cloudcavitation', 'project-pump-diagnostics-machine-learning', 'project-ifsp-latex-template',
-  'project-dimfot', 'project-sizer',
-] as const;
-
-const themesFor = (project: LegacyProjectFields): Theme[] => {
-  const themes = new Set<Theme>(['general']);
-  if (project.tags.some(tag => ['Embedded Linux', 'Yocto Project', 'QEMU', 'DLR', 'OPC UA', 'Industrial Automation'].includes(tag))) themes.add('embedded');
-  if (project.tags.some(tag => ['Machine Learning', 'Cybersecurity', 'LaTeX'].includes(tag))) themes.add('research');
-  if (project.tags.some(tag => ['Automation', 'Git & CI/CD', 'Shellscript'].includes(tag))) themes.add('devops');
-  return [...themes];
-};
-
-// TODO(Task 3): legacy display properties remain on this canonical-shaped export until Astro consumers migrate.
-export const projects = sourceProjects.map((project, index) => ({
-  ...project,
-  id: projectIds[index]!,
-  links: project.github ? [{ kind: 'github' as const, label: 'GitHub', url: project.github }] : [],
-  highlights: [],
-  themes: themesFor(project),
-  priority: project.featured ? 90 : 60,
-}));
-
-// Strict aggregate input without the temporary website-only display properties.
-export const canonicalProjects: CanonicalProject[] = projects.map(({ id, title, description, role, links, highlights, tags, themes, priority }) => ({
-  id, title, description, ...(role ? { role } : {}), links, highlights, tags, themes, priority,
-}));
+// TODO(Task 3): delete after Astro consumers read canonical display/link fields directly.
+export const projects: LegacyProject[] = canonicalProjects.map(project => {
+  const github = project.links.find(link => link.kind === 'github')?.url;
+  const link = project.legacyLinks?.[0]?.url ?? project.links.find(item => item.kind === 'website')?.url;
+  return { ...project, ...(github ? { github } : {}), ...(link ? { link } : {}) };
+});
