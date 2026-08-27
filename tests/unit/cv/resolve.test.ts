@@ -68,4 +68,86 @@ describe('resolveCv', () => {
     expect(view.experience.every(role => role.verification === 'verified')).toBe(true);
     expect(JSON.stringify(view)).not.toMatch(/<\/?[a-z][^>]*>/i);
   });
+
+  it('resolves the exact verified canonical chronology and approved English fallback text', () => {
+    const view = resolveCv(career, cvProfiles.generic);
+    expect(view.experience.map(role => role.id)).toEqual([
+      'act-digital-senior-embedded-software-engineer',
+      'datacom-embedded-software-engineer',
+      'nova-smar-rd-engineer',
+    ]);
+    expect(view.experience[0]!.highlights.map(highlight => highlight.id)).toEqual([
+      'act-mission-critical-embedded-software', 'act-schneider-strategic-partnership',
+      'act-industrial-protocols', 'act-real-time-latency',
+    ]);
+    expect(view.experience[0]!.highlights[0]!.text).toBe(
+      'Develop and customize mission-critical embedded software for Embedded Linux and RTOS, focusing on industrial switches and PLCs.',
+    );
+    const ids = view.experience.flatMap(role => role.highlights.map(highlight => highlight.id));
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(view.sections.map(section => section.kind)).toEqual(['skills', 'experience', 'education', 'projects', 'publications']);
+  });
+
+  it('selects exact canonical projects and publications for materially different limits', () => {
+    const generic = resolveCv(career, cvProfiles.generic);
+    const embedded = resolveCv(career, cvProfiles['embedded-rd']);
+    const devops = resolveCv(career, cvProfiles.devops);
+    expect(generic.projects.map(project => project.id)).toEqual(['project-uanalyzer', 'project-forgenv', 'project-leetsheet']);
+    expect(embedded.projects.map(project => project.id)).toEqual(['project-uanalyzer', 'project-forgenv', 'project-leetsheet', 'project-cloudcavitation']);
+    expect(devops.projects.map(project => project.id)).toEqual(['project-uanalyzer', 'project-forgenv', 'project-leetsheet', 'project-qemulab']);
+    expect(generic.publications.map(publication => publication.id)).toEqual([
+      'publication-opc-ua-survey', 'publication-industrial-automation-cybersecurity', 'publication-pump-fault-diagnosis',
+    ]);
+    expect(embedded.publications.map(publication => publication.id)).toEqual([
+      'publication-opc-ua-survey', 'publication-industrial-automation-cybersecurity',
+      'publication-pump-fault-diagnosis', 'publication-web-motor-drive-sizing',
+    ]);
+  });
+
+  it('materially differentiates canonical leadership, embedded, and DevOps emphasis', () => {
+    const leadership = resolveCv(career, cvProfiles.leadership);
+    const embedded = resolveCv(career, cvProfiles['embedded-rd']);
+    const devops = resolveCv(career, cvProfiles.devops);
+    const novaHighlights = (view: ReturnType<typeof resolveCv>) => view.experience.find(role => role.id === 'nova-smar-rd-engineer')!.highlights.map(item => item.id);
+    expect(novaHighlights(leadership)).toEqual([
+      'nova-product-development-leadership', 'nova-git-cicd-modernization',
+      'nova-cybersecurity-compliance', 'nova-industrial-software',
+    ]);
+    expect(novaHighlights(embedded)).toEqual([
+      'nova-product-development-leadership', 'nova-cybersecurity-compliance',
+      'nova-industrial-software', 'nova-ml-automation-tools',
+    ]);
+    expect(novaHighlights(devops)).toEqual([
+      'nova-git-cicd-modernization', 'nova-ml-automation-tools',
+      'nova-product-development-leadership', 'nova-cybersecurity-compliance',
+    ]);
+    const skills = (view: ReturnType<typeof resolveCv>) => view.skills.flatMap(group => group.skills.map(skill => skill.id));
+    expect(skills(leadership)).toEqual([
+      'skill-technical-leadership', 'skill-leadership',
+      'skill-embedded-linux', 'skill-embedded-systems', 'skill-linux', 'skill-yocto-project',
+      'skill-c-cpp', 'skill-python',
+      'skill-networking', 'skill-opc-ua', 'skill-dlr', 'skill-ethernet-ip',
+      'skill-industrial-automation', 'skill-cybersecurity',
+      'skill-git-cicd', 'skill-devops',
+    ]);
+    expect(skills(embedded)).toEqual([
+      'skill-embedded-linux', 'skill-embedded-systems', 'skill-linux', 'skill-yocto-project',
+      'skill-c-cpp', 'skill-python',
+      'skill-networking', 'skill-opc-ua', 'skill-dlr', 'skill-ethernet-ip', 'skill-l2-protocols', 'skill-l3-protocols',
+      'skill-industrial-automation', 'skill-cybersecurity', 'skill-iot', 'skill-machine-learning',
+      'skill-git-cicd', 'skill-devops',
+      'skill-technical-leadership', 'skill-leadership',
+    ]);
+    expect(skills(devops)).toEqual([
+      'skill-c-cpp', 'skill-python',
+      'skill-git-cicd', 'skill-devops', 'skill-tdd',
+      'skill-technical-leadership', 'skill-leadership',
+      'skill-embedded-linux', 'skill-embedded-systems', 'skill-linux', 'skill-yocto-project',
+      'skill-networking', 'skill-opc-ua', 'skill-dlr', 'skill-ethernet-ip', 'skill-l2-protocols',
+      'skill-industrial-automation', 'skill-cybersecurity',
+    ]);
+    expect(leadership.sections.map(section => section.kind)).toEqual(cvProfiles.leadership.sectionOrder);
+    expect(embedded.sections.map(section => section.kind)).toEqual(cvProfiles['embedded-rd'].sectionOrder);
+    expect(devops.sections.map(section => section.kind)).toEqual(cvProfiles.devops.sectionOrder);
+  });
 });

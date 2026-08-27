@@ -1,6 +1,6 @@
 import type { CareerDate, CareerDateRange, Person, WorkPosition } from '../../content/portfolio/schema';
 
-export const profileIds = ['generic', 'leadership', 'embedded-rd', 'devops'] as const;
+export const profileIds = Object.freeze(['generic', 'leadership', 'embedded-rd', 'devops'] as const);
 export type CvProfileId = (typeof profileIds)[number];
 export type CareerTheme = WorkPosition['highlights'][number]['themes'][number];
 export type CareerLink = Person['links'][number];
