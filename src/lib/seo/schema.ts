@@ -1,5 +1,4 @@
 import { SITE_NAME } from './metadata';
-import { career } from '../../content/portfolio/career';
 import type { Person } from '../../content/portfolio/schema';
 
 const BASE_URL = 'https://www.jontobias.com';
@@ -12,15 +11,23 @@ interface ArticleSchemaInput {
   image?: string;
 }
 
-type PersonLinkKind = Person['links'][number]['kind'];
+type PersonLink = Person['links'][number];
+type PersonLinkKind = PersonLink['kind'];
+type ReadonlyPerson = Omit<Readonly<Person>, 'links'> & {
+  readonly links: readonly PersonLink[];
+};
 
-export function getPersonLink(person: Person, kind: PersonLinkKind) {
-  const link = person.links.find((candidate) => candidate.kind === kind);
-  if (!link) throw new Error(`Missing required ${kind} link for ${person.id}`);
-  return link;
+export function getPersonLink<K extends PersonLinkKind>(
+  person: ReadonlyPerson,
+  kind: K,
+): Readonly<Extract<PersonLink, { kind: K }>> {
+  const links = person.links.filter((candidate) => candidate.kind === kind);
+  if (links.length === 0) throw new Error(`Missing required ${kind} link for ${person.id}`);
+  if (links.length > 1) throw new Error(`Duplicate required ${kind} link for ${person.id}`);
+  return Object.freeze({ ...links[0] }) as Readonly<Extract<PersonLink, { kind: K }>>;
 }
 
-export function generatePersonSchema(person: Person = career.person) {
+export function generatePersonSchema(person: ReadonlyPerson) {
   const website = getPersonLink(person, 'website');
   const linkedIn = getPersonLink(person, 'linkedin');
   const github = getPersonLink(person, 'github');

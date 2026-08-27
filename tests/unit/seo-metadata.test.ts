@@ -162,6 +162,10 @@ describe('generateSeo — page-type-aware title/description defaults', () => {
 });
 
 describe('schema generation', () => {
+  it('requires explicit person data for Person schema generation', () => {
+    expect(generatePersonSchema.length).toBe(1);
+  });
+
   it('throws when a required canonical person link is missing', () => {
     const personWithoutLinkedIn = {
       ...career.person,
@@ -169,6 +173,27 @@ describe('schema generation', () => {
     };
 
     expect(() => getPersonLink(personWithoutLinkedIn, 'linkedin')).toThrow(/linkedin/i);
+  });
+
+  it('throws when a required canonical person link kind is duplicated', () => {
+    const linkedIn = career.person.links.find((link) => link.kind === 'linkedin');
+    if (!linkedIn) throw new Error('canonical test fixture requires LinkedIn');
+    const personWithDuplicateLinkedIn = {
+      ...career.person,
+      links: [...career.person.links, { ...linkedIn }],
+    };
+
+    expect(() => getPersonLink(personWithDuplicateLinkedIn, 'linkedin')).toThrow(/duplicate.*linkedin/i);
+  });
+
+  it('returns an immutable copy without exposing canonical link data to mutation', () => {
+    const canonicalLinkedIn = career.person.links.find((link) => link.kind === 'linkedin');
+    const result = getPersonLink(career.person, 'linkedin');
+
+    expect(result).not.toBe(canonicalLinkedIn);
+    expect(Object.isFrozen(result)).toBe(true);
+    expect(() => Object.assign(result, { url: 'https://example.com' })).toThrow();
+    expect(canonicalLinkedIn?.url).toBe('https://www.linkedin.com/in/jonathantsilva/');
   });
 
   it('generatePersonSchema returns a valid Person JSON-LD object', () => {
