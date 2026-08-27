@@ -78,17 +78,91 @@ const renderPublications = (items: readonly ResolvedPublication[]): string => li
 const renderSkills = (groups: readonly ResolvedSkillGroup[]): string => groups.map(group => `
 <div class="skill-group"><h3>${escapeHtml(group.name)}</h3><ul class="skill-list">${group.skills.map(skill => `<li>${escapeHtml(skill.name)}</li>`).join('')}</ul></div>`).join('');
 
-const sectionContent = (view: ResolvedCv, kind: CvSectionKind): string => {
-  if (kind === 'skills') return renderSkills(view.skills);
-  if (kind === 'experience') return renderExperience(view.experience);
-  if (kind === 'projects') return renderProjects(view.projects);
-  if (kind === 'education') return renderEducation(view.education);
-  return renderPublications(view.publications);
+const assertNever = (value: never): never => {
+  throw new Error(`Unsupported CV section kind: ${String(value)}`);
 };
 
-const sectionHasContent = (view: ResolvedCv, kind: CvSectionKind): boolean => view[kind].length > 0;
+const sectionContent = (view: ResolvedCv, kind: CvSectionKind): string => {
+  switch (kind) {
+    case 'skills': return renderSkills(view.skills);
+    case 'experience': return renderExperience(view.experience);
+    case 'projects': return renderProjects(view.projects);
+    case 'education': return renderEducation(view.education);
+    case 'publications': return renderPublications(view.publications);
+    default: return assertNever(kind);
+  }
+};
+
+const sectionHasContent = (view: ResolvedCv, kind: CvSectionKind): boolean => {
+  switch (kind) {
+    case 'skills': return view.skills.length > 0;
+    case 'experience': return view.experience.length > 0;
+    case 'projects': return view.projects.length > 0;
+    case 'education': return view.education.length > 0;
+    case 'publications': return view.publications.length > 0;
+    default: return assertNever(kind);
+  }
+};
+
+const requireText = (value: string, field: string): void => {
+  if (!value.trim()) throw new Error(`${field} must not be empty`);
+};
+
+const validateView = (view: ResolvedCv): void => {
+  requireText(view.fullName, 'fullName');
+  requireText(view.headline, 'headline');
+  requireText(view.summary, 'summary');
+  requireText(view.location, 'location');
+  view.links.forEach((link, index) => {
+    requireText(link.label, `link ${index} label`);
+    requireText(link.url, `link ${index} URL`);
+  });
+
+  view.experience.forEach((item, index) => {
+    requireText(item.title, `experience ${index} title`);
+    requireText(item.employer, `experience ${index} employer`);
+    if (item.location !== undefined) requireText(item.location, `experience ${index} location`);
+    item.highlights.forEach((highlight, highlightIndex) => requireText(highlight.text, `experience ${index} highlight ${highlightIndex}`));
+  });
+  view.projects.forEach((item, index) => {
+    requireText(item.title, `project ${index} title`);
+    requireText(item.description, `project ${index} description`);
+    if (item.role !== undefined) requireText(item.role, `project ${index} role`);
+    item.links.forEach((link, linkIndex) => {
+      requireText(link.label, `project ${index} link ${linkIndex} label`);
+      requireText(link.url, `project ${index} link ${linkIndex} URL`);
+    });
+    item.highlights.forEach((highlight, highlightIndex) => requireText(highlight.text, `project ${index} highlight ${highlightIndex}`));
+  });
+  view.education.forEach((item, index) => {
+    requireText(item.institution, `education ${index} institution`);
+    requireText(item.credential, `education ${index} credential`);
+    if (item.location !== undefined) requireText(item.location, `education ${index} location`);
+    item.highlights.forEach((highlight, highlightIndex) => requireText(highlight.text, `education ${index} highlight ${highlightIndex}`));
+  });
+  view.publications.forEach((item, index) => {
+    requireText(item.title, `publication ${index} title`);
+    requireText(item.venue, `publication ${index} venue`);
+    requireText(item.type, `publication ${index} type`);
+    if (!item.authors.length) throw new Error(`publication ${index} authors must not be empty`);
+    item.authors.forEach((author, authorIndex) => requireText(author, `publication ${index} author ${authorIndex}`));
+    if (item.url !== undefined) requireText(item.url, `publication ${index} URL`);
+  });
+  view.skills.forEach((group, index) => {
+    requireText(group.name, `skill group ${index} name`);
+    if (!group.skills.length) throw new Error(`skill group ${index} skills must not be empty`);
+    group.skills.forEach((skill, skillIndex) => requireText(skill.name, `skill group ${index} skill ${skillIndex}`));
+  });
+
+  const seenSections = new Set<CvSectionKind>();
+  for (const { kind } of view.sections) {
+    if (seenSections.has(kind)) throw new Error(`Duplicate CV section kind: ${kind}`);
+    seenSections.add(kind);
+  }
+};
 
 export const renderCvHtml = (view: ResolvedCv): string => {
+  validateView(view);
   const sections = view.sections
     .filter(section => sectionHasContent(view, section.kind))
     .map(section => `<section aria-labelledby="section-${escapeHtml(section.kind)}"><h2 id="section-${escapeHtml(section.kind)}">${standardSectionHeading[section.kind]}</h2>${sectionContent(view, section.kind)}</section>`)

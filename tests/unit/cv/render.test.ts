@@ -75,13 +75,46 @@ describe('CV HTML renderer', () => {
   it('renders one complete English document with sections in resolved order', () => {
     const html = renderCvHtml(view);
     const tree = parse(html);
-    const mains = elements(tree, 'main').filter(node => Array.isArray(node.properties.className) && node.properties.className.includes('cv'));
+    const mains = elements(tree, 'main');
 
     expect(elements(tree, 'html')[0]?.properties.lang).toBe('en');
     expect(mains).toHaveLength(1);
+    expect(mains[0]?.properties.className).toEqual(['cv']);
     expect(elements(tree, 'section').map(section => text(elements(section, 'h2')[0]!)))
       .toEqual(view.sections.map(section => standardSectionHeading[section.kind]));
     expect(elements(mains[0]!, 'a').map(text)).toEqual(['Email Ada', 'Portfolio <home>']);
+  });
+
+  it('keeps flattened main text in identity, contact, summary, and section order', () => {
+    const mainText = text(elements(parse(renderCvHtml(view)), 'main')[0]!);
+    const orderedAnchors = [
+      'Ada <Lovelace>', 'Engineer & Researcher', 'London & Remote', 'Email Ada', 'Portfolio <home>',
+      'Builds reliable "systems" <script>alert(1)</script>.', 'Skills', 'Languages & Tools', 'TypeScript <ES>',
+      'Experience', 'Senior <Engineer>', 'Analytical & Co', 'Improved safety by 20% & reliability.',
+      'Projects', 'Engine <One>', 'A safe & fast engine.', 'Source code', 'Education', 'MSc <Computing>',
+      'Publications', 'Notes <on> Engines',
+    ];
+
+    let cursor = -1;
+    for (const anchor of orderedAnchors) {
+      const next = mainText.indexOf(anchor, cursor + 1);
+      expect(next, `Expected ${anchor} after offset ${cursor}`).toBeGreaterThan(cursor);
+      cursor = next;
+    }
+  });
+
+  it('rejects duplicate resolved section kinds before rendering', () => {
+    expect(() => renderCvHtml({ ...view, sections: [{ kind: 'skills' }, { kind: 'skills' }] }))
+      .toThrow(/duplicate.*section/i);
+  });
+
+  it('rejects empty required content that would create nominal content', () => {
+    expect(() => renderCvHtml({ ...view, location: '  ' })).toThrow(/location.*empty/i);
+    expect(() => renderCvHtml({
+      ...view,
+      skills: [{ id: 'empty', name: 'Empty', skills: [] }],
+      sections: [{ kind: 'skills' }],
+    })).toThrow(/skill group.*skills/i);
   });
 
   it('uses semantic single-column markup and leaves no empty sections', () => {
@@ -125,7 +158,7 @@ describe('CV print CSS', () => {
     expect(cvPrintStyles).toMatch(/\.cv\s*{[^}]*display:\s*block/s);
     expect(cvPrintStyles).toMatch(/section\s*{[^}]*break-inside:\s*auto/s);
     expect(cvPrintStyles).toMatch(/\.role\s*{[^}]*break-inside:\s*avoid-page/s);
-    expect(cvPrintStyles).not.toMatch(/display:\s*grid|grid-template|columns?\s*:|position:\s*(?:absolute|fixed)|transform\s*:|\bzoom\s*:/i);
+    expect(cvPrintStyles).not.toMatch(/display:\s*grid|grid-template|columns?\s*:|column-(?:count|width)\s*:|position:\s*(?:absolute|fixed)|transform\s*:|\bzoom\s*:/i);
     expect(cvPrintStyles).not.toMatch(/font-size:\s*(?:[0-8](?:\.\d+)?|9(?:\.[0-6]\d*)?)pt/i);
   });
 });
