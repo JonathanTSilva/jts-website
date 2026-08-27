@@ -1,16 +1,18 @@
 import { describe, expect, it } from 'vitest';
+import type { z } from 'zod';
 import {
   careerDataSchema,
   careerDateRangeSchema,
   careerDateSchema,
   careerHighlightSchema,
+  careerLinkSchema,
   localizedStringSchema,
   projectSchema,
 } from '../../../src/content/portfolio/schema';
 
 const text = (en = 'English', pt = 'Português') => ({ en, 'pt-br': pt });
 
-const validCareer = () => ({
+const validCareer = (): z.input<typeof careerDataSchema> => ({
   person: {
     id: 'jonathan-tobias',
     fullName: 'Jonathan Tobias',
@@ -24,10 +26,7 @@ const validCareer = () => ({
     id: 'software-engineer',
     employerId: 'example-inc',
     title: text('Software Engineer', 'Engenheiro de Software'),
-    dates: {
-      start: { value: '2024-01', precision: 'month' },
-      end: undefined as { value: string; precision: string } | undefined,
-    },
+    dates: { start: { value: '2024-01', precision: 'month' } },
     highlights: [],
     tags: ['TypeScript'],
   }],
@@ -68,6 +67,24 @@ describe('career schema', () => {
     })).toThrow();
   });
 
+  it('rejects unexpected fields in canonical objects', () => {
+    expect(() => careerHighlightSchema.parse({
+      id: 'reliable-systems',
+      webText: text(),
+      themes: ['general'],
+      priority: 50,
+      typoPriority: 100,
+    })).toThrow(/unrecognized key/i);
+  });
+
+  it('accepts only renderable URLs matching the required link kind', () => {
+    expect(careerLinkSchema.parse({ kind: 'email', label: 'Email', url: 'mailto:me@example.com' }).kind).toBe('email');
+    expect(careerLinkSchema.parse({ kind: 'github', label: 'GitHub', url: 'https://github.com/example' }).kind).toBe('github');
+    expect(() => careerLinkSchema.parse({ kind: 'website', label: 'Site', url: 'javascript:alert(1)' })).toThrow();
+    expect(() => careerLinkSchema.parse({ kind: 'email', label: 'Email', url: 'https://example.com' })).toThrow();
+    expect(() => careerLinkSchema.parse({ kind: 'github', label: 'GitHub', url: 'mailto:me@example.com' })).toThrow();
+  });
+
   it('enforces declared date precision', () => {
     expect(() => careerDateSchema.parse({ value: '2025-01', precision: 'year' })).toThrow(/year precision/i);
     expect(() => careerDateSchema.parse({ value: '2025', precision: 'month' })).toThrow(/month precision/i);
@@ -91,6 +108,26 @@ describe('career schema', () => {
     const career = validCareer();
     career.employers[0]!.id = career.person.id;
     expect(() => careerDataSchema.parse(career)).toThrow(/duplicate id/i);
+  });
+
+  it('reports the exact path of a duplicate top-level entity ID', () => {
+    const career = validCareer();
+    career.employers[0]!.id = career.person.id;
+    const result = careerDataSchema.safeParse(career);
+    expect(result.error?.issues[0]?.path).toEqual(['employers', 0, 'id']);
+  });
+
+  it('reports the exact path of a duplicate nested highlight ID', () => {
+    const career = validCareer();
+    const highlight: z.input<typeof careerHighlightSchema> = {
+      id: 'same-highlight',
+      webText: text(),
+      themes: ['general'],
+      priority: 50,
+    };
+    career.positions[0]!.highlights = [highlight, highlight];
+    const result = careerDataSchema.safeParse(career);
+    expect(result.error?.issues[0]?.path).toEqual(['positions', 0, 'highlights', 1, 'id']);
   });
 
   it('rejects positions referencing unknown employers', () => {

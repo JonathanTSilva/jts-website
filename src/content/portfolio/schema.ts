@@ -8,7 +8,7 @@ export const localeSchema = z.enum(['en', 'pt-br']);
 export const localizedStringSchema = z.object({
   en: nonEmptyStringSchema,
   'pt-br': nonEmptyStringSchema,
-});
+}).strict();
 
 export const themeSchema = z.enum(['general', 'embedded', 'research', 'leadership', 'devops']);
 
@@ -18,12 +18,12 @@ export const careerHighlightSchema = z.object({
   cvText: nonEmptyStringSchema.optional(),
   themes: z.array(themeSchema).min(1),
   priority: z.number().int().min(0).max(100),
-});
+}).strict();
 
 export const careerDateSchema = z.object({
   value: z.string().regex(/^\d{4}(?:-(?:0[1-9]|1[0-2]))?$/),
   precision: z.enum(['year', 'month']),
-}).superRefine((date, ctx) => {
+}).strict().superRefine((date, ctx) => {
   if (date.precision === 'year' && date.value.length !== 4) {
     ctx.addIssue({ code: 'custom', message: 'year precision requires YYYY' });
   }
@@ -35,7 +35,7 @@ export const careerDateSchema = z.object({
 export const careerDateRangeSchema = z.object({
   start: careerDateSchema,
   end: careerDateSchema.optional(),
-}).superRefine(({ start, end }, ctx) => {
+}).strict().superRefine(({ start, end }, ctx) => {
   const startMonth = start.precision === 'year' ? `${start.value}-01` : start.value;
   const endMonth = end?.precision === 'year' ? `${end.value}-12` : end?.value;
   if (endMonth && endMonth < startMonth) {
@@ -43,11 +43,21 @@ export const careerDateRangeSchema = z.object({
   }
 });
 
-export const careerLinkSchema = z.object({
-  kind: z.enum(['email', 'website', 'linkedin', 'github', 'orcid', 'other']).optional(),
-  label: nonEmptyStringSchema,
-  url: z.url(),
+const httpsUrlSchema = z.url().refine((url) => new URL(url).protocol === 'https:', {
+  message: 'link requires an HTTPS URL',
 });
+const mailtoUrlSchema = z.string().refine((url) => {
+  if (!url.startsWith('mailto:')) return false;
+  return z.email().safeParse(url.slice('mailto:'.length)).success;
+}, { message: 'email link requires a mailto URL' });
+
+export const careerLinkSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('email'), label: nonEmptyStringSchema, url: mailtoUrlSchema }).strict(),
+  z.object({ kind: z.literal('website'), label: nonEmptyStringSchema, url: httpsUrlSchema }).strict(),
+  z.object({ kind: z.literal('linkedin'), label: nonEmptyStringSchema, url: httpsUrlSchema }).strict(),
+  z.object({ kind: z.literal('github'), label: nonEmptyStringSchema, url: httpsUrlSchema }).strict(),
+  z.object({ kind: z.literal('orcid'), label: nonEmptyStringSchema, url: httpsUrlSchema }).strict(),
+]);
 
 export const personSchema = z.object({
   id: stableIdSchema,
@@ -56,14 +66,14 @@ export const personSchema = z.object({
   headline: localizedStringSchema,
   summary: localizedStringSchema,
   links: z.array(careerLinkSchema),
-});
+}).strict();
 
 export const employerSchema = z.object({
   id: stableIdSchema,
   name: nonEmptyStringSchema,
   location: localizedStringSchema.optional(),
   website: z.url().optional(),
-});
+}).strict();
 
 export const workPositionSchema = z.object({
   id: stableIdSchema,
@@ -73,7 +83,7 @@ export const workPositionSchema = z.object({
   dates: careerDateRangeSchema,
   highlights: z.array(careerHighlightSchema),
   tags: z.array(nonEmptyStringSchema),
-});
+}).strict();
 
 export const educationSchema = z.object({
   id: stableIdSchema,
@@ -83,7 +93,7 @@ export const educationSchema = z.object({
   dates: careerDateRangeSchema,
   highlights: z.array(careerHighlightSchema),
   tags: z.array(nonEmptyStringSchema),
-});
+}).strict();
 
 export const projectSchema = z.object({
   id: stableIdSchema,
@@ -96,7 +106,7 @@ export const projectSchema = z.object({
   tags: z.array(nonEmptyStringSchema),
   themes: z.array(themeSchema).min(1),
   priority: z.number().int().min(0).max(100),
-});
+}).strict();
 
 export const publicationSchema = z.object({
   id: stableIdSchema,
@@ -108,23 +118,21 @@ export const publicationSchema = z.object({
   url: z.url().optional(),
   themes: z.array(themeSchema).min(1),
   priority: z.number().int().min(0).max(100),
-});
+}).strict();
 
 export const skillSchema = z.object({
   id: stableIdSchema,
   name: nonEmptyStringSchema,
   themes: z.array(themeSchema).min(1),
   priority: z.number().int().min(0).max(100),
-});
+}).strict();
 
 export const skillGroupSchema = z.object({
   id: stableIdSchema,
   name: localizedStringSchema,
   priority: z.number().int().min(0).max(100),
   skills: z.array(skillSchema).min(1),
-});
-
-const chronologicalEntities = ['positions', 'education', 'projects'] as const;
+}).strict();
 
 export const careerDataSchema = z.object({
   person: personSchema,
@@ -134,7 +142,7 @@ export const careerDataSchema = z.object({
   projects: z.array(projectSchema),
   publications: z.array(publicationSchema),
   skillGroups: z.array(skillGroupSchema),
-}).superRefine((career, ctx) => {
+}).strict().superRefine((career, ctx) => {
   const ids = new Set<string>();
   const recordId = (id: string, path: PropertyKey[]) => {
     if (ids.has(id)) ctx.addIssue({ code: 'custom', path, message: `duplicate id: ${id}` });
@@ -142,17 +150,32 @@ export const careerDataSchema = z.object({
   };
 
   recordId(career.person.id, ['person', 'id']);
-  const collections = [career.employers, career.positions, career.education, career.projects, career.publications];
-  for (const collection of collections) {
-    for (const entity of collection) recordId(entity.id, ['id']);
-  }
-  for (const entity of [...career.positions, ...career.education, ...career.projects]) {
-    for (const highlight of entity.highlights) recordId(highlight.id, ['highlights', 'id']);
-  }
-  for (const group of career.skillGroups) {
-    recordId(group.id, ['skillGroups', 'id']);
-    for (const skill of group.skills) recordId(skill.id, ['skillGroups', 'skills', 'id']);
-  }
+  career.employers.forEach((entity, index) => recordId(entity.id, ['employers', index, 'id']));
+  career.positions.forEach((entity, index) => recordId(entity.id, ['positions', index, 'id']));
+  career.education.forEach((entity, index) => recordId(entity.id, ['education', index, 'id']));
+  career.projects.forEach((entity, index) => recordId(entity.id, ['projects', index, 'id']));
+  career.publications.forEach((entity, index) => recordId(entity.id, ['publications', index, 'id']));
+  career.positions.forEach((entity, entityIndex) => {
+    entity.highlights.forEach((highlight, highlightIndex) => {
+      recordId(highlight.id, ['positions', entityIndex, 'highlights', highlightIndex, 'id']);
+    });
+  });
+  career.education.forEach((entity, entityIndex) => {
+    entity.highlights.forEach((highlight, highlightIndex) => {
+      recordId(highlight.id, ['education', entityIndex, 'highlights', highlightIndex, 'id']);
+    });
+  });
+  career.projects.forEach((entity, entityIndex) => {
+    entity.highlights.forEach((highlight, highlightIndex) => {
+      recordId(highlight.id, ['projects', entityIndex, 'highlights', highlightIndex, 'id']);
+    });
+  });
+  career.skillGroups.forEach((group, groupIndex) => {
+    recordId(group.id, ['skillGroups', groupIndex, 'id']);
+    group.skills.forEach((skill, skillIndex) => {
+      recordId(skill.id, ['skillGroups', groupIndex, 'skills', skillIndex, 'id']);
+    });
+  });
 
   const employerIds = new Set(career.employers.map(({ id }) => id));
   career.positions.forEach((position, index) => {
@@ -165,15 +188,6 @@ export const careerDataSchema = z.object({
     }
   });
 
-  for (const collectionName of chronologicalEntities) {
-    career[collectionName].forEach((entity, index) => {
-      if (!entity.dates) return;
-      const result = careerDateRangeSchema.safeParse(entity.dates);
-      for (const issue of result.error?.issues ?? []) {
-        ctx.addIssue({ ...issue, path: [collectionName, index, 'dates', ...issue.path] });
-      }
-    });
-  }
 });
 
 export type Locale = z.infer<typeof localeSchema>;
