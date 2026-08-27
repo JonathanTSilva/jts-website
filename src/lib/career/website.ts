@@ -23,8 +23,22 @@ export function getWebsiteTimeline(career: CareerData, locale: Locale): readonly
     startDate: formatDate(item.dates.start.value), endDate: item.dates.end ? formatDate(item.dates.end.value) : locale === 'en' ? 'Present' : 'Atual',
     highlights: item.highlights.map(highlight => highlight.webText[locale]), tags: [...item.tags],
   }));
-  // Date dominates; organization/kind and stable ID make ties deterministic and keep employer roles together.
-  return [...work, ...education].sort((a, b) => b.sortDate.localeCompare(a.sortDate) || a.employerId.localeCompare(b.employerId) || a.kind.localeCompare(b.kind) || a.id.localeCompare(b.id)).map(({ sortDate: _, employerId: __, ...item }) => item);
+  type SortableTimelineItem = (typeof work)[number] | (typeof education)[number];
+  const workByEmployer = Map.groupBy(work, item => item.employerId);
+  const blocks: { id: string; kindPriority: number; newestStart: string; items: SortableTimelineItem[] }[] = [
+    ...[...workByEmployer.entries()].map(([employerId, items]) => ({
+      id: employerId,
+      kindPriority: 0,
+      newestStart: items.reduce((latest, item) => item.sortDate > latest ? item.sortDate : latest, ''),
+      items: items.sort((a, b) => b.sortDate.localeCompare(a.sortDate) || a.id.localeCompare(b.id)),
+    })),
+    ...education.map(item => ({ id: item.id, kindPriority: 1, newestStart: item.sortDate, items: [item] })),
+  ];
+  // Blocks sort by their newest role; stable kind/ID ties keep output deterministic.
+  return blocks
+    .sort((a, b) => b.newestStart.localeCompare(a.newestStart) || a.kindPriority - b.kindPriority || a.id.localeCompare(b.id))
+    .flatMap(block => block.items)
+    .map(({ sortDate: _, employerId: __, ...item }) => item);
 }
 
 export function getWebsiteSkills(career: CareerData, locale: Locale = 'en'): readonly WebsiteSkillGroup[] {

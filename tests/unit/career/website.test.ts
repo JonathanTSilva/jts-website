@@ -16,12 +16,21 @@ describe('career website adapters', () => {
     expect('verification' in en[0]!).toBe(false);
   });
 
-  it('keeps same-employer roles adjacent under stable tie breaking', () => {
+  it('keeps distinct-date employer progression adjacent and internally reverse chronological', () => {
     const fixture = structuredClone(career);
     const nova = fixture.positions.find(({ id }) => id === 'nova-smar-rd-engineer')!;
-    fixture.positions.push({ ...nova, id: 'nova-smar-second-role', verification: 'verified' });
+    fixture.positions.push({
+      ...nova,
+      id: 'nova-smar-later-role',
+      dates: { ...nova.dates, start: { value: '2023-06', precision: 'month' } },
+      verification: 'verified',
+    });
     const ids = getWebsiteTimeline(fixture, 'en').map(({ id }) => id);
-    expect(Math.abs(ids.indexOf(nova.id) - ids.indexOf('nova-smar-second-role'))).toBe(1);
+    expect(ids.slice(ids.indexOf('nova-smar-later-role'), ids.indexOf('nova-smar-later-role') + 2)).toEqual([
+      'nova-smar-later-role',
+      'nova-smar-rd-engineer',
+    ]);
+    expect(ids.indexOf('usp-msc-electrical-engineering')).toBeGreaterThan(ids.indexOf('nova-smar-rd-engineer'));
   });
 
   it('uses declared group and skill priorities without frequency counts', () => {
