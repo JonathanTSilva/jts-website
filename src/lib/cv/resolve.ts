@@ -5,7 +5,8 @@ import type {
 
 const normalizedDate = (range: CareerDateRange | undefined): string => {
   if (!range) return '0000-00';
-  const date = range.end ?? range.start;
+  if (!range.end) return '9999-12';
+  const date = range.end;
   return date.precision === 'year' ? `${date.value}-12` : date.value;
 };
 
@@ -63,7 +64,11 @@ export const resolveCv = (career: CareerData, profile: CvProfile): ResolvedCv =>
     }));
 
   const publications = [...career.publications]
-    .sort((left, right) => byPriorityThemeDateId(profile, { ...left, dates: { start: left.date } }, { ...right, dates: { start: right.date } }))
+    .sort((left, right) => byPriorityThemeDateId(
+      profile,
+      { ...left, dates: { start: left.date, end: left.date } },
+      { ...right, dates: { start: right.date, end: right.date } },
+    ))
     .slice(0, profile.limits.publications)
     .map(publication => ({
       id: publication.id, title: publication.title.en, authors: [...publication.authors], venue: publication.venue,

@@ -32,6 +32,30 @@ const fixture = (): CareerData => careerDataSchema.parse({
 });
 
 describe('resolveCv', () => {
+  it('sorts ongoing work and education ahead of newer completed entries', () => {
+    const input = fixture();
+    input.positions[0]!.dates = { start: { value: '2020', precision: 'year' } };
+    input.positions[1]!.dates = {
+      start: { value: '2024', precision: 'year' },
+      end: { value: '2025', precision: 'year' },
+    };
+    input.education.push(
+      {
+        id: 'education-current', institution: 'Current University', credential: { en: 'Current degree', 'pt-br': 'Curso atual' },
+        dates: { start: { value: '2010', precision: 'year' } }, highlights: [], tags: [],
+      },
+      {
+        id: 'education-completed', institution: 'Completed University', credential: { en: 'Completed degree', 'pt-br': 'Curso concluído' },
+        dates: { start: { value: '2024', precision: 'year' }, end: { value: '2025', precision: 'year' } }, highlights: [], tags: [],
+      },
+    );
+
+    const view = resolveCv(input, cvProfiles.generic);
+
+    expect(view.experience.map(role => role.id)).toEqual(['older', 'newer']);
+    expect(view.education.map(item => item.id)).toEqual(['education-current', 'education-completed']);
+  });
+
   it('resolves verified facts in deterministic chronology with theme-aware, deduplicated highlights', () => {
     const input = fixture();
     input.positions[0]!.highlights.push({ id: 'shared', webText: { en: 'Duplicate.', 'pt-br': 'Duplicado.' }, themes: ['embedded'], priority: 100 });

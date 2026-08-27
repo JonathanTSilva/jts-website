@@ -8,7 +8,15 @@ describe('CV profiles', () => {
     expect(Object.isFrozen(cvProfiles)).toBe(true);
     expect(Object.isFrozen(profileIds)).toBe(true);
     expect(Object.values(cvProfiles).every(Object.isFrozen)).toBe(true);
+    for (const profile of Object.values(cvProfiles)) {
+      expect(Object.isFrozen(profile.themeOrder)).toBe(true);
+      expect(Object.isFrozen(profile.sectionOrder)).toBe(true);
+      expect(Object.isFrozen(profile.limits)).toBe(true);
+    }
     expect(() => (profileIds as unknown as string[]).push('other')).toThrow(TypeError);
+    expect(() => (cvProfiles.generic.themeOrder as unknown as string[]).push('general')).toThrow(TypeError);
+    expect(() => (cvProfiles.generic.sectionOrder as unknown as string[]).push('experience')).toThrow(TypeError);
+    expect(() => { (cvProfiles.generic.limits as { skills: number }).skills = 1; }).toThrow(TypeError);
     expect(profileIds).toEqual(['generic', 'leadership', 'embedded-rd', 'devops']);
   });
 
