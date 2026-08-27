@@ -1,4 +1,5 @@
-import type { SkillGroup, Theme } from './types';
+import type { SkillGroup, WorkPosition } from './schema';
+type Theme = WorkPosition['highlights'][number]['themes'][number];
 
 const skill = (id: string, name: string, themes: Theme[], priority: number) => ({ id, name, themes, priority });
 

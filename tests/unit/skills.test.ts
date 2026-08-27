@@ -1,39 +1,19 @@
-import { describe, it, expect } from 'vitest';
-import { getSkills } from '../../src/lib/skills';
+import { describe, expect, it } from 'vitest';
+import { career } from '../../src/content/portfolio/career';
+import { getWebsiteSkills } from '../../src/lib/career/website';
 
-describe('getSkills', () => {
-  it('returns skills sorted by count descending', () => {
-    const skills = getSkills();
-    for (let i = 0; i < skills.length - 1; i++) {
-      expect(skills[i]!.count).toBeGreaterThanOrEqual(skills[i + 1]!.count);
-    }
+describe('website skills', () => {
+  it('has stable unique IDs and curated priority order', () => {
+    const groups = getWebsiteSkills(career, 'en');
+    expect(groups.map(({ id }) => id)).toEqual(['embedded-platforms', 'languages', 'networking-protocols', 'devops-tooling', 'leadership', 'research']);
+    const skills = groups.flatMap(({ skills }) => skills);
+    expect(new Set(skills.map(({ id }) => id)).size).toBe(skills.length);
+    expect(skills.every(({ id, name }) => id.length > 0 && name.length > 0)).toBe(true);
   });
 
-  it('returns at least one skill', () => {
-    const skills = getSkills();
-    expect(skills.length).toBeGreaterThan(0);
-  });
-
-  it('every skill has a non-empty tag and positive count', () => {
-    const skills = getSkills();
-    for (const skill of skills) {
-      expect(skill.tag.length).toBeGreaterThan(0);
-      expect(skill.count).toBeGreaterThan(0);
-    }
-  });
-
-  it('top 5 skills all have count >= the 6th skill', () => {
-    const skills = getSkills();
-    if (skills.length < 6) return;
-    const fifthCount = skills[4]!.count;
-    const sixthCount = skills[5]!.count;
-    expect(fifthCount).toBeGreaterThanOrEqual(sixthCount);
-  });
-
-  it('deduplicates tags across projects and experience', () => {
-    const skills = getSkills();
-    const tags = skills.map(s => s.tag);
-    const uniqueTags = new Set(tags);
-    expect(tags.length).toBe(uniqueTags.size);
+  it('is independent of pending work tags', () => {
+    const fixture = structuredClone(career);
+    fixture.positions.find(({ verification }) => verification === 'pending')!.tags.push('Pending-only skill');
+    expect(getWebsiteSkills(fixture, 'en')).toEqual(getWebsiteSkills(career, 'en'));
   });
 });

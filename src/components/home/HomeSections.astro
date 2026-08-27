@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import ProjectCard from '../portfolio/ProjectCard.astro';
-import { projects } from '../../content/portfolio/projects';
-import { publications } from '../../content/portfolio/publications';
+import { career } from '../../content/portfolio/career';
+import { getWebsiteProjects, getWebsitePublications } from '../../lib/career/website';
 import { contentLocalePath } from '../../lib/content/locale';
 
 interface Props {
@@ -39,13 +39,8 @@ const latestNotes = notes
   .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
   .slice(0, 3);
 
-const featuredProjects = projects.filter(p => p.status === 'Featured');
-const selectedProjects = featuredProjects.length >= 4
-  ? featuredProjects.slice(0, 4)
-  : [
-      ...featuredProjects,
-      ...projects.filter(p => p.status !== 'Featured').slice(0, 4 - featuredProjects.length),
-    ];
+const selectedProjects = getWebsiteProjects(career, locale, { home: true });
+const publications = getWebsitePublications(career, locale);
 
 const projectsLabel = locale === 'pt-br' ? '// portfólio' : '// portfolio';
 const publicationsLabel = locale === 'pt-br' ? '// portfólio' : '// portfolio';
@@ -60,7 +55,7 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
   </header>
   <div class="grid">
     {selectedProjects.map((project) => (
-      <ProjectCard project={project} locale={locale} />
+      <ProjectCard project={project} />
     ))}
   </div>
   <div class="cta">
@@ -82,15 +77,15 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
           <span class="pub-card-date">{pub.date}</span>
         </div>
         <p class="pub-card-title">
-          {pub.link
-            ? <a href={pub.link} target="_blank" rel="noopener noreferrer">{pub.title[locale]}</a>
-            : pub.title[locale]
+          {pub.url
+            ? <a href={pub.url} target="_blank" rel="noopener noreferrer">{pub.title}</a>
+            : pub.title
           }
         </p>
         <div class="pub-card-footer">
-          <span class="pub-card-publisher">{pub.publisher}</span>
-          {pub.link && (
-            <a href={pub.link} class="pub-card-arrow" target="_blank" rel="noopener noreferrer" aria-label="Open publication">→</a>
+          <span class="pub-card-publisher">{pub.venue}</span>
+          {pub.url && (
+            <a href={pub.url} class="pub-card-arrow" target="_blank" rel="noopener noreferrer" aria-label="Open publication">→</a>
           )}
         </div>
       </div>

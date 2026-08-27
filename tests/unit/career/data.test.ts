@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { career } from '../../../src/content/portfolio/career';
-import { experience } from '../../../src/content/portfolio/experience';
-import { projects } from '../../../src/content/portfolio/projects';
-import { publications } from '../../../src/content/portfolio/publications';
 import { careerDataSchema } from '../../../src/content/portfolio/schema';
+import { getWebsiteProjects, getWebsitePublications, getWebsiteTimeline } from '../../../src/lib/career/website';
 
 describe('canonical career data', () => {
   it('preserves the public identity and contact endpoints', () => {
@@ -31,10 +29,7 @@ describe('canonical career data', () => {
       { id: 'nova-smar-rd-electronic-intelligence-assistant', title: 'R&D Electronic Intelligence Assistant', start: '2022', end: '2023', verification: 'pending' },
       { id: 'nova-smar-rd-intern', title: 'R&D Intern', start: '2021', end: '2021', verification: 'pending' },
     ]);
-    expect(experience.filter(entry => entry.type === 'work' && entry.company === 'Nova Smar')).toHaveLength(1);
-    expect(experience.find(entry => entry.type === 'work' && entry.company === 'Nova Smar')).toMatchObject({
-      title: { en: 'R&D Engineer', 'pt-br': 'Engenheiro de P&D' }, startDate: '2021-01', endDate: '2024-09',
-    });
+    expect(getWebsiteTimeline(career, 'en').filter(entry => entry.kind === 'work' && entry.organization === 'Nova Smar')).toHaveLength(1);
   });
 
   it('uses globally unique IDs for all top-level and nested entities', () => {
@@ -56,7 +51,7 @@ describe('canonical career data', () => {
 
   it('preserves project count and important links and facts', () => {
     expect(career.projects).toHaveLength(13);
-    expect(projects.find(project => project.title.en === 'Forgenv')?.github)
+    expect(career.projects.find(project => project.title.en === 'Forgenv')?.links.find(link => link.kind === 'github')?.url)
       .toBe('https://github.com/JonathanTSilva/forgenv');
     const sizer = career.projects.find(project => project.title.en === 'Sizer');
     expect(sizer).toMatchObject({ image: '/assets/images/projects/sizer.png', status: 'Archived' });
@@ -70,48 +65,23 @@ describe('canonical career data', () => {
 
   it('preserves publication count, titles, and links', () => {
     expect(career.publications).toHaveLength(4);
-    expect(publications.find(publication => publication.title.en.startsWith('A Survey'))?.link)
+    expect(career.publications.find(publication => publication.title.en.startsWith('A Survey'))?.url)
       .toBe('https://ieeexplore.ieee.org/document/10375053');
     expect(career.publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')?.legacyHttpUrl)
       .toBe('http://ocs.ifsp.edu.br/index.php/conict/xconict/paper/view/5795/1289');
   });
 
-  it('derives project compatibility values from their canonical source', () => {
-    for (const project of projects) {
-      const canonical = career.projects.find(item => item.id === project.id)!;
-      expect(project.status).toBe(canonical.status);
-      expect(project.featured).toBe(canonical.featured);
-      expect(project.image).toBe(canonical.image);
-      expect(project.link).toBe(canonical.links.find(link => link.kind === 'website')?.url);
-      expect(project.github).toBe(canonical.links.find(link => link.kind === 'github')?.url);
-    }
-  });
-
-  it('derives publication compatibility values from their canonical source', () => {
-    for (const publication of publications) {
-      const canonical = career.publications.find(item => item.id === publication.id)!;
-      expect(publication.publisher).toBe(canonical.venue);
-      expect(publication.date).toBe(canonical.date.value);
-      expect(publication.link).toBe(canonical.url);
-    }
-  });
-
-  it('provides a derived legacy experience view for current consumers', () => {
-    expect(experience.some(entry => entry.type === 'work' && entry.company === 'Datacom')).toBe(true);
-    expect(experience.some(entry => entry.type === 'education' && entry.company.includes('USP'))).toBe(true);
-  });
-
   it('preserves every current project and experience tag in the curated skill taxonomy', () => {
-    const currentTags = new Set([...projects, ...experience].flatMap(item => item.tags));
+    const currentTags = new Set([...career.projects, ...career.positions, ...career.education].flatMap(item => item.tags));
     const curatedSkills = new Set(career.skillGroups.flatMap(group => group.skills.map(skill => skill.name)));
     expect([...currentTags].filter(tag => !curatedSkills.has(tag))).toEqual([]);
   });
 
   it('does not expose historical HTTP references as compatibility links', () => {
-    expect(projects.find(project => project.id === 'project-sizer')?.link).toBeUndefined();
+    expect(getWebsiteProjects(career, 'en').find(project => project.id === 'project-sizer')?.websiteUrl).toBeUndefined();
     expect(career.projects.find(project => project.id === 'project-sizer')?.legacyLinks?.[0]?.url)
       .toBe('http://sizer.ti.srt.ifsp.edu.br/');
-    expect(publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')?.link).toBeUndefined();
+    expect(getWebsitePublications(career, 'en').find(publication => publication.id === 'publication-web-motor-drive-sizing')?.url).toBeUndefined();
     expect(career.publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')?.legacyHttpUrl)
       .toBe('http://ocs.ifsp.edu.br/index.php/conict/xconict/paper/view/5795/1289');
   });
@@ -122,16 +92,4 @@ describe('canonical career data', () => {
     ]);
   });
 
-  it('freezes temporary compatibility arrays and their nested copies', () => {
-    expect(Object.isFrozen(experience)).toBe(true);
-    expect(Object.isFrozen(experience[0])).toBe(true);
-    expect(Object.isFrozen(experience[0]?.tags)).toBe(true);
-    expect(Object.isFrozen(experience[0]?.description)).toBe(true);
-    expect(Object.isFrozen(projects)).toBe(true);
-    expect(Object.isFrozen(projects[0])).toBe(true);
-    expect(Object.isFrozen(projects[0]?.links)).toBe(true);
-    expect(Object.isFrozen(publications)).toBe(true);
-    expect(Object.isFrozen(publications[0])).toBe(true);
-    expect(Object.isFrozen(publications[0]?.authors)).toBe(true);
-  });
 });

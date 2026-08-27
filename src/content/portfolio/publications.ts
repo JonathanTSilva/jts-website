@@ -1,7 +1,6 @@
-import type { Publication as CanonicalPublication } from './schema';
-import type { Publication as LegacyPublication } from './types';
+import type { Publication } from './schema';
 
-export const canonicalPublications: CanonicalPublication[] = [
+export const publications: Publication[] = [
   {
     id: 'publication-opc-ua-survey',
     title: { en: 'A Survey on OPC UA protocol: overview, challenges and opportunities', 'pt-br': 'Um levantamento sobre o protocolo OPC UA: visão geral, desafios e oportunidades' },
@@ -32,17 +31,3 @@ export const canonicalPublications: CanonicalPublication[] = [
     themes: ['research'], priority: 75,
   },
 ];
-
-// TODO(Task 3): delete after Astro consumers read canonical fields directly.
-const frozenArray = <T>(items: T[]): T[] => Object.freeze(items) as unknown as T[];
-
-export const publications: readonly Readonly<LegacyPublication>[] = Object.freeze(canonicalPublications.map(publication => {
-  const link = publication.url;
-  return Object.freeze({
-    ...publication, publisher: publication.venue, date: publication.date.value,
-    title: Object.freeze({ ...publication.title }),
-    authors: frozenArray([...publication.authors]),
-    themes: frozenArray([...publication.themes]),
-    ...(link ? { link } : {}),
-  });
-}));

@@ -1,6 +1,5 @@
-import type { Employer, Theme, WorkPosition } from './types';
-import type { ExperienceEntry } from './types';
-import { education } from './education';
+import type { Employer, WorkPosition } from './schema';
+type Theme = WorkPosition['highlights'][number]['themes'][number];
 
 export const employers: Employer[] = [
   { id: 'act-digital', name: 'Act Digital' },
@@ -53,18 +52,3 @@ export const positions: WorkPosition[] = [
   { id: 'nova-smar-rd-electronic-intelligence-assistant', employerId: 'nova-smar', title: { en: 'R&D Electronic Intelligence Assistant', 'pt-br': 'Assistente de Inteligência Eletrônica de P&D' }, location: novaLocation, dates: { start: { value: '2022', precision: 'year' }, end: { value: '2023', precision: 'year' } }, highlights: [], tags: [], verification: 'pending' },
   { id: 'nova-smar-rd-intern', employerId: 'nova-smar', title: { en: 'R&D Intern', 'pt-br': 'Estagiário de P&D' }, location: novaLocation, dates: { start: { value: '2021', precision: 'year' }, end: { value: '2021', precision: 'year' } }, highlights: [], tags: [], verification: 'pending' },
 ];
-
-// TODO(Task 3): delete after all Astro consumers use the canonical adapter.
-const frozenArray = <T>(items: T[]): T[] => Object.freeze(items) as unknown as T[];
-const freezeExperience = (entry: ExperienceEntry): Readonly<ExperienceEntry> => Object.freeze({
-  ...entry,
-  title: Object.freeze({ ...entry.title }),
-  location: Object.freeze({ ...entry.location }),
-  description: frozenArray(entry.description.map(text => Object.freeze({ ...text }))),
-  tags: frozenArray([...entry.tags]),
-});
-
-export const experience: readonly Readonly<ExperienceEntry>[] = Object.freeze([
-  ...positions.filter(position => position.verification === 'verified').map(position => freezeExperience({ type: 'work', title: position.title, company: employers.find(({ id }) => id === position.employerId)!.name, location: position.location ?? remote, startDate: position.dates.start.value, ...(position.dates.end ? { endDate: position.dates.end.value } : {}), description: position.highlights.map(({ webText }) => webText), tags: [...position.tags] })),
-  ...education.map(item => freezeExperience({ type: 'education', title: item.credential, company: item.institution, location: item.location ?? remote, startDate: item.dates.start.value, ...(item.dates.end ? { endDate: item.dates.end.value } : {}), description: item.highlights.map(({ webText }) => webText), tags: [...item.tags] })),
-]);
