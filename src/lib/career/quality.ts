@@ -19,17 +19,36 @@ export interface CvQualityWarning {
 }
 
 const themeTerms: Readonly<Record<CvProfile['themeOrder'][number], readonly string[]>> = {
-  general: ['engineer', 'software', 'system', 'product', 'technical'],
-  embedded: ['embedded', 'firmware', 'linux', 'rtos', 'hardware', 'protocol'],
-  research: ['research', 'study', 'publication', 'analysis', 'experiment'],
-  leadership: ['lead', 'leader', 'team', 'mentor', 'manage', 'coordinat'],
-  devops: ['devops', 'cicd', 'pipelin', 'automat', 'deploy', 'test', 'tooling'],
+  general: ['engineer', 'engineers', 'engineering', 'software', 'system', 'systems', 'product', 'products', 'technical'],
+  embedded: ['embedded', 'firmware', 'linux', 'rtos', 'hardware', 'protocol', 'protocols'],
+  research: ['research', 'study', 'studies', 'studied', 'publication', 'publications', 'analysis', 'experiment', 'experiments', 'rd'],
+  leadership: [
+    'lead', 'leads', 'leading', 'leader', 'leaders', 'team', 'teams', 'mentor', 'mentors', 'mentored', 'mentoring',
+    'manage', 'manages', 'managed', 'managing', 'management', 'manager', 'managers',
+    'coordinate', 'coordinates', 'coordinated', 'coordinating', 'coordination',
+  ],
+  devops: [
+    'devops', 'cicd', 'pipeline', 'pipelines', 'automation', 'automate', 'automates', 'automated', 'automating',
+    'deploy', 'deploys', 'deployed', 'deploying', 'deployment', 'deployments',
+    'test', 'tests', 'tested', 'testing', 'tester', 'testers', 'tooling',
+  ],
 };
 const passiveOpening = /^(?:was|were|is|are|been|being)\b/i;
 const vaguePhrasing = /\b(?:responsible for|worked on|helped(?: with| to)?|various|several tasks|important tasks)\b/i;
-const observableOutcome = /\b(?:reduc(?:e|ed|ing)|increas(?:e|ed|ing)|improv(?:e|ed|ing)|optim(?:ize|ized|izing)|achiev(?:e|ed|ing)|prevent(?:ed|ing)?|accelerat(?:e|ed|ing)|stabili(?:ze|zed|zing)|eliminat(?:e|ed|ing))\b/i;
-const measurableImpact = /(?:\bby\s+\d+(?:\.\d+)?\s*(?:%|x|milliseconds?|ms|seconds?|minutes?|hours?|days?)|\bfrom\s+\d+(?:\.\d+)?\s*(?:%|x|milliseconds?|ms|seconds?|minutes?|hours?|days?)\s+to\s+\d+(?:\.\d+)?\s*(?:%|x|milliseconds?|ms|seconds?|minutes?|hours?|days?))/i;
+const outcomeVerb = String.raw`(?:reduc(?:e|ed|ing)|increas(?:e|ed|ing)|improv(?:e|ed|ing)|optim(?:ize|ized|izing)|achiev(?:e|ed|ing)|prevent(?:ed|ing)?|accelerat(?:e|ed|ing)|stabili(?:ze|zed|zing)|eliminat(?:e|ed|ing)|cut(?:ting)?|sav(?:e|ed|ing)|serv(?:e|ed|ing)|lower(?:ed|ing)?|decreas(?:e|ed|ing)|reach(?:ed|ing)?)`;
+const observableOutcome = new RegExp(String.raw`\b${outcomeVerb}\b`, 'i');
+const quantity = String.raw`(?:\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)`;
+const durationUnit = String.raw`(?:%|x|milliseconds?|ms|seconds?|minutes?|hours?|days?)`;
+const measurableImpactPatterns = [
+  new RegExp(String.raw`\bby\s+${quantity}\s*${durationUnit}(?=\s|[.,;:]|$)`, 'i'),
+  new RegExp(String.raw`\b${outcomeVerb}\b.{0,60}\bfrom\s+${quantity}\s+to\s+${quantity}\b`, 'i'),
+  new RegExp(String.raw`\b(?:serv(?:e|ed|ing)|support(?:ed|ing)?|reach(?:ed|ing)?)\s+${quantity}\s+(?:users?|customers?|devices?|sites?)\b`, 'i'),
+  new RegExp(String.raw`\b${outcomeVerb}\b.{0,60}\bto\s+${quantity}\s*(?:milliseconds?|ms|seconds?|minutes?|hours?|days?)\b`, 'i'),
+  new RegExp(String.raw`\b(?:sav(?:e|ed|ing)|generat(?:e|ed|ing)|earn(?:ed|ing)?)\s+(?:[$€£]\s*${quantity}|${quantity}\s*(?:usd|eur|gbp))\b`, 'i'),
+  new RegExp(String.raw`\b${outcomeVerb}\b.{0,60}\b${quantity}\s*x\b`, 'i'),
+];
 const words = (text: string): string[] => text.toLowerCase().match(/[a-z0-9+#]+/g) ?? [];
+const themeWords = (text: string): string[] => words(text.replace(/ci\s*\/\s*cd/gi, 'cicd').replace(/r\s*&\s*d/gi, 'rd'));
 const comparableWords = (text: string): Set<string> => new Set(words(text).filter(word => !['a', 'an', 'and', 'for', 'of', 'the', 'to'].includes(word)));
 const similarity = (left: string, right: string): number => {
   const a = comparableWords(left);
@@ -72,7 +91,7 @@ export const getCvQualityWarnings = (view: ResolvedCv, profile: CvProfile): CvQu
     if (!observableOutcome.test(highlight.text)) {
       add('missing-observable-outcome', identity, 'Highlight does not state an observable outcome.');
     }
-    if (!measurableImpact.test(highlight.text)) {
+    if (!measurableImpactPatterns.some(pattern => pattern.test(highlight.text))) {
       add('missing-measurable-impact', identity, 'Highlight does not state a measurable impact.');
     }
   }
@@ -94,8 +113,8 @@ export const getCvQualityWarnings = (view: ResolvedCv, profile: CvProfile): CvQu
   const primaryTheme = profile.themeOrder[0] ?? 'general';
   const terms = themeTerms[primaryTheme];
   for (const project of view.projects) {
-    const tokens = words(`${project.title} ${project.description} ${project.role ?? ''} ${project.highlights.map(item => item.text).join(' ')}`);
-    if (!terms.some(term => tokens.some(token => token === term || (term.length >= 4 && token.startsWith(term))))) {
+    const tokens = themeWords(`${project.title} ${project.description} ${project.role ?? ''} ${project.highlights.map(item => item.text).join(' ')}`);
+    if (!terms.some(term => tokens.includes(term))) {
       add('weak-theme-relevance', `project:${project.id}`, `Project has weak relevance to the profile's primary ${primaryTheme} theme.`);
     }
   }
