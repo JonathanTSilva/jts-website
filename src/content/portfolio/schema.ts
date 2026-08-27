@@ -84,6 +84,7 @@ export const workPositionSchema = z.object({
   dates: careerDateRangeSchema,
   highlights: z.array(careerHighlightSchema),
   tags: z.array(nonEmptyStringSchema),
+  verification: z.enum(['verified', 'pending']),
 }).strict();
 
 export const educationSchema = z.object({

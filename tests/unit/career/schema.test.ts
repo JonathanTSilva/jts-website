@@ -10,6 +10,7 @@ import {
   localizedStringSchema,
   projectSchema,
   publicationSchema,
+  workPositionSchema,
 } from '../../../src/content/portfolio/schema';
 
 const text = (en = 'English', pt = 'Português') => ({ en, 'pt-br': pt });
@@ -31,6 +32,7 @@ const validCareer = (): z.input<typeof careerDataSchema> => ({
     dates: { start: { value: '2024-01', precision: 'month' } },
     highlights: [],
     tags: ['TypeScript'],
+    verification: 'verified',
   }],
   education: [],
   projects: [],
@@ -116,6 +118,17 @@ describe('career schema', () => {
   it('enforces declared date precision', () => {
     expect(() => careerDateSchema.parse({ value: '2025-01', precision: 'year' })).toThrow(/year precision/i);
     expect(() => careerDateSchema.parse({ value: '2025', precision: 'month' })).toThrow(/month precision/i);
+  });
+
+  it('requires explicit verification provenance for every work position', () => {
+    const position = {
+      id: 'example-position', employerId: 'example-inc', title: text(),
+      dates: { start: { value: '2024', precision: 'year' } }, highlights: [], tags: [],
+    };
+    expect(() => workPositionSchema.parse(position)).toThrow();
+    expect(workPositionSchema.parse({ ...position, verification: 'verified' }).verification).toBe('verified');
+    expect(workPositionSchema.parse({ ...position, verification: 'pending' }).verification).toBe('pending');
+    expect(() => workPositionSchema.parse({ ...position, verification: 'approved' })).toThrow();
   });
 
   it('rejects an end date before a start date', () => {

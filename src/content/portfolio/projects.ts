@@ -223,8 +223,21 @@ export const canonicalProjects: CanonicalProject[] = [
 ];
 
 // TODO(Task 3): delete after Astro consumers read canonical display/link fields directly.
-export const projects: LegacyProject[] = canonicalProjects.map(project => {
-  const github = project.links.find(link => link.kind === 'github')?.url;
-  const link = project.legacyLinks?.[0]?.url ?? project.links.find(item => item.kind === 'website')?.url;
-  return { ...project, ...(github ? { github } : {}), ...(link ? { link } : {}) };
+const frozenArray = <T>(items: T[]): T[] => Object.freeze(items) as unknown as T[];
+const freezeProject = (project: LegacyProject): Readonly<LegacyProject> => Object.freeze({
+  ...project,
+  title: Object.freeze({ ...project.title }),
+  description: Object.freeze({ ...project.description }),
+  ...(project.role ? { role: Object.freeze({ ...project.role }) } : {}),
+  links: frozenArray(project.links.map(link => Object.freeze({ ...link }))),
+  legacyLinks: project.legacyLinks ? frozenArray(project.legacyLinks.map(link => Object.freeze({ ...link }))) : undefined,
+  highlights: frozenArray(project.highlights.map(highlight => Object.freeze({ ...highlight, webText: Object.freeze({ ...highlight.webText }), themes: frozenArray([...highlight.themes]) }))),
+  tags: frozenArray([...project.tags]),
+  themes: frozenArray([...project.themes]),
 });
+
+export const projects: readonly Readonly<LegacyProject>[] = Object.freeze(canonicalProjects.map(project => {
+  const github = project.links.find(link => link.kind === 'github')?.url;
+  const link = project.links.find(item => item.kind === 'website')?.url;
+  return freezeProject({ ...project, ...(github ? { github } : {}), ...(link ? { link } : {}) });
+}));

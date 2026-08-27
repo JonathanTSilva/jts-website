@@ -34,10 +34,15 @@ export const canonicalPublications: CanonicalPublication[] = [
 ];
 
 // TODO(Task 3): delete after Astro consumers read canonical fields directly.
-export const publications: LegacyPublication[] = canonicalPublications.map(publication => {
-  const link = publication.url ?? publication.legacyHttpUrl;
-  return {
+const frozenArray = <T>(items: T[]): T[] => Object.freeze(items) as unknown as T[];
+
+export const publications: readonly Readonly<LegacyPublication>[] = Object.freeze(canonicalPublications.map(publication => {
+  const link = publication.url;
+  return Object.freeze({
     ...publication, publisher: publication.venue, date: publication.date.value,
+    title: Object.freeze({ ...publication.title }),
+    authors: frozenArray([...publication.authors]),
+    themes: frozenArray([...publication.themes]),
     ...(link ? { link } : {}),
-  };
-});
+  });
+}));

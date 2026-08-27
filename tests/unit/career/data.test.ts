@@ -20,6 +20,23 @@ describe('canonical career data', () => {
     expect(new Set(novaSmar.map(position => position.id)).size).toBe(novaSmar.length);
   });
 
+  it('keeps the website-primary Nova role verified and PDF split roles pending', () => {
+    const novaPositions = career.positions.filter(position => position.employerId === 'nova-smar');
+    expect(novaPositions.map(position => ({
+      id: position.id, title: position.title.en, start: position.dates.start.value,
+      end: position.dates.end?.value, verification: position.verification,
+    }))).toEqual([
+      { id: 'nova-smar-rd-engineer', title: 'R&D Engineer', start: '2021-01', end: '2024-09', verification: 'verified' },
+      { id: 'nova-smar-rd-electronic-intelligence-analyst', title: 'R&D Electronic Intelligence Analyst', start: '2023', end: '2024', verification: 'pending' },
+      { id: 'nova-smar-rd-electronic-intelligence-assistant', title: 'R&D Electronic Intelligence Assistant', start: '2022', end: '2023', verification: 'pending' },
+      { id: 'nova-smar-rd-intern', title: 'R&D Intern', start: '2021', end: '2021', verification: 'pending' },
+    ]);
+    expect(experience.filter(entry => entry.type === 'work' && entry.company === 'Nova Smar')).toHaveLength(1);
+    expect(experience.find(entry => entry.type === 'work' && entry.company === 'Nova Smar')).toMatchObject({
+      title: { en: 'R&D Engineer', 'pt-br': 'Engenheiro de P&D' }, startDate: '2021-01', endDate: '2024-09',
+    });
+  });
+
   it('uses globally unique IDs for all top-level and nested entities', () => {
     const ids = [
       career.person.id,
@@ -65,7 +82,7 @@ describe('canonical career data', () => {
       expect(project.status).toBe(canonical.status);
       expect(project.featured).toBe(canonical.featured);
       expect(project.image).toBe(canonical.image);
-      expect(project.link).toBe(canonical.legacyLinks?.[0]?.url ?? canonical.links.find(link => link.kind === 'website')?.url);
+      expect(project.link).toBe(canonical.links.find(link => link.kind === 'website')?.url);
       expect(project.github).toBe(canonical.links.find(link => link.kind === 'github')?.url);
     }
   });
@@ -75,7 +92,7 @@ describe('canonical career data', () => {
       const canonical = career.publications.find(item => item.id === publication.id)!;
       expect(publication.publisher).toBe(canonical.venue);
       expect(publication.date).toBe(canonical.date.value);
-      expect(publication.link).toBe(canonical.url ?? canonical.legacyHttpUrl);
+      expect(publication.link).toBe(canonical.url);
     }
   });
 
@@ -88,5 +105,33 @@ describe('canonical career data', () => {
     const currentTags = new Set([...projects, ...experience].flatMap(item => item.tags));
     const curatedSkills = new Set(career.skillGroups.flatMap(group => group.skills.map(skill => skill.name)));
     expect([...currentTags].filter(tag => !curatedSkills.has(tag))).toEqual([]);
+  });
+
+  it('does not expose historical HTTP references as compatibility links', () => {
+    expect(projects.find(project => project.id === 'project-sizer')?.link).toBeUndefined();
+    expect(career.projects.find(project => project.id === 'project-sizer')?.legacyLinks?.[0]?.url)
+      .toBe('http://sizer.ti.srt.ifsp.edu.br/');
+    expect(publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')?.link).toBeUndefined();
+    expect(career.publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')?.legacyHttpUrl)
+      .toBe('http://ocs.ifsp.edu.br/index.php/conict/xconict/paper/view/5795/1289');
+  });
+
+  it('uses the exact stable skill group order', () => {
+    expect(career.skillGroups.map(group => group.id)).toEqual([
+      'languages', 'embedded-platforms', 'networking-protocols', 'devops-tooling', 'leadership', 'research',
+    ]);
+  });
+
+  it('freezes temporary compatibility arrays and their nested copies', () => {
+    expect(Object.isFrozen(experience)).toBe(true);
+    expect(Object.isFrozen(experience[0])).toBe(true);
+    expect(Object.isFrozen(experience[0]?.tags)).toBe(true);
+    expect(Object.isFrozen(experience[0]?.description)).toBe(true);
+    expect(Object.isFrozen(projects)).toBe(true);
+    expect(Object.isFrozen(projects[0])).toBe(true);
+    expect(Object.isFrozen(projects[0]?.links)).toBe(true);
+    expect(Object.isFrozen(publications)).toBe(true);
+    expect(Object.isFrozen(publications[0])).toBe(true);
+    expect(Object.isFrozen(publications[0]?.authors)).toBe(true);
   });
 });
