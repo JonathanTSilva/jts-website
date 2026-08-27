@@ -1,6 +1,7 @@
-import type { ProjectEntry } from "./types";
+import type { Project as CanonicalProject } from './schema';
+import type { LegacyProjectFields, Theme } from './types';
 
-export const projects: ProjectEntry[] = [
+const sourceProjects: LegacyProjectFields[] = [
   {
     title: {
       en: "Forgenv",
@@ -194,3 +195,33 @@ export const projects: ProjectEntry[] = [
     status: "Archived",
   }
 ];
+
+const projectIds = [
+  'project-forgenv', 'project-qemulab', 'project-dlr-supervisor-simulator', 'project-uanalyzer',
+  'project-leetsheet', 'project-scriptize', 'project-custom-embedded-linux-yocto', 'project-sentminer',
+  'project-cloudcavitation', 'project-pump-diagnostics-machine-learning', 'project-ifsp-latex-template',
+  'project-dimfot', 'project-sizer',
+] as const;
+
+const themesFor = (project: LegacyProjectFields): Theme[] => {
+  const themes = new Set<Theme>(['general']);
+  if (project.tags.some(tag => ['Embedded Linux', 'Yocto Project', 'QEMU', 'DLR', 'OPC UA', 'Industrial Automation'].includes(tag))) themes.add('embedded');
+  if (project.tags.some(tag => ['Machine Learning', 'Cybersecurity', 'LaTeX'].includes(tag))) themes.add('research');
+  if (project.tags.some(tag => ['Automation', 'Git & CI/CD', 'Shellscript'].includes(tag))) themes.add('devops');
+  return [...themes];
+};
+
+// TODO(Task 3): legacy display properties remain on this canonical-shaped export until Astro consumers migrate.
+export const projects = sourceProjects.map((project, index) => ({
+  ...project,
+  id: projectIds[index]!,
+  links: project.github ? [{ kind: 'github' as const, label: 'GitHub', url: project.github }] : [],
+  highlights: [],
+  themes: themesFor(project),
+  priority: project.featured ? 90 : 60,
+}));
+
+// Strict aggregate input without the temporary website-only display properties.
+export const canonicalProjects: CanonicalProject[] = projects.map(({ id, title, description, role, links, highlights, tags, themes, priority }) => ({
+  id, title, description, ...(role ? { role } : {}), links, highlights, tags, themes, priority,
+}));

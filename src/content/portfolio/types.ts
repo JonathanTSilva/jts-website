@@ -1,9 +1,12 @@
-export interface LocalizedString {
-  en: string;
-  "pt-br": string;
-}
+export type {
+  CareerData, CareerDate, CareerDateRange, CareerHighlight, Education, Employer,
+  Locale, LocalizedString, Person, Project as CanonicalProject, Publication as CanonicalPublication,
+  SkillGroup, WorkPosition,
+} from './schema';
+export type Theme = import('./schema').CareerHighlight['themes'][number];
+import type { LocalizedString, Project as CanonicalProject, Publication as CanonicalPublication } from './schema';
 
-export interface Project {
+export interface LegacyProjectFields {
   title: LocalizedString;
   description: LocalizedString;
   tags: string[];
@@ -17,9 +20,10 @@ export interface Project {
   image?: string;
 }
 
+export type Project = CanonicalProject & LegacyProjectFields;
 export type ProjectEntry = Project;
 
-export interface Publication {
+export interface LegacyPublicationFields {
   title: LocalizedString;
   publisher: string;
   date: string; // ISO string or human readable
@@ -27,6 +31,8 @@ export interface Publication {
   type: "article" | "paper" | "book" | "talk" | "conference" | "journal";
 }
 
+// TODO(Task 3): replace this compatibility shape with CanonicalPublication in Astro consumers.
+export type Publication = Omit<CanonicalPublication, 'date' | 'url' | 'venue'> & LegacyPublicationFields;
 export type PublicationEntry = Publication;
 
 export interface ExperienceEntry {

@@ -1,6 +1,7 @@
-import type { PublicationEntry } from "./types";
+import type { Publication as CanonicalPublication } from './schema';
+import type { LegacyPublicationFields } from './types';
 
-export const publications: PublicationEntry[] = [
+const sourcePublications: LegacyPublicationFields[] = [
   {
     title: {
       en: "A Survey on OPC UA protocol: overview, challenges and opportunities",
@@ -42,3 +43,32 @@ export const publications: PublicationEntry[] = [
     type: "paper",
   }
 ];
+
+const publicationDetails = [
+  { id: 'publication-opc-ua-survey', authors: ['Jonathan Tobias da Silva', 'A. L. Dias', 'I. N. da Silva'], themes: ['research', 'embedded'] as const },
+  { id: 'publication-pump-fault-diagnosis', authors: ['A. L. Dias', 'Jonathan Tobias da Silva', 'A. C. Turcato', 'G. S. Sestito'], themes: ['research'] as const },
+  { id: 'publication-industrial-automation-cybersecurity', authors: ['Jonathan Tobias da Silva', 'O. Paschoal'], themes: ['research', 'embedded'] as const },
+  { id: 'publication-web-motor-drive-sizing', authors: ['Jonathan Tobias da Silva', 'A. L. Dias', 'N. F. D. F. Filho', 'A. C. Turcato'], themes: ['research'] as const },
+] as const;
+
+// TODO(Task 3): publisher/link/date aliases keep current Astro consumers compiling.
+export const publications = sourcePublications.map((publication, index) => ({
+  ...publication,
+  id: publicationDetails[index]!.id,
+  authors: [...publicationDetails[index]!.authors],
+  venue: publication.publisher,
+  themes: [...publicationDetails[index]!.themes],
+  priority: 75,
+}));
+
+export const canonicalPublications: CanonicalPublication[] = publications.map(publication => ({
+  id: publication.id,
+  title: publication.title,
+  authors: publication.authors,
+  venue: publication.venue,
+  date: { value: publication.date, precision: 'month' },
+  type: publication.type,
+  ...(publication.link?.startsWith('https://') ? { url: publication.link } : {}),
+  themes: publication.themes,
+  priority: publication.priority,
+}));
