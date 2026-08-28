@@ -3,7 +3,6 @@ type Theme = WorkPosition['highlights'][number]['themes'][number];
 
 export const employers: Employer[] = [
   { id: 'act-digital', name: 'Act Digital' },
-  { id: 'schneider-electric', name: 'Schneider Electric' },
   { id: 'datacom', name: 'Datacom' },
   { id: 'nova-smar', name: 'Nova Smar', location: { en: 'Sertãozinho, SP, Brazil', 'pt-br': 'Sertãozinho, SP, Brasil' } },
 ];
@@ -19,8 +18,8 @@ export const positions: WorkPosition[] = [
     title: { en: 'Senior Embedded Software Engineer', 'pt-br': 'Engenheiro Sênior de Software Embarcado' }, location: remote,
     dates: { start: { value: '2026-02', precision: 'month' } },
     highlights: [
-      h('act-schneider-strategic-partnership', 'Serve Schneider Electric, an Act Digital customer, allocated to its Innovation and Technology department on the Network Service Platform team.', 'Atuação para a Schneider Electric, cliente da Act Digital, com alocação no departamento de Innovation and Technology, na equipe Network Service Platform.', ['research', 'embedded'], 95),
-      h('act-mission-critical-embedded-software', 'Develop and customize mission-critical software for Embedded Linux and RTOS platforms used in industrial switches and PLCs.', 'Desenvolvimento e customização de software de missão crítica para plataformas Linux embarcado e RTOS usadas em switches industriais e CLPs.', ['embedded'], 95),
+      h('act-schneider-strategic-partnership', "Work as an Act Digital engineer assigned to Schneider Electric's Innovation and Technology department on the Network Service Platform team.", 'Atuação como engenheiro da Act Digital alocado no departamento de Innovation and Technology da Schneider Electric, na equipe Network Service Platform.', ['research', 'embedded'], 95),
+      h('act-mission-critical-embedded-software', 'Develop and customize mission-critical software for Embedded Linux and RTOS platforms used in industrial switches and PLCs.', 'Desenvolvimento e customização de software de missão crítica para plataformas de Linux embarcado e RTOS usadas em switches industriais e CLPs.', ['embedded'], 95),
       h('act-industrial-protocols', 'Implement EtherNet/IP, RSTP, DLR, OPC UA, and Modbus communication protocols for industrial systems.', 'Implementação dos protocolos de comunicação EtherNet/IP, RSTP, DLR, OPC UA e Modbus para sistemas industriais.', ['embedded'], 90),
       h('act-real-time-latency', 'Optimize real-time behavior and latency for Industrial IoT (IIoT) and critical-infrastructure requirements.', 'Otimização do comportamento em tempo real e da latência para requisitos de IIoT e infraestrutura crítica.', ['embedded'], 85),
     ], tags: ['C/C++', 'Python', 'Rust', 'Embedded Linux', 'VxWorks', 'L2 Protocols', 'Networking', 'EtherNet/IP', 'DLR', 'RSTP', 'OPC UA', 'IIoT', 'Git & CI/CD', 'DevOps', 'Technical Leadership', 'Industrial Automation'], verification: 'verified',
@@ -32,7 +31,7 @@ export const positions: WorkPosition[] = [
     highlights: [
       h('datacom-telecom-software', 'Developed and maintained embedded software for high-performance telecommunications devices.', 'Desenvolvimento e manutenção de software embarcado para dispositivos de telecomunicações de alto desempenho.', ['embedded'], 90),
       h('datacom-layer-three-protocols', 'Implemented IP, OSPF, and BGP Layer 3 protocols and improved system stability across hardware platforms.', 'Implementação dos protocolos de Camada 3 IP, OSPF e BGP e melhoria da estabilidade do sistema em diferentes plataformas de hardware.', ['embedded'], 90),
-      h('datacom-linux-debugging', 'Developed and debugged Embedded Linux systems, tuning performance and stability across hardware platforms.', 'Desenvolvimento e depuração de sistemas Linux embarcado, com ajustes de desempenho e estabilidade em diferentes plataformas de hardware.', ['embedded'], 85),
+      h('datacom-linux-debugging', 'Developed and debugged Embedded Linux systems, tuning performance and stability across hardware platforms.', 'Desenvolvimento e depuração de sistemas com Linux embarcado, com ajustes de desempenho e estabilidade em diferentes plataformas de hardware.', ['embedded'], 85),
       h('datacom-automated-testing', 'Designed unit and automated integration tests to improve code reliability.', 'Criação de testes unitários e de integração automatizados para melhorar a confiabilidade do código.', ['devops'], 80),
     ], tags: ['C/C++', 'Python', 'Shellscript', 'Embedded Linux', 'Buildroot', 'L3 Protocols', 'OSPF', 'BGP', 'QEMU', 'TDD', 'GoogleTest', 'Robot Framework', 'Jenkins', 'Git & CI/CD', 'Telecommunications'], verification: 'verified',
   },

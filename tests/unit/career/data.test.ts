@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 
 import { career } from '../../../src/content/portfolio/career';
 import { careerDataSchema } from '../../../src/content/portfolio/schema';
@@ -27,13 +28,29 @@ describe('canonical career data', () => {
   it('uses exact approved employment facts and customer allocation relationship', () => {
     const act = career.positions.find(position => position.id === 'act-digital-senior-embedded-software-engineer')!;
     const datacom = career.positions.find(position => position.id === 'datacom-embedded-software-engineer')!;
+    expect(career.employers.map(employer => employer.id)).toEqual(['act-digital', 'datacom', 'nova-smar']);
     expect(career.employers.find(employer => employer.id === act.employerId)?.name).toBe('Act Digital');
-    expect(act.highlights.find(highlight => highlight.id === 'act-schneider-strategic-partnership')?.webText.en)
-      .toMatch(/Schneider Electric.*customer.*allocated.*Innovation and Technology.*Network Service Platform/i);
+    expect(act.highlights.find(highlight => highlight.id === 'act-schneider-strategic-partnership')?.webText).toEqual({
+      en: "Work as an Act Digital engineer assigned to Schneider Electric's Innovation and Technology department on the Network Service Platform team.",
+      'pt-br': 'Atuação como engenheiro da Act Digital alocado no departamento de Innovation and Technology da Schneider Electric, na equipe Network Service Platform.',
+    });
+    expect(career.positions.some(position => position.employerId === 'schneider-electric')).toBe(false);
     expect(datacom).toMatchObject({
       title: { en: 'Embedded Software Engineer' },
       dates: { start: { value: '2024-09' }, end: { value: '2026-02' } },
     });
+  });
+
+  it('uses natural Brazilian Portuguese wording for Embedded Linux systems and platforms', () => {
+    const act = career.positions.find(position => position.id === 'act-digital-senior-embedded-software-engineer')!;
+    const datacom = career.positions.find(position => position.id === 'datacom-embedded-software-engineer')!;
+    expect(act.highlights.find(highlight => highlight.id === 'act-mission-critical-embedded-software')?.webText['pt-br'])
+      .toContain('plataformas de Linux embarcado');
+    expect(datacom.highlights.find(highlight => highlight.id === 'datacom-linux-debugging')?.webText['pt-br'])
+      .toContain('sistemas com Linux embarcado');
+    const about = readFileSync(new URL('../../../src/content/portfolio/about.pt-br.md', import.meta.url), 'utf8');
+    expect(about).toContain('plataformas de Linux embarcado');
+    expect(about).toContain('sistemas com Linux embarcado');
   });
 
   it('uses globally unique IDs for all top-level and nested entities', () => {

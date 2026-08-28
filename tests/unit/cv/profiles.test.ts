@@ -43,7 +43,7 @@ describe('CV profiles', () => {
         'Embedded software and R&D engineer specializing in C/C++, Python, Embedded Linux, RTOS, industrial and telecommunications protocols, cybersecurity, and applied research.',
       ],
       devops: [
-        'Senior DevOps & Engineering Enablement Engineer',
+        'DevOps & Engineering Enablement | Senior Embedded Software Engineer',
         'Software engineer improving embedded and R&D delivery through CI/CD, automation, Linux tooling, unit and integration testing, and reliable engineering workflows.',
       ],
     });
@@ -57,6 +57,7 @@ describe('CV profiles', () => {
     expect(cvProfiles.leadership.headline).toMatch(/Technical Lead/);
     expect(cvProfiles['embedded-rd'].summary).toMatch(/C\/C\+\+.*Python.*Linux.*RTOS.*protocols.*research/i);
     expect(cvProfiles.devops.summary).toMatch(/CI\/CD.*automation.*Linux.*testing/i);
+    expect(cvProfiles.devops.headline).toBe('DevOps & Engineering Enablement | Senior Embedded Software Engineer');
     expect(new Set(Object.values(cvProfiles).map(profile => profile.themeOrder.join(','))).size).toBe(4);
     expect(new Set(Object.values(cvProfiles).map(profile => profile.sectionOrder.join(','))).size).toBeGreaterThan(1);
     for (const profile of Object.values(cvProfiles)) {

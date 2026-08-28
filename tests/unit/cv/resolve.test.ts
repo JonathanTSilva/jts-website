@@ -102,9 +102,15 @@ describe('resolveCv', () => {
       expect(view.experience.flatMap(role => role.highlights).every(item => item.text.length <= 240)).toBe(true);
     }
     expect(`${views[0]!.headline} ${views[0]!.summary}`).toMatch(/Embedded.*R&D.*leadership.*DevOps/i);
-    const corpus = JSON.stringify(views);
-    for (const term of ['Embedded Linux', 'RTOS', 'C/C++', 'Python', 'CI/CD', 'industrial automation', 'telecommunications']) {
-      expect(corpus).toContain(term);
+    const requiredTerms: Record<string, string[]> = {
+      generic: ['Embedded Linux', 'RTOS', 'technical leadership', 'CI/CD', 'industrial automation', 'telecommunications'],
+      leadership: ['team', 'embedded', 'CI/CD', 'industrial systems'],
+      'embedded-rd': ['C/C++', 'Python', 'Embedded Linux', 'RTOS', 'cybersecurity', 'OPC UA'],
+      devops: ['CI/CD', 'automation', 'Linux', 'testing', 'Git'],
+    };
+    for (const view of views) {
+      const corpus = JSON.stringify(view).toLowerCase();
+      for (const term of requiredTerms[view.profileId]!) expect(corpus).toContain(term.toLowerCase());
     }
   });
 

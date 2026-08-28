@@ -31,7 +31,7 @@ export const cvProfiles: Readonly<Record<CvProfileId, CvProfile>> = Object.freez
     limits: { highlightsPerRole: 4, projects: 4, publications: 4, skills: 20 },
   }),
   devops: profile({
-    id: 'devops', headline: 'Senior DevOps & Engineering Enablement Engineer',
+    id: 'devops', headline: 'DevOps & Engineering Enablement | Senior Embedded Software Engineer',
     summary: 'Software engineer improving embedded and R&D delivery through CI/CD, automation, Linux tooling, unit and integration testing, and reliable engineering workflows.',
     themeOrder: ['devops', 'leadership', 'embedded', 'research', 'general'],
     sectionOrder: ['skills', 'experience', 'projects', 'education', 'publications'],
