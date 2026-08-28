@@ -56,7 +56,7 @@ pnpm test:e2e
 
 The Poppler check is independent of the JavaScript PDF verifier. It confirms A4 page geometry, the one-to-two-page limit, standard headings, representative reading order, and absence of known extraction artifacts. CI installs Poppler explicitly before validation.
 
-The deploy-boundary check recursively scans `dist/`. It permits only `dist/assets/cv/jonathan-cv.pdf`, and rejects extra PDFs, private-profile paths, private CV HTML, and selector artifacts. Private files remain outside Astro's input and output trees and are ignored by Git.
+The deploy-boundary check recursively scans `dist/` without following links. It permits only a regular file at `dist/assets/cv/jonathan-cv.pdf`; rejects every symlink, non-regular entry, extra PDF, and path containing a private profile ID; and scans HTML for selector syntax, private profile assignments, and the three exact private headlines. Private files remain outside Astro's input and output trees and are ignored by Git.
 
 ## Future private automation
 

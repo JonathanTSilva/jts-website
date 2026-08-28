@@ -7,14 +7,10 @@ const execFile = promisify(execFileCallback);
 
 const orderedAnchors = Object.freeze([
   'Jonathan Tobias da Silva',
-  'Skills',
-  'Experience',
   'Nova Smar',
-  'Education',
   'University of São Paulo',
-  'Projects',
-  'Publications',
 ]);
+const standardHeadings = Object.freeze(['Skills', 'Experience', 'Education', 'Projects', 'Publications']);
 
 export const validatePopplerOutput = (info: string, text: string): void => {
   const pages = Number(info.match(/^Pages:\s+(\d+)$/m)?.[1]);
@@ -30,6 +26,15 @@ export const validatePopplerOutput = (info: string, text: string): void => {
   }
   if (text.includes('\\csuse')) throw new Error('CV extraction contains a LaTeX template artifact: \\csuse');
   if (text.includes('\uFFFD')) throw new Error('CV extraction contains a replacement glyph');
+
+  const lines = text.split(/\r?\n/).map(line => line.trim());
+  let previousHeading = -1;
+  for (const heading of standardHeadings) {
+    const index = lines.indexOf(heading);
+    if (index < 0) throw new Error(`CV extraction is missing required standalone heading: ${heading}`);
+    if (index <= previousHeading) throw new Error(`CV extraction heading order is invalid at: ${heading}`);
+    previousHeading = index;
+  }
 
   let previous = -1;
   for (const anchor of orderedAnchors) {

@@ -13,12 +13,17 @@ export const getGeistFontCss = async (): Promise<string> => {
   return `@font-face{font-family:'Geist CV';font-style:normal;font-weight:400;src:url(data:font/woff2;base64,${regular.toString('base64')}) format('woff2')}@font-face{font-family:'Geist CV';font-style:normal;font-weight:600;src:url(data:font/woff2;base64,${semibold.toString('base64')}) format('woff2')}`;
 };
 
+export const prepareCvPdfHtml = async (html: string): Promise<string> => {
+  const fonts = await getGeistFontCss();
+  if (!html.includes('<style>')) throw new Error('CV HTML must contain a style element for embedded fonts');
+  return html.replace('<style>', `<style>${fonts}`);
+};
+
 export const renderPdfBytes = async (html: string): Promise<Uint8Array> => {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
-    const fonts = await getGeistFontCss();
-    const sourceHtml = html.replace('<style>', `<style>${fonts}`);
+    const sourceHtml = await prepareCvPdfHtml(html);
     await page.setContent(sourceHtml, { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready.then(() => undefined));
     const fontsLoaded = await page.evaluate(() => document.fonts.check('400 10pt "Geist CV"') && document.fonts.check('600 10pt "Geist CV"'));
