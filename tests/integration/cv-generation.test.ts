@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -19,6 +19,7 @@ describe('CV generation', () => {
         title: 'Jonathan Tobias da Silva — CV', author: 'Jonathan Tobias da Silva', subject: 'generic professional CV',
         keywords: 'CV generic Senior Embedded/R&D Engineer | Technical Leadership | DevOps',
         creator: 'jts-website', producer: 'jts-website', language: 'en-US',
+        creationDate: 'D:20000101000000Z', modificationDate: 'D:20000101000000Z',
       } });
       expect(result.verification.pageCount).toBeGreaterThanOrEqual(1);
       expect(result.verification.pageCount).toBeLessThanOrEqual(2);
@@ -35,6 +36,9 @@ describe('CV generation', () => {
       let cursor = -1;
       for (const anchor of representative) { const index = result.verification.text.indexOf(anchor, cursor + 1); expect(index).toBeGreaterThan(cursor); cursor = index; }
       expect(new TextDecoder().decode(await readFile(output))).not.toContain('existing destination');
+      expect((await stat(output)).mode & 0o777).toBe(0o600);
+      const repeated = await generateCv({ profileId: 'generic', mode: 'test', testRoot });
+      expect(repeated.verification.metadata).toEqual(result.verification.metadata);
       expect((await readdir(testRoot)).filter(name => name.startsWith('.cv-stage-'))).toEqual([]);
     } finally { await rm(testRoot, { recursive: true, force: true }); }
   }, 60_000);
@@ -52,4 +56,18 @@ describe('CV generation', () => {
       expect((await readdir(testRoot)).filter(name => name.startsWith('.cv-stage-'))).toEqual([]);
     } finally { await rm(testRoot, { recursive: true, force: true }); }
   });
+
+  it('creates and replaces private production output with owner-only permissions', async () => {
+    const workingRoot = await mkdtemp(join(tmpdir(), 'jts-cv-private-')); const original = process.cwd();
+    try {
+      process.chdir(workingRoot);
+      const first = await generateCv({ profileId: 'leadership', mode: 'private' });
+      expect(first.output).toBe(join(workingRoot, '.cv-output/jonathan-tobias-cv-leadership.pdf'));
+      expect((await stat(first.output)).mode & 0o777).toBe(0o600);
+      await writeFile(first.output, 'replacement target', { mode: 0o644 });
+      const replaced = await generateCv({ profileId: 'leadership', mode: 'private' });
+      expect((await stat(replaced.output)).mode & 0o777).toBe(0o600);
+      expect(new TextDecoder().decode(await readFile(replaced.output))).not.toContain('replacement target');
+    } finally { process.chdir(original); await rm(workingRoot, { recursive: true, force: true }); }
+  }, 60_000);
 });

@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { chromium } from '@playwright/test';
 import { PDFDocument, PDFName, PDFString } from 'pdf-lib';
 import type { ResolvedCv } from './types';
 
-const fontFace = async (): Promise<string> => {
-  const directory = resolve('node_modules/geist/dist/fonts/geist-sans');
+export const getGeistFontCss = async (): Promise<string> => {
+  const require = createRequire(import.meta.url);
+  const directory = resolve(dirname(require.resolve('geist/font/sans')), 'fonts/geist-sans');
   const [regular, semibold] = await Promise.all([readFile(resolve(directory, 'Geist-Regular.woff2')), readFile(resolve(directory, 'Geist-SemiBold.woff2'))]);
   return `@font-face{font-family:'Geist CV';font-style:normal;font-weight:400;src:url(data:font/woff2;base64,${regular.toString('base64')}) format('woff2')}@font-face{font-family:'Geist CV';font-style:normal;font-weight:600;src:url(data:font/woff2;base64,${semibold.toString('base64')}) format('woff2')}`;
 };
@@ -15,7 +17,7 @@ export const renderPdfBytes = async (html: string): Promise<Uint8Array> => {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
-    const fonts = await fontFace();
+    const fonts = await getGeistFontCss();
     const sourceHtml = html.replace('<style>', `<style>${fonts}`);
     await page.setContent(sourceHtml, { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready.then(() => undefined));

@@ -1,4 +1,4 @@
-import { lstat, mkdir, mkdtemp, readFile, realpath, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { chmod, lstat, mkdir, mkdtemp, readFile, realpath, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { career } from '../../content/portfolio/career';
 import { getCvQualityWarnings } from '../career/quality';
@@ -44,6 +44,7 @@ const assertSameParent = async (parent: string, expected: ParentIdentity): Promi
 export const generateCv = async (request: GenerateRequest, testDependencies?: TestDependencies): Promise<GenerateCvResult> => {
   if (testDependencies && request.mode !== 'test') throw new Error('CV dependency injection is restricted to test mode');
   const destination = getCvOutput(request); const parent = dirname(destination);
+  const outputMode = request.mode === 'public' ? 0o644 : 0o600;
   await mkdir(parent, { recursive: true });
   const parentIdentity = await captureParent(parent);
   await assertSafeDestination(destination);
@@ -58,13 +59,17 @@ export const generateCv = async (request: GenerateRequest, testDependencies?: Te
     const warnings = getCvQualityWarnings(view, profile);
     const rendered = await dependencies.renderPdfBytes(renderCvHtml(view));
     const normalized = await dependencies.normalizePdfMetadata(rendered, view);
-    await writeFile(stagedPdf, normalized, { flag: 'wx' });
+    await writeFile(stagedPdf, normalized, { flag: 'wx', mode: 0o600 });
+    await chmod(stagedPdf, 0o600);
     const verification = await dependencies.verifyCvPdf(new Uint8Array(await readFile(stagedPdf)), view);
     await assertSameParent(parent, parentIdentity);
     await assertSafeDestination(destination);
     if (getCvOutput(request) !== destination) throw new Error('CV output destination changed before atomic replacement');
     await rename(stagedPdf, destination);
+    await chmod(destination, outputMode);
     await assertSameParent(parent, parentIdentity);
+    const final = await lstat(destination);
+    if (!final.isFile() || final.isSymbolicLink() || (final.mode & 0o777) !== outputMode) throw new Error('CV output permissions or file type are invalid after replacement');
     return { output: destination, verification, warnings };
   } finally { await rm(stage, { recursive: true, force: true }); }
 };
