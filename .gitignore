@@ -5,7 +5,7 @@ node_modules/
 dist/
 .astro/
 .cv-output/
-public/assets/cv/*.pdf
+/public/assets/cv/jonathan-cv.pdf
 
 # Logs
 npm-debug.log*

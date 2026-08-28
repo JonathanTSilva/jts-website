@@ -1,3 +1,6 @@
+import { lstat, mkdtemp, rename, rm } from 'node:fs/promises';
+import { realpathSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateCv as generateCvProduction } from '../src/lib/cv/generate';
 import { getCvOutput as getCvOutputProduction } from '../src/lib/cv/output-policy';
@@ -46,6 +49,12 @@ interface CliDependencies {
     output: string;
     warnings: readonly Readonly<{ code: string; entityId: string; message: string }>[];
   }>>;
+  readonly fs?: Readonly<{
+    lstat: typeof lstat;
+    mkdtemp: typeof mkdtemp;
+    rename: typeof rename;
+    rm: typeof rm;
+  }>;
 }
 
 const productionDependencies: CliDependencies = {
@@ -53,14 +62,113 @@ const productionDependencies: CliDependencies = {
   generateCv: generateCvProduction,
 };
 
+interface ResolvedRequest {
+  readonly request: CliRequest;
+  readonly output: string;
+}
+
+interface Backup {
+  readonly output: string;
+  readonly directory?: string;
+  readonly file?: string;
+}
+
+const errorMessage = (error: unknown): string => error instanceof Error ? error.message : String(error);
+
+const resolveRequests = (
+  requests: readonly CliRequest[],
+  getCvOutput: CliDependencies['getCvOutput'],
+): readonly ResolvedRequest[] => requests.map(request => {
+  try {
+    return { request, output: getCvOutput(request) };
+  } catch (error) {
+    throw new Error(`${request.profileId}: ${errorMessage(error)}`);
+  }
+});
+
+const runTransactionalBatch = async (
+  resolved: readonly ResolvedRequest[],
+  dependencies: CliDependencies,
+): Promise<readonly Awaited<ReturnType<CliDependencies['generateCv']>>[]> => {
+  const fs = dependencies.fs ?? { lstat, mkdtemp, rename, rm };
+  const backups: Backup[] = [];
+  const results: Awaited<ReturnType<CliDependencies['generateCv']>>[] = [];
+  try {
+    // Generation is sequential and may be observable by another same-account process,
+    // but rollback guarantees the command's final on-disk state is never a mixed batch.
+    for (const { output } of resolved) {
+      try {
+        await fs.lstat(output);
+      } catch (error) {
+        if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+          backups.push({ output });
+          continue;
+        }
+        throw error;
+      }
+      const directory = await fs.mkdtemp(join(dirname(output), '.cv-batch-backup-'));
+      try {
+        const file = join(directory, basename(output));
+        await fs.rename(output, file);
+        backups.push({ output, directory, file });
+      } catch (error) {
+        await fs.rm(directory, { recursive: true, force: true });
+        throw error;
+      }
+    }
+
+    for (const { request, output } of resolved) {
+      try {
+        const result = await dependencies.generateCv(request);
+        if (result.output !== output) throw new Error('generator returned an unexpected output path');
+        results.push(result);
+      } catch (error) {
+        throw new Error(`${request.profileId}: ${errorMessage(error)}`);
+      }
+    }
+  } catch (error) {
+    const rollbackErrors: string[] = [];
+    for (const backup of backups) {
+      try {
+        await fs.rm(backup.output, { force: true });
+        if (backup.file) await fs.rename(backup.file, backup.output);
+        if (backup.directory) await fs.rm(backup.directory, { recursive: true, force: true });
+      } catch (rollbackError) {
+        rollbackErrors.push(errorMessage(rollbackError));
+      }
+    }
+    if (rollbackErrors.length) {
+      throw new Error(`${errorMessage(error)}; rollback failed: ${rollbackErrors.join('; ')}`);
+    }
+    throw error;
+  }
+  await Promise.all(backups.map(backup => backup.directory
+    ? fs.rm(backup.directory, { recursive: true, force: true })
+    : Promise.resolve()));
+  return results;
+};
+
 export const main = async (
   args: readonly string[] = process.argv.slice(2),
   dependencies: CliDependencies = productionDependencies,
 ): Promise<void> => {
-  for (const request of parseCvArguments(args)) {
-    const expectedOutput = dependencies.getCvOutput(request);
-    const result = await dependencies.generateCv(request);
-    if (result.output !== expectedOutput) throw new Error('CV generator returned an unexpected output path');
+  const requests = parseCvArguments(args);
+  const resolved = resolveRequests(requests, dependencies.getCvOutput);
+  const results = requests.length > 1
+    ? await runTransactionalBatch(resolved, dependencies)
+    : [await (async () => {
+      const { request, output } = resolved[0]!;
+      try {
+        const result = await dependencies.generateCv(request);
+        if (result.output !== output) throw new Error('generator returned an unexpected output path');
+        return result;
+      } catch (error) {
+        throw new Error(`${request.profileId}: ${errorMessage(error)}`);
+      }
+    })()];
+  for (let index = 0; index < resolved.length; index += 1) {
+    const { request } = resolved[index]!;
+    const result = results[index]!;
     for (const warning of result.warnings) {
       console.warn(`[${warning.code}] ${warning.entityId}: ${warning.message}`);
     }
@@ -68,7 +176,16 @@ export const main = async (
   }
 };
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+export const isDirectInvocation = (entrypoint: string | undefined, moduleUrl: string): boolean => {
+  if (!entrypoint) return false;
+  try {
+    return realpathSync(entrypoint) === realpathSync(fileURLToPath(moduleUrl));
+  } catch {
+    return false;
+  }
+};
+
+if (isDirectInvocation(process.argv[1], import.meta.url)) {
   main().catch(error => {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;
