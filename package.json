@@ -9,6 +9,8 @@
     "build:cv": "pnpm cv:build:public",
     "cv:build": "tsx scripts/generate-cv.ts",
     "cv:build:all": "tsx scripts/generate-cv.ts --all-private",
+    "cv:check:poppler": "tsx scripts/check-cv-poppler.ts public/assets/cv/jonathan-cv.pdf",
+    "cv:check:dist": "tsx scripts/check-cv-dist.ts dist",
     "build:search": "tsx scripts/build-search-index.ts",
     "build": "pnpm build:cv && pnpm build:search && astro build",
     "preview": "astro preview",

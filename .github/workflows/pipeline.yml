@@ -35,6 +35,11 @@ jobs:
         
       - name: Install Playwright Browsers
         run: pnpm test:e2e:install
+
+      - name: Install Poppler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
         
       - name: Check Astro
         run: pnpm check
@@ -47,6 +52,12 @@ jobs:
         
       - name: Build
         run: pnpm build
+
+      - name: Check CV with Poppler
+        run: pnpm cv:check:poppler
+
+      - name: Check CV deploy boundary
+        run: pnpm cv:check:dist
 
       - name: E2E Tests
         run: pnpm test:e2e
