@@ -17,6 +17,7 @@ describe('CV generation', () => {
       expect(result.output).toBe(output);
       expect(result.verification).toMatchObject({ pageCount: expect.any(Number), hasStructTree: true, metadata: {
         title: 'Jonathan Tobias da Silva — CV', author: 'Jonathan Tobias da Silva', subject: 'generic professional CV',
+        keywords: 'CV generic Senior Embedded/R&D Engineer | Technical Leadership | DevOps',
         creator: 'jts-website', producer: 'jts-website', language: 'en-US',
       } });
       expect(result.verification.pageCount).toBeGreaterThanOrEqual(1);
