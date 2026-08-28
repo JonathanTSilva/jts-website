@@ -5,8 +5,12 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "cv:build:public": "tsx scripts/generate-cv.ts --public",
+    "build:cv": "pnpm cv:build:public",
+    "cv:build": "tsx scripts/generate-cv.ts",
+    "cv:build:all": "tsx scripts/generate-cv.ts --all-private",
     "build:search": "tsx scripts/build-search-index.ts",
-    "build": "pnpm build:search && astro build",
+    "build": "pnpm build:cv && pnpm build:search && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "test:unit": "vitest run",
