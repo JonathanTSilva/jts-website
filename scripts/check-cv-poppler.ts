@@ -21,8 +21,11 @@ export const validatePopplerOutput = (info: string, text: string): void => {
   if (!Number.isInteger(pages) || pages < 1 || pages > 2) {
     throw new Error(`CV must contain one or two pages; Poppler reported ${Number.isFinite(pages) ? pages : 'an unknown count'}`);
   }
-  const sizes = [...info.matchAll(/^Page(?:\s+\d+)? size:\s+([\d.]+) x ([\d.]+) pts(?: \(A4\))?$/gm)];
-  if (!sizes.length || sizes.some(match => Math.abs(Number(match[1]) - 595.28) > 1 || Math.abs(Number(match[2]) - 841.89) > 1)) {
+  const sizes = [...info.matchAll(/^Page\s+\d+ size:\s+([\d.]+) x ([\d.]+) pts(?: \(A4\))?$/gm)];
+  if (sizes.length !== pages) {
+    throw new Error(`Poppler must report an A4 size record for every page; expected ${pages} size records but found ${sizes.length}`);
+  }
+  if (sizes.some(match => Math.abs(Number(match[1]) - 595.28) > 1 || Math.abs(Number(match[2]) - 841.89) > 1)) {
     throw new Error('CV pages must use A4 portrait dimensions');
   }
   if (text.includes('\\csuse')) throw new Error('CV extraction contains a LaTeX template artifact: \\csuse');
@@ -39,11 +42,16 @@ export const validatePopplerOutput = (info: string, text: string): void => {
 
 export const checkCvWithPoppler = async (pdfPath: string): Promise<void> => {
   try {
-    const [{ stdout: info }, { stdout: text }] = await Promise.all([
-      execFile('pdfinfo', [pdfPath], { encoding: 'utf8' }),
+    const { stdout: summary } = await execFile('pdfinfo', [pdfPath], { encoding: 'utf8' });
+    const pages = Number(summary.match(/^Pages:\s+(\d+)$/m)?.[1]);
+    if (!Number.isInteger(pages) || pages < 1 || pages > 2) {
+      throw new Error(`CV must contain one or two pages; Poppler reported ${Number.isFinite(pages) ? pages : 'an unknown count'}`);
+    }
+    const [{ stdout: pageInfo }, { stdout: text }] = await Promise.all([
+      execFile('pdfinfo', ['-f', '1', '-l', String(pages), pdfPath], { encoding: 'utf8' }),
       execFile('pdftotext', ['-layout', pdfPath, '-'], { encoding: 'utf8' }),
     ]);
-    validatePopplerOutput(info, text);
+    validatePopplerOutput(`${summary}\n${pageInfo}`, text);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       throw new Error('Poppler is required for this check. Install poppler-utils and try again.', { cause: error });

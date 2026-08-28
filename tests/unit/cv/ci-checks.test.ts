@@ -6,7 +6,11 @@ import { describe, expect, test } from 'vitest';
 import { validatePopplerOutput } from '../../../scripts/check-cv-poppler';
 import { validateCvDist } from '../../../scripts/check-cv-dist';
 
-const validInfo = 'Pages: 2\nPage size: 595.92 x 842.04 pts (A4)';
+const validInfo = [
+  'Pages: 2',
+  'Page    1 size: 595.92 x 842.04 pts (A4)',
+  'Page    2 size: 595.92 x 842.04 pts (A4)',
+].join('\n');
 const validText = [
   'Jonathan Tobias da Silva', 'Skills', 'Experience', 'Nova Smar',
   'Education', 'University of São Paulo', 'Projects', 'Publications',
@@ -18,8 +22,10 @@ describe('Poppler CV validation', () => {
   });
 
   test.each([
-    ['Pages: 3\nPage size: 595.92 x 842.04 pts (A4)', validText, /one or two pages/i],
-    ['Pages: 1\nPage size: 612 x 792 pts', validText, /A4/i],
+    ['Pages: 3\nPage    1 size: 595.92 x 842.04 pts (A4)', validText, /one or two pages/i],
+    ['Pages: 1\nPage    1 size: 612 x 792 pts', validText, /A4/i],
+    ['Pages: 2\nPage    1 size: 595.92 x 842.04 pts (A4)', validText, /every page|2.*size/i],
+    ['Pages: 2\nPage    1 size: 595.92 x 842.04 pts (A4)\nPage    2 size: 612 x 792 pts', validText, /A4/i],
     [validInfo, validText.replace('Experience\nNova Smar', 'Nova Smar\nExperience'), /order/i],
     [validInfo, validText.replace('Skills\n', ''), /Skills/],
     [validInfo, `${validText}\n\\csuse`, /template artifact/i],
@@ -49,6 +55,9 @@ describe('deploy CV boundary', () => {
     'assets/cv/jonathan-cv-leadership.pdf',
     'downloads/embedded-rd/profile.html',
     'devops/index.html',
+    'notes/myleadershipcv.txt',
+    'pages/devopsresume.html',
+    'assets/xembedded-rdy.txt',
   ])('rejects private or extra deploy artifact %s', async path => {
     const root = await makeDist();
     await put(root, 'assets/cv/jonathan-cv.pdf');

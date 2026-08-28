@@ -3,7 +3,7 @@ import { extname, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const allowedPdf = 'assets/cv/jonathan-cv.pdf';
-const privateProfilePattern = /(?:^|[^a-z])(leadership|embedded-rd|devops)(?:[^a-z]|$)/i;
+const privateProfilePattern = /(leadership|embedded-rd|devops)/i;
 const selectorPattern = /(?:cv[-_ ]?profile|choose\s+(?:a\s+)?cv\s+profile|profile\s*selector)/i;
 
 const filesBelow = async (root: string, directory = root): Promise<string[]> => {
