@@ -9,8 +9,8 @@ export const person: Person = {
     'pt-br': 'Engenheiro Sênior de Sistemas Embarcados/P&D | Liderança Técnica | DevOps',
   },
   summary: {
-    en: 'Senior software engineer specializing in embedded software and systems across operational and information technology domains.',
-    'pt-br': 'Engenheiro de software sênior especializado em software e sistemas embarcados nos domínios de tecnologia operacional e da informação.',
+    en: 'Senior embedded software and R&D engineer working across industrial automation and telecommunications, with experience in technical leadership, Embedded Linux, real-time systems, networking, applied research, and CI/CD.',
+    'pt-br': 'Engenheiro sênior de software embarcado e P&D com atuação em automação industrial e telecomunicações e experiência em liderança técnica, Linux embarcado, sistemas de tempo real, redes, pesquisa aplicada e CI/CD.',
   },
   links: [
     { kind: 'email', label: 'jonathantosilva@hotmail.com', url: 'mailto:jonathantosilva@hotmail.com' },

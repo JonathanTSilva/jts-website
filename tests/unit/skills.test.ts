@@ -11,9 +11,9 @@ describe('website skills', () => {
     expect(skills.every(({ id, name }) => id.length > 0 && name.length > 0)).toBe(true);
   });
 
-  it('is independent of pending work tags', () => {
+  it('is independent of work tags', () => {
     const fixture = structuredClone(career);
-    fixture.positions.find(({ verification }) => verification === 'pending')!.tags.push('Pending-only skill');
+    fixture.positions[0]!.tags.push('Role-only skill');
     expect(getWebsiteSkills(fixture, 'en')).toEqual(getWebsiteSkills(career, 'en'));
   });
 });

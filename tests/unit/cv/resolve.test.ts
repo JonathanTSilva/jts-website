@@ -93,6 +93,21 @@ describe('resolveCv', () => {
     expect(JSON.stringify(view)).not.toMatch(/<\/?[a-z][^>]*>/i);
   });
 
+  it('keeps every profile concise, differentiated, and rich in approved ATS terminology', () => {
+    const views = Object.values(cvProfiles).map(profile => resolveCv(career, profile));
+    expect(new Set(views.map(view => view.headline)).size).toBe(4);
+    expect(new Set(views.map(view => view.summary)).size).toBe(4);
+    for (const view of views) {
+      expect(view.summary.length).toBeLessThanOrEqual(220);
+      expect(view.experience.flatMap(role => role.highlights).every(item => item.text.length <= 240)).toBe(true);
+    }
+    expect(`${views[0]!.headline} ${views[0]!.summary}`).toMatch(/Embedded.*R&D.*leadership.*DevOps/i);
+    const corpus = JSON.stringify(views);
+    for (const term of ['Embedded Linux', 'RTOS', 'C/C++', 'Python', 'CI/CD', 'industrial automation', 'telecommunications']) {
+      expect(corpus).toContain(term);
+    }
+  });
+
   it('resolves the exact verified canonical chronology and approved English fallback text', () => {
     const view = resolveCv(career, cvProfiles.generic);
     expect(view.experience.map(role => role.id)).toEqual([
@@ -105,7 +120,7 @@ describe('resolveCv', () => {
       'act-industrial-protocols', 'act-real-time-latency',
     ]);
     expect(view.experience[0]!.highlights[0]!.text).toBe(
-      'Develop and customize mission-critical embedded software for Embedded Linux and RTOS, focusing on industrial switches and PLCs.',
+      'Develop and customize mission-critical software for Embedded Linux and RTOS platforms used in industrial switches and PLCs.',
     );
     const ids = view.experience.flatMap(role => role.highlights.map(highlight => highlight.id));
     expect(new Set(ids).size).toBe(ids.length);

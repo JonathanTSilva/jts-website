@@ -26,8 +26,7 @@ export const publications: Publication[] = [
     id: 'publication-web-motor-drive-sizing',
     title: { en: 'Development of a WEB application for sizing electric motor drive equipment', 'pt-br': 'Desenvolvimento de uma aplicação WEB para dimensionamento de equipamentos de acionamento de motores elétricos' },
     authors: ['Jonathan Tobias da Silva', 'A. L. Dias', 'N. F. D. F. Filho', 'A. C. Turcato'], venue: 'IFSP',
-    date: { value: '2019-10', precision: 'month' }, type: 'paper',
-    legacyHttpUrl: 'http://ocs.ifsp.edu.br/index.php/conict/xconict/paper/view/5795/1289',
+    date: { value: '2020', precision: 'year' }, type: 'paper',
     themes: ['research'], priority: 75,
   },
 ];

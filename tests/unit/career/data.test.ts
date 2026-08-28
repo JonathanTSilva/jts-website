@@ -12,24 +12,28 @@ describe('canonical career data', () => {
     ]));
   });
 
-  it('represents the Nova Smar progression as distinct positions', () => {
+  it('represents Nova Smar as the one owner-approved flattened role', () => {
     const novaSmar = career.positions.filter(position => position.employerId === 'nova-smar');
-    expect(novaSmar.length).toBeGreaterThan(1);
-    expect(new Set(novaSmar.map(position => position.id)).size).toBe(novaSmar.length);
-  });
-
-  it('keeps the website-primary Nova role verified and PDF split roles pending', () => {
-    const novaPositions = career.positions.filter(position => position.employerId === 'nova-smar');
-    expect(novaPositions.map(position => ({
+    expect(novaSmar.map(position => ({
       id: position.id, title: position.title.en, start: position.dates.start.value,
       end: position.dates.end?.value, verification: position.verification,
     }))).toEqual([
       { id: 'nova-smar-rd-engineer', title: 'R&D Engineer', start: '2021-01', end: '2024-09', verification: 'verified' },
-      { id: 'nova-smar-rd-electronic-intelligence-analyst', title: 'R&D Electronic Intelligence Analyst', start: '2023', end: '2024', verification: 'pending' },
-      { id: 'nova-smar-rd-electronic-intelligence-assistant', title: 'R&D Electronic Intelligence Assistant', start: '2022', end: '2023', verification: 'pending' },
-      { id: 'nova-smar-rd-intern', title: 'R&D Intern', start: '2021', end: '2021', verification: 'pending' },
     ]);
+    expect(career.positions.map(position => position.id).join(' ')).not.toMatch(/analyst|assistant|intern/);
     expect(getWebsiteTimeline(career, 'en').filter(entry => entry.kind === 'work' && entry.organization === 'Nova Smar')).toHaveLength(1);
+  });
+
+  it('uses exact approved employment facts and customer allocation relationship', () => {
+    const act = career.positions.find(position => position.id === 'act-digital-senior-embedded-software-engineer')!;
+    const datacom = career.positions.find(position => position.id === 'datacom-embedded-software-engineer')!;
+    expect(career.employers.find(employer => employer.id === act.employerId)?.name).toBe('Act Digital');
+    expect(act.highlights.find(highlight => highlight.id === 'act-schneider-strategic-partnership')?.webText.en)
+      .toMatch(/Schneider Electric.*customer.*allocated.*Innovation & Technology.*Network Service Platform/i);
+    expect(datacom).toMatchObject({
+      title: { en: 'Embedded Software Engineer' },
+      dates: { start: { value: '2024-09' }, end: { value: '2026-02' } },
+    });
   });
 
   it('uses globally unique IDs for all top-level and nested entities', () => {
@@ -55,9 +59,7 @@ describe('canonical career data', () => {
       .toBe('https://github.com/JonathanTSilva/forgenv');
     const sizer = career.projects.find(project => project.title.en === 'Sizer');
     expect(sizer).toMatchObject({ image: '/assets/images/projects/sizer.png', status: 'Archived' });
-    expect(sizer?.legacyLinks).toEqual([{
-      label: 'Historical live site', url: 'http://sizer.ti.srt.ifsp.edu.br/',
-    }]);
+    expect(sizer?.legacyLinks).toBeUndefined();
     expect(career.projects.find(project => project.title.en === 'Forgenv')).toMatchObject({
       featured: true, status: 'In Progress',
     });
@@ -67,8 +69,9 @@ describe('canonical career data', () => {
     expect(career.publications).toHaveLength(4);
     expect(career.publications.find(publication => publication.title.en.startsWith('A Survey'))?.url)
       .toBe('https://ieeexplore.ieee.org/document/10375053');
-    expect(career.publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')?.legacyHttpUrl)
-      .toBe('http://ocs.ifsp.edu.br/index.php/conict/xconict/paper/view/5795/1289');
+    expect(career.publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')).toMatchObject({
+      date: { value: '2020', precision: 'year' },
+    });
   });
 
   it('preserves every current project and experience tag in the curated skill taxonomy', () => {
@@ -79,11 +82,9 @@ describe('canonical career data', () => {
 
   it('does not expose historical HTTP references as compatibility links', () => {
     expect(getWebsiteProjects(career, 'en').find(project => project.id === 'project-sizer')?.websiteUrl).toBeUndefined();
-    expect(career.projects.find(project => project.id === 'project-sizer')?.legacyLinks?.[0]?.url)
-      .toBe('http://sizer.ti.srt.ifsp.edu.br/');
+    expect(career.projects.find(project => project.id === 'project-sizer')?.legacyLinks).toBeUndefined();
     expect(getWebsitePublications(career, 'en').find(publication => publication.id === 'publication-web-motor-drive-sizing')?.url).toBeUndefined();
-    expect(career.publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')?.legacyHttpUrl)
-      .toBe('http://ocs.ifsp.edu.br/index.php/conict/xconict/paper/view/5795/1289');
+    expect(career.publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')?.legacyHttpUrl).toBeUndefined();
   });
 
   it('uses the exact stable skill group order', () => {

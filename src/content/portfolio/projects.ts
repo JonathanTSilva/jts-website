@@ -215,7 +215,6 @@ export const projects: Project[] = [
     image: "/assets/images/projects/sizer.png",
     tags: ["Web Development", "JavaScript", "React", "Node.js", "Data Engineering"],
     links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/SI-Sizer' }],
-    legacyLinks: [{ label: 'Historical live site', url: 'http://sizer.ti.srt.ifsp.edu.br/' }],
     highlights: [], themes: ['general'], priority: 60,
     status: "Archived",
   }

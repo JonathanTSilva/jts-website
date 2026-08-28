@@ -32,19 +32,19 @@ describe('CV profiles', () => {
     expect(Object.fromEntries(profileIds.map(id => [id, [cvProfiles[id].headline, cvProfiles[id].summary]]))).toEqual({
       generic: [
         'Senior Embedded/R&D Engineer | Technical Leadership | DevOps',
-        'Senior embedded and R&D engineer building reliable industrial and telecommunications systems, with technical leadership and DevOps experience.',
+        'Senior embedded software and R&D engineer delivering industrial automation and telecommunications systems with Embedded Linux, RTOS, networking, technical leadership, and CI/CD experience.',
       ],
       leadership: [
         'Technical Lead | Embedded & R&D Engineering',
-        'Technical leader guiding embedded product development, engineering teams, and delivery practices for industrial systems.',
+        'Technical leader coordinating embedded product development and engineering teams, with hands-on experience in industrial systems, Git migrations, CI/CD, and applied R&D.',
       ],
       'embedded-rd': [
         'Senior Embedded Software & R&D Engineer',
-        'Embedded software and R&D engineer specializing in industrial systems, Linux, real-time platforms, networking, and applied research.',
+        'Embedded software and R&D engineer specializing in C/C++, Python, Embedded Linux, RTOS, industrial and telecommunications protocols, cybersecurity, and applied research.',
       ],
       devops: [
         'Senior DevOps & Engineering Enablement Engineer',
-        'Software engineer improving delivery through CI/CD, automation, Linux tooling, testing, and reliable engineering workflows.',
+        'Software engineer improving embedded and R&D delivery through CI/CD, automation, Linux tooling, unit and integration testing, and reliable engineering workflows.',
       ],
     });
   });
@@ -55,7 +55,7 @@ describe('CV profiles', () => {
     expect(cvProfiles.devops.themeOrder[0]).toBe('devops');
     expect(cvProfiles.generic.themeOrder.slice(0, 4)).toEqual(['embedded', 'research', 'leadership', 'devops']);
     expect(cvProfiles.leadership.headline).toMatch(/Technical Lead/);
-    expect(cvProfiles['embedded-rd'].summary).toMatch(/Linux.*real-time.*networking.*research/i);
+    expect(cvProfiles['embedded-rd'].summary).toMatch(/C\/C\+\+.*Python.*Linux.*RTOS.*protocols.*research/i);
     expect(cvProfiles.devops.summary).toMatch(/CI\/CD.*automation.*Linux.*testing/i);
     expect(new Set(Object.values(cvProfiles).map(profile => profile.themeOrder.join(','))).size).toBe(4);
     expect(new Set(Object.values(cvProfiles).map(profile => profile.sectionOrder.join(','))).size).toBeGreaterThan(1);

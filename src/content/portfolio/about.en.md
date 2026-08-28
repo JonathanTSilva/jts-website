@@ -2,13 +2,13 @@
 title: "Biography"
 language: "en"
 translationKey: "about-me"
-summary: "Senior Embedded Software Engineer specializing in mission-critical systems and technical leadership."
+summary: "Senior embedded software and R&D engineer working across industrial automation and telecommunications."
 ---
 
-I am a **Senior Embedded Software Engineer** with years of experience in the R&D industry, working at the intersection of operational and information technologies. My work is centered on the design and implementation of robust embedded software, primarily for industrial environments, ranging from industrial automation to telecommunications.
+I am a **Senior Embedded Software Engineer** working at the intersection of operational and information technologies. I design and implement embedded software for industrial automation and telecommunications, with experience in Embedded Linux, RTOS platforms, networking protocols, testing, and CI/CD.
 
-Currently, I work as a Senior Embedded Software Engineer at **Act Digital**, in strategic partnership with **Schneider Electric**, where I develop Embedded Linux and RTOS solutions for industrial connectivity. Throughout my career, I have led technical teams of up to 10 engineers, delivering high-impact projects that require high availability and strong performance.
+I work at **Act Digital** and am allocated to its customer **Schneider Electric**, in the Innovation & Technology department's Network Service Platform team. There I develop Embedded Linux and RTOS solutions for industrial connectivity. Earlier, I coordinated embedded-product development with a team of 10 engineers and led the adoption of Git and CI/CD practices in an R&D workflow.
 
-I hold a **Master of Science (M.Sc.) in Electrical Engineering** from the **University of São Paulo (USP)**, with a focus on artificial intelligence applied to the security of industrial networks and protocols, integrating advanced research with practical and sustainable engineering, supported by solid hands-on experience with a range of tools and technologies.
+I hold a **Master of Science (M.Sc.) in Electrical Engineering** from the **University of São Paulo (USP)**, focused on artificial intelligence applied to industrial network and protocol security. This research complements hands-on engineering in cybersecurity, industrial communications, and reliable software systems.
 
 My approach to engineering is guided by technical rigor and the consistent application of fundamental principles of quality, architecture, and development. I prioritize building systems that are robust, testable, and easy to evolve, with clear, well-structured code supported by practices that ensure reliability, maintainability, and effective documentation throughout the software lifecycle.
