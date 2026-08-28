@@ -19,9 +19,10 @@ const safeUrl = (value: string): boolean => {
 export interface PdfTextFragment { readonly page: number; readonly text: string; readonly rect: readonly [number, number, number, number] }
 export interface TextFieldMatch { readonly field: string; readonly page: number; readonly rects: readonly (readonly [number, number, number, number])[]; readonly tokenStart: number; readonly tokenEnd: number }
 interface Token { readonly value: string; readonly page: number; readonly rect: readonly [number, number, number, number]; readonly item: number }
-const words = (value: string): string[] => value.normalize('NFKC').replace(/[\u00ad\u200b\u2060\ufeff]/g, '').match(/[\p{L}\p{N}+#]+/gu) ?? [];
+const normalizedGlyphs = (value: string): string => value.normalize('NFKC').replace(/[\u00ad\u200b\u2060\ufeff]/g, '');
+const words = (value: string): string[] => normalizedGlyphs(value).match(/\S+/gu) ?? [];
 const tokenizeFragments = (items: readonly PdfTextFragment[]): Token[] => items.flatMap((item, itemIndex) => {
-  const matches = [...item.text.normalize('NFKC').matchAll(/[\p{L}\p{N}+#]+/gu)];
+  const normalized = normalizedGlyphs(item.text); const matches = [...normalized.matchAll(/\S+/gu)];
   const width = item.rect[2] - item.rect[0]; const length = Math.max(item.text.length, 1);
   return matches.map(match => ({
     value: match[0], page: item.page, item: itemIndex,
@@ -126,14 +127,19 @@ export const verifyCvPdf = async (bytes: Uint8Array, view: ResolvedCv): Promise<
     assertValidExtractedCvText(text);
     matchOrderedTextFields(fragments, orderedAnchors(view));
     const linkExpectations = expectedLinks(view); const linkMatches = matchOrderedTextFields(fragments, linkExpectations.map(link => link.label));
-    const overlaps = (left: readonly number[], right: readonly number[]): boolean => Math.min(left[2]!, right[2]!) > Math.max(left[0]!, right[0]!)
-      && Math.min(left[3]!, right[3]!) > Math.max(left[1]!, right[1]!);
+    const area = (rect: readonly number[]): number => Math.max(0, rect[2]! - rect[0]!) * Math.max(0, rect[3]! - rect[1]!);
+    const intersection = (left: readonly number[], right: readonly number[]): number => Math.max(0, Math.min(left[2]!, right[2]!) - Math.max(left[0]!, right[0]!))
+      * Math.max(0, Math.min(left[3]!, right[3]!) - Math.max(left[1]!, right[1]!));
     linkExpectations.forEach((expected, index) => {
       assert(safeUrl(expected.url), `CV model contains an invalid link URL: ${expected.url}`);
       const expectedUrl = new URL(expected.url).href;
       const match = linkMatches[index]!;
-      assert(annotations.some(annotation => annotation.page === match.page && new URL(annotation.url).href === expectedUrl
-        && match.rects.some(rect => overlaps(rect, annotation.rect))), `PDF is missing geometrically associated link annotation for ${expected.label}`);
+      const matchingAnnotations = annotations.filter(annotation => annotation.page === match.page && new URL(annotation.url).href === expectedUrl)
+        .map(annotation => [annotation.rect[0] - 1, annotation.rect[1] - 1, annotation.rect[2] + 1, annotation.rect[3] + 1] as const);
+      const coverage = match.rects.map(rect => Math.min(1, matchingAnnotations.reduce((sum, annotation) => sum + intersection(rect, annotation), 0) / area(rect)));
+      assert(coverage.length > 0 && coverage.every(value => value >= 0.8)
+        && coverage.reduce((sum, value) => sum + value, 0) / coverage.length >= 0.8,
+      `PDF link annotation does not cover the complete visible label for ${expected.label}`);
     });
     return { pageCount: pdf.numPages, hasStructTree, text, links, pages, metadata: {
       title: String(info.Title), author: String(info.Author), subject: String(info.Subject), keywords: String(info.Keywords),

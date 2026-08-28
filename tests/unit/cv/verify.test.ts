@@ -21,7 +21,7 @@ const twoLinkView = { ...view, links: [
   { kind: 'github', label: 'Link Two', url: 'https://example.com/two' },
 ] } satisfies ResolvedCv;
 
-async function fixture(options: { pages?: number; size?: [number, number]; text?: string; metadata?: boolean; structure?: boolean; link?: boolean; splitWord?: boolean; urls?: string[]; labelsForRects?: string[]; zeroArea?: boolean } = {}) {
+async function fixture(options: { pages?: number; size?: [number, number]; text?: string; metadata?: boolean; structure?: boolean; link?: boolean; splitWord?: boolean; urls?: string[]; labelsForRects?: string[]; zeroArea?: boolean; rectScale?: number } = {}) {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   for (let index = 0; index < (options.pages ?? 1); index += 1) {
@@ -36,7 +36,7 @@ async function fixture(options: { pages?: number; size?: [number, number]; text?
       const annotations = (options.urls ?? ['mailto:test@example.com']).map((url, urlIndex) => {
         const label = (options.labelsForRects ?? ['Email'])[urlIndex] ?? 'Email'; const labelIndex = text.indexOf(label);
         const x = 30 + font.widthOfTextAtSize(text.slice(0, Math.max(labelIndex, 0)), 3); const width = font.widthOfTextAtSize(label, 3);
-        const rect = options.zeroArea ? [x, 800, x, 800] : [x, 798, x + width, 805];
+        const rect = options.zeroArea ? [x, 800, x, 800] : [x, 798, x + width * (options.rectScale ?? 1), 805];
         return pdf.context.register(pdf.context.obj({ Type: 'Annot', Subtype: 'Link', Rect: rect, Border: [0, 0, 0], A: { Type: 'Action', S: 'URI', URI: PDFString.of(url) } }));
       });
       page.node.set(PDFName.of('Annots'), pdf.context.obj(annotations));
@@ -71,6 +71,12 @@ describe('CV PDF verifier', () => {
     expect(matches[1]!.tokenStart).toBeGreaterThan(matches[0]!.tokenEnd);
     expect(() => matchOrderedTextFields([{ page: 1, text: 'Engineer', rect: [0, 0, 50, 10] as const }], ['Engineer', 'Engineer'])).toThrow(/Engineer/);
   });
+  it('preserves meaningful punctuation in complete ordered fields', () => {
+    const fragment = (text: string) => [{ page: 1, text, rect: [0, 0, 200, 10] as const }];
+    expect(() => matchOrderedTextFields(fragment('C C++'), ['C/C++'])).toThrow(/C\/C\+\+/);
+    expect(() => matchOrderedTextFields(fragment('2020 Present'), ['2020 – Present'])).toThrow(/2020/);
+    expect(() => matchOrderedTextFields(fragment('Ada Author Paper Alpha Journal 2024 paper'), ['Ada Author. Paper Alpha. Journal, 2024. paper.'])).toThrow(/Ada Author/);
+  });
   it('rejects empty input', async () => { await expect(verifyCvPdf(new Uint8Array(), view)).rejects.toThrow(/empty/i); });
   it('rejects more than two pages', async () => { await expect(verifyCvPdf(await fixture({ pages: 3 }), view)).rejects.toThrow(/one or two pages/i); });
   it('rejects non-A4 pages', async () => { await expect(verifyCvPdf(await fixture({ size: [612, 792] }), view)).rejects.toThrow(/A4/i); });
@@ -98,6 +104,13 @@ describe('CV PDF verifier', () => {
   it('rejects swapped URL annotations even when both URLs exist', async () => {
     const text = 'Jonathan Tobias da Silva Engineer Brazil Link One Link Two Reliable systems. Skills Tools TypeScript Experience Engineer Acme 2020 – Present';
     await expect(verifyCvPdf(await fixture({ text, urls: ['https://example.com/two', 'https://example.com/one'], labelsForRects: ['Link One', 'Link Two'] }), twoLinkView)).rejects.toThrow(/Link (?:One|Two)/i);
+  });
+  it('accepts correctly associated annotations covering complete multi-token labels', async () => {
+    const text = 'Jonathan Tobias da Silva Engineer Brazil Link One Link Two Reliable systems. Skills Tools TypeScript Experience Engineer Acme 2020 – Present';
+    await expect(verifyCvPdf(await fixture({ text, urls: ['https://example.com/one', 'https://example.com/two'], labelsForRects: ['Link One', 'Link Two'] }), twoLinkView)).resolves.toMatchObject({ pageCount: 1 });
+  });
+  it('rejects a tiny annotation that overlaps only part of a visible label', async () => {
+    await expect(verifyCvPdf(await fixture({ rectScale: 0.1 }), view)).rejects.toThrow(/complete visible label.*Email/i);
   });
   it('rejects a correctly targeted URL annotation placed over unrelated text', async () => {
     await expect(verifyCvPdf(await fixture({ labelsForRects: ['Jonathan Tobias'] }), view)).rejects.toThrow(/Email/i);
