@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -147,6 +147,46 @@ describe('main', () => {
 
     expect(generateCv).not.toHaveBeenCalled();
     expect(await readFile(leadership, 'utf8')).toBe('original');
+    expect((await readdir(root)).filter(name => name.includes('backup'))).toEqual([]);
+  });
+
+  it('rejects a directory destination during preflight without mutating any output', async () => {
+    const root = await temporaryRoot();
+    const leadership = join(root, 'leadership.pdf');
+    const embedded = join(root, 'embedded-rd.pdf');
+    await writeFile(leadership, 'original leadership', { mode: 0o640 });
+    await writeFile(join(root, 'kept.txt'), 'outside');
+    await mkdir(embedded);
+    await writeFile(join(embedded, 'contents.txt'), 'directory contents');
+    const getCvOutput = vi.fn(request => join(root, `${request.profileId}.pdf`));
+    const generateCv = vi.fn();
+
+    await expect(main(['--all-private'], { getCvOutput, generateCv }))
+      .rejects.toThrow(/embedded-rd.*regular file/i);
+
+    expect(getCvOutput).toHaveBeenCalledTimes(3);
+    expect(generateCv).not.toHaveBeenCalled();
+    expect(await readFile(leadership, 'utf8')).toBe('original leadership');
+    expect((await stat(leadership)).mode & 0o777).toBe(0o640);
+    expect(await readFile(join(embedded, 'contents.txt'), 'utf8')).toBe('directory contents');
+    expect((await readdir(root)).filter(name => name.includes('backup'))).toEqual([]);
+  });
+
+  it('rejects a symlink destination during preflight without touching its target', async () => {
+    const root = await temporaryRoot();
+    const target = join(root, 'target.pdf');
+    const embedded = join(root, 'embedded-rd.pdf');
+    await writeFile(target, 'target contents');
+    await symlink(target, embedded);
+    const getCvOutput = vi.fn(request => join(root, `${request.profileId}.pdf`));
+    const generateCv = vi.fn();
+
+    await expect(main(['--all-private'], { getCvOutput, generateCv }))
+      .rejects.toThrow(/embedded-rd.*symlink|symlink.*embedded-rd/i);
+
+    expect(getCvOutput).toHaveBeenCalledTimes(3);
+    expect(generateCv).not.toHaveBeenCalled();
+    expect(await readFile(target, 'utf8')).toBe('target contents');
     expect((await readdir(root)).filter(name => name.includes('backup'))).toEqual([]);
   });
 

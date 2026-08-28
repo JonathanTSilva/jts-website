@@ -93,18 +93,25 @@ const runTransactionalBatch = async (
   const fs = dependencies.fs ?? { lstat, mkdtemp, rename, rm };
   const backups: Backup[] = [];
   const results: Awaited<ReturnType<CliDependencies['generateCv']>>[] = [];
+  const existingOutputs = new Set<string>();
+  for (const { request, output } of resolved) {
+    try {
+      const details = await fs.lstat(output);
+      if (details.isSymbolicLink()) throw new Error('existing output must not be a symlink');
+      if (!details.isFile()) throw new Error('existing output must be a regular file');
+      existingOutputs.add(output);
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') continue;
+      throw new Error(`${request.profileId}: ${errorMessage(error)}`);
+    }
+  }
   try {
     // Generation is sequential and may be observable by another same-account process,
     // but rollback guarantees the command's final on-disk state is never a mixed batch.
     for (const { output } of resolved) {
-      try {
-        await fs.lstat(output);
-      } catch (error) {
-        if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-          backups.push({ output });
-          continue;
-        }
-        throw error;
+      if (!existingOutputs.has(output)) {
+        backups.push({ output });
+        continue;
       }
       const directory = await fs.mkdtemp(join(dirname(output), '.cv-batch-backup-'));
       try {
