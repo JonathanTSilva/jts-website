@@ -7,7 +7,7 @@ summary: "Engenheiro sênior de software embarcado e P&D com atuação em automa
 
 Sou **Engenheiro Sênior de Software Embarcado** e atuo na convergência entre tecnologias operacionais e de informação. Projeto e implemento software embarcado para automação industrial e telecomunicações, com experiência em Linux embarcado, plataformas RTOS, protocolos de rede, testes e CI/CD.
 
-Atuo na **Act Digital**, alocado em sua cliente **Schneider Electric**, no departamento de Innovation & Technology e na equipe Network Service Platform. Nesse contexto, desenvolvo soluções em Linux embarcado e RTOS para conectividade industrial. Antes disso, coordenei o desenvolvimento de produtos embarcados com uma equipe de 10 engenheiros e liderei a adoção de Git e CI/CD em um fluxo de P&D.
+Atuo na **Act Digital**, alocado em sua cliente **Schneider Electric**, no departamento de Innovation and Technology e na equipe Network Service Platform. Nesse contexto, desenvolvo soluções em Linux embarcado e RTOS para conectividade industrial. Antes disso, coordenei o desenvolvimento de produtos embarcados com uma equipe de 10 engenheiros e liderei a adoção de Git e CI/CD em um fluxo de P&D.
 
 Sou **Mestre em Engenharia Elétrica (M.Sc.)** pela **Universidade de São Paulo (USP)**, com foco em inteligência artificial aplicada à segurança de redes e protocolos industriais. Essa pesquisa complementa minha atuação prática em cibersegurança, comunicações industriais e sistemas de software confiáveis.
 

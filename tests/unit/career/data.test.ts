@@ -29,7 +29,7 @@ describe('canonical career data', () => {
     const datacom = career.positions.find(position => position.id === 'datacom-embedded-software-engineer')!;
     expect(career.employers.find(employer => employer.id === act.employerId)?.name).toBe('Act Digital');
     expect(act.highlights.find(highlight => highlight.id === 'act-schneider-strategic-partnership')?.webText.en)
-      .toMatch(/Schneider Electric.*customer.*allocated.*Innovation & Technology.*Network Service Platform/i);
+      .toMatch(/Schneider Electric.*customer.*allocated.*Innovation and Technology.*Network Service Platform/i);
     expect(datacom).toMatchObject({
       title: { en: 'Embedded Software Engineer' },
       dates: { start: { value: '2024-09' }, end: { value: '2026-02' } },
@@ -69,6 +69,8 @@ describe('canonical career data', () => {
     expect(career.publications).toHaveLength(4);
     expect(career.publications.find(publication => publication.title.en.startsWith('A Survey'))?.url)
       .toBe('https://ieeexplore.ieee.org/document/10375053');
+    expect(career.publications.find(publication => publication.id === 'publication-industrial-automation-cybersecurity')?.title.en)
+      .toBe('Strengthening Industrial Automation: Best Practices in Cybersecurity');
     expect(career.publications.find(publication => publication.id === 'publication-web-motor-drive-sizing')).toMatchObject({
       date: { value: '2020', precision: 'year' },
     });
