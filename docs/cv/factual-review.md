@@ -21,3 +21,16 @@ The owner decisions below are complete and implemented in the canonical career d
 - Website work descriptions and exact month dates remain primary facts where the website provides them.
 - M.Sc., B.Sc., and Administration technical degree facts remain separate education records.
 - All 13 projects and four publications retain their approved bilingual titles and descriptions. Approved current display links remain; the rejected Sizer and IFSP historical HTTP references were removed.
+
+## Rendered PDF approval
+
+Jonathan approved all four rendered CV profiles on 2026-08-28 after reviewing their format, section distribution, scanability, links, page breaks, collisions, emphasis, extraction order, and factual accuracy.
+
+Reviewed source revision: `8fc97cf7047e0dc979daadf1a78c4dac432caf91`
+
+| Profile | Artifact | SHA-256 | Owner decision | Status |
+| --- | --- | --- | --- | --- |
+| Generic | `public/assets/cv/jonathan-cv.pdf` | `c2630fc64d040d91786fc87f5696bcfd261adde097d722bd22f8cb7fa6c44448` | Approved | Done |
+| Leadership | `.cv-output/jonathan-tobias-cv-leadership.pdf` | `f613da833058dd7fdc584149e525b824403295fde425b9331c1a416daadb09b4` | Approved | Done |
+| Embedded/R&D | `.cv-output/jonathan-tobias-cv-embedded-rd.pdf` | `2e9d761b3767a97fb86c1aaa91239b904ac41f0bdce2fbf81d52112242938353` | Approved | Done |
+| DevOps | `.cv-output/jonathan-tobias-cv-devops.pdf` | `530a9ed96d8e57990b15dce7b0fe25ac31d7e4b2fc937ef8f08c1be8ab8e847e` | Approved | Done |
