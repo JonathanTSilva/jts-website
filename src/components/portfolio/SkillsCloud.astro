@@ -33,7 +33,7 @@ const tier = (priority: number) => priority >= 95 ? 'skill-pill--top' : priority
       <button type="button" class="skills-filter" data-group={group.id} aria-pressed="false">{group.name}</button>
     ))}
   </div>
-  <div class="skills-cloud" aria-live="polite">
+  <div class="skills-cloud">
     {skills.map(skill => (
       <span class:list={['skill-pill', tier(skill.priority)]} data-group={skill.groupId}>{skill.name}</span>
     ))}
