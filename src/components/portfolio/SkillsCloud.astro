@@ -8,46 +8,192 @@ interface Props {
   groups: readonly WebsiteSkillGroup[];
 }
 
-const { skillsLabel, groups } = Astro.props;
+const { locale, skillsLabel, groups } = Astro.props;
+
+const labels = {
+  en: { all: 'All', filter: 'Filter skills by category' },
+  'pt-br': { all: 'Tudo', filter: 'Filtrar habilidades por categoria' },
+}[locale];
+
+// One cloud ordered by priority; category filters only hide pills, so each
+// group keeps its own priority order and the "All" view reads most-relevant first.
+const skills = groups
+  .flatMap(group => group.skills.map(skill => ({ ...skill, groupId: group.id, groupPriority: group.priority })))
+  .sort((a, b) => b.priority - a.priority || b.groupPriority - a.groupPriority || a.id.localeCompare(b.id));
+
+const tier = (priority: number) => priority >= 95 ? 'skill-pill--top' : priority >= 85 ? 'skill-pill--high' : 'skill-pill--normal';
 ---
 
 <section class="portfolio-section">
   <h2>{skillsLabel}</h2>
-  <div class="skills-cloud">
+  <div class="skills-filters" role="group" aria-label={labels.filter}>
+    <span class="skills-filter-indicator" aria-hidden="true"></span>
+    <button type="button" class="skills-filter active" data-group="all" aria-pressed="true">{labels.all}</button>
     {groups.map(group => (
-      <div class="skill-group">
-        <h3>{group.name}</h3>
-        {group.skills.map((skill, index) => (
-          <span class:list={['skill-pill', index < 3 ? 'skill-pill--top' : index < 6 ? 'skill-pill--high' : 'skill-pill--normal']}>{skill.name}</span>
-        ))}
-      </div>
+      <button type="button" class="skills-filter" data-group={group.id} aria-pressed="false">{group.name}</button>
+    ))}
+  </div>
+  <div class="skills-cloud" aria-live="polite">
+    {skills.map(skill => (
+      <span class:list={['skill-pill', tier(skill.priority)]} data-group={skill.groupId}>{skill.name}</span>
     ))}
   </div>
 </section>
 
+<script>
+  function initSkillsFilters() {
+    const filters = document.querySelector<HTMLElement>('.skills-filters');
+    const cloud = document.querySelector<HTMLElement>('.skills-cloud');
+    if (!filters || !cloud || filters.dataset.ready) return;
+    filters.dataset.ready = 'true';
+
+    const indicator = filters.querySelector<HTMLElement>('.skills-filter-indicator');
+    const buttons = Array.from(filters.querySelectorAll<HTMLButtonElement>('.skills-filter'));
+    const pills = Array.from(cloud.querySelectorAll<HTMLElement>('.skill-pill'));
+
+    function moveIndicator(animate = true) {
+      const active = filters!.querySelector<HTMLElement>('.skills-filter.active');
+      if (!indicator || !active) return;
+      if (!animate) indicator.style.setProperty('transition', 'none');
+      indicator.style.left = active.offsetLeft + 'px';
+      indicator.style.top = active.offsetTop + active.offsetHeight + 'px';
+      indicator.style.width = active.offsetWidth + 'px';
+      indicator.style.opacity = '1';
+      if (!animate) requestAnimationFrame(() => indicator.style.removeProperty('transition'));
+    }
+
+    function select(group: string) {
+      buttons.forEach(btn => {
+        const isActive = btn.dataset.group === group;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+      pills.forEach(pill => {
+        pill.hidden = group !== 'all' && pill.dataset.group !== group;
+      });
+      capPillGrowth();
+      moveIndicator();
+    }
+
+    // Pills stretch to justify each row, but never beyond MAX_PILL_GROWTH of
+    // their natural width — sparse rows (e.g. the last one) stay centered instead.
+    const MAX_PILL_GROWTH = 1.25;
+
+    function capPillGrowth() {
+      const visible = pills.filter(pill => !pill.hidden);
+      visible.forEach(pill => { pill.style.flexGrow = '0'; pill.style.maxWidth = ''; });
+      const naturalWidths = visible.map(pill => pill.offsetWidth);
+      visible.forEach((pill, i) => {
+        pill.style.flexGrow = '';
+        pill.style.maxWidth = naturalWidths[i]! * MAX_PILL_GROWTH + 'px';
+      });
+    }
+
+    buttons.forEach(btn => btn.addEventListener('click', () => select(btn.dataset.group!)));
+
+    capPillGrowth();
+    moveIndicator(false);
+    // Font metrics change button and pill geometry
+    document.fonts?.ready?.then(() => { capPillGrowth(); moveIndicator(false); });
+    new ResizeObserver(() => moveIndicator(false)).observe(filters);
+  }
+
+  initSkillsFilters();
+  document.addEventListener('astro:page-load', initSkillsFilters);
+</script>
+
 <style>
   h2 {
     font-size: var(--text-2xl);
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
     border-bottom: 1px solid var(--border);
     padding-bottom: var(--space-2);
     color: var(--text);
   }
 
+  /* ── Category filters ── */
+  .skills-filters {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-1) var(--space-2);
+    margin-bottom: var(--space-8);
+  }
+
+  .skills-filter {
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius-full);
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .skills-filter:hover {
+    color: var(--text);
+  }
+
+  .skills-filter.active {
+    color: var(--accent);
+  }
+
+  .skills-filter:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Tubelight line under the active filter — mirrors the header nav indicator */
+  .skills-filter-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 8px 1px var(--accent);
+    opacity: 0;
+    pointer-events: none;
+    transition: left var(--duration-base) var(--ease-out),
+                top var(--duration-base) var(--ease-out),
+                width var(--duration-base) var(--ease-out),
+                opacity var(--duration-fast);
+  }
+
+  /* ── Cloud ── */
+  /* Justified cloud: pills grow to fill each wrapped row, so rows stay
+     edge-to-edge for any number of skills or active filter. The script caps
+     each pill's growth, and centering balances rows that hit the cap. */
   .skills-cloud {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: var(--space-2);
   }
 
-  .skill-group { display: flex; flex-wrap: wrap; gap: var(--space-2); width: 100%; }
-  .skill-group h3 { width: 100%; margin: var(--space-2) 0 0; font-size: var(--text-sm); color: var(--text-muted); }
-
   .skill-pill {
+    flex: 1 1 auto;
+    text-align: center;
+    white-space: nowrap;
     font-family: var(--font-mono);
     background: var(--surface);
     border-radius: var(--radius-full);
     border: 1px solid var(--border);
+    animation: pill-in var(--duration-base) var(--ease-out);
+  }
+
+  .skill-pill[hidden] {
+    display: none;
+  }
+
+  @keyframes pill-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
   }
 
   .skill-pill--top {
@@ -69,5 +215,10 @@ const { skillsLabel, groups } = Astro.props;
     padding: var(--space-1) var(--space-2);
     color: var(--text-muted);
     border-color: var(--border);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skill-pill { animation: none; }
+    .skills-filter-indicator { transition: none; }
   }
 </style>

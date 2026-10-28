@@ -50,6 +50,24 @@ test('skills cloud renders at least one pill', async ({ page }) => {
   expect(count).toBeGreaterThan(0);
 });
 
+test('skills filters default to All and show one category at a time', async ({ page }) => {
+  await page.goto('/portfolio');
+  const filters = page.getByRole('group', { name: 'Filter skills by category' });
+  const pills = page.locator('.skills-cloud .skill-pill');
+  const total = await pills.count();
+
+  await expect(filters.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.skills-cloud h3')).toHaveCount(0);
+
+  await filters.getByRole('button', { name: 'Leadership' }).click();
+  await expect(filters.getByRole('button', { name: 'Leadership' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(filters.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('.skills-cloud .skill-pill:visible')).toHaveText(['Technical Leadership', 'Leadership', 'Management']);
+
+  await filters.getByRole('button', { name: 'All' }).click();
+  await expect(page.locator('.skills-cloud .skill-pill:visible')).toHaveCount(total);
+});
+
 test('about section shows image or placeholder', async ({ page }) => {
   await page.goto('/portfolio');
   const imageWrap = page.locator('.about-image-wrap');
