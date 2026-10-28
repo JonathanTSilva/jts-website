@@ -2,17 +2,34 @@ import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { career } from '../src/content/portfolio/career';
+import { cvProfiles } from '../src/lib/cv/profiles';
+import { standardSectionHeading } from '../src/lib/cv/render';
+import { resolveCv } from '../src/lib/cv/resolve';
+import type { ResolvedCv } from '../src/lib/cv/types';
 
 const execFile = promisify(execFileCallback);
 
-const orderedAnchors = Object.freeze([
-  'Jonathan Tobias da Silva',
-  'Nova Smar',
-  'University of São Paulo',
-]);
-const standardHeadings = Object.freeze(['Skills', 'Experience', 'Education', 'Projects', 'Publications']);
+export interface PopplerExpectations { readonly headings: readonly string[]; readonly anchors: readonly string[] }
 
-export const validatePopplerOutput = (info: string, text: string): void => {
+// Derived from the career data so content edits never require touching this check.
+export const popplerExpectations = (view: ResolvedCv): PopplerExpectations => {
+  const sections = view.sections.map(({ kind }) => kind).filter(kind => kind === 'skills' ? view.skills.length > 0 : view[kind].length > 0);
+  return {
+    headings: sections.map(kind => standardSectionHeading[kind]),
+    anchors: [view.fullName, ...sections.flatMap(kind => {
+      if (kind === 'experience') return [view.experience[0]!.employer];
+      if (kind === 'education') return [view.education[0]!.institution];
+      return [];
+    })],
+  };
+};
+
+export const validatePopplerOutput = (
+  info: string,
+  text: string,
+  { headings: standardHeadings, anchors: orderedAnchors }: PopplerExpectations = popplerExpectations(resolveCv(career, cvProfiles.generic)),
+): void => {
   const pages = Number(info.match(/^Pages:\s+(\d+)$/m)?.[1]);
   if (!Number.isInteger(pages) || pages < 1 || pages > 2) {
     throw new Error(`CV must contain one or two pages; Poppler reported ${Number.isFinite(pages) ? pages : 'an unknown count'}`);

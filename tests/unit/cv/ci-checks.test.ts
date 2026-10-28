@@ -3,7 +3,10 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { describe, expect, test } from 'vitest';
 
-import { validatePopplerOutput } from '../../../scripts/check-cv-poppler';
+import { popplerExpectations, validatePopplerOutput as validateWithExpectations } from '../../../scripts/check-cv-poppler';
+import { career } from '../../../src/content/portfolio/career';
+import { cvProfiles } from '../../../src/lib/cv/profiles';
+import { resolveCv } from '../../../src/lib/cv/resolve';
 import { validateCvDist } from '../../../scripts/check-cv-dist';
 
 const validInfo = [
@@ -15,8 +18,20 @@ const validText = [
   'Jonathan Tobias da Silva', 'Skills', 'Experience', 'Nova Smar',
   'Education', 'University of São Paulo', 'Projects', 'Publications',
 ].join('\n');
+const fixtureExpectations = {
+  headings: ['Skills', 'Experience', 'Education', 'Projects', 'Publications'],
+  anchors: ['Jonathan Tobias da Silva', 'Nova Smar', 'University of São Paulo'],
+};
+const validatePopplerOutput = (info: string, text: string) => validateWithExpectations(info, text, fixtureExpectations);
 
 describe('Poppler CV validation', () => {
+  test('derives headings and anchors from the generic profile and career data', () => {
+    const view = resolveCv(career, cvProfiles.generic);
+    const expected = popplerExpectations(view);
+    expect(expected.anchors).toEqual([view.fullName, view.experience[0]!.employer, view.education[0]!.institution]);
+    expect(expected.headings).toEqual(['Skills', 'Experience', 'Education', 'Projects', 'Publications']);
+  });
+
   test('accepts one or two A4 pages with ordered anchors and standard headings', () => {
     expect(() => validatePopplerOutput(validInfo, validText)).not.toThrow();
   });
@@ -52,11 +67,22 @@ describe('deploy CV boundary', () => {
   });
 
   test.each([
+    'blog/devops-tips/index.html',
+    'notes/leadership-lessons/index.html',
+    'og/blog/devops-tips.png',
+  ])('allows ordinary content whose slug mentions a profile theme: %s', async path => {
+    const root = await makeDist();
+    await put(root, 'assets/cv/jonathan-cv.pdf');
+    await put(root, path, '<p>Lessons on DevOps and leadership</p>');
+    await expect(validateCvDist(root)).resolves.toBeUndefined();
+  });
+
+  test.each([
     'resume.pdf',
     'nested/jonathan-cv.pdf',
     'assets/cv/jonathan-cv-leadership.pdf',
     'downloads/embedded-rd/profile.html',
-    'devops/index.html',
+    'cv/devops/index.html',
     'notes/myleadershipcv.txt',
     'pages/devopsresume.html',
     'assets/xembedded-rdy.txt',

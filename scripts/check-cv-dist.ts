@@ -1,11 +1,20 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { cvProfiles } from '../src/lib/cv/profiles';
 
 const allowedPdf = 'assets/cv/jonathan-cv.pdf';
-const privateProfilePattern = /(leadership|embedded-rd|devops)/i;
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const privateProfiles = Object.values(cvProfiles).filter(profile => profile.id !== 'generic');
+const privateIds = privateProfiles.map(profile => escapeRegExp(profile.id)).join('|');
+// Words like "devops" or "leadership" are legitimate blog/notes slugs, so a path is only
+// private when it pairs a profile ID with a CV marker; "embedded-rd" is CV-only vocabulary.
+const privateProfilePathPattern = new RegExp(`embedded-rd|(?:cv|resume|profile).*(?:${privateIds})|(?:${privateIds}).*(?:cv|resume|profile)`, 'i');
 const selectorPattern = /(?:cv[-_ ]?profile|choose\s+(?:a\s+)?cv\s+profile|profile\s*selector)/i;
-const privatePayloadPattern = /Technical Lead \| Embedded & R&D Engineering|Senior Embedded Software & R&D Engineer|DevOps & Engineering Enablement \| Senior Embedded Software Engineer|profile(?:Id)?["'\s:=]+(?:leadership|embedded-rd|devops)/i;
+const privatePayloadPattern = new RegExp(
+  [...privateProfiles.map(profile => escapeRegExp(profile.headline)), `profile(?:Id)?["'\\s:=]+(?:${privateIds})`].join('|'),
+  'i',
+);
 
 type DeployFile = Readonly<{ path: string; absolutePath: string }>;
 
@@ -32,7 +41,7 @@ export const validateCvDist = async (distPath: string): Promise<void> => {
     if (extname(file).toLowerCase() === '.pdf' && file !== allowedPdf) {
       throw new Error(`CV deploy boundary rejected unexpected PDF: ${file}`);
     }
-    if (privateProfilePattern.test(file)) {
+    if (privateProfilePathPattern.test(file)) {
       throw new Error(`CV deploy boundary rejected private profile artifact: ${file}`);
     }
     if (extname(file).toLowerCase() === '.html') {
