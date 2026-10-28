@@ -14,6 +14,7 @@ Live at **[www.jontobias.com](https://www.jontobias.com)**.
 - **Light / Dark Theme:** System preference detection with persistent manual override via `localStorage`.
 - **Analytics (opt-in):** Plausible Analytics with explicit consent gate — no cookies, no tracking by default.
 - **Static First:** Pure static build. No runtime services, no server, no database.
+- **Generated ATS-Friendly CV:** Production builds generate and verify the generic public CV from the canonical career model; role-specific variants remain local and private.
 
 ## Getting Started
 
@@ -42,7 +43,7 @@ PUBLIC_PLAUSIBLE_SCRIPT_SRC=https://plausible.io/js/script.js
 
 ```bash
 pnpm dev        # starts dev server at http://localhost:4321
-pnpm build      # builds search index then static site → dist/
+pnpm build      # generates the public CV, search index, and static site → dist/
 pnpm preview    # serves the built output locally
 ```
 
@@ -97,6 +98,8 @@ Translation pairs are linked via a shared `translationKey` in frontmatter. If a 
 pnpm test:unit          # Vitest unit tests (src/lib, scripts)
 pnpm test:e2e           # Playwright E2E tests (requires built site)
 pnpm test:e2e:install   # Install Playwright browsers (first run)
+pnpm cv:check:poppler   # Independent PDF extraction/geometry check (requires Poppler)
+pnpm cv:check:dist      # Verify no private CV artifacts enter dist/
 pnpm run check          # Astro + TypeScript type check
 ```
 
@@ -115,3 +118,4 @@ Deployed to [GitHub Pages](https://pages.github.com/) via GitHub Actions on push
 - [Content Templates](docs/content-contracts/)
 - [Automation Docs](docs/automation/)
 - [SEO Checklist](docs/site-operations/seo-checklist.md) — metadata rules, structured data, multilingual SEO invariants
+- [CV Operations](docs/cv/operations.md) — public/private generation, verification, privacy, and release review

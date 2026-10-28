@@ -1,14 +1,11 @@
 ---
-import type { Publication } from '../../content/portfolio/types';
-
-import type { Locale } from '../../lib/content/locale';
+import type { WebsitePublication } from '../../lib/career/website';
 
 interface Props {
-  publication: Publication;
-  locale: Locale;
+  publication: WebsitePublication;
 }
 
-const { publication, locale } = Astro.props;
+const { publication } = Astro.props;
 ---
 
 <div class="pub-item">
@@ -16,13 +13,13 @@ const { publication, locale } = Astro.props;
   <div class="pub-info">
     <span class="pub-type">{publication.type}</span>
     <h3>
-      {publication.link ? (
-        <a href={publication.link} target="_blank" rel="noopener noreferrer">{publication.title[locale]}</a>
+      {publication.url ? (
+        <a href={publication.url} target="_blank" rel="noopener noreferrer">{publication.title}</a>
       ) : (
-        publication.title[locale]
+        publication.title
       )}
     </h3>
-    <span class="pub-publisher">{publication.publisher}</span>
+    <span class="pub-publisher">{publication.venue}</span>
   </div>
 </div>
 

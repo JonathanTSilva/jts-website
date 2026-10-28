@@ -1,6 +1,8 @@
 ---
 import type { Locale } from '../../lib/content/locale';
 import { getHeroPositioning } from '../../lib/content/positioning';
+import { career } from '../../content/portfolio/career';
+import { getPersonLink } from '../../lib/seo/schema';
 import HeroBackground from './HeroBackground.astro';
 
 interface Props {
@@ -15,6 +17,9 @@ const blogHref      = locale === 'en' ? '/blog'      : '/pt-br/blog';
 const notesHref     = locale === 'en' ? '/notes'     : '/pt-br/notes';
 
 const { typewriterPrefix, typewriterPhrases, achievements } = t;
+const emailLink = getPersonLink(career.person, 'email');
+const linkedInLink = getPersonLink(career.person, 'linkedin');
+const githubLink = getPersonLink(career.person, 'github');
 ---
 
 <section class="hero" aria-label="Introduction">
@@ -35,7 +40,7 @@ const { typewriterPrefix, typewriterPhrases, achievements } = t;
 
       <div class="hero-social">
         <a
-          href="mailto:jonathantosilva@hotmail.com"
+          href={emailLink.url}
           class="social-link"
           data-analytics-event="email_click"
           data-analytics-props='{"surface":"hero","locale":"home"}'
@@ -47,7 +52,7 @@ const { typewriterPrefix, typewriterPhrases, achievements } = t;
           Email
         </a>
         <a
-          href="https://www.linkedin.com/in/jonathantsilva/"
+          href={linkedInLink.url}
           class="social-link"
           target="_blank"
           rel="noopener noreferrer"
@@ -60,7 +65,7 @@ const { typewriterPrefix, typewriterPhrases, achievements } = t;
           LinkedIn
         </a>
         <a
-          href="https://github.com/JonathanTSilva"
+          href={githubLink.url}
           class="social-link"
           target="_blank"
           rel="noopener noreferrer"

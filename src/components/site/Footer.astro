@@ -1,5 +1,7 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import { career } from '../../content/portfolio/career';
+import { getPersonLink } from '../../lib/seo/schema';
 
 interface Props {
   locale: 'en' | 'pt-br';
@@ -9,6 +11,9 @@ interface Props {
 
 const { locale, currentPath, translations } = Astro.props;
 const currentYear = new Date().getFullYear();
+const emailLink = getPersonLink(career.person, 'email');
+const linkedInLink = getPersonLink(career.person, 'linkedin');
+const githubLink = getPersonLink(career.person, 'github');
 
 const t = {
   en: {
@@ -37,7 +42,7 @@ const t = {
       <!-- Social icons -->
       <div class="footer-social">
         <a
-          href="https://www.linkedin.com/in/jonathantsilva/"
+          href={linkedInLink.url}
           aria-label="LinkedIn"
           rel="noopener noreferrer"
           target="_blank"
@@ -50,7 +55,7 @@ const t = {
           </svg>
         </a>
         <a
-          href="https://github.com/JonathanTSilva"
+          href={githubLink.url}
           aria-label="GitHub"
           rel="noopener noreferrer"
           target="_blank"
@@ -63,7 +68,7 @@ const t = {
           </svg>
         </a>
         <a
-          href="mailto:jonathantosilva@hotmail.com"
+          href={emailLink.url}
           aria-label="Email"
           class="footer-social-link"
           data-analytics-event="email_click"
