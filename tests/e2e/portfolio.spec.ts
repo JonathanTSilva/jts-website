@@ -62,7 +62,9 @@ test('skills filters default to All and show one category at a time', async ({ p
   await filters.getByRole('button', { name: 'Leadership' }).click();
   await expect(filters.getByRole('button', { name: 'Leadership' })).toHaveAttribute('aria-pressed', 'true');
   await expect(filters.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false');
-  await expect(page.locator('.skills-cloud .skill-pill:visible')).toHaveText(['Technical Leadership', 'Leadership', 'Management']);
+  await expect(page.locator('.skills-cloud .skill-pill:visible')).toHaveText([
+    'Technical Leadership', 'Leadership', 'Management', 'Scrum', 'Kanban', 'Technical Documentation', 'OKR',
+  ]);
 
   await filters.getByRole('button', { name: 'All' }).click();
   await expect(page.locator('.skills-cloud .skill-pill:visible')).toHaveCount(total);

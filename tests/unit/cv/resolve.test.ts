@@ -122,11 +122,11 @@ describe('resolveCv', () => {
       'nova-smar-rd-engineer',
     ]);
     expect(view.experience[0]!.highlights.map(highlight => highlight.id)).toEqual([
-      'act-mission-critical-embedded-software', 'act-schneider-strategic-partnership',
-      'act-industrial-protocols', 'act-real-time-latency',
+      'act-ethernet-ip-stack-upgrade', 'act-mission-critical-embedded-software',
+      'act-schneider-strategic-partnership', 'act-industrial-protocols',
     ]);
     expect(view.experience[0]!.highlights[0]!.text).toBe(
-      'Develop and customize mission-critical software for Embedded Linux and RTOS platforms used in industrial switches and PLCs.',
+      'Led an EtherNet/IP stack upgrade, replacing a manual two-way merge with an automated Git three-way workflow and cutting merge-and-update effort from 30+ engineer-days to under five (over 80%).',
     );
     const ids = view.experience.flatMap(role => role.highlights.map(highlight => highlight.id));
     expect(new Set(ids).size).toBe(ids.length);
@@ -156,15 +156,15 @@ describe('resolveCv', () => {
     const novaHighlights = (view: ReturnType<typeof resolveCv>) => view.experience.find(role => role.id === 'nova-smar-rd-engineer')!.highlights.map(item => item.id);
     expect(novaHighlights(leadership)).toEqual([
       'nova-product-development-leadership', 'nova-git-cicd-modernization',
-      'nova-cybersecurity-compliance', 'nova-industrial-software',
+      'nova-system302-quality-assurance', 'nova-cybersecurity-compliance',
     ]);
     expect(novaHighlights(embedded)).toEqual([
       'nova-product-development-leadership', 'nova-cybersecurity-compliance',
-      'nova-industrial-software', 'nova-ml-automation-tools',
+      'nova-yocto-embedded-linux', 'nova-industrial-software',
     ]);
     expect(novaHighlights(devops)).toEqual([
-      'nova-git-cicd-modernization', 'nova-ml-automation-tools',
-      'nova-product-development-leadership', 'nova-cybersecurity-compliance',
+      'nova-test-automation', 'nova-git-cicd-modernization',
+      'nova-system302-quality-assurance', 'nova-product-development-leadership',
     ]);
     const skills = (view: ReturnType<typeof resolveCv>) => view.skills.flatMap(group => group.skills.map(skill => skill.id));
     expect(skills(leadership)).toEqual([

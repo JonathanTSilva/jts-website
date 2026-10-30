@@ -44,13 +44,16 @@ describe('canonical career data', () => {
   it('uses natural Brazilian Portuguese wording for Embedded Linux systems and platforms', () => {
     const act = career.positions.find(position => position.id === 'act-digital-senior-embedded-software-engineer')!;
     const datacom = career.positions.find(position => position.id === 'datacom-embedded-software-engineer')!;
+    const nova = career.positions.find(position => position.id === 'nova-smar-rd-engineer')!;
     expect(act.highlights.find(highlight => highlight.id === 'act-mission-critical-embedded-software')?.webText['pt-br'])
-      .toContain('plataformas de Linux embarcado');
-    expect(datacom.highlights.find(highlight => highlight.id === 'datacom-linux-debugging')?.webText['pt-br'])
-      .toContain('sistemas com Linux embarcado');
+      .toContain('software em Embedded Linux e VxWorks');
+    expect(datacom.highlights.find(highlight => highlight.id === 'datacom-layer-three-protocols')?.webText['pt-br'])
+      .toContain('para Embedded Linux, usando Buildroot');
+    expect(nova.highlights.find(highlight => highlight.id === 'nova-yocto-embedded-linux')?.webText['pt-br'])
+      .toContain('sistemas e kernels Linux embarcados');
     const about = readFileSync(new URL('../../../src/content/portfolio/about.pt-br.md', import.meta.url), 'utf8');
-    expect(about).toContain('plataformas de Linux embarcado');
-    expect(about).toContain('sistemas com Linux embarcado');
+    expect(about).toContain('Desenvolvo software embarcado e de sistemas confiável');
+    expect(about).toContain('cibersegurança industrial');
   });
 
   it('uses globally unique IDs for all top-level and nested entities', () => {
