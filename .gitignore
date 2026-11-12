@@ -35,3 +35,26 @@ test-results/
 # Private operational notes
 docs/private/
 *homelab-network-segmentation*
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+Thumbs.db
+
+# Secrets and local config
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Claude Code local state
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Node
+build/
+coverage/
+.eslintcache
+*.tsbuildinfo
