@@ -1,0 +1,3 @@
+# Legacy docs and synced site content predate the standard: they hold example
+# URLs, root-relative site links and references to files that no longer exist.
+exclude_path = ["tests/fixtures", "docs", "src/content"]

@@ -106,8 +106,8 @@ Translation pairs are linked via a shared `translationKey` in frontmatter. If a 
 ### Testing
 
 ```bash
-pnpm test               # Same as test:unit; this is what CI runs
-pnpm test:unit          # Vitest unit tests (src/lib, scripts)
+pnpm test               # Vitest unit tests without the browser-based CV test (what the shared CI job runs)
+pnpm test:unit          # All Vitest unit tests (src/lib, scripts), needs Playwright browsers
 pnpm test:e2e           # Playwright E2E tests (requires built site)
 pnpm test:all           # Unit and E2E tests together
 pnpm test:e2e:install   # Install Playwright browsers (first run)

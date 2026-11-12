@@ -28,7 +28,8 @@ Or open the repository in a dev container or GitHub Codespaces, which runs the s
 |---|---|
 | Dev server | `pnpm dev` |
 | Build (CV, search index, site) | `pnpm build` |
-| Unit tests (what `pnpm run test` and CI run) | `pnpm run test` |
+| Unit tests without the browser-based CV integration test (what the shared `ci` node job runs) | `pnpm run test` |
+| All unit tests (needs Playwright browsers, run by `pipeline.yml`) | `pnpm test:unit` |
 | E2E tests (needs a built site and Playwright browsers) | `pnpm test:e2e` |
 | Unit and E2E together | `pnpm test:all` |
 | Type check | `pnpm run typecheck` (same as `pnpm check`) |
