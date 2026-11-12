@@ -2,6 +2,7 @@
   "name": "jts-website",
   "type": "module",
   "version": "1.0.0",
+  "packageManager": "pnpm@10",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -20,10 +21,12 @@
     "test:e2e:update": "playwright test --update-snapshots",
     "test:e2e:update-missing": "playwright test --update-snapshots=missing",
     "test:e2e:install": "playwright install --with-deps",
-    "test": "pnpm test:unit && pnpm test:e2e",
+    "test": "vitest run --exclude tests/integration/cv-generation.test.ts",
+    "test:all": "pnpm test:unit && pnpm test:e2e",
     "lint:content": "tsx scripts/validate-content.ts",
     "sync:content": "tsx scripts/sync-content.ts",
-    "check": "astro check"
+    "check": "astro check",
+    "typecheck": "astro check"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
