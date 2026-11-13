@@ -110,8 +110,8 @@ function buildImageNode(target: string, modifier: string): any {
   if (modifier) {
     const dim = modifier.match(/^(\d+)(?:x(\d+))?$/);
     if (dim) {
-      const w = parseInt(dim[1] ?? '0', 10);
-      const h = dim[2] ? parseInt(dim[2], 10) : undefined;
+      const w = Number.parseInt(dim[1] ?? '0', 10);
+      const h = dim[2] ? Number.parseInt(dim[2], 10) : undefined;
       node.data = {
         hProperties: {
           width: w,

@@ -16,15 +16,15 @@ export function remarkObsidianImages() {
       if (!sizeStr) return;
 
       const [wStr, hStr] = sizeStr.split('x');
-      const width = parseInt(wStr, 10);
-      if (isNaN(width)) return;
+      const width = Number.parseInt(wStr, 10);
+      if (Number.isNaN(width)) return;
 
       node.data = node.data ?? {};
       node.data.hProperties = {
         ...node.data.hProperties,
         width,
         style: `max-width: ${width}px; width: 100%;`,
-        ...(hStr && !isNaN(parseInt(hStr, 10)) ? { height: parseInt(hStr, 10) } : {}),
+        ...(hStr && !Number.isNaN(Number.parseInt(hStr, 10)) ? { height: Number.parseInt(hStr, 10) } : {}),
       };
     });
   };

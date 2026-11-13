@@ -1,13 +1,19 @@
 # Changes here will be overwritten by Copier. Re-sync with `copier update`.
-_commit: v1.1.1
+_commit: v1.2.0
 _src_path: gh:JonathanTSilva/template-repo
+bench: false
 description: 🧠 Personal bilingual website built with Astro and deployed to GitHub
     Pages
+e2e: true
 has_release: false
 kind: jts
 license: mit+cc-by-4.0
+lighthouse: true
+load: false
 repo_name: jts-website
+reports: false
 skeleton: false
+sonar: true
 stack: node
 status: active
 visibility: public

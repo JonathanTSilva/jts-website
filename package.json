@@ -22,6 +22,7 @@
     "test:e2e:update-missing": "playwright test --update-snapshots=missing",
     "test:e2e:install": "playwright install --with-deps",
     "test": "vitest run --exclude tests/integration/cv-generation.test.ts",
+    "coverage": "vitest run --exclude tests/integration/cv-generation.test.ts --coverage --coverage.provider=v8 --coverage.reporter=lcov --coverage.include=src/**",
     "test:all": "pnpm test:unit && pnpm test:e2e",
     "lint:content": "tsx scripts/validate-content.ts",
     "sync:content": "tsx scripts/sync-content.ts",
@@ -53,6 +54,7 @@
     "@playwright/test": "^1.50.1",
     "@types/fs-extra": "^11.0.4",
     "@types/mdast": "^4.0.4",
+    "@vitest/coverage-v8": "4.1.12",
     "fs-extra": "^11.3.4",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.2.108",
@@ -65,6 +67,6 @@
     "tsx": "^4.19.2",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vitest": "^3.0.7"
+    "vitest": "^4.1.12"
   }
 }
