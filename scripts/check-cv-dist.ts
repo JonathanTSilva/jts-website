@@ -1,5 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { extname, relative, resolve, sep } from 'node:path';
+import { extname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { cvProfiles } from '../src/lib/cv/profiles';
 
@@ -59,6 +59,11 @@ const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(proc
 if (isMain) {
   const distPath = process.argv[2];
   if (!distPath) throw new Error('Usage: check-cv-dist.ts <dist-directory>');
+  // Only audit a directory inside the working tree, never an arbitrary path.
+  const fromCwd = relative(process.cwd(), resolve(distPath));
+  if (fromCwd.startsWith('..') || isAbsolute(fromCwd)) {
+    throw new Error(`CV deploy boundary check requires a directory inside the working tree: ${distPath}`);
+  }
   await validateCvDist(distPath);
   console.log(`CV deploy boundary check passed: ${distPath}`);
 }
