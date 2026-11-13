@@ -52,21 +52,26 @@ jobs:
       artifact: node-coverage
       flags: node
 
-  # The site's own Playwright suite. playwright.config serves dist, so build it first.
+  # The site's own Playwright suite. pipeline.yml already runs it on ubuntu-24.04.
+  # Switched off because the shared e2e workflow runs on ubuntu-latest, which is
+  # 26.04 and not yet supported by Playwright ("playwright install" fails there).
+  # Remove the `if` once the shared workflow pins a supported runner.
   e2e:
+    if: false
     permissions:
       contents: read
     uses: JonathanTSilva/.github/.github/workflows/e2e.yml@v1
     with:
       command: pnpm build && pnpm exec playwright test
 
-  # Lighthouse CI against the built site.
+  # Lighthouse CI against the built site. The CV PDF step is skipped because it
+  # needs Playwright browsers; the audit does not need the PDF.
   lighthouse:
     permissions:
       contents: read
     uses: JonathanTSilva/.github/.github/workflows/lighthouse.yml@v1
     with:
-      build-command: pnpm run build
+      build-command: pnpm build:search && pnpm exec astro build
       static-dist-dir: dist
 
   # The one check the repository ruleset requires. Skipped jobs are fine.
