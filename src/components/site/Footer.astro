@@ -20,11 +20,13 @@ const t = {
     rights: 'All rights reserved.',
     privacy: 'Privacy Policy',
     terms: 'Terms of Service',
+    engineering: 'Engineering',
   },
   'pt-br': {
     rights: 'Todos os direitos reservados.',
     privacy: 'Política de Privacidade',
     terms: 'Termos de Serviço',
+    engineering: 'Engenharia',
   },
 }[locale];
 ---
@@ -96,6 +98,7 @@ const t = {
     <div class="footer-row footer-row-legal">
       <p class="footer-copy">&copy; {currentYear} Jonathan Tobias da Silva. {t.rights}</p>
       <div class="footer-legal-links">
+        <a href={locale === 'en' ? '/engineering' : `/${locale}/engineering`}>{t.engineering}</a>
         <a href={locale === 'en' ? '/privacy' : `/${locale}/privacy`}>{t.privacy}</a>
         <a href={locale === 'en' ? '/terms' : `/${locale}/terms`}>{t.terms}</a>
       </div>
