@@ -1,0 +1,333 @@
+---
+import {
+  getDashboard,
+  listedRepos,
+  archivedPublicCount,
+  repoBadges,
+  HANDBOOK_URL,
+  DASHBOARD_URL,
+} from '../../lib/engineering/dashboard';
+
+interface Props {
+  locale: 'en' | 'pt-br';
+}
+
+const { locale } = Astro.props;
+const { data } = await getDashboard();
+const repos = listedRepos(data);
+const archived = archivedPublicCount(data);
+const generated = data.generated_at ? new Date(data.generated_at) : null;
+
+const t = {
+  en: {
+    title: 'Engineering',
+    intro: 'Every repository I maintain follows one engineering standard: the same CI, security checks, labels, branches and docs. A nightly audit checks each public repo against it, and this page shows the result. The rules live in the',
+    handbook: 'engineering handbook',
+    reposOnStandard: 'Repos on standard',
+    ciGreen: 'CI green',
+    of: 'of',
+    summaryLabel: 'Summary',
+    tableCaption: 'Public repositories and their engineering signals',
+    scrollLabel: 'Repositories table, scrollable',
+    repo: 'Repository',
+    status: 'Status',
+    ci: 'CI',
+    coverage: 'Coverage',
+    quality: 'Quality gate',
+    scorecard: 'Scorecard',
+    release: 'Latest release',
+    none: 'No CI',
+    passing: 'Passing',
+    other: 'Not passing',
+    notApplicable: 'Not applicable',
+    alt: {
+      coverage: 'Code coverage for',
+      quality: 'SonarQube Cloud quality gate for',
+      scorecard: 'OpenSSF Scorecard for',
+      release: 'Latest release of',
+    },
+    updated: 'Data from',
+    updatedSuffix: 'source',
+    archivedNote: (n: number) => `${n} archived public ${n === 1 ? 'repository is' : 'repositories are'} left out.`,
+    statuses: { active: 'Active', wip: 'In progress', inactive: 'Inactive', archived: 'Archived' } as Record<string, string>,
+  },
+  'pt-br': {
+    title: 'Engenharia',
+    intro: 'Todo repositório que mantenho segue um único padrão de engenharia: o mesmo CI, as mesmas verificações de segurança, rótulos, branches e documentação. Uma auditoria noturna confere cada repositório público contra esse padrão, e esta página mostra o resultado. As regras estão no',
+    handbook: 'manual de engenharia',
+    reposOnStandard: 'Repos no padrão',
+    ciGreen: 'CI verde',
+    of: 'de',
+    summaryLabel: 'Resumo',
+    tableCaption: 'Repositórios públicos e seus sinais de engenharia',
+    scrollLabel: 'Tabela de repositórios, rolável',
+    repo: 'Repositório',
+    status: 'Status',
+    ci: 'CI',
+    coverage: 'Cobertura',
+    quality: 'Quality gate',
+    scorecard: 'Scorecard',
+    release: 'Última versão',
+    none: 'Sem CI',
+    passing: 'Passando',
+    other: 'Falhando',
+    notApplicable: 'Não se aplica',
+    alt: {
+      coverage: 'Cobertura de código de',
+      quality: 'Quality gate do SonarQube Cloud de',
+      scorecard: 'OpenSSF Scorecard de',
+      release: 'Última versão de',
+    },
+    updated: 'Dados de',
+    updatedSuffix: 'fonte',
+    archivedNote: (n: number) => `${n} ${n === 1 ? 'repositório público arquivado ficou' : 'repositórios públicos arquivados ficaram'} de fora.`,
+    statuses: { active: 'Ativo', wip: 'Em andamento', inactive: 'Inativo', archived: 'Arquivado' } as Record<string, string>,
+  },
+}[locale];
+
+const dateText = generated
+  ? generated.toLocaleDateString(locale, { dateStyle: 'long', timeZone: 'UTC' })
+  : '';
+---
+
+<div class="container">
+  <header class="eng-header">
+    <h1 class="eng-title">{t.title}</h1>
+    <p class="eng-intro">
+      {t.intro}
+      <a href={HANDBOOK_URL} rel="noopener noreferrer" target="_blank">{t.handbook}</a>.
+    </p>
+    {generated && (
+      <p class="eng-updated">
+        {t.updated} <time datetime={generated.toISOString()}>{dateText}</time>
+        (<a href={DASHBOARD_URL} rel="noopener noreferrer" target="_blank">{t.updatedSuffix}</a>)
+      </p>
+    )}
+  </header>
+
+  <section aria-label={t.summaryLabel}>
+    <ul class="tiles">
+      <li class="tile">
+        <span class="tile-value">{data.summary.percent}%</span>
+        <span class="tile-label">{t.reposOnStandard}</span>
+        <span class="tile-detail">{data.summary.compliant} {t.of} {data.summary.total}</span>
+      </li>
+      <li class="tile">
+        <span class="tile-value">{data.summary.ci_green}/{data.summary.ci_total}</span>
+        <span class="tile-label">{t.ciGreen}</span>
+        <span class="tile-detail">main</span>
+      </li>
+    </ul>
+  </section>
+
+  <div class="table-scroll" role="region" aria-label={t.scrollLabel} tabindex="0">
+    <table class="eng-table">
+      <caption class="visually-hidden">{t.tableCaption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{t.repo}</th>
+          <th scope="col">{t.status}</th>
+          <th scope="col">{t.ci}</th>
+          <th scope="col">{t.coverage}</th>
+          <th scope="col">{t.quality}</th>
+          <th scope="col">{t.scorecard}</th>
+          <th scope="col">{t.release}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {repos.map((repo) => {
+          const b = repoBadges(repo.name);
+          const hasCi = repo.ci !== null;
+          return (
+            <tr>
+              <th scope="row" class="repo-name">
+                <a href={b.repo} rel="noopener noreferrer" target="_blank">{repo.name}</a>
+              </th>
+              <td>
+                <span class="chip">{t.statuses[repo.status] ?? repo.status}</span>
+              </td>
+              <td>
+                {hasCi ? (
+                  <span class:list={['chip', repo.ci === 'success' ? 'chip-ok' : 'chip-warn']}>
+                    {repo.ci === 'success' ? t.passing : t.other}
+                  </span>
+                ) : (
+                  <span class="na">{t.none}</span>
+                )}
+              </td>
+              <td>
+                {hasCi ? (
+                  <a href={b.coverage} rel="noopener noreferrer" target="_blank">
+                    <img src={b.coverageImg} alt={`${t.alt.coverage} ${repo.name}`} height="20" loading="lazy" decoding="async" />
+                  </a>
+                ) : (
+                  <span class="na" aria-label={t.notApplicable}>&mdash;</span>
+                )}
+              </td>
+              <td>
+                {hasCi ? (
+                  <a href={b.quality} rel="noopener noreferrer" target="_blank">
+                    <img src={b.qualityImg} alt={`${t.alt.quality} ${repo.name}`} height="20" loading="lazy" decoding="async" />
+                  </a>
+                ) : (
+                  <span class="na" aria-label={t.notApplicable}>&mdash;</span>
+                )}
+              </td>
+              <td>
+                {hasCi ? (
+                  <a href={b.scorecard} rel="noopener noreferrer" target="_blank">
+                    <img src={b.scorecardImg} alt={`${t.alt.scorecard} ${repo.name}`} height="20" loading="lazy" decoding="async" />
+                  </a>
+                ) : (
+                  <span class="na" aria-label={t.notApplicable}>&mdash;</span>
+                )}
+              </td>
+              <td>
+                <a href={b.release} rel="noopener noreferrer" target="_blank">
+                  <img src={b.releaseImg} alt={`${t.alt.release} ${repo.name}`} height="20" loading="lazy" decoding="async" />
+                </a>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+  {archived > 0 && <p class="eng-note">{t.archivedNote(archived)}</p>}
+</div>
+
+<style>
+  .container {
+    max-width: var(--wide-max);
+    margin: 0 auto;
+    padding: var(--space-8) 0;
+  }
+  .eng-header {
+    max-width: var(--container-max);
+    margin-bottom: var(--space-8);
+  }
+  .eng-title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-4);
+  }
+  .eng-intro {
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-4);
+  }
+  .eng-updated,
+  .eng-note {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text);
+  }
+  .eng-note {
+    margin-top: var(--space-4);
+  }
+
+  .tiles {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-8);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space-4);
+  }
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+    box-shadow: var(--shadow-sm);
+  }
+  .tile-value {
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-bold);
+    color: var(--accent);
+    line-height: var(--leading-tight);
+  }
+  .tile-label {
+    font-weight: var(--weight-semibold);
+    color: var(--text);
+  }
+  .tile-detail {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+  .table-scroll:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .eng-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+  .eng-table th,
+  .eng-table td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .eng-table thead th {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    color: var(--text);
+    background: var(--surface-high);
+  }
+  .eng-table tbody tr:last-child th,
+  .eng-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .repo-name {
+    font-family: var(--font-mono);
+    font-weight: var(--weight-medium);
+  }
+  .eng-table img {
+    display: block;
+    height: 20px;
+    width: auto;
+  }
+  .eng-table a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  .chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    padding: 2px var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--surface-high);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .chip-ok {
+    background: var(--accent-dim);
+    color: var(--text);
+    border-color: var(--text);
+  }
+  .chip-warn {
+    background: var(--surface-high);
+    color: var(--text);
+    border-color: var(--text);
+  }
+  .na {
+    color: var(--text);
+  }
+</style>
