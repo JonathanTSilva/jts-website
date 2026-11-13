@@ -1,6 +1,9 @@
-# jts-website
-
-Personal bilingual website built with Astro and deployed to GitHub Pages.
+<!-- brand:header:start -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/header-e56760fc-dark.svg">
+  <img alt="jts-website: Personal bilingual website built with Astro and deployed to GitHub Pages" src="assets/brand/header-e56760fc-light.svg" width="100%">
+</picture>
+<!-- brand:header:end -->
 
 <!-- badges:start -->
 [![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)](https://www.repostatus.org/#active)
@@ -146,3 +149,10 @@ This repository has two licenses. See [LICENSE](LICENSE).
 
 - **Code** (source, scripts, configuration): [MIT License](https://opensource.org/license/mit).
 - **Content** (written content such as blog posts, notes, documentation and images): [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0).
+
+<!-- brand:footer:start -->
+<p align="right"><a href="https://www.jontobias.com"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/JonathanTSilva/.github/main/assets/brand/jontobias-dark.svg">
+  <img alt="jontobias.com" src="https://raw.githubusercontent.com/JonathanTSilva/.github/main/assets/brand/jontobias-light.svg" width="200">
+</picture></a></p>
+<!-- brand:footer:end -->

@@ -4,6 +4,8 @@ config:
   MD041: false  # CLAUDE.md starts with an import, not a heading
   MD024:
     siblings_only: true  # repeated headings under different parents are fine
+  MD033:
+    allowed_elements: [picture, source, img, p, a]  # brand header and footer
 # Legacy prose and site content predate the standard. Content is written in
 # Obsidian and synced in, so it is not reformatted to fit the lint rules.
 ignores:
