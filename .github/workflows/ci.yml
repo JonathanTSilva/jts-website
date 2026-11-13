@@ -52,12 +52,8 @@ jobs:
       artifact: node-coverage
       flags: node
 
-  # The site's own Playwright suite. pipeline.yml already runs it on ubuntu-24.04.
-  # Switched off because the shared e2e workflow runs on ubuntu-latest, which is
-  # 26.04 and not yet supported by Playwright ("playwright install" fails there).
-  # Remove the `if` once the shared workflow pins a supported runner.
+  # The site's own Playwright suite. The shared workflow pins ubuntu-24.04.
   e2e:
-    if: false
     permissions:
       contents: read
     uses: JonathanTSilva/.github/.github/workflows/e2e.yml@v1
