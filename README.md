@@ -1,7 +1,7 @@
 <!-- brand:header:start -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/header-e56760fc-dark.svg">
-  <img alt="jts-website: Personal bilingual website built with Astro and deployed to GitHub Pages" src="assets/brand/header-e56760fc-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/header-94f544de-dark.svg">
+  <img alt="jts-website: Personal bilingual website built with Astro and deployed to GitHub Pages" src="assets/brand/header-94f544de-light.svg" width="100%">
 </picture>
 <!-- brand:header:end -->
 
