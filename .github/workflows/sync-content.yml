@@ -57,5 +57,7 @@ jobs:
           commit-message: "chore: sync content from vault"
           title: "chore: sync content from vault"
           body: "This PR was automatically created to sync content from the private vault."
-          branch: "sync/content"
+          # Fixed and issue-shaped (<type>/<n>-<slug>) so the shared branch-name check passes
+          # and every run updates the same PR.
+          branch: "chore/1-sync-content"
           delete-branch: true
