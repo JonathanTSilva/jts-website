@@ -12,6 +12,16 @@
     "type": "blog"
   },
   {
+    "title": "Bem-vindo",
+    "summary": "O primeiro post deste blog — um breve oi e algumas palavras sobre o que pensei pra esse site.",
+    "tags": [
+      "meta",
+      "pessoal"
+    ],
+    "url": "/pt-br/blog/2026-04-welcome.pt-br",
+    "type": "blog"
+  },
+  {
     "title": "Construindo um Segundo Cérebro",
     "summary": "Um método comprovado para organizar sua vida digital e liberar seu potencial criativo.",
     "tags": [
@@ -69,7 +79,7 @@
   },
   {
     "title": "Biografia",
-    "summary": "Engenheiro Sênior de Software Embarcado especializado em sistemas críticos e liderança técnica.",
+    "summary": "Engenheiro sênior de software embarcado e P&D com atuação em automação industrial e telecomunicações.",
     "tags": [],
     "url": "/pt-br/portfolio",
     "type": "portfolio"

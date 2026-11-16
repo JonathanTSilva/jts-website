@@ -13,23 +13,23 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout website repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}
           path: website-repo
 
       - name: Checkout private content repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: JonathanTSilva/jts-brain
           token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}
           path: content-repo
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: 10
           
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: 'pnpm'
@@ -50,7 +50,7 @@ jobs:
         run: pnpm lint:content
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           path: website-repo
           token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}

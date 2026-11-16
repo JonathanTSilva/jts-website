@@ -1,20 +1,12 @@
 ---
-import type { ExperienceEntry } from '../../content/portfolio/types';
-import type { Locale } from '../../lib/content/locale';
+import type { WebsiteTimelineItem } from '../../lib/career/website';
 
 interface Props {
-  entry: ExperienceEntry;
-  locale: Locale;
+  entry: WebsiteTimelineItem;
 }
 
-const { entry, locale } = Astro.props;
-const title = entry.title[locale];
-const location = entry.location[locale];
-const descriptions = entry.description.map(d => d[locale]);
-
-const startLabel = entry.startDate.replace('-', '/');
-const endLabel = entry.endDate ? entry.endDate.replace('-', '/') : (locale === 'en' ? 'Present' : 'Atual');
-const dateRange = `${startLabel} – ${endLabel}`;
+const { entry } = Astro.props;
+const dateRange = `${entry.startDate} – ${entry.endDate}`;
 ---
 
 <div class="timeline-item">
@@ -22,23 +14,23 @@ const dateRange = `${startLabel} – ${endLabel}`;
   <div class="timeline-dot" aria-hidden="true"></div>
   <div class="timeline-content">
     <div class="timeline-header">
-      <span class:list={['timeline-badge', entry.type === 'work' ? 'badge-work' : 'badge-edu']}>
-        {entry.type === 'work' ? 'WORK' : 'EDUCATION'}
+      <span class:list={['timeline-badge', entry.kind === 'work' ? 'badge-work' : 'badge-edu']}>
+        {entry.kind === 'work' ? 'WORK' : 'EDUCATION'}
       </span>
-      <span class="timeline-company">{entry.company}</span>
+      <span class="timeline-company">{entry.organization}</span>
       <span class="timeline-date">{dateRange}</span>
     </div>
-    <h3 class="timeline-title">{title}</h3>
+    <h3 class="timeline-title">{entry.title}</h3>
     <div class="timeline-location">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
         <circle cx="12" cy="10" r="3"></circle>
       </svg>
-      <span>{location}</span>
+      <span>{entry.location}</span>
     </div>
 
     <ul class="timeline-desc-list">
-      {descriptions.map(desc => <li class="timeline-desc-item">{desc}</li>)}
+      {entry.highlights.map(desc => <li class="timeline-desc-item">{desc}</li>)}
     </ul>
 
     <div class="timeline-tags">

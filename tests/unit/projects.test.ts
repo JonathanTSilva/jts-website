@@ -1,45 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { projects } from '../../src/content/portfolio/projects';
-
-// Mirrors the selection logic in HomeSections.astro
-function selectHomeProjects(max = 4) {
-  const featured = projects.filter(p => p.status === 'Featured');
-  return featured.length >= max
-    ? featured.slice(0, max)
-    : [
-        ...featured,
-        ...projects.filter(p => p.status !== 'Featured').slice(0, max - featured.length),
-      ];
-}
+import { career } from '../../src/content/portfolio/career';
+import { getWebsiteProjects } from '../../src/lib/career/website';
 
 describe('home projects selection', () => {
   it('returns at most 4 projects', () => {
-    expect(selectHomeProjects().length).toBeLessThanOrEqual(4);
+    expect(getWebsiteProjects(career, 'en', { home: true }).length).toBeLessThanOrEqual(4);
   });
 
   it('featured projects appear first', () => {
-    const selected = selectHomeProjects();
-    const featuredProjects = projects.filter(p => p.status === 'Featured');
-    featuredProjects.forEach(fp => {
-      if (selected.some(s => s.title.en === fp.title.en)) {
-        const idx = selected.findIndex(s => s.title.en === fp.title.en);
-        const nonFeaturedBefore = selected.slice(0, idx).filter(s => s.status !== 'Featured');
-        expect(nonFeaturedBefore.length).toBe(0);
-      }
-    });
+    const selected = getWebsiteProjects(career, 'en', { home: true });
+    expect(selected.findIndex(p => !p.featured)).toBe(selected.filter(p => p.featured).length);
   });
 
   it('fills up to 4 with non-featured when fewer than 4 featured exist', () => {
-    const featuredCount = projects.filter(p => p.status === 'Featured').length;
+    const featuredCount = career.projects.filter(p => p.featured).length;
     if (featuredCount < 4) {
-      expect(selectHomeProjects().length).toBe(Math.min(4, projects.length));
+      expect(getWebsiteProjects(career, 'en', { home: true }).length).toBe(Math.min(4, career.projects.length));
     }
   });
 
   it('every selected project has a title and description', () => {
-    for (const p of selectHomeProjects()) {
-      expect(p.title.en.length).toBeGreaterThan(0);
-      expect(p.description.en.length).toBeGreaterThan(0);
+    for (const p of getWebsiteProjects(career, 'en', { home: true })) {
+      expect(p.title.length).toBeGreaterThan(0);
+      expect(p.description.length).toBeGreaterThan(0);
     }
   });
 });

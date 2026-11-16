@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import EngineeringDashboard from '../../../components/engineering/EngineeringDashboard.astro';
+
+const locale = 'pt-br';
+
+const translations = {
+  en: '/engineering',
+  'pt-br': '/pt-br/engineering',
+};
+---
+
+<BaseLayout
+  locale={locale}
+  title="Engenharia"
+  description="Como meus repositórios públicos se saem contra um único padrão de engenharia: CI, cobertura, quality gate, scorecard de cadeia de suprimentos e versões."
+  translations={translations}
+>
+  <EngineeringDashboard locale={locale} />
+</BaseLayout>

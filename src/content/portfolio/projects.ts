@@ -1,7 +1,8 @@
-import type { ProjectEntry } from "./types";
+import type { Project } from './schema';
 
-export const projects: ProjectEntry[] = [
+export const projects: Project[] = [
   {
+    id: 'project-forgenv',
     title: {
       en: "Forgenv",
       "pt-br": "Forgenv",
@@ -12,7 +13,8 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "🛠️",
     tags: ["Rust", "Linux"],
-    github: "https://github.com/JonathanTSilva/forgenv",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/forgenv' }],
+    highlights: [], themes: ['general'], priority: 90,
     featured: true,
     status: "In Progress",
     role: {
@@ -21,6 +23,7 @@ export const projects: ProjectEntry[] = [
     }
   },
   {
+    id: 'project-qemulab',
     title: {
       en: "Qemulab",
       "pt-br": "Qemulab",
@@ -31,10 +34,12 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "🧪",
     tags: ["Python", "Automation", "QEMU", "TUI"],
+    links: [], highlights: [], themes: ['general', 'embedded', 'devops'], priority: 60,
     featured: false,
     status: "Private",
   },
   {
+    id: 'project-dlr-supervisor-simulator',
     title: {
       en: "DLR Supervisor Simulator",
       "pt-br": "DLR Supervisor Simulator",
@@ -45,10 +50,12 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "💍",
     tags: ["Python", "L2 Protocols", "DLR", "Industrial Automation"],
+    links: [], highlights: [], themes: ['general', 'embedded'], priority: 60,
     featured: false,
     status: "Private",
   },
   {
+    id: 'project-uanalyzer',
     title: {
       en: "UAnalyzer",
       "pt-br": "UAnalyzer",
@@ -59,11 +66,13 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "🛡️",
     tags: ["Python", "OPC UA", "Cybersecurity", "Industrial Automation"],
-    github: "https://github.com/JonathanTSilva/uanalyser",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/uanalyser' }],
+    highlights: [], themes: ['general', 'embedded', 'research'], priority: 90,
     featured: true,
     status: "Featured",
   },
   {
+    id: 'project-leetsheet',
     title: {
       en: "Leetsheet",
       "pt-br": "Leetsheet",
@@ -74,11 +83,13 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "📝",
     tags: ["Go", "TUI"],
-    github: "https://github.com/JonathanTSilva/leetsheet",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/leetsheet' }],
+    highlights: [], themes: ['general'], priority: 90,
     featured: true,
     status: "Featured",
   },
   {
+    id: 'project-scriptize',
     title: {
       en: "Scriptize",
       "pt-br": "Scriptize",
@@ -89,10 +100,12 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "📜",
     tags: ["Shellscript", "Python"],
-    github: "https://github.com/JonathanTSilva/scriptize",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/scriptize' }],
+    highlights: [], themes: ['general', 'devops'], priority: 60,
     status: "Active",
   },
   {
+    id: 'project-custom-embedded-linux-yocto',
     title: {
       en: "Custom Embedded Linux (Yocto)",
       "pt-br": "Linux Embarcado Customizado (Yocto)",
@@ -103,9 +116,11 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "🐧",
     tags: ["Yocto Project", "Embedded Linux", "Kernel", "Kernel Module", "Industrial Automation"],
+    links: [], highlights: [], themes: ['general', 'embedded'], priority: 60,
     status: "Private",
   },
   {
+    id: 'project-sentminer',
     title: {
       en: "Sentminer",
       "pt-br": "Sentminer",
@@ -116,10 +131,12 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "⛏️",
     tags: ["Python", "Qt"],
-    github: "https://github.com/JonathanTSilva",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva' }],
+    highlights: [], themes: ['general'], priority: 60,
     status: "In Progress",
   },
   {
+    id: 'project-cloudcavitation',
     title: {
       en: "CloudCavitation",
       "pt-br": "CloudCavitation",
@@ -130,11 +147,13 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "☁️",
     tags: ["Node.js", "JavaScript", "Python", "Machine Learning", "Cloud Computing", "Industrial Automation"],
-    github: "https://github.com/JonathanTSilva/FP-CloudCavitation",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/FP-CloudCavitation' }],
+    highlights: [], themes: ['general', 'embedded', 'research'], priority: 60,
     featured: false,
     status: "Archived",
   },
   {
+    id: 'project-pump-diagnostics-machine-learning',
     title: {
       en: "Pump Diagnostics with Machine Learning",
       "pt-br": "Diagnóstico de Bombas com Aprendizado de Máquina",
@@ -145,11 +164,13 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "🩺",
     tags: ["Matlab", "Python", "Machine Learning", "Industrial Automation"],
-    github: "https://github.com/JonathanTSilva/SI-Cavitation",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/SI-Cavitation' }],
+    highlights: [], themes: ['general', 'embedded', 'research'], priority: 60,
     featured: false,
     status: "Active",
   },
   {
+    id: 'project-ifsp-latex-template',
     title: {
       en: "Official LaTeX Template for IFSP",
       "pt-br": "Template LaTeX Oficial para IFSP",
@@ -160,10 +181,12 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "🎓",
     tags: ["LaTeX"],
-    github: "https://github.com/JonathanTSilva/TP-IFSP",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/TP-IFSP' }],
+    highlights: [], themes: ['general', 'research'], priority: 60,
     status: "Active",
   },
   {
+    id: 'project-dimfot',
     title: {
       en: "Dimfot",
       "pt-br": "Dimfot",
@@ -174,10 +197,12 @@ export const projects: ProjectEntry[] = [
     },
     // icon: "☀️",
     tags: ["Android", "Kotlin"],
-    github: "https://github.com/JonathanTSilva/Dimfot",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/Dimfot' }],
+    highlights: [], themes: ['general'], priority: 60,
     status: "Archived",
   },
   {
+    id: 'project-sizer',
     title: {
       en: "Sizer",
       "pt-br": "Sizer",
@@ -189,8 +214,8 @@ export const projects: ProjectEntry[] = [
     // icon: "📏",
     image: "/assets/images/projects/sizer.png",
     tags: ["Web Development", "JavaScript", "React", "Node.js", "Data Engineering"],
-    github: "https://github.com/JonathanTSilva/SI-Sizer",
-    link: "http://sizer.ti.srt.ifsp.edu.br/",
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/SI-Sizer' }],
+    highlights: [], themes: ['general'], priority: 60,
     status: "Archived",
   }
 ];

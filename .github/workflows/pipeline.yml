@@ -5,27 +5,27 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+  schedule:
+    # Nightly rebuild so /engineering picks up fresh jts-ops dashboard data
+    - cron: '17 4 * * *'
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     env:
       PUBLIC_PLAUSIBLE_DOMAIN: ${{ vars.PUBLIC_PLAUSIBLE_DOMAIN }}
       PUBLIC_PLAUSIBLE_API_HOST: ${{ vars.PUBLIC_PLAUSIBLE_API_HOST }}
       PUBLIC_PLAUSIBLE_SCRIPT_SRC: ${{ vars.PUBLIC_PLAUSIBLE_SCRIPT_SRC }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: 10
           
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: 'pnpm'
@@ -35,6 +35,11 @@ jobs:
         
       - name: Install Playwright Browsers
         run: pnpm test:e2e:install
+
+      - name: Install Poppler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
         
       - name: Check Astro
         run: pnpm check
@@ -48,23 +53,33 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Check CV with Poppler
+        run: pnpm cv:check:poppler
+
+      - name: Check CV deploy boundary
+        run: pnpm cv:check:dist
+
       - name: E2E Tests
         run: pnpm test:e2e
         
       - name: Upload Pages artifact
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ./dist
 
   deploy:
     needs: validate
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

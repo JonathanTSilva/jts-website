@@ -12,6 +12,16 @@
     "type": "blog"
   },
   {
+    "title": "Welcome",
+    "summary": "The first post on this blog — a quick hello and a few words about what I had in mind for this site.",
+    "tags": [
+      "meta",
+      "personal"
+    ],
+    "url": "/blog/2026-04-welcome.en",
+    "type": "blog"
+  },
+  {
     "title": "Building a Second Brain",
     "summary": "A proven method to organise your digital life and unlock your creative potential.",
     "tags": [
@@ -69,7 +79,7 @@
   },
   {
     "title": "Biography",
-    "summary": "Senior Embedded Software Engineer specializing in mission-critical systems and technical leadership.",
+    "summary": "Senior embedded software and R&D engineer working across industrial automation and telecommunications.",
     "tags": [],
     "url": "/portfolio",
     "type": "portfolio"

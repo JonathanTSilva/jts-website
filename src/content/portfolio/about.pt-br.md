@@ -2,13 +2,19 @@
 title: "Biografia"
 language: "pt-br"
 translationKey: "about-me"
-summary: "Engenheiro Sênior de Software Embarcado especializado em sistemas críticos e liderança técnica."
+summary: "Engenheiro sênior de software embarcado e P&D com atuação em automação industrial e telecomunicações."
 ---
 
-Sou **Engenheiro Sênior de Software Embarcado** com anos de experiência na indústria de P&D, atuando na convergência entre tecnologias operacionais e de informação. Minha atuação concentra-se no design e na implementação de software robusto, principalmente voltado a ambientes embarcados para sistemas críticos, desde automação industrial até telecomunicações.
+Desenvolvo software embarcado e de sistemas confiável — e lidero o trabalho de engenharia que viabiliza a entrega de produtos complexos.
 
-Atuo como Engenheiro Sênior na **Act Digital**, em parceria estratégica com a **Schneider Electric**, onde desenvolvo soluções em Linux embarcado e RTOS para conectividade industrial. Ao longo da minha trajetória, liderei com sucesso equipes técnicas de até 10 engenheiros, entregando projetos de alto impacto que exigem alta disponibilidade e elevado desempenho.
+Sou um líder técnico hands-on que transforma trabalhos ambíguos e de alto risco em planos claros, decisões sólidas e entregas confiáveis. Contribuo diretamente com arquitetura, código, integração, diagnóstico de problemas e testes, ao mesmo tempo em que alinho equipes e aprimoro os fluxos de engenharia.
 
-**Mestre em Engenharia Elétrica (M.Sc.)** pela **Universidade de São Paulo (USP)**, com foco em inteligência artificial aplicada à segurança de redes e protocolos industriais, integrando pesquisa avançada à engenharia aplicada e sustentável, sustentada por sólida experiência prática com diversas ferramentas e tecnologias.
+Minha trajetória inclui liderar e executar a modernização de uma stack de redes já com cinco anos, resolvendo mais de 20 mil conflitos de merge enquanto coordenava as equipes de domínio de L2 e L3. Também conduzi a automação de testes em mais de 25 repositórios, reduzindo o esforço de testes manuais em mais de 90%.
 
-Minha abordagem à engenharia é guiada por rigor técnico e pela aplicação consistente de princípios fundamentais de qualidade, arquitetura e desenvolvimento. Priorizo a construção de sistemas robustos, testáveis e de fácil evolução, com código claro, bem estruturado e sustentado por práticas que garantem confiabilidade, manutenibilidade e documentação eficaz ao longo de todo o ciclo de vida do software.
+Esses resultados refletem minha forma de trabalhar: entender o sistema a fundo, concentrar a equipe nas restrições que realmente importam e automatizar o trabalho manual recorrente.
+
+Minha base abrange software de sistemas, C/C++, Linux, RTOS, sistemas embarcados, redes e sistemas industriais. Sou mais eficaz onde o software encontra hardware, protocolos, restrições de tempo real e produtos de longo ciclo de vida — mas minha contribuição vai além de qualquer tecnologia ou domínio específico.
+
+Sou **Mestre em Engenharia Elétrica (M.Sc.)** pela **Universidade de São Paulo (USP)**, com pesquisa em cibersegurança industrial. Meus trabalhos sobre sistemas industriais foram publicados em periódicos de destaque e apresentados em conferências internacionais.
+
+Valorizo problemas de engenharia desafiadores, equipes técnicas fortes e colaboração internacional voltada à construção de produtos confiáveis.

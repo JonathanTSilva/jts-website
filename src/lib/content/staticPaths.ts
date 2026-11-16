@@ -31,9 +31,9 @@ export function buildNoteIndex(allNotes: CollectionEntry<'notes'>[], locale: Loc
 
   const categories = Array.from(
     new Set(notesToShow.map(n => n.data.category).filter((c): c is string => !!c))
-  ).sort();
+  ).sort((a, b) => a.localeCompare(b));
 
-  const tags = Array.from(new Set(notesToShow.flatMap(n => n.data.tags))).sort();
+  const tags = Array.from(new Set(notesToShow.flatMap(n => n.data.tags))).sort((a, b) => a.localeCompare(b));
 
   const categoryCounts = categories.reduce((acc, cat) => {
     acc[cat] = notesToShow.filter(n => n.data.category === cat).length;
@@ -42,7 +42,7 @@ export function buildNoteIndex(allNotes: CollectionEntry<'notes'>[], locale: Loc
 
   const noteTypes = Array.from(
     new Set(notesToShow.map(n => n.data.noteType ?? 'note'))
-  ).sort();
+  ).sort((a, b) => a.localeCompare(b));
 
   const noteTypeCounts = noteTypes.reduce((acc, type) => {
     acc[type] = notesToShow.filter(n => (n.data.noteType ?? 'note') === type).length;
