@@ -15,11 +15,25 @@
 [![Codespaces](https://img.shields.io/badge/codespaces-open-181717?style=flat-square&logo=github)](https://codespaces.new/JonathanTSilva/jts-website)
 <!-- badges:end -->
 
+**A personal site that is a portfolio, a blog and a notebook at once, in two languages, with no server to run.** Live at **[www.jontobias.com](https://www.jontobias.com)**.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/screenshots/home-dark.png">
+    <img src="assets/screenshots/home-light.png" alt="The home page of jontobias.com: name, title, links, a short bio and an illustrated portrait, with a light and a dark theme" width="100%">
+  </picture>
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/home-pt-br.png" alt="The same home page in Brazilian Portuguese, at /pt-br/" width="49%">
+  <img src="assets/screenshots/notes.png" alt="The Notes page, with category and tag filters and cards for each note type" width="49%">
+</p>
+
+*The home page in both themes, the same page in Brazilian Portuguese, and the filterable Notes collection. Screenshots of the live site.*
+
 ## What it is
 
-Personal website for [Jonathan T. Silva](https://www.jontobias.com), Senior Embedded Software Engineer. Bilingual (English / Brazilian Portuguese), statically generated with [Astro](https://astro.build/) and deployed to GitHub Pages.
-
-Live at **[www.jontobias.com](https://www.jontobias.com)**.
+Personal website for [Jonathan T. Silva](https://www.jontobias.com), Senior Embedded Software Engineer. Bilingual (English / Brazilian Portuguese), statically generated with [Astro](https://astro.build/) and deployed to GitHub Pages. Content is written in Obsidian and synced in, and every build validates it before publishing.
 
 ### Features
 
@@ -30,12 +44,14 @@ Live at **[www.jontobias.com](https://www.jontobias.com)**.
 - **RSS Feeds:** Separate feeds for blog posts and notes, one per locale.
 - **Light / Dark Theme:** System preference detection with persistent manual override via `localStorage`.
 - **Analytics (opt-in):** Plausible Analytics with explicit consent gate — no cookies, no tracking by default.
+- **Engineering dashboard:** `/engineering` shows how each public repository measures up against one engineering standard (CI, coverage, quality gate, scorecard, releases), fed by a nightly audit.
+- **Math and diagrams:** KaTeX equations and Mermaid diagrams render inside notes and posts.
 - **Static First:** Pure static build. No runtime services, no server, no database.
 - **Generated ATS-Friendly CV:** Production builds generate and verify the generic public CV from the canonical career model; role-specific variants remain local and private.
 
 ## Quick start
 
-Prerequisites: [Node.js](https://nodejs.org/) v18+ and [pnpm](https://pnpm.io/). Or open it in a dev container or GitHub Codespaces.
+Prerequisites: [Node.js](https://nodejs.org/) 22.12 or newer (Astro 6 requires it) and [pnpm](https://pnpm.io/). Or open it in a dev container or GitHub Codespaces.
 
 ```sh
 git clone https://github.com/JonathanTSilva/jts-website.git
