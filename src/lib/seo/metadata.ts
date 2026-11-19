@@ -1,6 +1,7 @@
 import { type Locale, DEFAULT_LOCALE, LOCALES } from '../content/locale';
 
 export const SITE_NAME = 'Tobias';
+export const OG_SITE_NAME = 'Jonathan Tobias';
 const SITE_DESCRIPTION = 'Senior Embedded Software Engineer & M.Sc. specializing in mission-critical systems and technical leadership.';
 
 export type PageType = 'home' | 'blog-index' | 'notes-index' | 'portfolio' | 'now' | 'article' | 'legal' | 'generic';
@@ -121,6 +122,8 @@ export function generateSeo(props: SeoProps) {
     fullTitle = `${SITE_NAME} | ${profession}`;
   }
 
+  const shareTitle = ogType === 'article' && title ? title : fullTitle;
+
   const fullDescription = description ?? (pageDefaults ? pageDefaults.description : SITE_DESCRIPTION);
 
   // Strip locale prefix from current path if it exists to find the base path
@@ -152,17 +155,17 @@ export function generateSeo(props: SeoProps) {
     description: fullDescription,
     canonical: fullCanonical,
     og: {
-      title: fullTitle,
+      title: shareTitle,
       description: fullDescription,
       type: ogType,
       url: fullCanonical,
       image: fullImage,
-      site_name: SITE_NAME,
+      site_name: OG_SITE_NAME,
       locale: locale === 'pt-br' ? 'pt_BR' : 'en_US',
     },
     twitter: {
       card: 'summary_large_image',
-      title: fullTitle,
+      title: shareTitle,
       description: fullDescription,
       image: fullImage,
     },

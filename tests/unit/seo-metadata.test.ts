@@ -249,3 +249,18 @@ describe('schema generation', () => {
     expect(schema.image).toBeUndefined();
   });
 });
+
+describe('generateSeo — share titles', () => {
+  it('uses bare title for article og and twitter titles and sets og site_name', () => {
+    const result = generateSeo({ locale: 'en', title: 'Welcome', ogType: 'article' });
+    expect(result.title).toBe('Welcome | Tobias');
+    expect(result.og.title).toBe('Welcome');
+    expect(result.twitter.title).toBe('Welcome');
+    expect(result.og.site_name).toBe('Jonathan Tobias');
+  });
+
+  it('keeps full title for non-article share titles', () => {
+    const result = generateSeo({ locale: 'en', pageType: 'blog-index' });
+    expect(result.og.title).toBe('Blog | Tobias');
+  });
+});
