@@ -2,6 +2,8 @@ import { type Locale, DEFAULT_LOCALE, LOCALES } from '../content/locale';
 
 export const SITE_NAME = 'Tobias';
 export const OG_SITE_NAME = 'Jonathan Tobias';
+// Bump when the share card design changes, so LinkedIn/WhatsApp fetch the new image.
+export const OG_IMAGE_VERSION = '2';
 const SITE_DESCRIPTION = 'Senior Embedded Software Engineer & M.Sc. specializing in mission-critical systems and technical leadership.';
 
 export type PageType = 'home' | 'blog-index' | 'notes-index' | 'portfolio' | 'now' | 'article' | 'legal' | 'generic';
@@ -136,6 +138,9 @@ export function generateSeo(props: SeoProps) {
     : new URL(currentPath, baseUrl).toString();
 
   const fullImage = image ? new URL(image, baseUrl).toString() : new URL('/og-image.png', baseUrl).toString();
+  const imageUrl = new URL(fullImage);
+  imageUrl.searchParams.set('v', OG_IMAGE_VERSION);
+  const shareImage = imageUrl.toString();
 
   // EN (x-default) URL derived from pathWithoutLocale
   const enHref = new URL(pathWithoutLocale === '/' ? '/' : pathWithoutLocale, baseUrl).toString();
@@ -159,7 +164,7 @@ export function generateSeo(props: SeoProps) {
       description: fullDescription,
       type: ogType,
       url: fullCanonical,
-      image: fullImage,
+      image: shareImage,
       site_name: OG_SITE_NAME,
       locale: locale === 'pt-br' ? 'pt_BR' : 'en_US',
     },
@@ -167,7 +172,7 @@ export function generateSeo(props: SeoProps) {
       card: 'summary_large_image',
       title: shareTitle,
       description: fullDescription,
-      image: fullImage,
+      image: shareImage,
     },
     alternateLocales,
   };

@@ -264,3 +264,21 @@ describe('generateSeo — share titles', () => {
     expect(result.og.title).toBe('Blog | Tobias');
   });
 });
+
+describe('generateSeo — share image version', () => {
+  it('appends ?v=2 to custom image path and sets matching twitter image', () => {
+    const result = generateSeo({ locale: 'en', image: '/og/blog/x.png' });
+    expect(result.og.image).toBe('https://www.jontobias.com/og/blog/x.png?v=2');
+    expect(result.twitter.image).toBe('https://www.jontobias.com/og/blog/x.png?v=2');
+  });
+
+  it('appends ?v=2 to default og-image when no image is specified', () => {
+    const result = generateSeo({ locale: 'en' });
+    expect(result.og.image).toBe('https://www.jontobias.com/og-image.png?v=2');
+  });
+
+  it('preserves existing query parameters when appending v=2', () => {
+    const result = generateSeo({ locale: 'en', image: '/og/blog/x.png?foo=1' });
+    expect(result.og.image).toBe('https://www.jontobias.com/og/blog/x.png?foo=1&v=2');
+  });
+});
