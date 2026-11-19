@@ -2,14 +2,18 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import satori from 'satori';
 import sharp from 'sharp';
+import { lightenHex } from './og/shareLabel';
+
+const FONT_DIR = 'node_modules/geist/dist/fonts';
+const loadFont = (file: string) => readFileSync(resolve(FONT_DIR, file));
 
 // Load fonts once at module level
-const geistFont = readFileSync(
-  resolve('node_modules/geist/dist/fonts/geist-sans/Geist-Regular.ttf')
-);
-const geistBoldFont = readFileSync(
-  resolve('node_modules/geist/dist/fonts/geist-sans/Geist-Bold.ttf')
-);
+const fonts = [
+  { name: 'Geist', data: loadFont('geist-sans/Geist-Regular.ttf'), weight: 400, style: 'normal' },
+  { name: 'Geist', data: loadFont('geist-sans/Geist-SemiBold.ttf'), weight: 600, style: 'normal' },
+  { name: 'Geist', data: loadFont('geist-sans/Geist-Bold.ttf'), weight: 700, style: 'normal' },
+  { name: 'Geist Mono', data: loadFont('geist-mono/GeistMono-Medium.ttf'), weight: 500, style: 'normal' },
+] as const;
 
 // Load images as base64 data URIs
 const logoBase64 = (() => {
@@ -24,203 +28,89 @@ const avatarBase64 = (() => {
 
 interface OGImageOptions {
   title: string;
-  category?: string;
-  author?: string;
-  authorRole?: string;
+  label: string;
+  accent?: string;
 }
 
 export const DEFAULT_OG_AUTHOR = 'Jonathan Tobias';
 export const DEFAULT_OG_AUTHOR_ROLE = 'Senior Embedded Software Engineer';
 export const DEFAULT_OG_DOMAIN = 'jontobias.com';
 
+const BG = '#0A0A0F';
+const TEXT = '#E8E8F2';
+const MUTED = '#8185A5';
+const DEFAULT_ACCENT = '#6272EA';
+
+function titleFontSize(title: string): number {
+  if (title.length > 100) return 54;
+  if (title.length > 70) return 62;
+  if (title.length > 40) return 70;
+  return 76;
+}
+
+type Node = { type: string; props: { style?: Record<string, unknown>; [key: string]: unknown } };
+
+const box = (style: Record<string, unknown>, ...children: unknown[]): Node => ({
+  type: 'div',
+  props: {
+    style: { display: 'flex', ...style },
+    children: children.length === 1 ? children[0] : children,
+  },
+});
+
+const image = (src: string, size: number, style: Record<string, unknown> = {}): Node => ({
+  type: 'img',
+  props: { src, width: size, height: size, style },
+});
+
 export async function generateOGImage(options: OGImageOptions): Promise<Buffer> {
-  const {
-    title,
-    category,
-    author = DEFAULT_OG_AUTHOR,
-    authorRole = DEFAULT_OG_AUTHOR_ROLE,
-  } = options;
+  const { title, label, accent = DEFAULT_ACCENT } = options;
 
-  const svg = await satori(
-    {
-      type: 'div',
-      props: {
-        style: {
-          width: '1200px',
-          height: '630px',
-          background: '#0f0f1a',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          padding: '60px 80px',
-          position: 'relative',
-          overflow: 'hidden',
+  const card = box(
+    { width: 1200, height: 630, background: BG, flexDirection: 'column', fontFamily: 'Geist' },
+    box({ height: 14, width: 1200, background: accent }),
+    box(
+      { flex: 1, flexDirection: 'column', padding: '56px 72px 0 72px', overflow: 'hidden' },
+      box(
+        { fontFamily: 'Geist Mono', fontWeight: 500, fontSize: 30, color: lightenHex(accent), letterSpacing: 2 },
+        label
+      ),
+      box(
+        {
+          marginTop: 28,
+          fontSize: titleFontSize(title),
+          fontWeight: 700,
+          color: '#ffffff',
+          lineHeight: 1.12,
+          maxWidth: 1050,
         },
-        children: [
-          // Background accent glow (top-right)
-          {
-            type: 'div',
-            props: {
-              style: {
-                position: 'absolute',
-                top: '-120px',
-                right: '-80px',
-                width: '400px',
-                height: '400px',
-                borderRadius: '9999px',
-                background: 'radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%)',
-                display: 'flex',
-              },
-            },
-          },
-
-          // Top-left: logo + domain
-          {
-            type: 'div',
-            props: {
-              style: {
-                position: 'absolute',
-                top: '44px',
-                left: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-              },
-              children: [
-                {
-                  type: 'img',
-                  props: {
-                    src: logoBase64,
-                    width: 28,
-                    height: 28,
-                    style: { borderRadius: '6px' },
-                  },
-                },
-                {
-                  type: 'span',
-                  props: {
-                    style: {
-                      fontFamily: 'Geist',
-                      fontSize: '18px',
-                      fontWeight: '400',
-                      color: '#c0c0d0',
-                    },
-                    children: DEFAULT_OG_DOMAIN,
-                  },
-                },
-              ],
-            },
-          },
-
-          // Category badge
-          ...(category ? [{
-            type: 'div',
-            props: {
-              style: {
-                background: '#7c3aed',
-                color: '#fff',
-                fontFamily: 'Geist',
-                fontSize: '14px',
-                padding: '4px 16px',
-                borderRadius: '9999px',
-                marginBottom: '20px',
-                display: 'flex',
-              },
-              children: category,
-            },
-          }] : []),
-
-          // Title
-          {
-            type: 'h1',
-            props: {
-              style: {
-                fontFamily: 'Geist',
-                fontSize: title.length > 60 ? '40px' : '52px',
-                fontWeight: '700',
-                color: '#ffffff',
-                lineHeight: '1.2',
-                margin: '0',
-                maxWidth: '960px',
-              },
-              children: title,
-            },
-          },
-
-          // Bottom-right: author block
-          {
-            type: 'div',
-            props: {
-              style: {
-                position: 'absolute',
-                bottom: '44px',
-                right: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-              },
-              children: [
-                {
-                  type: 'img',
-                  props: {
-                    src: avatarBase64,
-                    width: 48,
-                    height: 48,
-                    style: { borderRadius: '9999px', objectFit: 'cover' },
-                  },
-                },
-                {
-                  type: 'div',
-                  props: {
-                    style: {
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '3px',
-                    },
-                    children: [
-                      {
-                        type: 'span',
-                        props: {
-                          style: {
-                            fontFamily: 'Geist',
-                            fontSize: '17px',
-                            fontWeight: '700',
-                            color: '#ffffff',
-                          },
-                          children: author,
-                        },
-                      },
-                      {
-                        type: 'span',
-                        props: {
-                          style: {
-                            fontFamily: 'Geist',
-                            fontSize: '13px',
-                            fontWeight: '400',
-                            color: '#888899',
-                          },
-                          children: authorRole,
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      width: 1200,
-      height: 630,
-      fonts: [
-        { name: 'Geist', data: geistFont, weight: 400, style: 'normal' },
-        { name: 'Geist', data: geistBoldFont, weight: 700, style: 'normal' },
-      ],
-    }
+        title
+      )
+    ),
+    box(
+      { alignItems: 'center', justifyContent: 'space-between', padding: '0 72px 52px 72px' },
+      box(
+        { alignItems: 'center', gap: 20 },
+        image(avatarBase64, 84, { borderRadius: 9999, border: `3px solid ${accent}` }),
+        box(
+          { flexDirection: 'column' },
+          box({ fontSize: 34, fontWeight: 600, color: TEXT }, DEFAULT_OG_AUTHOR),
+          box({ fontSize: 24, color: MUTED }, DEFAULT_OG_AUTHOR_ROLE)
+        )
+      ),
+      box(
+        { alignItems: 'center', gap: 14 },
+        image(logoBase64, 56, { borderRadius: 12 }),
+        box({ fontSize: 28, color: TEXT, fontFamily: 'Geist Mono', fontWeight: 500 }, DEFAULT_OG_DOMAIN)
+      )
+    )
   );
+
+  const svg = await satori(card as unknown as Parameters<typeof satori>[0], {
+    width: 1200,
+    height: 630,
+    fonts: [...fonts],
+  });
 
   return sharp(Buffer.from(svg)).png().toBuffer();
 }

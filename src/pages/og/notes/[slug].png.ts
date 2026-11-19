@@ -1,6 +1,7 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
-import { DEFAULT_OG_AUTHOR, DEFAULT_OG_AUTHOR_ROLE, generateOGImage } from '../../../lib/ogImage';
+import { generateOGImage } from '../../../lib/ogImage';
+import { buildShareLabel, resolveShareAccent } from '../../../lib/og/shareLabel';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const notes = await getCollection('notes');
@@ -14,9 +15,12 @@ export const GET: APIRoute = async ({ props }) => {
   const { note } = props as { note: Awaited<ReturnType<typeof getCollection<'notes'>>>[0] };
   const png = await generateOGImage({
     title: note.data.title,
-    author: DEFAULT_OG_AUTHOR,
-    authorRole: DEFAULT_OG_AUTHOR_ROLE,
-    ...(note.data.category ? { category: note.data.category } : {}),
+    label: buildShareLabel({
+      kind: note.data.noteType ?? 'note',
+      category: note.data.category,
+      locale: note.data.language,
+    }),
+    accent: resolveShareAccent(note.data.colorToken),
   });
 
   return new Response(new Uint8Array(png), {
