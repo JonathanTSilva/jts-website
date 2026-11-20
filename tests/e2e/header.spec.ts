@@ -177,14 +177,20 @@ test.describe('Header', () => {
     await expect(closeIcon).toBeVisible();
   });
 
-  test('language switcher is absent from desktop header actions but present in mobile drawer', async ({ page }) => {
-    // Desktop: lang-pill should not appear in the top header actions bar
+  test('language switcher sits right of the search field on desktop and only in the drawer on mobile', async ({ page }) => {
+    // Desktop: lang-pill is the last item in the header actions bar, right of the search field
+    await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
     const headerActions = page.locator('.header-actions');
-    await expect(headerActions.locator('.lang-pill')).not.toBeVisible();
+    const desktopPill = headerActions.locator('.lang-pill');
+    await expect(desktopPill).toBeVisible();
+    const pillBox = await desktopPill.boundingBox();
+    const searchBox = await headerActions.locator('.search-field').boundingBox();
+    expect(pillBox!.x).toBeGreaterThanOrEqual(searchBox!.x + searchBox!.width);
 
-    // Mobile: lang-pill should appear inside the mobile drawer
+    // Mobile: header actions bar is hidden; lang-pill appears inside the mobile drawer
     await page.setViewportSize({ width: 375, height: 812 });
+    await expect(desktopPill).not.toBeVisible();
     await page.locator('#hamburger').click();
     const mobileActions = page.locator('.mobile-actions');
     await expect(mobileActions.locator('.lang-pill')).toBeVisible();

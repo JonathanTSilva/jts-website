@@ -44,6 +44,7 @@ const navItems = getNavigation(locale);
     </nav>
 
     <div class="header-actions">
+      <ThemeToggle />
       <div class="search-field" role="button" tabindex="0" aria-label="Open search">
         <input
           type="text"
@@ -55,7 +56,7 @@ const navItems = getNavigation(locale);
           <circle cx="8" cy="8" r="5"/><path d="m13 13 3 3"/>
         </svg>
       </div>
-      <ThemeToggle />
+      <LanguageSwitcher currentLocale={locale} currentPath={currentPath} translations={translations} />
     </div>
 
     <button
@@ -364,6 +365,16 @@ const navItems = getNavigation(locale);
   }
   .search-field input::placeholder { color: var(--text-muted); }
   .search-field svg { flex-shrink: 0; color: var(--text-muted); }
+
+  /* Tablet: collapse the search field to an icon-only pill so the language
+     switcher fits beside it without overflowing the header row */
+  @media (min-width: 48rem) and (max-width: 63.9375rem) {
+    .search-field {
+      width: auto;
+      padding: var(--space-2);
+    }
+    .search-field input { display: none; }
+  }
 
   /* Mobile: 3-column layout (logo | search-icon | hamburger) */
   @media (max-width: 47.9375rem) {
