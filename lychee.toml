@@ -1,3 +1,7 @@
 # Legacy docs and synced site content predate the standard: they hold example
 # URLs, root-relative site links and references to files that no longer exist.
 exclude_path = ["tests/fixtures", "docs", "src/content"]
+
+# opensource.org's bot protection answers 403 to GitHub runners, so the
+# MIT license link in README.md fails CI at random although it works.
+exclude = ['^https://opensource\.org/']
