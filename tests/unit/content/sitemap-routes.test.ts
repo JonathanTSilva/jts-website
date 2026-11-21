@@ -1,0 +1,90 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { readRouteEntries, sitemapMeta } from '../../../src/lib/content/sitemapRoutes';
+
+const SITE = 'https://www.jontobias.com';
+let root: string;
+
+function post(
+  collection: 'blog' | 'notes',
+  file: string,
+  fm: { slug: string; language: string; key: string; published: string; updated?: string },
+) {
+  const lines = [
+    '---',
+    `slug: "${fm.slug}"`,
+    `title: "T"`,
+    `language: "${fm.language}"`,
+    `translationKey: "${fm.key}"`,
+    `publishedAt: ${fm.published}`,
+    ...(fm.updated ? [`updatedAt: ${fm.updated}`] : []),
+    '---',
+    '',
+    'Body',
+  ];
+  writeFileSync(join(root, collection, file), lines.join('\n'));
+}
+
+beforeAll(() => {
+  root = mkdtempSync(join(tmpdir(), 'sitemap-routes-'));
+  mkdirSync(join(root, 'blog'));
+  mkdirSync(join(root, 'notes'));
+
+  // EN-only blog post.
+  post('blog', 'b.en.md', { slug: 'b.en', language: 'en', key: 'b', published: '2026-03-01' });
+  // Full blog pair, EN has updatedAt.
+  post('blog', 'a.en.md', {
+    slug: 'a.en', language: 'en', key: 'a', published: '2026-03-02', updated: '2026-11-20',
+  });
+  post('blog', 'a.pt-br.mdx', { slug: 'a.pt-br', language: 'pt-br', key: 'a', published: '2026-03-02' });
+  // PT-only note.
+  post('notes', 'n.pt-br.md', { slug: 'n.pt-br', language: 'pt-br', key: 'n', published: '2026-04-05' });
+  // Non-markdown file is ignored.
+  writeFileSync(join(root, 'blog', 'README.txt'), 'ignore me');
+});
+
+afterAll(() => rmSync(root, { recursive: true, force: true }));
+
+describe('readRouteEntries', () => {
+  it('reads frontmatter of md and mdx files only', () => {
+    const entries = readRouteEntries(root, 'blog');
+    expect(entries.map((e) => e.slug).sort()).toEqual(['a.en', 'a.pt-br', 'b.en']);
+    const a = entries.find((e) => e.slug === 'a.en')!;
+    expect(a.language).toBe('en');
+    expect(a.translationKey).toBe('a');
+    expect(a.updatedAt).toEqual(new Date('2026-11-20'));
+  });
+
+  it('returns an empty list for a missing collection folder', () => {
+    expect(readRouteEntries(join(root, 'nope'), 'blog')).toEqual([]);
+  });
+});
+
+describe('sitemapMeta', () => {
+  it('excludes fallback pages and keeps real ones', () => {
+    const { exclude } = sitemapMeta(root, SITE);
+    expect(exclude.has(`${SITE}/pt-br/blog/b.en/`)).toBe(true);
+    expect(exclude.has(`${SITE}/blog/b.en/`)).toBe(false);
+    expect(exclude.has(`${SITE}/blog/a.en/`)).toBe(false);
+    expect(exclude.has(`${SITE}/pt-br/blog/a.pt-br/`)).toBe(false);
+  });
+
+  it('excludes the English fallback of a Portuguese-only note', () => {
+    const { exclude } = sitemapMeta(root, SITE);
+    expect(exclude.has(`${SITE}/notes/n.pt-br/`)).toBe(true);
+    expect(exclude.has(`${SITE}/pt-br/notes/n.pt-br/`)).toBe(false);
+  });
+
+  it('uses updatedAt for lastmod when present', () => {
+    const { lastmod } = sitemapMeta(root, SITE);
+    expect(lastmod.get(`${SITE}/blog/a.en/`)).toBe('2026-11-20T00:00:00.000Z');
+  });
+
+  it('falls back to publishedAt for lastmod', () => {
+    const { lastmod } = sitemapMeta(root, SITE);
+    expect(lastmod.get(`${SITE}/pt-br/blog/a.pt-br/`)).toBe('2026-03-02T00:00:00.000Z');
+    expect(lastmod.get(`${SITE}/pt-br/notes/n.pt-br/`)).toBe('2026-04-05T00:00:00.000Z');
+  });
+});
