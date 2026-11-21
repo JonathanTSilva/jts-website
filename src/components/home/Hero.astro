@@ -3,7 +3,9 @@ import type { Locale } from '../../lib/content/locale';
 import { getHeroPositioning } from '../../lib/content/positioning';
 import { career } from '../../content/portfolio/career';
 import { getPersonLink } from '../../lib/seo/schema';
+import { Picture } from 'astro:assets';
 import HeroBackground from './HeroBackground.astro';
+import profileHero from '../../assets/images/profile-hero.png';
 
 interface Props {
   locale: Locale;
@@ -91,11 +93,16 @@ const githubLink = getPersonLink(career.person, 'github');
 
     <div class="hero-right">
       <div class="profile-image-wrap">
-        <img
-          src="/assets/images/profile_ai_transparent2.png"
+        <Picture
+          src={profileHero}
           alt={t.profileAlt}
           class="profile-image"
-          onerror="this.style.display='none';this.parentElement.classList.add('profile-placeholder')"
+          formats={['avif', 'webp']}
+          fallbackFormat="webp"
+          widths={[320, 480, 720]}
+          sizes="(max-width: 48rem) calc(100vw - 2rem), 480px"
+          loading="eager"
+          fetchpriority="high"
         />
       </div>
 
@@ -285,11 +292,6 @@ const githubLink = getPersonLink(career.person, 'github');
     object-fit: cover;
     display: block;
     border-radius: var(--radius-md);
-  }
-  .profile-image-wrap.profile-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   .achievement-grid {
