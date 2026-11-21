@@ -91,7 +91,7 @@ export async function generateOGImage(options: OGImageOptions): Promise<Buffer> 
       { alignItems: 'center', justifyContent: 'space-between', padding: '0 72px 52px 72px' },
       box(
         { alignItems: 'center', gap: 20 },
-        image(avatarBase64, 84, { borderRadius: 9999, border: `3px solid ${accent}` }),
+        image(avatarBase64, 84, { boxSizing: 'border-box', borderRadius: 9999, border: `3px solid ${accent}` }),
         box(
           { flexDirection: 'column' },
           box({ fontSize: 34, fontWeight: 600, color: TEXT }, DEFAULT_OG_AUTHOR),
