@@ -17,10 +17,6 @@ export default defineConfig({
   vite: {
     build: {
       rollupOptions: {
-        // html2canvas is an optional progressive-enhancement dep (whiteboard copy button).
-        // It degrades gracefully to URL copy when absent — mark external so the build
-        // does not fail if the package is not installed.
-        external: ['html2canvas'],
         output: {
           // Mermaid 11.x produces 50+ micro-chunks (one per diagram type + cytoscape etc.).
           // Merge all of them into a single lazy vendor chunk to eliminate the waterfall
