@@ -43,7 +43,7 @@
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
     "katex": "^0.16.44",
-    "mermaid": "^11.13.0",
+    "mermaid": "^12.3.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "typescript": "^5.7.3",
