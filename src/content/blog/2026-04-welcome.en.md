@@ -1,5 +1,5 @@
 ---
-slug: "2026-04-welcome.en"
+slug: "welcome"
 title: "Welcome"
 language: "en"
 translationKey: "welcome"

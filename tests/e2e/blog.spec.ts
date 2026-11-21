@@ -43,14 +43,19 @@ test.describe('Blog', () => {
     await expect(page.locator('.author-subtitle')).toHaveText('Senior Embedded Software Engineer');
   });
 
-  test('a translated post has no cross-locale duplicate page', async ({ page }) => {
-    // One page per translation and locale: the EN post is not rebuilt under /pt-br/.
-    // Fallback pages (with the notice) exist only for posts missing a translation;
-    // they are covered by unit tests until WS11 adds fixture content.
+  test('a translated post shares its clean path with the other locale', async ({ page }) => {
+    // Both languages of a post share a slug, so the same path under /pt-br/ is the real
+    // translation (not a copy of the EN page). Fallback pages (with the notice) exist only
+    // for posts missing a translation; they are covered by unit tests.
     await page.goto('/blog');
-    const href = await page.locator('a.blog-entry').first().getAttribute('href'); // e.g. /blog/2026-04-welcome.en
+    const href = await page.locator('a.blog-entry').first().getAttribute('href'); // e.g. /blog/welcome/
+    await page.goto(href!);
+    const enPageTitle = await page.title();
+
     const response = await page.goto('/pt-br' + href);
-    expect(response?.status()).toBe(404);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pt-br');
+    expect(await page.title()).not.toBe(enPageTitle);
   });
 
   test('RSS feed is generated', async ({ page }) => {

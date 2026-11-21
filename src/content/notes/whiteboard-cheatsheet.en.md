@@ -1,5 +1,5 @@
 ---
-slug: "whiteboard-cheatsheet.en"
+slug: "whiteboard-cheatsheet"
 title: "Whiteboard Note — Cheatsheet"
 language: "en"
 translationKey: "whiteboard-cheatsheet"

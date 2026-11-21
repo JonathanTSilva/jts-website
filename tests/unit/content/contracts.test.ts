@@ -160,3 +160,50 @@ describe('validateContent — mindmap notes', () => {
     expect(result.warnings.some(w => w.includes('H1'))).toBe(true);
   });
 });
+
+describe('validateContent — slug rule', () => {
+  const fm = {
+    slug: 'welcome',
+    title: 'Welcome',
+    language: 'en',
+    translationKey: 'welcome',
+    publishedAt: '2026-04-01',
+    summary: 'A summary',
+    tags: ['test'],
+  };
+  const body = '## Conclusion\nBye';
+  const slugErrors = (errors: string[]) => errors.filter((e) => e.startsWith('slug'));
+
+  it('flags a slug that still carries the date and the language', () => {
+    const result = validateContent('blog', { ...fm, slug: '2026-04-welcome.en' }, body, '2026-04-welcome.en.md');
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain(
+      'slug "2026-04-welcome.en" must be "welcome" (the filename without the date and the language)',
+    );
+  });
+
+  it('accepts the clean slug', () => {
+    const result = validateContent('blog', fm, body, '2026-04-welcome.en.md');
+    expect(slugErrors(result.errors)).toEqual([]);
+    expect(result.success).toBe(true);
+  });
+
+  it('raises no slug error without a filename', () => {
+    const result = validateContent('blog', { ...fm, slug: '2026-04-welcome.en' }, body);
+    expect(slugErrors(result.errors)).toEqual([]);
+  });
+
+  it('applies to notes, keeping their date', () => {
+    const note = { slug: 'x', title: 'X', language: 'en', translationKey: 'x', publishedAt: '2026-04-01' };
+    const result = validateContent('notes', note, 'text', '2026-11-x.en.md');
+    expect(result.errors).toContain(
+      'slug "x" must be "2026-11-x" (the filename without the date and the language)',
+    );
+  });
+
+  it('does not apply to now', () => {
+    const now = { slug: 'whatever', title: 'Now', language: 'en', translationKey: 'now', publishedAt: '2026-04-01', updatedAt: '2026-04-01' };
+    const result = validateContent('now', now, 'text', 'index.en.md');
+    expect(slugErrors(result.errors)).toEqual([]);
+  });
+});

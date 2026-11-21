@@ -53,8 +53,8 @@ The sync script never rewrites your markdown — it only moves files. The remark
 jts-brain/
   08-Publish/
     Blog/
-      my-post.en.md
-      my-post.pt-br.md
+      2026-11-my-post.en.md
+      2026-11-my-post.pt-br.md
     Notes/
       my-note.en.md
     Now.en.md           ← legacy Now.md is still accepted as a fallback
@@ -114,22 +114,24 @@ Runs automatically during `pnpm build` as part of the Astro markdown pipeline. I
 
 ### Wikilinks → internal links
 
-The plugin scans `src/content/blog/` and `src/content/notes/` at build start, reads each file's frontmatter `slug`, and builds a lookup table. It then replaces `[[…]]` patterns with standard `<a>` elements.
+The plugin scans `src/content/blog/` and `src/content/notes/` at build start, reads each file's frontmatter `slug` and `language`, and builds a lookup table. It then replaces `[[…]]` patterns with standard `<a>` elements pointing at the clean URL (`/<collection>/<slug>/`, with the `/pt-br` prefix for Portuguese).
 
 ```
-[[debugging-habits]]           → /notes/debugging-habits.en
-[[debugging-habits|My Note]]   → /notes/debugging-habits.en  (label: "My Note")
-[[debugging-habits#heading]]   → /notes/debugging-habits.en#heading
-[[some-post|Read this]]        → /blog/some-post.en           (label: "Read this")
+[[debugging-habits]]                          → /notes/debugging-habits/
+[[debugging-habits|My Note]]                  → /notes/debugging-habits/  (label: "My Note")
+[[debugging-habits#heading]]                  → /notes/debugging-habits/#heading
+[[2026-11-some-post.en|Read this]]            → /blog/some-post/          (label: "Read this")
+[[2026-11-some-post.pt-br|Leia isto]]         → /pt-br/blog/some-post/    (label: "Leia isto")
 ```
 
-The link resolves regardless of how precisely you write the target:
+Vault wikilinks are filename stems, and those keep working unchanged. The link resolves regardless of how precisely you write the target:
 
 | You write | Resolves via |
 |---|---|
-| `[[debugging-habits]]` | base name match |
-| `[[debugging-habits.en]]` | full name without extension |
-| `[[debugging-habits.en.md]]` | full filename |
+| `[[2026-11-some-post.en]]` | filename stem (exactly one language) |
+| `[[2026-11-some-post.en.md]]` | full filename |
+| `[[2026-11-some-post]]` | filename without the language (both languages, linking page's language wins) |
+| `[[some-post]]` | clean slug (both languages, linking page's language wins) |
 
 Locale is inferred from the current file's name (`my-post.pt-br.md` → prefers `pt-br` translations, falls back to `en`).
 
@@ -159,17 +161,37 @@ Standard markdown images (`![alt](url)`) and external links (`[text](https://…
 
 ## How to write content in Obsidian
 
-### File naming
+### File naming and the slug rule
 
-Every published file must follow the `{slug}.{locale}.md` convention:
+Every published file follows the `{name}.{locale}.md` convention. Filenames keep the date and the language suffix:
 
 ```
-my-post.en.md       # English
-my-post.pt-br.md    # Portuguese
-my-note.en.md
+2026-11-my-post.en.md       # English blog post
+2026-11-my-post.pt-br.md    # Portuguese blog post
+my-note.en.md               # English note
+my-note.pt-br.md            # Portuguese note
 ```
 
-The frontmatter `slug` field must match `{base}.{locale}` exactly (e.g. `slug: "my-post.en"`). This becomes the URL path: `/blog/my-post.en`.
+The frontmatter `slug` is derived from the filename:
+
+- Take the filename without `.md`.
+- Remove the `.en` / `.pt-br` suffix.
+- For a blog post, also remove the leading `YYYY-MM-`.
+
+The slug is the same in both languages of a post (`2026-11-my-post.en.md` and `2026-11-my-post.pt-br.md` both have `slug: "my-post"`). The URLs are:
+
+| Content | English | Portuguese |
+|---|---|---|
+| Blog post | `/blog/my-post/` | `/pt-br/blog/my-post/` |
+| Note | `/notes/my-note/` | `/pt-br/notes/my-note/` |
+
+`pnpm lint:content` fails when the slug does not match the filename, or when two files of the same collection and language end up with the same slug.
+
+Each post's Open Graph image follows the same shape: `/og/blog/my-post.png` (English) and `/og/pt-br/blog/my-post.png` (Portuguese); notes use `/og/notes/…` and `/og/pt-br/notes/…`.
+
+### Old URLs redirect
+
+Before the clean slugs, URLs were the filename stem (`/blog/2026-04-welcome.en/`) and some were shared publicly. Those old URLs, including the cross-locale forms such as `/blog/2026-04-welcome.pt-br/`, redirect to the new pages through static redirect pages marked `noindex`. The list lives in `src/data/legacy-slugs.ts`, was generated once on 2026-11-21 and must keep every entry forever. New posts do not need an entry: they never had an old URL.
 
 ### Frontmatter required fields
 
@@ -178,11 +200,11 @@ Blog and Notes files require `slug`, `title`, `language`, `translationKey`, and 
 ### Links and embeds cheat-sheet
 
 ```markdown
-Link to another post or note:
-  [[my-note]]
-  [[my-note|Display text]]
-  [[my-note#some-heading]]
-  [[my-note#some-heading|Display text]]
+Link to another post or note (filename stem or clean slug):
+  [[my-note.en]]
+  [[my-note.en|Display text]]
+  [[2026-11-my-post.en#some-heading]]
+  [[2026-11-my-post.en#some-heading|Display text]]
 
 External link (standard markdown — never converted):
   [label](https://example.com)
@@ -238,7 +260,7 @@ Runs on every push / PR to `main`:
 ## Troubleshooting
 
 **`[[link]]` renders as literal text on the page**
-The target slug was not found in the content map. Check that the file has been synced and has a valid `slug` in its frontmatter matching the `{base}.{locale}` pattern.
+The target was not found in the content map. Check that the file has been synced and that the link uses its filename stem (`2026-11-my-post.en`) or its slug (`my-post`).
 
 **Image is broken (404 in browser)**
 The file was not copied to `public/assets/uploads/`. Check the sync output for the `[images]` line — it shows how many refs were found vs. copied. Possible causes:

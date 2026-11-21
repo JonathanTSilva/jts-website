@@ -1,5 +1,5 @@
 ---
-slug: "2026-11-low-cost-homelab-setup.en"
+slug: "low-cost-homelab-setup"
 title: "My 'almost' low-cost setup"
 language: "en"
 translationKey: "low-cost-homelab-setup"

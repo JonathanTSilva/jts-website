@@ -1,5 +1,6 @@
 import { blogSchema, notesSchema, nowSchema } from "./schemas";
 import { requireSections } from "./contracts";
+import { expectedSlug } from "./slug";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SafeParseSchema = { safeParse: (data: unknown) => any };
@@ -29,10 +30,24 @@ interface ValidationResult {
 export function validateContent(
   collection: CollectionType,
   frontmatter: Record<string, any>,
-  body: string
+  body: string,
+  filename?: string
 ): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
+
+  // 0. Slug rule: the filename without the date and the language.
+  if (filename && (collection === "blog" || collection === "notes")) {
+    const slug = frontmatter.slug;
+    if (typeof slug === "string" && slug.length > 0) {
+      const expected = expectedSlug(filename, collection);
+      if (slug !== expected) {
+        errors.push(
+          `slug "${slug}" must be "${expected}" (the filename without the date and the language)`
+        );
+      }
+    }
+  }
 
   // 1. Validate Frontmatter
   const schema = SCHEMAS[collection];

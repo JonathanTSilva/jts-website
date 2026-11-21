@@ -1,82 +1,103 @@
 import { visit } from 'unist-util-visit';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { contentPath } from '../content/routes';
+import { LOCALES, type Locale } from '../content/locale';
 
 // ---------------------------------------------------------------------------
 // Content map — resolves [[wikilinks]] to website URLs
 // ---------------------------------------------------------------------------
 
-interface ContentEntry {
+export interface ContentEntry {
   collection: 'blog' | 'notes';
   slug: string;
   locale: string;
 }
 
-// Built once per process; safe since content files don't change during a build.
-let mapCache: Map<string, ContentEntry[]> | null = null;
+export type ContentMap = Map<string, ContentEntry[]>;
 
-function buildContentMap(): Map<string, ContentEntry[]> {
-  if (mapCache) return mapCache;
-
-  const map = new Map<string, ContentEntry[]>();
-  const contentDir = path.resolve(process.cwd(), 'src/content');
+/**
+ * Reads every blog post and note under `contentDir` and indexes it by each key
+ * a writer might use in a wikilink. Vault wikilinks are filename stems
+ * (`[[2026-11-low-cost-homelab-setup.en]]`); the clean slug
+ * (`[[low-cost-homelab-setup]]`) works too. Both languages of a post share the
+ * slug, so a slug key holds one entry per language.
+ */
+export function buildContentMap(contentDir: string): ContentMap {
+  const map: ContentMap = new Map();
 
   const addEntry = (key: string, entry: ContentEntry) => {
     if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(entry);
+    const list = map.get(key)!;
+    if (!list.includes(entry)) list.push(entry);
   };
 
   for (const collection of ['blog', 'notes'] as const) {
     const dir = path.join(contentDir, collection);
     if (!fs.existsSync(dir)) continue;
 
-    const files = fs.readdirSync(dir).filter(f => /\.(md|mdx)$/.test(f));
+    const files = fs.readdirSync(dir).filter(f => /\.(md|mdx)$/.test(f)).sort();
     for (const file of files) {
       const raw = fs.readFileSync(path.join(dir, file), 'utf-8');
 
       // Extract the frontmatter slug field.
-      const slugMatch = raw.match(/^slug:\s*"?([^"\n]+)"?\s*$/m);
+      const slugMatch = raw.match(/^slug:\s*["']?([^"'\n]+?)["']?\s*$/m);
       if (!slugMatch?.[1]) continue;
       const slug = slugMatch[1].trim();
 
-      // Derive locale from filename: "debugging-habits.en.md" → locale="en"
+      // Language: frontmatter first, then the filename suffix ("x.pt-br.md").
       const withoutExt = file.replace(/\.(md|mdx)$/, '');
       const lastDot = withoutExt.lastIndexOf('.');
-      const locale = lastDot !== -1 ? withoutExt.slice(lastDot + 1) : 'en';
+      const fileLocale = lastDot !== -1 ? withoutExt.slice(lastDot + 1) : 'en';
       const baseName = lastDot !== -1 ? withoutExt.slice(0, lastDot) : withoutExt;
+      const langMatch = raw.match(/^language:\s*["']?([^"'\n]+?)["']?\s*$/m);
+      const locale = (langMatch?.[1] ?? fileLocale).trim();
 
       const entry: ContentEntry = { collection, slug, locale };
 
       // Index under every key a writer might use in an Obsidian wikilink:
-      //   [[debugging-habits]]               → baseName
-      //   [[debugging-habits.en]]            → withoutExt
-      //   [[debugging-habits.en.md]]         → file
-      //   [[2026-03-markdown-cheatsheet.en]] → slug (may equal withoutExt)
+      //   [[low-cost-homelab-setup]]               -> slug (shared by both languages)
+      //   [[2026-11-low-cost-homelab-setup]]       -> filename without the language
+      //   [[2026-11-low-cost-homelab-setup.en]]    -> filename stem (exactly one entry)
+      //   [[2026-11-low-cost-homelab-setup.en.md]] -> filename
       addEntry(baseName, entry);
       addEntry(withoutExt, entry);
       addEntry(file, entry);
-      if (slug !== withoutExt) addEntry(slug, entry);
+      addEntry(slug, entry);
     }
   }
 
-  mapCache = map;
   return map;
 }
 
-function resolveUrl(target: string, preferLocale: string): string | null {
-  const map = buildContentMap();
+// Built once per process; safe since content files don't change during a build.
+let mapCache: ContentMap | null = null;
+
+function getContentMap(): ContentMap {
+  mapCache ??= buildContentMap(path.resolve(process.cwd(), 'src/content'));
+  return mapCache;
+}
+
+/** Resolves a wikilink target to the page URL built from the entry's slug + language. */
+export function resolveWikilinkUrl(map: ContentMap, target: string, preferLocale: string): string | null {
   const normalized = target.replace(/\.(md|mdx)$/, '').trim();
   const entries = map.get(normalized);
   if (!entries || entries.length === 0) return null;
 
+  // A stem with a language suffix has exactly one entry; a slug or a base name
+  // has one per language, so pick the linking page's language first.
   const best: ContentEntry | undefined =
     entries.find(e => e.locale === preferLocale) ??
     entries.find(e => e.locale === 'en') ??
     entries[0];
 
   if (!best) return null;
-  const prefix = best.locale === 'en' ? '' : `/${best.locale}`;
-  return `${prefix}/${best.collection}/${best.slug}`;
+  const locale: Locale = (LOCALES as readonly string[]).includes(best.locale) ? (best.locale as Locale) : 'en';
+  return contentPath(best.collection, locale, best.slug);
+}
+
+function resolveUrl(target: string, preferLocale: string): string | null {
+  return resolveWikilinkUrl(getContentMap(), target, preferLocale);
 }
 
 // ---------------------------------------------------------------------------

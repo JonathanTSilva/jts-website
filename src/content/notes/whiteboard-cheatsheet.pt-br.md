@@ -1,5 +1,5 @@
 ---
-slug: "whiteboard-cheatsheet.pt-br"
+slug: "whiteboard-cheatsheet"
 title: "Nota de Quadro Branco — Cheatsheet"
 language: "pt-br"
 translationKey: "whiteboard-cheatsheet"

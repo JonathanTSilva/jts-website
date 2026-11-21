@@ -1,5 +1,5 @@
 ---
-slug: "2026-03-markdown-cheatsheet.en"
+slug: "markdown-cheatsheet"
 title: "Markdown Cheatsheet — Website Writing Reference"
 language: "en"
 translationKey: "markdown-cheatsheet"

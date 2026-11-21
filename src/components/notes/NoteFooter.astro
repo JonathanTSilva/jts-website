@@ -44,7 +44,7 @@ const url = Astro.url.href;
       <h2 class="nf-heading">{t.related}</h2>
       <div class="nf-related-grid">
         {relatedNotes.map((r) => (
-          <a href={contentLocalePath(locale, `/notes/${r.id}`)} class="nf-card">
+          <a href={contentLocalePath(locale, `/notes/${r.data.slug}`)} class="nf-card">
             <span class="nf-card-date">
               {r.data.publishedAt.toLocaleDateString(dateLocale, { dateStyle: 'medium' })}
             </span>
@@ -63,7 +63,7 @@ const url = Astro.url.href;
     <nav class="nf-nav" aria-label={t.navLabel}>
       <div class="nf-nav-side">
         {prev ? (
-          <a href={contentLocalePath(locale, `/notes/${prev.id}`)} class="nf-nav-link">
+          <a href={contentLocalePath(locale, `/notes/${prev.data.slug}`)} class="nf-nav-link">
             <span class="nf-nav-dir">{t.prev}</span>
             <span class="nf-nav-title">{prev.data.title}</span>
           </a>
@@ -71,7 +71,7 @@ const url = Astro.url.href;
       </div>
       <div class="nf-nav-side nf-nav-side--right">
         {next ? (
-          <a href={contentLocalePath(locale, `/notes/${next.id}`)} class="nf-nav-link nf-nav-link--right">
+          <a href={contentLocalePath(locale, `/notes/${next.data.slug}`)} class="nf-nav-link nf-nav-link--right">
             <span class="nf-nav-dir">{t.next}</span>
             <span class="nf-nav-title">{next.data.title}</span>
           </a>

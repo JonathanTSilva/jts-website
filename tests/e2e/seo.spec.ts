@@ -240,3 +240,28 @@ test.describe('Translation-aware hreflang', () => {
     expect(response.status()).toBe(200);
   });
 });
+
+test.describe('Legacy slug redirects', () => {
+  // Old URLs were shared (LinkedIn etc.) and must still land on the post.
+  const cases = [
+    { from: '/blog/2026-11-low-cost-homelab-setup.en/', to: /\/blog\/low-cost-homelab-setup\/?$/ },
+    { from: '/pt-br/blog/2026-11-low-cost-homelab-setup.pt-br/', to: /\/pt-br\/blog\/low-cost-homelab-setup\/?$/ },
+    { from: '/blog/2026-04-welcome.pt-br/', to: /\/pt-br\/blog\/welcome\/?$/ },
+    { from: '/notes/note-cheatsheet.en/', to: /\/notes\/note-cheatsheet\/?$/ },
+  ];
+
+  for (const { from, to } of cases) {
+    test(`old shared URL still reaches the post: ${from}`, async ({ page }) => {
+      await page.goto(from);
+      await page.waitForURL(to);
+      await expect(page.locator('h1').first()).toBeVisible();
+    });
+  }
+
+  test('the redirect page is noindex so old URLs do not get indexed', async ({ page }) => {
+    const response = await page.request.get('/blog/2026-11-low-cost-homelab-setup.en/');
+    expect(response.status()).toBe(200);
+    const html = await response.text();
+    expect(html).toMatch(/<meta[^>]+name="robots"[^>]+content="[^"]*noindex/i);
+  });
+});

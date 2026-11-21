@@ -8,8 +8,8 @@ import { test, expect } from '@playwright/test';
  * The cheatsheet post slug is stable and intentionally hardcoded here.
  */
 
-const EN_SLUG = '/blog/2026-03-markdown-cheatsheet.en';
-const PT_SLUG = '/pt-br/blog/2026-03-markdown-cheatsheet.pt-br';
+const EN_SLUG = '/blog/markdown-cheatsheet';
+const PT_SLUG = '/pt-br/blog/markdown-cheatsheet';
 
 test.describe('Markdown Rendering — Cheatsheet Post', () => {
   // The cheatsheet is a large page (Shiki highlighting, Mermaid, math).
@@ -226,7 +226,7 @@ test.describe('Markdown Rendering — Cheatsheet Post', () => {
 
     test('PT-BR post links to EN translation via language switcher', async ({ page }) => {
       await page.goto(PT_SLUG);
-      const enLink = page.locator('.footer-row-brand a[href*="/blog/2026-03-markdown-cheatsheet.en"]');
+      const enLink = page.locator('.footer-row-brand a[href*="/blog/markdown-cheatsheet"]');
       await expect(enLink).toBeVisible();
     });
   });

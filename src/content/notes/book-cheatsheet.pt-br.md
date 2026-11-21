@@ -1,5 +1,5 @@
 ---
-slug: "book-cheatsheet.pt-br"
+slug: "book-cheatsheet"
 title: "Construindo um Segundo Cérebro"
 language: "pt-br"
 translationKey: "book-cheatsheet"
@@ -72,7 +72,7 @@ A abordagem prática do livro é seu principal diferencial. Onde outros livros d
 ## Referência de Frontmatter
 
 ```yaml
-slug: "meu-livro.pt-br"                    # obrigatório
+slug: "meu-livro"                          # obrigatório
 title: "Título do Livro"                   # obrigatório
 noteType: book                             # obrigatório para este layout
 author:                                    # lista de strings opcional

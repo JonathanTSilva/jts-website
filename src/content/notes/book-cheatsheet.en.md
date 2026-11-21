@@ -1,5 +1,5 @@
 ---
-slug: "book-cheatsheet.en"
+slug: "book-cheatsheet"
 title: "Building a Second Brain"
 language: "en"
 translationKey: "book-cheatsheet"
@@ -72,7 +72,7 @@ The book's practical stance is its main strength. Where other PKM books philosop
 ## Frontmatter Reference
 
 ```yaml
-slug: "my-book.en"                        # required
+slug: "my-book"                           # required
 title: "Book Title"                       # required
 noteType: book                            # required for this layout
 author:                                   # optional list of strings

@@ -1,5 +1,5 @@
 ---
-slug: "2026-11-chinese-cameras-internet.en"
+slug: "chinese-cameras-internet"
 title: "What Chinese cameras do on the internet"
 language: "en"
 translationKey: "chinese-cameras-internet"

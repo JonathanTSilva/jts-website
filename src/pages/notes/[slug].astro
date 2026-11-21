@@ -1,6 +1,7 @@
 ---
 import { render } from 'astro:content';
 import { makeNoteStaticPaths } from '../../lib/content/staticPaths';
+import { ogImagePath } from '../../lib/content/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import DefaultNoteLayout from '../../components/notes/layouts/DefaultNoteLayout.astro';
 import BookNoteLayout from '../../components/notes/layouts/BookNoteLayout.astro';
@@ -27,7 +28,7 @@ const NoteLayout = layouts[note.data.noteType ?? 'note'];
   locale={locale}
   title={note.data.title}
   description={note.data.summary ?? undefined}
-  image={`/og/notes/${note.data.slug}.png`}
+  image={ogImagePath('notes', note.data.language, note.data.slug)}
   ogType="article"
   translations={translations}
   noindex={isTranslationFallback}

@@ -1,5 +1,5 @@
 ---
-slug: "mindmap-cheatsheet.en"
+slug: "mindmap-cheatsheet"
 title: "Note Types — Mind Map"
 language: "en"
 translationKey: "mindmap-cheatsheet"
@@ -92,8 +92,8 @@ colorToken: "#065f46"
 ## Shared Fields
 
 - slug
-    - Format: slug.language
-    - e.g. note-cheatsheet.en
+    - Format: filename without date and language
+    - e.g. note-cheatsheet
 - translationKey
     - Links EN and PT-BR versions
     - Powers language switcher

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { validateContent } from '../src/lib/content/validation';
+import { findSlugCollisions, type SlugOwner } from '../src/lib/content/slug';
 import {
   listRepoFiles,
   listVaultFiles,
@@ -17,8 +18,8 @@ function validateFile(file: SourceFile) {
   const fileContent = fs.readFileSync(file.path, 'utf8');
   const { data, content } = matter(fileContent);
 
-  const result = validateContent(file.collection, data, content);
-  return { errors: result.errors, warnings: result.warnings };
+  const result = validateContent(file.collection, data, content, file.destName);
+  return { errors: result.errors, warnings: result.warnings, data };
 }
 
 function parseArgs(argv: string[]): { vault: string | null; extra: string[] } {
@@ -69,9 +70,22 @@ function main() {
 
   let hasErrors = false;
   const report: Record<string, string[]> = {};
+  const owners: SlugOwner[] = [];
 
   for (const file of files) {
-    const { errors, warnings } = validateFile(file);
+    const { errors, warnings, data } = validateFile(file);
+    if (
+      (file.collection === 'blog' || file.collection === 'notes') &&
+      typeof data.slug === 'string' &&
+      typeof data.language === 'string'
+    ) {
+      owners.push({
+        collection: file.collection,
+        language: data.language,
+        slug: data.slug,
+        name: file.destName,
+      });
+    }
     // Extra files can live outside the report base; show those as given.
     const rel = path.relative(reportBase, file.path);
     const relativePath = rel.startsWith('..') ? file.path : rel;
@@ -82,6 +96,13 @@ function main() {
       hasErrors = true;
       report[relativePath] = errors;
     }
+  }
+
+  // Corpus check: two files of one collection and language must not share a slug.
+  const collisions = findSlugCollisions(owners);
+  if (collisions.length > 0) {
+    hasErrors = true;
+    report['(corpus)'] = collisions;
   }
 
   if (hasErrors) {

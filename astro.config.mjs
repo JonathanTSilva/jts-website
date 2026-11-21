@@ -4,6 +4,8 @@ import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { sitemapMeta } from './src/lib/content/sitemapRoutes.ts';
+import { legacyRedirects } from './src/lib/content/legacyRedirects.ts';
+import { LEGACY_SLUGS } from './src/data/legacy-slugs.ts';
 import { rehypeCallouts } from './src/lib/rehype/callouts.ts';
 import { remarkHighlights } from './src/lib/remark/highlights.ts';
 import { remarkObsidianImages } from './src/lib/remark/obsidian-images.ts';
@@ -19,9 +21,13 @@ const sitemapData = sitemapMeta('src/content', SITE);
 
 export default defineConfig({
   site: SITE,
+  // Old `<date>-<name>.<lang>` URLs redirect to the clean shared slugs (static meta-refresh pages).
+  redirects: legacyRedirects(LEGACY_SLUGS),
   integrations: [
     mdx(),
     sitemap({
+      // Both languages of a post share a slug, so the alternates map path-for-path.
+      i18n: { defaultLocale: 'en', locales: { en: 'en', 'pt-br': 'pt-BR' } },
       filter: (page) => !sitemapData.exclude.has(page),
       serialize: (item) => ({ ...item, lastmod: sitemapData.lastmod.get(item.url) ?? item.lastmod }),
     }),
