@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
-import type { Locale } from '../../lib/content/locale';
-import { contentLocalePath } from '../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../lib/content/locale';
+import { format, useTranslations } from '../../i18n/ui';
 import { getReadingTime } from '../../lib/readingTime';
 import { buildCategoryMap } from '../../lib/content/i18n';
 import TranslationStatusTag from '../site/TranslationStatusTag.astro';
@@ -11,6 +11,7 @@ interface Props {
 }
 
 const { locale } = Astro.props;
+const t = useTranslations(locale);
 
 const allPosts = await getCollection('blog');
 
@@ -59,29 +60,21 @@ const groupedPosts = postsToShow.reduce((acc, post) => {
 
 const years = Object.keys(groupedPosts).map(Number).sort((a, b) => b - a);
 
-const monthNames = {
-  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-  'pt-br': ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
-}[locale];
-
-const translationMissingLabel = {
-  en: 'Available in Portuguese only',
-  'pt-br': 'Disponível apenas em Inglês',
-}[locale];
+const monthNames = Object.values(t.common.months);
 ---
 
 {postsToShow.length === 0 ? (
   <p class="empty-state">
-    {locale === 'en' ? 'No posts yet. Check back soon.' : 'Nenhum post ainda. Volte em breve.'}
+    {t.blog.empty}
   </p>
 ) : (
   <>
-    <div class="blog-filter-bar" role="toolbar" aria-label="Filter by category">
+    <div class="blog-filter-bar" role="toolbar" aria-label={t.blog.filterByCategory}>
       <button
         class="filter-category-btn active"
         data-category="all"
       >
-        All
+        {t.blog.filterAll}
         <span class="badge-count">{totalCount}</span>
       </button>
       {categories.map(cat => (
@@ -118,14 +111,14 @@ const translationMissingLabel = {
                         <span class="blog-entry-title">
                           {post.data.title}
                           {post.isTranslationMissing && (
-                            <TranslationStatusTag text={translationMissingLabel} />
+                            <TranslationStatusTag text={t.site.translationMissing} />
                           )}
                         </span>
                         <span class="blog-entry-date">
                           <time datetime={post.data.publishedAt.toISOString()}>
                             {post.data.publishedAt.toLocaleDateString(locale, { month: 'short', day: '2-digit' })}
                           </time>
-                          {' · '}{mins} min
+                          {' · '}{format(t.blog.readingTimeShort, { minutes: mins })}
                         </span>
                       </a>
                     );
@@ -142,7 +135,7 @@ const translationMissingLabel = {
 
 <div class="cross-section-link">
   <a href={contentLocalePath(locale, '/notes')} class="cross-section-nav">
-    {locale === 'pt-br' ? 'Ver notas →' : 'Browse Notes →'}
+    {t.blog.browseNotes}
   </a>
 </div>
 
