@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
+/** Each translation lives only under its own locale's prefix. */
+const localePrefix = (slug: string): string => (slug.endsWith('.pt-br') ? '/pt-br' : '');
+
 test.describe('Indexing surfaces', () => {
   test('robots.txt returns 200 with correct directives', async ({ request }) => {
     const response = await request.get('/robots.txt');
@@ -139,7 +142,7 @@ test.describe('Build Integrity', () => {
 
     // Check blog posts
     for (const slug of blogSlugs) {
-      await page.goto(`/blog/${slug}`);
+      await page.goto(`${localePrefix(slug)}/blog/${slug}`);
       const ogImage = await page.locator('meta[property="og:image"]').first().getAttribute('content');
       expect(ogImage).toBeTruthy();
       expect(ogImage).toContain(`/og/blog/${slug}.png`);
@@ -153,7 +156,7 @@ test.describe('Build Integrity', () => {
 
     // Check notes
     for (const slug of notesSlugs) {
-      await page.goto(`/notes/${slug}`);
+      await page.goto(`${localePrefix(slug)}/notes/${slug}`);
       const ogImage = await page.locator('meta[property="og:image"]').first().getAttribute('content');
       expect(ogImage).toBeTruthy();
       expect(ogImage).toContain(`/og/notes/${slug}.png`);
