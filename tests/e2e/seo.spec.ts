@@ -215,3 +215,28 @@ test.describe('Structured Data (JSON-LD)', () => {
     expect(types).toContain('WebSite');
   });
 });
+
+test.describe('Translation-aware hreflang', () => {
+  test('article hreflang points to the real translation', async ({ page }) => {
+    await page.goto('/blog');
+    const href = await page.locator('a.blog-entry').first().getAttribute('href');
+    expect(href).toBeTruthy();
+    await page.goto(href!);
+
+    const hreflangHref = await page
+      .locator('link[rel="alternate"][hreflang="pt-br"]')
+      .getAttribute('href');
+    const switcherHref = await page
+      .locator('a.lang-btn[data-locale="pt-br"]')
+      .first()
+      .getAttribute('href');
+    expect(hreflangHref).toBeTruthy();
+    expect(switcherHref).toBeTruthy();
+
+    const normalize = (p: string) => p.replace(/\/+$/, '');
+    expect(normalize(new URL(hreflangHref!).pathname)).toBe(normalize(switcherHref!));
+
+    const response = await page.request.get(switcherHref!);
+    expect(response.status()).toBe(200);
+  });
+});

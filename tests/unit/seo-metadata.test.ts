@@ -27,6 +27,51 @@ describe('generateSeo — canonical generation', () => {
   });
 });
 
+describe('generateSeo — translation-aware alternates', () => {
+  it('translations drive alternates', () => {
+    const result = generateSeo({
+      locale: 'en',
+      currentPath: '/blog/a.en/',
+      translations: { en: '/blog/a.en/', 'pt-br': '/pt-br/blog/a.pt-br/' },
+    });
+    expect(result.alternateLocales).toEqual([
+      { locale: 'en', href: `${BASE_URL}/blog/a.en/` },
+      { locale: 'pt-br', href: `${BASE_URL}/pt-br/blog/a.pt-br/` },
+      { locale: 'x-default', href: `${BASE_URL}/blog/a.en/` },
+    ]);
+    expect(result.robots).toBeUndefined();
+  });
+
+  it('x-default falls back to pt-br when there is no en translation', () => {
+    const result = generateSeo({
+      locale: 'pt-br',
+      currentPath: '/pt-br/blog/c/',
+      translations: { 'pt-br': '/pt-br/blog/c/' },
+    });
+    expect(result.alternateLocales).toEqual([]);
+  });
+
+  it('a single translation emits no alternates', () => {
+    const result = generateSeo({
+      locale: 'en',
+      currentPath: '/blog/b/',
+      translations: { en: '/blog/b/' },
+    });
+    expect(result.alternateLocales).toEqual([]);
+  });
+
+  it('noindex emits robots and no alternates', () => {
+    const result = generateSeo({
+      locale: 'pt-br',
+      currentPath: '/pt-br/blog/b/',
+      translations: { en: '/blog/b/' },
+      noindex: true,
+    });
+    expect(result.robots).toBe('noindex, follow');
+    expect(result.alternateLocales).toEqual([]);
+  });
+});
+
 describe('generateSeo — alternate locale generation', () => {
   it('EN path /blog generates en and pt-br alternates', () => {
     const result = generateSeo({ locale: 'en', currentPath: '/blog' });

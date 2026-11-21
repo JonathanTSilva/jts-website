@@ -36,6 +36,7 @@ const t = {
   image={`/og/blog/${post.data.slug}.png`}
   ogType="article"
   translations={translations}
+  noindex={isTranslationFallback}
   structuredData={generateArticleSchema({ title: post.data.title, description: post.data.summary, url: `https://www.jontobias.com/pt-br/blog/${post.data.slug}`, publishedAt: post.data.publishedAt, image: `https://www.jontobias.com/og/blog/${post.data.slug}.png` })}
 >
   <div class="post-wrapper" style={`--category-color: ${categoryColor}`}>

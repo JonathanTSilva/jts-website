@@ -23,9 +23,10 @@ interface Props {
   translations?: Partial<Record<Locale, string>> | undefined;
   structuredData?: object | object[] | undefined;
   pageType?: PageType | undefined;
+  noindex?: boolean | undefined;
 }
 
-const { title, description, image, ogType, locale = 'en', translations, structuredData, pageType } = Astro.props;
+const { title, description, image, ogType, locale = 'en', translations, structuredData, pageType, noindex } = Astro.props;
 ---
 
 <!doctype html>
@@ -36,6 +37,8 @@ const { title, description, image, ogType, locale = 'en', translations, structur
     <link rel="icon" type="image/png" href="/assets/images/jts-logo-circle-simple.png" />
     <meta name="generator" content={Astro.generator} />
     <script is:inline set:html={themeInlineScript} />
+    {/* Static pages also pass `translations` (for the language switcher) as bare path
+        maps; only articles feed them into hreflang, static pages keep path mapping. */}
     <SeoHead
       title={title}
       description={description}
@@ -44,6 +47,8 @@ const { title, description, image, ogType, locale = 'en', translations, structur
       locale={locale}
       currentPath={Astro.url.pathname}
       pageType={pageType}
+      translations={ogType === 'article' ? translations : undefined}
+      noindex={noindex}
     />
     {locale === 'en' ? (
       <>

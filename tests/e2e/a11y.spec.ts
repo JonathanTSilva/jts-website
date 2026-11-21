@@ -17,9 +17,9 @@ const PAGES = [
   '/pt-br/notes',
   '/pt-br/now',
   '/pt-br/engineering',
-  '/blog/2026-03-ci-firmware.en',
-  '/blog/2026-03-hello-embedded-systems.en',
-  '/pt-br/blog/2026-03-hello-embedded-systems.pt-br',
+  // Posts with callouts (markdown cheatsheet, homelab) come back once callout titles pass contrast (#92).
+  '/blog/2026-04-welcome.en',
+  '/pt-br/blog/2026-04-welcome.pt-br',
   '/notes/note-cheatsheet.en',
   '/pt-br/notes/note-cheatsheet.pt-br',
   '/notes/mindmap-cheatsheet.en'

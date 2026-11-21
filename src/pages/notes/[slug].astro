@@ -9,7 +9,7 @@ import WhiteboardLayout from '../../components/notes/layouts/WhiteboardLayout.as
 
 export const getStaticPaths = makeNoteStaticPaths('en');
 
-const { note, translations, prev, next, relatedNotes } = Astro.props;
+const { note, translations, isTranslationFallback, prev, next, relatedNotes } = Astro.props;
 const { Content } = await render(note);
 const locale = 'en';
 
@@ -30,6 +30,7 @@ const NoteLayout = layouts[note.data.noteType ?? 'note'];
   image={`/og/notes/${note.data.slug}.png`}
   ogType="article"
   translations={translations}
+  noindex={isTranslationFallback}
 >
   <NoteLayout note={note} Content={Content} locale={locale} prev={prev} next={next} relatedNotes={relatedNotes} />
 </BaseLayout>
