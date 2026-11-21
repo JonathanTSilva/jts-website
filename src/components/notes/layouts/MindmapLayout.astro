@@ -1,14 +1,13 @@
 ---
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
+import { useTranslations } from '../../../i18n/ui';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
 type Props = NoteLayoutProps;
 
 const { note, Content, locale, prev, next, relatedNotes } = Astro.props;
 
-const fallbackNotice = locale === 'en'
-  ? 'This mindmap is not available in English. Showing the original version.'
-  : 'Este mapa mental não está disponível em Português. Mostrando a versão original.';
+const t = useTranslations(locale);
 
 const isTranslationFallback = note.data.language !== locale;
 ---
@@ -36,7 +35,7 @@ const isTranslationFallback = note.data.language !== locale;
 
   <div class="mindmap-wrapper">
     {isTranslationFallback && (
-      <TranslationFallbackNotice message={fallbackNotice} />
+      <TranslationFallbackNotice message={t.notes.fallbackNoticeMindmap} />
     )}
     <Content />
   </div>

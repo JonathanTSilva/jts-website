@@ -1,5 +1,6 @@
 ---
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
+import { useTranslations } from '../../../i18n/ui';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 import '@fontsource/caveat/400.css';
 import '@fontsource/caveat/600.css';
@@ -10,11 +11,7 @@ type Props = NoteLayoutProps;
 
 const { note, Content, locale, prev, next, relatedNotes } = Astro.props;
 
-const t = locale === 'en'
-  ? { copyImage: 'Copy as image', copied: 'Copied!',
-      fallbackNotice: 'This whiteboard is not available in English. Showing the original version.' }
-  : { copyImage: 'Copiar como imagem', copied: 'Copiado!',
-      fallbackNotice: 'Este quadro não está disponível em Português. Mostrando a versão original.' };
+const t = useTranslations(locale);
 
 const isTranslationFallback = note.data.language !== locale;
 ---
@@ -29,22 +26,22 @@ const isTranslationFallback = note.data.language !== locale;
   articleClass="whiteboard-page"
 >
   {isTranslationFallback && (
-    <TranslationFallbackNotice message={t.fallbackNotice} />
+    <TranslationFallbackNotice message={t.notes.fallbackNoticeWhiteboard} />
   )}
 
   <div class="whiteboard-frame" data-whiteboard>
     <div class="whiteboard-board">
       <button
         class="whiteboard-copy-btn"
-        data-copy-label={t.copyImage}
-        data-copied-label={t.copied}
-        aria-label={t.copyImage}
+        data-copy-label={t.notes.copyAsImage}
+        data-copied-label={t.notes.copied}
+        aria-label={t.notes.copyAsImage}
       >
         <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
           <polyline points="21 15 16 10 5 21"/>
         </svg>
-        <span class="copy-label">{t.copyImage}</span>
+        <span class="copy-label">{t.notes.copyAsImage}</span>
       </button>
 
       <h1 class="whiteboard-title">{note.data.title}</h1>
