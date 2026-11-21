@@ -153,6 +153,8 @@ Deployed to [GitHub Pages](https://pages.github.com/) via GitHub Actions on push
 - [Automation Docs](docs/automation/)
 - [SEO Checklist](docs/site-operations/seo-checklist.md) — metadata rules, structured data, multilingual SEO invariants
 - [CV Operations](docs/cv/operations.md) — public/private generation, verification, privacy, and release review
+- [Site review 2026-11-21](docs/reviews/2026-11-21-full-site-review.md) — full review of correctness, SEO, performance, dependencies, tests and automation
+- [Site review remediation plan](docs/superpowers/plans/2026-11-21-site-review-remediation.md) — phased fixes with model routing
 - [Engineering handbook](https://github.com/JonathanTSilva/.github/blob/main/handbook/README.md): the conventions this repository follows
 
 ## Contributing

@@ -4,15 +4,15 @@ import satori from 'satori';
 import sharp from 'sharp';
 import { lightenHex } from './og/shareLabel';
 
-const FONT_DIR = 'node_modules/geist/dist/fonts';
+const FONT_DIR = 'src/assets/fonts/geist';
 const loadFont = (file: string) => readFileSync(resolve(FONT_DIR, file));
 
 // Load fonts once at module level
 const fonts = [
-  { name: 'Geist', data: loadFont('geist-sans/Geist-Regular.ttf'), weight: 400, style: 'normal' },
-  { name: 'Geist', data: loadFont('geist-sans/Geist-SemiBold.ttf'), weight: 600, style: 'normal' },
-  { name: 'Geist', data: loadFont('geist-sans/Geist-Bold.ttf'), weight: 700, style: 'normal' },
-  { name: 'Geist Mono', data: loadFont('geist-mono/GeistMono-Medium.ttf'), weight: 500, style: 'normal' },
+  { name: 'Geist', data: loadFont('Geist-Regular.ttf'), weight: 400, style: 'normal' },
+  { name: 'Geist', data: loadFont('Geist-SemiBold.ttf'), weight: 600, style: 'normal' },
+  { name: 'Geist', data: loadFont('Geist-Bold.ttf'), weight: 700, style: 'normal' },
+  { name: 'Geist Mono', data: loadFont('GeistMono-Medium.ttf'), weight: 500, style: 'normal' },
 ] as const;
 
 // Load images as base64 data URIs

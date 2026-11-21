@@ -1,15 +1,13 @@
 import assert from 'node:assert/strict';
-import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { PDFDocument, PDFName, PDFString } from 'pdf-lib';
 import type { ResolvedCv } from './types';
 
 export const getGeistFontCss = async (): Promise<string> => {
-  const require = createRequire(import.meta.url);
-  const directory = resolve(dirname(require.resolve('geist/font/sans')), 'fonts/geist-sans');
-  const [regular, semibold] = await Promise.all([readFile(resolve(directory, 'Geist-Regular.woff2')), readFile(resolve(directory, 'Geist-SemiBold.woff2'))]);
+  const directory = new URL('../../assets/fonts/geist/', import.meta.url);
+  const [regular, semibold] = await Promise.all([readFile(fileURLToPath(new URL('Geist-Regular.woff2', directory))), readFile(fileURLToPath(new URL('Geist-SemiBold.woff2', directory)))]);
   return `@font-face{font-family:'Geist CV';font-style:normal;font-weight:400;src:url(data:font/woff2;base64,${regular.toString('base64')}) format('woff2')}@font-face{font-family:'Geist CV';font-style:normal;font-weight:600;src:url(data:font/woff2;base64,${semibold.toString('base64')}) format('woff2')}`;
 };
 

@@ -5,6 +5,7 @@ node_modules/
 dist/
 .astro/
 .cv-output/
+/public/api/
 /public/assets/cv/jonathan-cv.pdf
 
 # Logs
