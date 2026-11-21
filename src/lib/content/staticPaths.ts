@@ -2,6 +2,7 @@ import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import type { Locale } from './locale';
 import { buildCategoryMap } from './i18n';
+import { planLocalizedRoutes, type RouteEntry } from './routes';
 
 /**
  * Computes all display data for the notes index page.
@@ -52,32 +53,49 @@ export function buildNoteIndex(allNotes: CollectionEntry<'notes'>[], locale: Loc
   return { notesToShow, categories, tags, categoryCounts, noteTypes, noteTypeCounts };
 }
 
+/** Adapts a content collection entry to the shape the route planner needs. */
+function toRouteEntry<T extends { data: { slug: string; language: Locale; translationKey: string; publishedAt: Date; updatedAt?: Date | undefined } }>(
+  item: T,
+): RouteEntry & { item: T } {
+  return {
+    slug: item.data.slug,
+    language: item.data.language,
+    translationKey: item.data.translationKey,
+    publishedAt: item.data.publishedAt,
+    updatedAt: item.data.updatedAt,
+    item,
+  };
+}
+
 /**
  * Returns a `getStaticPaths` function for a note detail page ([slug].astro).
  * Both EN and PT-BR pages use identical logic — the only difference is locale.
+ * One page per translation group; a fallback page only when the locale's
+ * translation is missing.
  */
 export function makeNoteStaticPaths(locale: Locale) {
   return async function getStaticPaths() {
     const allNotes = await getCollection('notes');
+    const routes = planLocalizedRoutes(allNotes.map(toRouteEntry), 'notes', locale);
 
-    const sameLangNotes = allNotes
-      .filter(n => n.data.language === locale)
+    // Prev/next and related notes only consider notes written in this locale.
+    const sameLangNotes = routes
+      .filter(r => !r.isFallback)
+      .map(r => r.entry.item)
       .sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
 
-    return allNotes.map(note => {
-      const translations = allNotes.filter(n => n.data.translationKey === note.data.translationKey);
-      const enNote = translations.find(n => n.data.language === 'en');
-      const ptNote = translations.find(n => n.data.language === 'pt-br');
+    return routes.map(route => {
+      const note = route.entry.item;
 
       const currentIdx = sameLangNotes.findIndex(n => n.id === note.id);
-      // Guard currentIdx >= 0: cross-locale notes (language !== locale) return -1,
-      // and sameLangNotes[-1 + 1] = sameLangNotes[0] would produce a phantom next link.
+      // Fallback notes are not in sameLangNotes (idx -1): they get no prev/next,
+      // otherwise sameLangNotes[-1 + 1] would produce a phantom next link.
       const prev = currentIdx > 0 ? sameLangNotes[currentIdx - 1] : undefined;
       const next = currentIdx >= 0 && currentIdx < sameLangNotes.length - 1 ? sameLangNotes[currentIdx + 1] : undefined;
 
-      const relatedNotes = allNotes
+      const relatedNotes = sameLangNotes
         .filter(n => {
-          if (n.id === note.id || n.data.language !== locale) return false;
+          if (n.id === note.id) return false;
           const sameCategory = note.data.category && n.data.category === note.data.category;
           const sharedTags = note.data.tags?.some(tag => n.data.tags?.includes(tag)) ?? false;
           return sameCategory || sharedTags;
@@ -92,10 +110,8 @@ export function makeNoteStaticPaths(locale: Locale) {
           prev,
           next,
           relatedNotes,
-          translations: {
-            ...(enNote ? { en: `/notes/${enNote.data.slug}` } : {}),
-            ...(ptNote ? { 'pt-br': `/pt-br/notes/${ptNote.data.slug}` } : {}),
-          },
+          isTranslationFallback: route.isFallback,
+          translations: route.translations,
         },
       };
     });
@@ -105,50 +121,31 @@ export function makeNoteStaticPaths(locale: Locale) {
 /**
  * Returns a `getStaticPaths` function for a blog post detail page ([slug].astro).
  * Both EN and PT-BR pages use identical logic — the only difference is locale.
+ * One page per translation group; a fallback page only when the locale's
+ * translation is missing.
  */
 export function makeBlogStaticPaths(locale: Locale) {
   return async function getStaticPaths() {
     const allPosts = await getCollection('blog');
+    const routes = planLocalizedRoutes(allPosts.map(toRouteEntry), 'blog', locale).sort(
+      (a, b) => b.entry.publishedAt.getTime() - a.entry.publishedAt.getTime(),
+    );
 
-    const uniqueTranslationKeys = Array.from(new Set(allPosts.map(p => p.data.translationKey)));
+    return routes.map((route, idx) => {
+      const post = route.entry.item;
+      const prevPost = idx < routes.length - 1 ? routes[idx + 1]?.entry.item : undefined;
+      const nextPost = idx > 0 ? routes[idx - 1]?.entry.item : undefined;
 
-    const displayPosts = uniqueTranslationKeys
-      .map(key => {
-        const translations = allPosts.filter(p => p.data.translationKey === key);
-        return (
-          translations.find(p => p.data.language === locale) ||
-          translations.find(p => p.data.language === 'en') ||
-          translations[0]
-        );
-      })
-      .filter((p): p is NonNullable<typeof p> => p != null)
-      .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
-
-    return uniqueTranslationKeys.flatMap(key => {
-      const translations = allPosts.filter(p => p.data.translationKey === key);
-      const displayPost = displayPosts.find(p => p.data.translationKey === key);
-      const idx = displayPost ? displayPosts.indexOf(displayPost) : -1;
-      const prevPost = idx >= 0 && idx < displayPosts.length - 1 ? displayPosts[idx + 1] : undefined;
-      const nextPost = idx > 0 ? displayPosts[idx - 1] : undefined;
-
-      return translations.map(post => {
-        const enPost = translations.find(p => p.data.language === 'en');
-        const ptPost = translations.find(p => p.data.language === 'pt-br');
-
-        return {
-          params: { slug: post.data.slug },
-          props: {
-            post,
-            isTranslationFallback: post.data.language !== locale,
-            prev: prevPost ? { title: prevPost.data.title, slug: prevPost.data.slug } : undefined,
-            next: nextPost ? { title: nextPost.data.title, slug: nextPost.data.slug } : undefined,
-            translations: {
-              ...(enPost ? { en: `/blog/${enPost.data.slug}` } : {}),
-              ...(ptPost ? { 'pt-br': `/pt-br/blog/${ptPost.data.slug}` } : {}),
-            },
-          },
-        };
-      });
+      return {
+        params: { slug: post.data.slug },
+        props: {
+          post,
+          isTranslationFallback: route.isFallback,
+          prev: prevPost ? { title: prevPost.data.title, slug: prevPost.data.slug } : undefined,
+          next: nextPost ? { title: nextPost.data.title, slug: nextPost.data.slug } : undefined,
+          translations: route.translations,
+        },
+      };
     });
   };
 }
