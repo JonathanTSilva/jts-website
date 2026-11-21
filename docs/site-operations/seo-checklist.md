@@ -57,9 +57,12 @@ Pass an array — multiple schemas on one page are supported.
 ## 3. Multilingual SEO Invariants
 
 - Every page **must** pass `locale` to `<BaseLayout>`. English pages use `locale="en"` (the default); Portuguese pages use `locale="pt-br"`.
-- `hreflang="en"`, `hreflang="pt-br"`, and `hreflang="x-default"` are emitted automatically by `SeoHead` — do not add them manually in page files.
+- `hreflang` alternates are emitted automatically by `SeoHead`; do not add them manually in page files.
+  - Article pages (blog posts and notes) pass `translations` to `<BaseLayout>`. Alternates come from those real translations only, and `x-default` is the English page (or the Portuguese one when there is no English page). A post with a single translation emits no alternates.
+  - Fallback pages (a locale whose translation is missing, showing the original instead) are `noindex, follow`, emit no alternates, and are excluded from the sitemap.
+  - Static pages (`ogType` other than `article`) use their `translations` only for the language switcher; their alternates are derived by mapping the `/pt-br` path prefix.
 - The canonical URL is computed from `currentPath` automatically. Only pass the `canonical` prop if you need to override it (e.g., paginated pages pointing to the first page).
-- Every translated page must have a corresponding file under both `src/pages/` (EN) and `src/pages/pt-br/` (PT-BR). A missing translation breaks the hreflang pair.
+- Every translated page must have a corresponding file under both `src/pages/` (EN) and `src/pages/pt-br/` (PT-BR). A missing static translation breaks the hreflang pair.
 
 ---
 
