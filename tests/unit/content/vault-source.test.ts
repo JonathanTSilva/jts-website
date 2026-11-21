@@ -22,9 +22,14 @@ afterEach(() => {
 });
 
 describe('listVaultFiles', () => {
-  it('maps 08-Publish/Blog files to the blog collection', () => {
-    const p = write('08-Publish/Blog/a.en.md');
-    expect(listVaultFiles(root)).toEqual([{ path: p, collection: 'blog', destName: 'a.en.md' }]);
+  it.each([
+    ['08-Publish/Blog/a.en.md', 'blog', 'a.en.md'],
+    ['08-Publish/Now.en.md', 'now', 'index.en.md'],
+    ['08-Publish/Now.pt-br.md', 'now', 'index.pt-br.md'],
+    ['08-Publish/Now.md', 'now', 'index.en.md'], // legacy name, used only when Now.en.md is absent
+  ])('maps %s to %s/%s', (rel, collection, destName) => {
+    const p = write(rel);
+    expect(listVaultFiles(root)).toEqual([{ path: p, collection, destName }]);
   });
 
   it('maps 08-Publish/Notes files (md and mdx) to the notes collection', () => {
@@ -35,21 +40,6 @@ describe('listVaultFiles', () => {
       ['notes', 'm.en.mdx'],
       ['notes', 'n.en.md'],
     ]);
-  });
-
-  it('maps Now.en.md to now/index.en.md', () => {
-    const p = write('08-Publish/Now.en.md');
-    expect(listVaultFiles(root)).toEqual([{ path: p, collection: 'now', destName: 'index.en.md' }]);
-  });
-
-  it('maps Now.pt-br.md to now/index.pt-br.md', () => {
-    const p = write('08-Publish/Now.pt-br.md');
-    expect(listVaultFiles(root)).toEqual([{ path: p, collection: 'now', destName: 'index.pt-br.md' }]);
-  });
-
-  it('falls back to legacy Now.md when Now.en.md is absent', () => {
-    const p = write('08-Publish/Now.md');
-    expect(listVaultFiles(root)).toEqual([{ path: p, collection: 'now', destName: 'index.en.md' }]);
   });
 
   it('prefers Now.en.md over legacy Now.md when both exist', () => {
@@ -75,16 +65,12 @@ describe('withExtraFiles', () => {
     const basePath = write('vault/08-Publish/Blog/a.en.md');
     const extra = write('elsewhere/a.en.md');
     const base = [{ path: basePath, collection: 'blog' as const, destName: 'a.en.md' }];
-    expect(withExtraFiles(base, [extra])).toEqual([
-      { path: extra, collection: 'blog', destName: 'a.en.md' },
-    ]);
+    expect(withExtraFiles(base, [extra])).toEqual([{ path: extra, collection: 'blog', destName: 'a.en.md' }]);
   });
 
   it('puts a file with a noteType frontmatter key into notes', () => {
     const extra = write('n.en.md', '---\ntitle: x\nnoteType: book\n---\n\nbody\n');
-    expect(withExtraFiles([], [extra])).toEqual([
-      { path: extra, collection: 'notes', destName: 'n.en.md' },
-    ]);
+    expect(withExtraFiles([], [extra])).toEqual([{ path: extra, collection: 'notes', destName: 'n.en.md' }]);
   });
 
   it('puts a file without noteType into blog and keeps unrelated base files', () => {
