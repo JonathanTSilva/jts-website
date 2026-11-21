@@ -41,32 +41,20 @@ describe('syncContent script', () => {
     expect(fs.existsSync(path.join(DEST_DIR, 'now/index.pt-br.md'))).toBe(true);
   });
 
-  it('should sync the English Now page from Now.en.md', async () => {
+  // The English Now page comes from Now.en.md; the legacy Now.md is used only without it.
+  it.each([
+    ['only Now.en.md', { 'Now.en.md': 'current' }, 'current'],
+    ['only the legacy Now.md', { 'Now.md': 'legacy' }, 'legacy'],
+    ['both, Now.en.md wins', { 'Now.md': 'legacy', 'Now.en.md': 'current' }, 'current'],
+  ])('syncs the English Now page from %s', async (_case, files, expected) => {
     fs.ensureDirSync(path.join(SOURCE_DIR, '08-Publish'));
-    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.en.md'), 'Now EN from en file');
+    for (const [name, body] of Object.entries(files)) {
+      fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish', name), body);
+    }
 
     await syncContent(SOURCE_DIR, DEST_DIR);
 
-    expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe('Now EN from en file');
-  });
-
-  it('should fall back to the legacy Now.md when Now.en.md is absent', async () => {
-    fs.ensureDirSync(path.join(SOURCE_DIR, '08-Publish'));
-    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.md'), 'Now EN legacy');
-
-    await syncContent(SOURCE_DIR, DEST_DIR);
-
-    expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe('Now EN legacy');
-  });
-
-  it('should prefer Now.en.md over the legacy Now.md when both exist', async () => {
-    fs.ensureDirSync(path.join(SOURCE_DIR, '08-Publish'));
-    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.md'), 'Now EN legacy');
-    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.en.md'), 'Now EN current');
-
-    await syncContent(SOURCE_DIR, DEST_DIR);
-
-    expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe('Now EN current');
+    expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe(expected);
   });
 
   it('should remove files in destination that are not in source', async () => {
