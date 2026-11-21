@@ -1,5 +1,5 @@
 ---
-slug: "2026-11-chinese-cameras-internet.pt-br"
+slug: "chinese-cameras-internet"
 title: "O que as câmeras chinesas fazem na internet"
 language: "pt-br"
 translationKey: "chinese-cameras-internet"

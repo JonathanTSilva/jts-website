@@ -1,5 +1,5 @@
 ---
-slug: "note-cheatsheet.pt-br"
+slug: "note-cheatsheet"
 title: "Nota Padrão — Cheatsheet"
 language: "pt-br"
 translationKey: "note-cheatsheet"
@@ -72,7 +72,7 @@ outra_chave = outro_valor
 
 | Campo         | Tipo     | Obrigatório | Notas                                      |
 |---------------|----------|-------------|--------------------------------------------|
-| `slug`        | string   | ✓           | Deve terminar em `.en` ou `.pt-br`         |
+| `slug`        | string   | ✓           | Nome do arquivo sem data e idioma, igual nos dois |
 | `title`       | string   | ✓           | Exibido no card e no cabeçalho da página   |
 | `publishedAt` | date     | ✓           | Formato ISO 8601                           |
 | `colorToken`  | string   | ✗           | Valor de cor CSS diretamente               |
@@ -104,7 +104,7 @@ flowchart LR
 ## Referência de Frontmatter
 
 ```yaml
-slug: "minha-nota.pt-br"        # obrigatório — slug.linguagem
+slug: "minha-nota"              # obrigatório — nome do arquivo sem data e idioma
 title: "Título da Minha Nota"   # obrigatório
 language: "pt-br"               # obrigatório — en | pt-br
 translationKey: "minha-nota"    # obrigatório — chave compartilhada entre traduções

@@ -1,5 +1,5 @@
 ---
-slug: "note-cheatsheet.en"
+slug: "note-cheatsheet"
 title: "Default Note — Cheatsheet"
 language: "en"
 translationKey: "note-cheatsheet"
@@ -72,7 +72,7 @@ another_key = another_value
 
 | Field        | Type     | Required | Notes                            |
 |--------------|----------|----------|----------------------------------|
-| `slug`       | string   | ✓        | Must end in `.en` or `.pt-br`    |
+| `slug`       | string   | ✓        | Filename without date and language, same in both |
 | `title`      | string   | ✓        | Shown in card and page header    |
 | `publishedAt`| date     | ✓        | ISO 8601 format                  |
 | `colorToken` | string   | ✗        | Raw CSS color value              |
@@ -104,7 +104,7 @@ flowchart LR
 ## Frontmatter Reference
 
 ```yaml
-slug: "my-note.en"              # required — slug.language
+slug: "my-note"                 # required — filename without date and language
 title: "My Note Title"          # required
 language: "en"                  # required — en | pt-br
 translationKey: "my-note"       # required — shared key across translations

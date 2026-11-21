@@ -1,5 +1,5 @@
 ---
-slug: "mindmap-cheatsheet.pt-br"
+slug: "mindmap-cheatsheet"
 title: "Tipos de Nota — Mapa Mental"
 language: "pt-br"
 translationKey: "mindmap-cheatsheet"
@@ -92,8 +92,8 @@ colorToken: "#065f46"
 ## Campos Compartilhados
 
 - slug
-    - Formato: slug.linguagem
-    - Ex: note-cheatsheet.pt-br
+    - Formato: nome do arquivo sem data e idioma
+    - Ex: note-cheatsheet
 - translationKey
     - Liga versões EN e PT-BR
     - Aciona o seletor de idioma

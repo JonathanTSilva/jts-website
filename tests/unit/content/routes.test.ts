@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { contentPath, planLocalizedRoutes, type RouteEntry } from '../../../src/lib/content/routes';
+import { contentPath, ogImagePath, ogRouteParam, planLocalizedRoutes, type RouteEntry } from '../../../src/lib/content/routes';
 
 function entry(slug: string, language: 'en' | 'pt-br', translationKey: string): RouteEntry {
   return { slug, language, translationKey, publishedAt: new Date('2024-01-01') };
@@ -48,5 +48,18 @@ describe('planLocalizedRoutes', () => {
     expect(routes).toHaveLength(1);
     expect(routes[0]!.entry.slug).toBe('c.pt-br');
     expect(routes[0]!.isFallback).toBe(true);
+  });
+});
+
+describe('ogImagePath / ogRouteParam', () => {
+  it('mirrors the page URL under /og, one image per language', () => {
+    expect(ogImagePath('blog', 'en', 'welcome')).toBe('/og/blog/welcome.png');
+    expect(ogImagePath('blog', 'pt-br', 'welcome')).toBe('/og/pt-br/blog/welcome.png');
+    expect(ogImagePath('notes', 'pt-br', 'x')).toBe('/og/pt-br/notes/x.png');
+  });
+
+  it('gives the [...path] route param that produces that image path', () => {
+    expect(ogRouteParam('blog', 'en', 'welcome')).toBe('blog/welcome');
+    expect(ogRouteParam('blog', 'pt-br', 'welcome')).toBe('pt-br/blog/welcome');
   });
 });

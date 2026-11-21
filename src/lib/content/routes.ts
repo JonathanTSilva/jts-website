@@ -28,6 +28,20 @@ export function contentPath(base: string, locale: Locale, slug: string): string 
   return `${prefix}/${base}/${slug}/`;
 }
 
+/** `[...path]` param of the OG image route, e.g. 'pt-br/blog/x'. */
+export function ogRouteParam(base: string, locale: Locale, slug: string): string {
+  const prefix = locale === 'en' ? '' : `${locale}/`;
+  return `${prefix}${base}/${slug}`;
+}
+
+/**
+ * URL path of an entry's OG image, one per language since both languages of a
+ * post share a slug: '/og/blog/x.png' (en), '/og/pt-br/blog/x.png' (pt-br).
+ */
+export function ogImagePath(base: string, locale: Locale, slug: string): string {
+  return `/og/${ogRouteParam(base, locale, slug)}.png`;
+}
+
 /**
  * Plans exactly one page per translation group (translationKey) for a locale.
  * The page renders the entry written in `locale`; when there is none it falls

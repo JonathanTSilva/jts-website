@@ -18,11 +18,11 @@ const PAGES = [
   '/pt-br/now',
   '/pt-br/engineering',
   // Posts with callouts (markdown cheatsheet, homelab) come back once callout titles pass contrast (#92).
-  '/blog/2026-04-welcome.en',
-  '/pt-br/blog/2026-04-welcome.pt-br',
-  '/notes/note-cheatsheet.en',
-  '/pt-br/notes/note-cheatsheet.pt-br',
-  '/notes/mindmap-cheatsheet.en'
+  '/blog/welcome',
+  '/pt-br/blog/welcome',
+  '/notes/note-cheatsheet',
+  '/pt-br/notes/note-cheatsheet',
+  '/notes/mindmap-cheatsheet'
 ];
 
 // Dark --text-muted value. Contrast failures with any other foreground color in

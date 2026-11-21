@@ -1,9 +1,26 @@
 import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import matter from 'gray-matter';
+import { contentPath, ogImagePath } from '../../src/lib/content/routes';
+import type { Locale } from '../../src/lib/content/locale';
 
-/** Each translation lives only under its own locale's prefix. */
-const localePrefix = (slug: string): string => (slug.endsWith('.pt-br') ? '/pt-br' : '');
+interface ContentFile {
+  slug: string;
+  language: Locale;
+}
+
+/** Reads slug and language from each file's frontmatter, as the site does. */
+function readContent(dir: 'blog' | 'notes'): ContentFile[] {
+  const root = path.join(process.cwd(), 'src/content', dir);
+  return fs
+    .readdirSync(root)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const { data } = matter(fs.readFileSync(path.join(root, f), 'utf8'));
+      return { slug: String(data.slug), language: data.language as Locale };
+    });
+}
 
 test.describe('Indexing surfaces', () => {
   test('robots.txt returns 200 with correct directives', async ({ request }) => {
@@ -43,48 +60,21 @@ test.describe('Build Integrity', () => {
     expect(response.ok()).toBe(true);
     const xml = await response.text();
 
-    // Get expected slugs from src/content
-    const blogDir = path.join(process.cwd(), 'src/content/blog');
-    const notesDir = path.join(process.cwd(), 'src/content/notes');
-    
-    const blogFiles = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
-    const notesFiles = fs.readdirSync(notesDir).filter(f => f.endsWith('.md'));
-
-    // Extract slugs from filenames (assuming filename is the slug + extension)
-    // Actually, we need to check how slugs are generated.
-    // In Astro, it's usually the filename without extension.
-    
-    const blogSlugs = blogFiles.map(f => f.replace(/\.(en|pt-br)\.md$/, '.$1'));
-    const notesSlugs = notesFiles.map(f => f.replace(/\.(en|pt-br)\.md$/, '.$1'));
-
-    // Wait, let's look at the sitemap output from before:
-    // https://www.jontobias.com/blog/2026-03-ci-firmware.en/
-    // It seems it appends the locale and a trailing slash.
-
-    for (const slug of blogSlugs) {
-      expect(xml).toContain(`/blog/${slug}/`);
+    for (const { slug, language } of readContent('blog')) {
+      expect(xml).toContain(contentPath('blog', language, slug));
     }
-    for (const slug of notesSlugs) {
-      expect(xml).toContain(`/notes/${slug}/`);
+    for (const { slug, language } of readContent('notes')) {
+      expect(xml).toContain(contentPath('notes', language, slug));
     }
   });
 
   test('RSS feeds should be valid and contain content items', async ({ request }) => {
-    const blogDir = path.join(process.cwd(), 'src/content/blog');
-    const notesDir = path.join(process.cwd(), 'src/content/notes');
-
-    const enBlogSlugs = fs.readdirSync(blogDir)
-      .filter(f => f.endsWith('.en.md'))
-      .map(f => f.replace(/\.en\.md$/, '.en'));
-    const ptBlogSlugs = fs.readdirSync(blogDir)
-      .filter(f => f.endsWith('.pt-br.md'))
-      .map(f => f.replace(/\.pt-br\.md$/, '.pt-br'));
-    const enNotesSlugs = fs.readdirSync(notesDir)
-      .filter(f => f.endsWith('.en.md'))
-      .map(f => f.replace(/\.en\.md$/, '.en'));
-    const ptNotesSlugs = fs.readdirSync(notesDir)
-      .filter(f => f.endsWith('.pt-br.md'))
-      .map(f => f.replace(/\.pt-br\.md$/, '.pt-br'));
+    const slugsOf = (dir: 'blog' | 'notes', language: Locale): string[] =>
+      readContent(dir).filter((c) => c.language === language).map((c) => c.slug);
+    const enBlogSlugs = slugsOf('blog', 'en');
+    const ptBlogSlugs = slugsOf('blog', 'pt-br');
+    const enNotesSlugs = slugsOf('notes', 'en');
+    const ptNotesSlugs = slugsOf('notes', 'pt-br');
 
     // English Blog RSS
     const blogRss = await request.get('/rss.xml');
@@ -92,12 +82,10 @@ test.describe('Build Integrity', () => {
     const blogXml = await blogRss.text();
     expect(blogXml).toContain("<title>Jonathan&apos;s Blog</title>");
     for (const slug of enBlogSlugs) {
-      expect(blogXml).toContain(`/blog/${slug}`);
+      expect(blogXml).toContain(`https://www.jontobias.com${contentPath('blog', 'en', slug)}`);
     }
     // PT-BR posts must NOT appear in the EN feed
-    for (const slug of ptBlogSlugs) {
-      expect(blogXml).not.toContain(`/pt-br/blog/${slug}`);
-    }
+    expect(blogXml).not.toContain('/pt-br/blog/');
 
     // PT-BR Blog RSS
     const ptBlogRss = await request.get('/pt-br/rss.xml');
@@ -105,7 +93,7 @@ test.describe('Build Integrity', () => {
     const ptBlogXml = await ptBlogRss.text();
     expect(ptBlogXml).toContain('<language>pt-br</language>');
     for (const slug of ptBlogSlugs) {
-      expect(ptBlogXml).toContain(`/pt-br/blog/${slug}`);
+      expect(ptBlogXml).toContain(`https://www.jontobias.com${contentPath('blog', 'pt-br', slug)}`);
     }
 
     // English Notes RSS
@@ -114,11 +102,9 @@ test.describe('Build Integrity', () => {
     const notesXml = await notesRss.text();
     expect(notesXml).toContain("<title>Jonathan&apos;s Notes</title>");
     for (const slug of enNotesSlugs) {
-      expect(notesXml).toContain(`/notes/${slug}`);
+      expect(notesXml).toContain(`https://www.jontobias.com${contentPath('notes', 'en', slug)}`);
     }
-    for (const slug of ptNotesSlugs) {
-      expect(notesXml).not.toContain(`/pt-br/notes/${slug}`);
-    }
+    expect(notesXml).not.toContain('/pt-br/notes/');
 
     // PT-BR Notes RSS
     const ptNotesRss = await request.get('/pt-br/notes/rss.xml');
@@ -126,45 +112,27 @@ test.describe('Build Integrity', () => {
     const ptNotesXml = await ptNotesRss.text();
     expect(ptNotesXml).toContain('<language>pt-br</language>');
     for (const slug of ptNotesSlugs) {
-      expect(ptNotesXml).toContain(`/pt-br/notes/${slug}`);
+      expect(ptNotesXml).toContain(`https://www.jontobias.com${contentPath('notes', 'pt-br', slug)}`);
     }
   });
 
   test('every blog post and note should have a reachable og:image meta tag', async ({ page, request }) => {
-    const blogDir = path.join(process.cwd(), 'src/content/blog');
-    const notesDir = path.join(process.cwd(), 'src/content/notes');
-    
-    const blogFiles = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
-    const notesFiles = fs.readdirSync(notesDir).filter(f => f.endsWith('.md'));
+    const items = [
+      ...readContent('blog').map((c) => ({ base: 'blog', ...c })),
+      ...readContent('notes').map((c) => ({ base: 'notes', ...c })),
+    ];
 
-    const blogSlugs = blogFiles.map(f => f.replace(/\.(en|pt-br)\.md$/, '.$1'));
-    const notesSlugs = notesFiles.map(f => f.replace(/\.(en|pt-br)\.md$/, '.$1'));
-
-    // Check blog posts
-    for (const slug of blogSlugs) {
-      await page.goto(`${localePrefix(slug)}/blog/${slug}`);
+    for (const { base, slug, language } of items) {
+      await page.goto(contentPath(base, language, slug));
       const ogImage = await page.locator('meta[property="og:image"]').first().getAttribute('content');
       expect(ogImage).toBeTruthy();
-      expect(ogImage).toContain(`/og/blog/${slug}.png`);
-      
-      // Reachability check — strip domain so the request hits the local test server,
+      expect(ogImage).toContain(ogImagePath(base, language, slug));
+
+      // Reachability check: strip the domain so the request hits the local test server,
       // not the production site (which may not have this content yet).
       const imagePath = new URL(ogImage!).pathname;
       const imageResponse = await request.get(imagePath);
-      expect(imageResponse.status(), `og:image for blog/${slug} should be reachable`).toBe(200);
-    }
-
-    // Check notes
-    for (const slug of notesSlugs) {
-      await page.goto(`${localePrefix(slug)}/notes/${slug}`);
-      const ogImage = await page.locator('meta[property="og:image"]').first().getAttribute('content');
-      expect(ogImage).toBeTruthy();
-      expect(ogImage).toContain(`/og/notes/${slug}.png`);
-
-      // Reachability check — strip domain so the request hits the local test server.
-      const imagePath = new URL(ogImage!).pathname;
-      const imageResponse = await request.get(imagePath);
-      expect(imageResponse.status(), `og:image for notes/${slug} should be reachable`).toBe(200);
+      expect(imageResponse.status(), `og:image for ${language} ${base}/${slug} should be reachable`).toBe(200);
     }
   });
 });
