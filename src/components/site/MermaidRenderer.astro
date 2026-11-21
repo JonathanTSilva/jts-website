@@ -56,6 +56,11 @@
       mermaid.initialize({
         startOnLoad: false,
         theme: 'base',
+        // Mermaid 12 defaults to the neo look and the ELK layout; keep the classic look and dagre layout.
+        look: 'classic',
+        layout: 'dagre',
+        // Mermaid 12 lowered the flowchart wrapping width from 200 to 120; keep the wider labels.
+        flowchart: { wrappingWidth: 200 },
         themeVariables: getThemeVariables(root),
       });
 
