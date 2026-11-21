@@ -41,6 +41,34 @@ describe('syncContent script', () => {
     expect(fs.existsSync(path.join(DEST_DIR, 'now/index.pt-br.md'))).toBe(true);
   });
 
+  it('should sync the English Now page from Now.en.md', async () => {
+    fs.ensureDirSync(path.join(SOURCE_DIR, '08-Publish'));
+    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.en.md'), 'Now EN from en file');
+
+    await syncContent(SOURCE_DIR, DEST_DIR);
+
+    expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe('Now EN from en file');
+  });
+
+  it('should fall back to the legacy Now.md when Now.en.md is absent', async () => {
+    fs.ensureDirSync(path.join(SOURCE_DIR, '08-Publish'));
+    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.md'), 'Now EN legacy');
+
+    await syncContent(SOURCE_DIR, DEST_DIR);
+
+    expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe('Now EN legacy');
+  });
+
+  it('should prefer Now.en.md over the legacy Now.md when both exist', async () => {
+    fs.ensureDirSync(path.join(SOURCE_DIR, '08-Publish'));
+    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.md'), 'Now EN legacy');
+    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.en.md'), 'Now EN current');
+
+    await syncContent(SOURCE_DIR, DEST_DIR);
+
+    expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe('Now EN current');
+  });
+
   it('should remove files in destination that are not in source', async () => {
     // Setup destination with an obsolete file
     const blogDest = path.join(DEST_DIR, 'blog');

@@ -9,7 +9,8 @@
  * ────────────
  * 1. Mirrors 08-Publish/{Blog,Notes}/ → src/content/{blog,notes}/
  *    Files removed from the vault are removed here too (true mirror).
- * 2. Mirrors 08-Publish/Now.md and Now.pt-br.md → src/content/now/
+ * 2. Mirrors 08-Publish/Now.en.md (legacy fallback: Now.md) and Now.pt-br.md
+ *    → src/content/now/
  * 3. Scans every synced markdown file for Obsidian image embeds (![[…]])
  *    and copies only the referenced files from 99-Meta/Attachments/ into
  *    public/assets/uploads/.
@@ -46,7 +47,8 @@ interface DirMapping {
   dest: string;  // relative to CONTENT_DEST
 }
 interface FileMapping {
-  src: string;
+  /** One source, or several in priority order (the first that exists wins). */
+  src: string | string[];
   dest: string;
 }
 
@@ -56,7 +58,7 @@ const DIR_MAPPINGS: DirMapping[] = [
 ];
 
 const FILE_MAPPINGS: FileMapping[] = [
-  { src: '08-Publish/Now.md',       dest: 'now/index.en.md'    },
+  { src: ['08-Publish/Now.en.md', '08-Publish/Now.md'], dest: 'now/index.en.md' },
   { src: '08-Publish/Now.pt-br.md', dest: 'now/index.pt-br.md' },
 ];
 
@@ -101,9 +103,10 @@ async function mirrorDir(srcPath: string, destPath: string, label: string): Prom
   console.log(`[${label.padEnd(6)}] ${srcFiles.length} file(s)`);
 }
 
-async function mirrorFile(srcPath: string, destPath: string): Promise<void> {
-  if (!fs.existsSync(srcPath)) {
-    console.log(`[skip] ${path.basename(srcPath)}  (not found)`);
+async function mirrorFile(srcPaths: string[], destPath: string): Promise<void> {
+  const srcPath = srcPaths.find(p => fs.existsSync(p));
+  if (!srcPath) {
+    console.log(`[skip] ${srcPaths.map(p => path.basename(p)).join(' | ')} (not found)`);
     return;
   }
   await fs.ensureDir(path.dirname(destPath));
@@ -203,7 +206,8 @@ export async function syncContent(
     await mirrorDir(path.join(sourceDir, src), path.join(contentDest, dest), dest);
   }
   for (const { src, dest } of FILE_MAPPINGS) {
-    await mirrorFile(path.join(sourceDir, src), path.join(contentDest, dest));
+    const candidates = (Array.isArray(src) ? src : [src]).map(s => path.join(sourceDir, s));
+    await mirrorFile(candidates, path.join(contentDest, dest));
   }
 
   // 2 — Find all image references in the published content

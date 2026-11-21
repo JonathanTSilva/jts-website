@@ -33,8 +33,10 @@ const { title, description, image, ogType, locale = 'en', translations, structur
 <html lang={locale} data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/png" href="/assets/images/jts-logo-circle-simple.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="generator" content={Astro.generator} />
     <script is:inline set:html={themeInlineScript} />
     {/* Static pages also pass `translations` (for the language switcher) as bare path
@@ -67,7 +69,7 @@ const { title, description, image, ogType, locale = 'en', translations, structur
     ))}
   </head>
   <body class="site-wrapper">
-    <a href="#main-content" class="skip-link">Skip to content</a>
+    <a href="#main-content" class="skip-link">{locale === 'pt-br' ? 'Pular para o conteúdo' : 'Skip to content'}</a>
     <Header locale={locale} translations={translations} />
     <main id="main-content">
       <slot />
