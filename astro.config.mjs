@@ -36,23 +36,18 @@ export default defineConfig({
   ],
   vite: {
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         output: {
-          // Mermaid 11.x produces 50+ micro-chunks (one per diagram type + cytoscape etc.).
+          // Mermaid produces 50+ micro-chunks (one per diagram type + cytoscape etc.).
           // Merge all of them into a single lazy vendor chunk to eliminate the waterfall
           // of parallel requests on pages that actually render diagrams.
-          manualChunks(id) {
-            if (
-              id.includes('/node_modules/mermaid/') ||
-              id.includes('/node_modules/cytoscape/') ||
-              id.includes('/node_modules/khroma/') ||
-              id.includes('/node_modules/dagre-d3-es/') ||
-              id.includes('/node_modules/@braintree/sanitize-url/') ||
-              id.includes('/node_modules/d3') ||
-              id.includes('/node_modules/elkjs/')
-            ) {
-              return 'mermaid-vendor';
-            }
+          codeSplitting: {
+            groups: [
+              {
+                name: 'mermaid-vendor',
+                test: /[\\/]node_modules[\\/](mermaid|cytoscape|khroma|dagre-d3-es|@braintree[\\/]sanitize-url|d3[^\\/]*|elkjs)[\\/]/,
+              },
+            ],
           },
         },
       },
