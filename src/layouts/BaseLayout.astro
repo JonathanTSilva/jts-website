@@ -32,7 +32,7 @@ const { title, description, image, ogType, locale = 'en', translations, structur
 <html lang={locale} data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/assets/images/jts-logo-circle-simple.png" />
     <meta name="generator" content={Astro.generator} />
     <script is:inline set:html={themeInlineScript} />
@@ -62,7 +62,7 @@ const { title, description, image, ogType, locale = 'en', translations, structur
     ))}
   </head>
   <body class="site-wrapper">
-    <a href="#main-content" class="skip-link">Skip to content</a>
+    <a href="#main-content" class="skip-link">{locale === 'pt-br' ? 'Pular para o conteúdo' : 'Skip to content'}</a>
     <Header locale={locale} translations={translations} />
     <main id="main-content">
       <slot />

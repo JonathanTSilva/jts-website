@@ -58,3 +58,8 @@ for (const theme of THEMES) {
     });
   }
 }
+
+test('PT skip link is Portuguese', async ({ page }) => {
+  await page.goto('/pt-br/');
+  await expect(page.locator('.skip-link')).toHaveText('Pular para o conteúdo');
+});

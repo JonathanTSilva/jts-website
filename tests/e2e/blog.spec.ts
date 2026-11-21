@@ -194,4 +194,12 @@ test.describe('Blog', () => {
     const hasVisible = await btn.evaluate(el => el.classList.contains('visible'));
     expect(hasVisible).toBe(true);
   });
+
+  test('PT post back link stays in Portuguese', async ({ page }) => {
+    await page.goto('/pt-br/blog');
+    const firstPost = page.locator('a[href^="/pt-br/blog/"]').first();
+    await firstPost.click();
+    await page.waitForURL(/\/pt-br\/blog\/.+/);
+    await expect(page.locator('.back-link')).toHaveAttribute('href', '/pt-br/blog');
+  });
 });
