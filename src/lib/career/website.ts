@@ -1,4 +1,5 @@
 import type { CareerData, Locale } from '../../content/portfolio/schema';
+import { useTranslations } from '../../i18n/ui';
 
 export interface WebsiteTimelineItem { readonly id: string; readonly kind: 'work' | 'education'; readonly title: string; readonly organization: string; readonly location: string; readonly startDate: string; readonly endDate: string; readonly highlights: readonly string[]; readonly tags: readonly string[]; }
 export interface WebsiteSkill { readonly id: string; readonly name: string; readonly priority: number; }
@@ -14,13 +15,13 @@ export function getWebsiteTimeline(career: CareerData, locale: Locale): readonly
     id: position.id, kind: 'work' as const, employerId: position.employerId, sortDate: position.dates.start.value,
     title: position.title[locale], organization: employers.get(position.employerId)?.name ?? '',
     location: position.location?.[locale] ?? employers.get(position.employerId)?.location?.[locale] ?? '',
-    startDate: formatDate(position.dates.start.value), endDate: position.dates.end ? formatDate(position.dates.end.value) : locale === 'en' ? 'Present' : 'Atual',
+    startDate: formatDate(position.dates.start.value), endDate: position.dates.end ? formatDate(position.dates.end.value) : useTranslations(locale).common.present,
     highlights: position.highlights.map(item => item.webText[locale]), tags: [...position.tags],
   }));
   const education = career.education.map(item => ({
     id: item.id, kind: 'education' as const, employerId: item.institution, sortDate: item.dates.start.value,
     title: item.credential[locale], organization: item.institution, location: item.location?.[locale] ?? '',
-    startDate: formatDate(item.dates.start.value), endDate: item.dates.end ? formatDate(item.dates.end.value) : locale === 'en' ? 'Present' : 'Atual',
+    startDate: formatDate(item.dates.start.value), endDate: item.dates.end ? formatDate(item.dates.end.value) : useTranslations(locale).common.present,
     highlights: item.highlights.map(highlight => highlight.webText[locale]), tags: [...item.tags],
   }));
   type SortableTimelineItem = (typeof work)[number] | (typeof education)[number];

@@ -1,32 +1,5 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from '../components/home/Hero.astro';
-import HomeSections from '../components/home/HomeSections.astro';
-import { generateWebSiteSchema, generatePersonSchema } from '../lib/seo/schema';
-import { career } from '../content/portfolio/career';
-
-const locale = 'en';
-
-const translations = {
-  en: '/',
-  'pt-br': '/pt-br',
-};
-
-const t = {
-  projects: 'Projects',
-  publications: 'Publications',
-  blog: 'Latest Blog Posts',
-  notes: 'Latest Notes',
-  seeAllPortfolio: 'See full portfolio',
-  downloadCv: 'Download CV (PDF)',
-  viewAllBlog: 'View all blog posts',
-  viewAllNotes: 'View all notes',
-  at: 'at',
-  viewAllPublications: 'See all publications',
-};
+import HomePage from '../components/pages/HomePage.astro';
 ---
 
-<BaseLayout locale={locale} pageType="home" translations={translations} structuredData={[generateWebSiteSchema(), generatePersonSchema(career.person)]}>
-  <Hero locale="en" />
-  <HomeSections locale={locale} t={t} />
-</BaseLayout>
+<HomePage locale="en" />

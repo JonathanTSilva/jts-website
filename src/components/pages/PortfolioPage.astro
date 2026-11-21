@@ -1,0 +1,192 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { career } from '../../content/portfolio/career';
+import { getWebsiteProjects, getWebsitePublications, getWebsiteSkills, getWebsiteTimeline } from '../../lib/career/website';
+import ProjectCard from '../portfolio/ProjectCard.astro';
+import PublicationItem from '../portfolio/PublicationItem.astro';
+import TimelineItem from '../portfolio/TimelineItem.astro';
+import AboutSection from '../portfolio/AboutSection.astro';
+import SkillsCloud from '../portfolio/SkillsCloud.astro';
+import { contentLocalePath, type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const translations = {
+  en: contentLocalePath('en', '/portfolio'),
+  'pt-br': contentLocalePath('pt-br', '/portfolio'),
+};
+
+const timeline = getWebsiteTimeline(career, locale);
+const projects = getWebsiteProjects(career, locale);
+const publications = getWebsitePublications(career, locale);
+const skills = getWebsiteSkills(career, locale);
+---
+
+<BaseLayout locale={locale} pageType="portfolio" translations={translations}>
+  <div class="portfolio-wrapper">
+    <div class="portfolio-header">
+      <h1>{t.portfolio.title}</h1>
+      <a
+        href="/assets/cv/jonathan-cv.pdf"
+        download
+        class="cv-button"
+        data-analytics-event="cv_download"
+        data-analytics-props={JSON.stringify({ surface: 'portfolio-header', locale })}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        {t.portfolio.downloadCv}
+      </a>
+    </div>
+
+    <AboutSection locale={locale} aboutLabel={t.portfolio.about} />
+    <SkillsCloud locale={locale} skillsLabel={t.portfolio.skills} groups={skills} />
+
+    <section class="portfolio-section">
+      <h2>{t.portfolio.projects}</h2>
+      <div class="bento-grid">
+        {projects.map((project) => (
+          <ProjectCard project={project} locale={locale} />
+        ))}
+      </div>
+    </section>
+
+    <section class="portfolio-section">
+      <h2>{t.portfolio.experience}</h2>
+      <div class="timeline">
+        {timeline.map((entry) => (
+          <TimelineItem entry={entry} locale={locale} />
+        ))}
+      </div>
+    </section>
+
+<script>
+  const items = document.querySelectorAll('.timeline-item');
+  if (items.length && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        entry.target.classList.toggle('timeline-item--active', entry.isIntersecting);
+      });
+    }, { rootMargin: '-30% 0px -30% 0px' });
+    items.forEach(item => observer.observe(item));
+  }
+</script>
+
+    <section class="portfolio-section">
+      <h2>{t.portfolio.publications}</h2>
+      <div class="prose-constrained">
+        <div class="pub-list">
+          {publications.map((pub) => (
+            <PublicationItem publication={pub} />
+          ))}
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .portfolio-wrapper {
+    max-width: var(--wide-max);
+    margin: 0 auto;
+    width: 100%;
+    padding-top: var(--space-8);
+  }
+
+  .portfolio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-12);
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  h1 {
+    font-size: var(--text-4xl);
+    margin: 0;
+  }
+
+  .cv-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--accent);
+    color: var(--bg);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+    transition: background var(--duration-fast) var(--ease-out);
+  }
+  .cv-button:hover { background: var(--accent-hover); }
+
+  .portfolio-section {
+    margin-bottom: var(--space-16);
+  }
+
+  h2 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-8);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--space-2);
+    color: var(--text);
+  }
+
+  .prose-constrained {
+    max-width: var(--container-max);
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 768px) {
+    .bento-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .pub-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  @media (max-width: 640px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+    }
+
+    /* On mobile, featured cards don't span 3 columns */
+    .bento-grid :global(.project-card[style*="span"]) {
+      grid-column: span 1 !important;
+    }
+
+    .portfolio-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .portfolio-header .cv-button {
+      align-self: center;
+    }
+  }
+</style>
