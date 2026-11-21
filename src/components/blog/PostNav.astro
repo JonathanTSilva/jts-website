@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '../../lib/content/locale';
 import { contentLocalePath } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 
 interface Props {
   locale: Locale;
@@ -9,17 +10,15 @@ interface Props {
 }
 
 const { locale, prev, next } = Astro.props;
-const labels = locale === 'pt-br'
-  ? { prev: '← Mais antigo', next: 'Mais recente →' }
-  : { prev: '← Older', next: 'Newer →' };
+const t = useTranslations(locale);
 ---
 
 {(prev || next) && (
-  <nav class="post-nav" aria-label="Post navigation">
+  <nav class="post-nav" aria-label={t.blog.postNavLabel}>
     <div class="post-nav-prev">
       {prev && (
         <a href={contentLocalePath(locale, `/blog/${prev.slug}`)} class="post-nav-link">
-          <span class="post-nav-label">{labels.prev}</span>
+          <span class="post-nav-label">{t.blog.older}</span>
           <span class="post-nav-title">{prev.title}</span>
         </a>
       )}
@@ -27,7 +26,7 @@ const labels = locale === 'pt-br'
     <div class="post-nav-next">
       {next && (
         <a href={contentLocalePath(locale, `/blog/${next.slug}`)} class="post-nav-link post-nav-link--next">
-          <span class="post-nav-label">{labels.next}</span>
+          <span class="post-nav-label">{t.blog.newer}</span>
           <span class="post-nav-title">{next.title}</span>
         </a>
       )}

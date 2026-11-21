@@ -65,7 +65,7 @@ const isTranslationFallback = note.data.language !== locale;
       btn.addEventListener('click', async () => {
         const canvas = btn.closest('.whiteboard-frame')?.querySelector<HTMLElement>('.whiteboard-board');
         if (!canvas) return;
-        const copiedLabel = btn.dataset.copiedLabel ?? 'Copied!';
+        const copiedLabel = btn.dataset.copiedLabel ?? '';
         try {
           const { default: html2canvas } = await import('html2canvas');
           const canvasEl = await html2canvas(canvas);

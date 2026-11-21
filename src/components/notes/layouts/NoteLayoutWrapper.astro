@@ -36,7 +36,7 @@ const t = useTranslations(locale);
   <NoteFooter note={note} relatedNotes={relatedNotes} prev={prev} next={next} locale={locale} />
 </article>
 
-<BackToTop />
+<BackToTop locale={locale} />
 
 <slot name="after" />
 

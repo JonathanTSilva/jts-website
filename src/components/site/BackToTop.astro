@@ -1,10 +1,19 @@
 ---
-// No props. Uses scroll event to show/hide.
+// Uses scroll event to show/hide.
+import type { Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
 ---
 
 <button
   class="back-to-top-btn"
-  aria-label="Back to top"
+  aria-label={t.site.backToTop}
 >
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="4 10 8 6 12 10"/>

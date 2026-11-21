@@ -2,7 +2,8 @@
 import { Image } from 'astro:assets';
 import jtsLogo from '../../assets/images/jts-logo.png';
 import { getNavigation } from '../../lib/navigation';
-import { type Locale } from '../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 import ThemeToggle from './ThemeToggle.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 
@@ -16,16 +17,17 @@ const { locale, currentPath: rawPath = Astro.url.pathname, translations } = Astr
 // Normalize trailing slash for comparison (keep root '/' as-is)
 const currentPath = rawPath.length > 1 ? rawPath.replace(/\/$/, '') : rawPath;
 const navItems = getNavigation(locale);
+const t = useTranslations(locale);
 ---
 
 <header class="site-header" id="site-header">
   <div class="header-inner">
-    <a href={locale === 'en' ? '/' : `/${locale}`} class="logo" aria-label="Home">
-      <Image src={jtsLogo} alt="JTS logo" class="logo-img" width={24} height={24} densities={[1, 2]} loading="eager" />
+    <a href={contentLocalePath(locale, '/')} class="logo" aria-label={t.header.homeLabel}>
+      <Image src={jtsLogo} alt={t.site.logoAlt} class="logo-img" width={24} height={24} densities={[1, 2]} loading="eager" />
       <span class="logo-name">Tobias</span>
     </a>
 
-    <nav class="main-nav" aria-label="Main navigation" id="main-nav">
+    <nav class="main-nav" aria-label={t.header.mainNavigation} id="main-nav">
       <span class="nav-indicator" aria-hidden="true"></span>
       <ul class="nav-list">
         {navItems.map((item) => (
@@ -46,11 +48,11 @@ const navItems = getNavigation(locale);
     </nav>
 
     <div class="header-actions">
-      <ThemeToggle />
-      <div class="search-field" role="button" tabindex="0" aria-label="Open search">
+      <ThemeToggle locale={locale} />
+      <div class="search-field" role="button" tabindex="0" aria-label={t.header.openSearch}>
         <input
           type="text"
-          placeholder="Search..."
+          placeholder={t.header.searchPlaceholder}
           readonly
           tabindex="-1"
         />
@@ -64,7 +66,7 @@ const navItems = getNavigation(locale);
     <button
       class="search-icon-btn"
       id="search-icon-btn"
-      aria-label="Open search"
+      aria-label={t.header.openSearch}
       type="button"
     >
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
@@ -75,7 +77,9 @@ const navItems = getNavigation(locale);
     <button
       class="hamburger"
       id="hamburger"
-      aria-label="Open menu"
+      aria-label={t.header.openMenu}
+      data-open-label={t.header.openMenu}
+      data-close-label={t.header.closeMenu}
       aria-expanded="false"
       aria-controls="mobile-nav"
       type="button"
@@ -100,11 +104,11 @@ const navItems = getNavigation(locale);
     </ul>
     <div class="mobile-actions">
       <div class="mobile-action-row">
-        <span class="mobile-action-label">Appearance</span>
-        <ThemeToggle />
+        <span class="mobile-action-label">{t.header.appearance}</span>
+        <ThemeToggle locale={locale} />
       </div>
       <div class="mobile-action-row">
-        <span class="mobile-action-label">Language</span>
+        <span class="mobile-action-label">{t.header.language}</span>
         <LanguageSwitcher currentLocale={locale} currentPath={currentPath} translations={translations} />
       </div>
     </div>
@@ -138,8 +142,8 @@ const navItems = getNavigation(locale);
     hamburger?.setAttribute('aria-expanded', String(open));
     mobileNav?.setAttribute('aria-hidden', String(!open));
     mobileNav?.classList.toggle('open', open);
-    if (!open) hamburger?.setAttribute('aria-label', 'Open menu');
-    else hamburger?.setAttribute('aria-label', 'Close menu');
+    const label = open ? hamburger?.dataset.closeLabel : hamburger?.dataset.openLabel;
+    if (label) hamburger?.setAttribute('aria-label', label);
   }
 
   hamburger?.addEventListener('click', () => {

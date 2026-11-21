@@ -95,7 +95,7 @@ const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
       </div>
 
       <aside class="toc-sidebar">
-        <TableOfContents headings={headings} />
+        <TableOfContents locale={locale} headings={headings} />
       </aside>
     </div>
 
@@ -105,7 +105,7 @@ const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
     <PostNav locale={locale} prev={prev} next={next} />
   </div>
 
-  <BackToTop />
+  <BackToTop locale={locale} />
 </BaseLayout>
 
 {post.body?.includes('```mermaid') && <MermaidRenderer />}
