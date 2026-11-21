@@ -1,22 +1,20 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import type { Locale } from '../../../lib/content/locale';
-import { contentLocalePath } from '../../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../../lib/content/locale';
+import { useTranslations } from '../../../i18n/ui';
 import { getNoteAccentColor } from '../../../lib/notes';
 import TranslationStatusTag from '../../site/TranslationStatusTag.astro';
 
 interface Props {
   note: CollectionEntry<'notes'> & { isTranslationMissing?: boolean };
   locale: Locale;
-  translationMissingLabel: string;
 }
 
-const { note, locale, translationMissingLabel } = Astro.props;
+const { note, locale } = Astro.props;
+const t = useTranslations(locale);
 
 const statusKey = note.data.status?.[0] as 'finished' | 'reading' | 'abandoned' | undefined;
-const statusLabel = statusKey
-  ? ({ finished: locale === 'en' ? 'Finished' : 'Concluído', reading: locale === 'en' ? 'Reading' : 'Lendo', abandoned: locale === 'en' ? 'Abandoned' : 'Abandonado' }[statusKey] ?? statusKey)
-  : undefined;
+const statusLabel = statusKey ? t.notes.bookStatus[statusKey] : undefined;
 ---
 
 <article
@@ -29,7 +27,7 @@ const statusLabel = statusKey
   <a href={contentLocalePath(locale, `/notes/${note.data.slug}`)} class="note-link">
     <header class="note-header">
       {note.data.category && <span class="note-category">{note.data.category}</span>}
-      <span class="type-badge" aria-label="Book note">
+      <span class="type-badge" aria-label={t.notes.typeBadge.book}>
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -38,7 +36,7 @@ const statusLabel = statusKey
     </header>
     <h2 class="note-title">{note.data.title}</h2>
     {note.isTranslationMissing && (
-      <TranslationStatusTag text={translationMissingLabel} />
+      <TranslationStatusTag text={t.site.translationMissing} />
     )}
     {note.data.summary && <p class="note-summary">{note.data.summary}</p>}
     {(note.data.author?.length || statusLabel) && (

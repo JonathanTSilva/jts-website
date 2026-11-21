@@ -1,17 +1,17 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import type { Locale } from '../../../lib/content/locale';
-import { contentLocalePath } from '../../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../../lib/content/locale';
+import { useTranslations } from '../../../i18n/ui';
 import { getNoteAccentColor } from '../../../lib/notes';
 import TranslationStatusTag from '../../site/TranslationStatusTag.astro';
 
 interface Props {
   note: CollectionEntry<'notes'> & { isTranslationMissing?: boolean };
   locale: Locale;
-  translationMissingLabel: string;
 }
 
-const { note, locale, translationMissingLabel } = Astro.props;
+const { note, locale } = Astro.props;
+const t = useTranslations(locale);
 ---
 
 <article
@@ -24,7 +24,7 @@ const { note, locale, translationMissingLabel } = Astro.props;
   <a href={contentLocalePath(locale, `/notes/${note.data.slug}`)} class="note-link">
     <header class="note-header">
       {note.data.category && <span class="note-category">{note.data.category}</span>}
-      <span class="type-badge" aria-label="Whiteboard note">
+      <span class="type-badge" aria-label={t.notes.typeBadge.whiteboard}>
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
           <line x1="3" y1="9" x2="21" y2="9"/>
@@ -34,7 +34,7 @@ const { note, locale, translationMissingLabel } = Astro.props;
     </header>
     <h2 class="note-title">{note.data.title}</h2>
     {note.isTranslationMissing && (
-      <TranslationStatusTag text={translationMissingLabel} />
+      <TranslationStatusTag text={t.site.translationMissing} />
     )}
     {note.data.summary && <p class="note-summary">{note.data.summary}</p>}
     {note.data.tags && note.data.tags.length > 0 && (
