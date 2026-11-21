@@ -147,7 +147,7 @@ The setup still has gaps:
 - Monitoring has been down since the Pi 3B+'s SD card failed on November 6, 2026. It comes back when I buy a *high-endurance* card.
 - The containers have backups on the NAS (four of them have been test-restored), but those backups have no off-site copy yet, as the 3-2-1 rule asks (three copies, two different media, one off-site). Only the critical configs already go encrypted to the cloud every day.
 - The two 500 GB disks form a mirror for the backups, but the 4 TB one, with the courses, has no redundancy. A 1 TB disk doesn't even show up in the system.
-- The IoT network no longer reaches the internet, with one narrow exception: the cameras can only open HTTPS to Google, for their connectivity check. I will cover this in a separate post about how many Chinese cameras reach the internet and their servers.
+- The IoT network no longer reaches the internet, with one narrow exception: the cameras can only open HTTPS to Google, for their connectivity check. I explain this exception in [[2026-11-chinese-cameras-internet.en|What Chinese cameras do on the internet]].
 
 ## What comes next
 
