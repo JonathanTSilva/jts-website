@@ -2,9 +2,12 @@
   "name": "jts-website",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "pnpm build:search && astro dev",
     "start": "astro dev",
     "cv:build:public": "tsx scripts/generate-cv.ts --public",
     "build:cv": "pnpm cv:build:public",
@@ -41,7 +44,6 @@
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
     "katex": "^0.16.44",
-    "marked": "^17.0.5",
     "mermaid": "^11.13.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
