@@ -23,6 +23,9 @@ importers:
       '@fontsource/caveat':
         specifier: ^5.2.8
         version: 5.2.8
+      '@fontsource/outfit':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/patrick-hand':
         specifier: ^5.2.8
         version: 5.2.8
@@ -412,6 +415,9 @@ packages:
 
   '@fontsource/caveat@5.2.8':
     resolution: {integrity: sha512-9fUUfFE2IQFKbx+xOcaeQxxmh8iJguEb8z+j1PeueO4UUx+XfT4pRm/B04ZDvFA794/iRxY/IibmP8ZKtIf4rw==}
+
+  '@fontsource/outfit@5.3.0':
+    resolution: {integrity: sha512-0AVHzTTVJSxWDOxPKSfMeHhZeBFDU3cmgrcOb76ZEyhGo0+xgyG3GsLF3h9+X8w0IX7G4jzjJgFQEBiWdX6VgA==}
 
   '@fontsource/patrick-hand@5.2.8':
     resolution: {integrity: sha512-FZx34VLuiF+Pjv/A/m1bTxjR6hAvmL6vdCp62uypVdgFvSrPrBOxX+vCXVy8lfNVFqvKfm/ghun+aaYVYqfBEg==}
@@ -3325,6 +3331,8 @@ snapshots:
     optional: true
 
   '@fontsource/caveat@5.2.8': {}
+
+  '@fontsource/outfit@5.3.0': {}
 
   '@fontsource/patrick-hand@5.2.8': {}
 

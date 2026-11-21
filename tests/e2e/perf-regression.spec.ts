@@ -36,11 +36,15 @@ test.describe('Performance regression guards', () => {
   });
 
   test('whiteboard note loads self-hosted fonts (no Google Fonts CDN)', async ({ page }) => {
-    // Navigate to whiteboard and verify no Google Fonts link tags exist
-    await page.goto('/notes/whiteboard-cheatsheet.en');
-    const googleFontLinks = await page.locator('link[href*="fonts.googleapis.com"]').count();
-    expect(googleFontLinks).toBe(0);
-    // The whiteboard should still render with the correct font
+    const hits: string[] = [];
+    page.on('request', (r) => {
+      if (/fonts\.(googleapis|gstatic)\.com/.test(r.url())) hits.push(r.url());
+    });
+    for (const path of ['/', '/pt-br/', '/notes/whiteboard-cheatsheet.en']) {
+      await page.goto(path);
+      await page.waitForLoadState('networkidle');
+    }
+    expect(hits).toEqual([]);
     await expect(page.locator('[data-whiteboard]')).toBeVisible();
   });
 
