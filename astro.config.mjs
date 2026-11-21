@@ -3,6 +3,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { sitemapMeta } from './src/lib/content/sitemapRoutes.ts';
 import { rehypeCallouts } from './src/lib/rehype/callouts.ts';
 import { remarkHighlights } from './src/lib/remark/highlights.ts';
 import { remarkObsidianImages } from './src/lib/remark/obsidian-images.ts';
@@ -11,9 +12,20 @@ import { remarkNoteBlocks } from './src/lib/remark/note-blocks.ts';
 import { remarkMindmap } from './src/lib/remark/mindmap.ts';
 import { remarkTaskItems } from './src/lib/remark/task-items.ts';
 
+const SITE = 'https://www.jontobias.com';
+
+// Fallback pages (missing translation) stay out of the sitemap; articles carry lastmod.
+const sitemapData = sitemapMeta('src/content', SITE);
+
 export default defineConfig({
-  site: 'https://www.jontobias.com',
-  integrations: [mdx(), sitemap()],
+  site: SITE,
+  integrations: [
+    mdx(),
+    sitemap({
+      filter: (page) => !sitemapData.exclude.has(page),
+      serialize: (item) => ({ ...item, lastmod: sitemapData.lastmod.get(item.url) ?? item.lastmod }),
+    }),
+  ],
   vite: {
     build: {
       rollupOptions: {

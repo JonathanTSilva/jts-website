@@ -105,10 +105,50 @@ export interface SeoProps {
   locale: Locale;
   currentPath?: string;
   pageType?: PageType | undefined;
+  /** Real translations of this page (path per locale). Drives hreflang when set. */
+  translations?: Partial<Record<Locale, string>> | undefined;
+  /** Keeps the page out of search results (translation fallback pages). */
+  noindex?: boolean | undefined;
+}
+
+interface Alternate {
+  locale: string;
+  href: string;
+}
+
+/** hreflang alternates from real translations; none unless at least two exist. */
+function buildTranslationAlternates(
+  translations: Partial<Record<Locale, string>>,
+  baseUrl: string,
+): Alternate[] {
+  const present = LOCALES.flatMap((locale) => {
+    const path = translations[locale];
+    return path ? [{ locale, href: new URL(path, baseUrl).toString() }] : [];
+  });
+  if (present.length < 2) return [];
+  const xDefault = translations[DEFAULT_LOCALE] ?? translations['pt-br'];
+  return [
+    ...present,
+    ...(xDefault ? [{ locale: 'x-default', href: new URL(xDefault, baseUrl).toString() }] : []),
+  ];
+}
+
+/** hreflang alternates for static pages, derived by mapping the locale prefix. */
+function buildPathAlternates(pathWithoutLocale: string, baseUrl: string): Alternate[] {
+  const enHref = new URL(pathWithoutLocale === '/' ? '/' : pathWithoutLocale, baseUrl).toString();
+  return [
+    ...LOCALES.map((loc) => {
+      const localePrefix = loc === DEFAULT_LOCALE ? '' : `/${loc}`;
+      const path = pathWithoutLocale === '/' ? '' : pathWithoutLocale;
+      const href = new URL(`${localePrefix}${path}${path === '' ? '/' : ''}`, baseUrl).toString();
+      return { locale: loc, href };
+    }),
+    { locale: 'x-default', href: enHref },
+  ];
 }
 
 export function generateSeo(props: SeoProps) {
-  const { title, description, canonical, ogType = 'website', image, locale, currentPath = '/', pageType } = props;
+  const { title, description, canonical, ogType = 'website', image, locale, currentPath = '/', pageType, translations, noindex } = props;
   const baseUrl = 'https://www.jontobias.com';
 
   // Resolve page-type defaults when no explicit title/description given
@@ -142,18 +182,11 @@ export function generateSeo(props: SeoProps) {
   imageUrl.searchParams.set('v', OG_IMAGE_VERSION);
   const shareImage = imageUrl.toString();
 
-  // EN (x-default) URL derived from pathWithoutLocale
-  const enHref = new URL(pathWithoutLocale === '/' ? '/' : pathWithoutLocale, baseUrl).toString();
-
-  const alternateLocales = [
-    ...LOCALES.map((loc) => {
-      const localePrefix = loc === DEFAULT_LOCALE ? '' : `/${loc}`;
-      const path = pathWithoutLocale === '/' ? '' : pathWithoutLocale;
-      const href = new URL(`${localePrefix}${path}${path === '' ? '/' : ''}`, baseUrl).toString();
-      return { locale: loc, href };
-    }),
-    { locale: 'x-default', href: enHref },
-  ];
+  const alternateLocales = noindex
+    ? []
+    : translations
+      ? buildTranslationAlternates(translations, baseUrl)
+      : buildPathAlternates(pathWithoutLocale, baseUrl);
 
   return {
     title: fullTitle,
@@ -175,5 +208,6 @@ export function generateSeo(props: SeoProps) {
       image: shareImage,
     },
     alternateLocales,
+    robots: noindex ? ('noindex, follow' as const) : undefined,
   };
 }
