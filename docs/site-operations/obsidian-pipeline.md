@@ -57,7 +57,7 @@ jts-brain/
       my-post.pt-br.md
     Notes/
       my-note.en.md
-    Now.md
+    Now.en.md           ← legacy Now.md is still accepted as a fallback
     Now.pt-br.md
 
   99-Meta/
@@ -80,7 +80,7 @@ Only `08-Publish/` and the referenced files from `99-Meta/Attachments/` are ever
 |---|---|
 | `08-Publish/Blog/*.md` | `src/content/blog/` |
 | `08-Publish/Notes/*.md` | `src/content/notes/` |
-| `08-Publish/Now.md` | `src/content/now/index.en.md` |
+| `08-Publish/Now.en.md` (fallback: legacy `08-Publish/Now.md`) | `src/content/now/index.en.md` |
 | `08-Publish/Now.pt-br.md` | `src/content/now/index.pt-br.md` |
 
 Files are overwritten on every sync. Files that exist in the destination but were removed from the vault are deleted — it is a true mirror.

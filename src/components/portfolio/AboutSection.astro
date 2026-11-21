@@ -1,5 +1,7 @@
 ---
+import { Picture } from 'astro:assets';
 import { type Locale } from '../../lib/content/locale';
+import profileAbout from '../../assets/images/profile-about.jpg';
 
 interface Props {
   locale: Locale;
@@ -15,11 +17,14 @@ const { Content: AboutContent } = aboutModule;
   <h2>{aboutLabel}</h2>
   <div class="about-grid">
     <div class="about-image-wrap">
-      <img
-        src="/assets/images/profile2.jpg"
+      <Picture
+        src={profileAbout}
         alt="Jonathan Tobias"
         class="about-image"
-        onerror="this.style.display='none';this.parentElement.classList.add('about-placeholder')"
+        formats={['avif', 'webp']}
+        widths={[192, 384]}
+        sizes="12rem"
+        loading="lazy"
       />
     </div>
     <div class="prose-constrained">
@@ -60,13 +65,6 @@ const { Content: AboutContent } = aboutModule;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     display: block;
-  }
-
-  .about-placeholder {
-    background: var(--surface-high);
-    border-radius: var(--radius-md);
-    width: 12rem;
-    height: 12rem;
   }
 
   .prose-constrained {

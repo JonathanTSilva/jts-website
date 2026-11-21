@@ -324,3 +324,28 @@ test.describe('Legal placeholder pages', () => {
     await expect(page.getByRole('heading', { name: 'Downloads and external links' })).toBeVisible();
   });
 });
+
+test('hero image is optimized', async ({ page }) => {
+  const responsePromise = page.waitForResponse((res) => res.url().includes('profile-hero'));
+  await page.goto('/');
+  const response = await responsePromise;
+  const body = await response.body();
+  expect(body.length).toBeLessThan(250_000);
+
+  const img = page.locator('.profile-image');
+  await expect(img).toHaveAttribute('width', /\d+/);
+  await expect(img).toHaveAttribute('height', /\d+/);
+  await expect(img).toHaveAttribute('fetchpriority', 'high');
+});
+
+test('icons and manifest are linked', async ({ page }) => {
+  await page.goto('/');
+  const icon = page.locator('link[rel="icon"]');
+  expect(await icon.getAttribute('href')).toMatch(/favicon-32x32\.png$/);
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/site.webmanifest');
+
+  const res = await page.request.get('/site.webmanifest');
+  expect(res.status()).toBe(200);
+  const manifest = await res.json();
+  expect(manifest.name).toBe('Jonathan Tobias');
+});

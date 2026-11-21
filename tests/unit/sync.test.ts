@@ -41,6 +41,22 @@ describe('syncContent script', () => {
     expect(fs.existsSync(path.join(DEST_DIR, 'now/index.pt-br.md'))).toBe(true);
   });
 
+  // The English Now page comes from Now.en.md; the legacy Now.md is used only without it.
+  it.each([
+    ['only Now.en.md', { 'Now.en.md': 'current' }, 'current'],
+    ['only the legacy Now.md', { 'Now.md': 'legacy' }, 'legacy'],
+    ['both, Now.en.md wins', { 'Now.md': 'legacy', 'Now.en.md': 'current' }, 'current'],
+  ])('syncs the English Now page from %s', async (_case, files, expected) => {
+    fs.ensureDirSync(path.join(SOURCE_DIR, '08-Publish'));
+    for (const [name, body] of Object.entries(files)) {
+      fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish', name), body);
+    }
+
+    await syncContent(SOURCE_DIR, DEST_DIR);
+
+    expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe(expected);
+  });
+
   it('should remove files in destination that are not in source', async () => {
     // Setup destination with an obsolete file
     const blogDest = path.join(DEST_DIR, 'blog');

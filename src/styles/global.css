@@ -1,5 +1,6 @@
 @import './tokens.css';
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&display=swap');
+@import '@fontsource/outfit/600.css';
+@import '@fontsource/outfit/700.css';
 
 /* ── Geist font-face declarations ───────────────────────── */
 @font-face {
