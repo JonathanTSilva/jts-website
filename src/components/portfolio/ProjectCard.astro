@@ -10,6 +10,9 @@ interface Props {
 
 const { project, locale } = Astro.props;
 const t = useTranslations(locale);
+const status = project.status ?? 'Active';
+// 'Active' is the only status with a dictionary entry; the rest render as written in the data.
+const statusLabel = status === 'Active' ? t.portfolio.defaultProjectStatus : status;
 ---
 
 <article
@@ -17,8 +20,8 @@ const t = useTranslations(locale);
   style={project.featured ? 'grid-column: span 2;' : ''}
 >
   <div class="card-top">
-    <span class="card-status" data-status={project.status ?? 'Active'}>
-      {project.status ?? t.portfolio.defaultProjectStatus}
+    <span class="card-status" data-status={status}>
+      {statusLabel}
     </span>
   </div>
 

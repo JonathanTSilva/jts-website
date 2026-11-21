@@ -40,7 +40,7 @@ test.describe('Blog', () => {
 
     await expect(page.locator('.post-title')).toBeVisible();
     await expect(page.locator('.author-name')).toHaveText('Jonathan Tobias');
-    await expect(page.locator('.author-subtitle')).toHaveText('Senior Embedded Software Engineer');
+    await expect(page.locator('.author-subtitle')).toHaveText('Engenheiro Sênior de Software Embarcado');
   });
 
   test('a translated post shares its clean path with the other locale', async ({ page }) => {
