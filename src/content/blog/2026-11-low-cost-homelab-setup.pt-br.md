@@ -147,7 +147,7 @@ O setup ainda tem buracos:
 - O monitoramento está parado desde que o cartão SD do Pi 3B+ falhou. Ele volta quando eu comprar um cartão *high-endurance*.
 - Os contêineres têm backup no NAS (a restauração de quatro deles já foi testada), mas esses backups ainda não têm cópia fora de casa, como pede a regra 3-2-1 (três cópias, duas mídias diferentes, uma fora de casa). Só as configurações críticas já vão criptografadas pra nuvem todo dia.
 - Os dois discos de 500 GB formam um espelho pros backups, mas o de 4 TB, com os cursos, não tem redundância. Um disco de 1 TB nem aparece no sistema.
-- A rede IoT não sai mais pra internet, com uma exceção estreita: as câmeras só podem abrir HTTPS pro Google, pra checagem de conexão. Vou tratar disso em post separado sobre como grande parte das câmeras chinesas acessam a internet e servidores.
+- A rede IoT não sai mais pra internet, com uma exceção estreita: as câmeras só podem abrir HTTPS pro Google, pra checagem de conexão. Expliquei essa exceção em [[2026-11-chinese-cameras-internet.pt-br|O que as câmeras chinesas fazem na internet]].
 
 ## O que vem depois
 
