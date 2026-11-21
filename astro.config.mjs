@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
+import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -21,6 +22,7 @@ const sitemapData = sitemapMeta('src/content', SITE);
 
 export default defineConfig({
   site: SITE,
+  compressHTML: true,
   // Old `<date>-<name>.<lang>` URLs redirect to the clean shared slugs (static meta-refresh pages).
   redirects: legacyRedirects(LEGACY_SLUGS),
   integrations: [
@@ -57,6 +59,21 @@ export default defineConfig({
     },
   },
   markdown: {
+    processor: unified({
+      remarkPlugins: [
+        remarkNoteBlocks,
+        remarkHighlights,
+        remarkObsidianImages,
+        remarkObsidianWikilinks,
+        remarkMindmap,
+        remarkMath,
+        remarkTaskItems,
+      ],
+      rehypePlugins: [
+        rehypeCallouts,
+        [rehypeKatex, { strict: false }],
+      ],
+    }),
     shikiConfig: {
       // Dual theme: light values are default inline styles,
       // dark values stored as --shiki-dark-* CSS variables.
@@ -66,18 +83,5 @@ export default defineConfig({
         dark:  'one-dark-pro',
       },
     },
-    remarkPlugins: [
-      remarkNoteBlocks,
-      remarkHighlights,
-      remarkObsidianImages,
-      remarkObsidianWikilinks,
-      remarkMindmap,
-      remarkMath,
-      remarkTaskItems,
-    ],
-    rehypePlugins: [
-      rehypeCallouts,
-      [rehypeKatex, { strict: false }],
-    ],
   },
 });
