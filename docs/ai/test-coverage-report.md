@@ -16,7 +16,7 @@ remark/obsidian-images.ts	Image sizing	7 (WxH, width-only, non-numeric)
 remark/task-items.ts	Obsidian tasks	8 (4 markers, stripping, unknowns)
 rehype/callouts.ts	Callout blocks	11 (16 aliases, collapsible, a11y)
 C. E2e Regression Guards
-7 new tests in perf-regression.spec.ts specifically protect the performance refactor areas:
+7 new tests in rendering-regression.spec.ts specifically protect the performance refactor areas:
 
 Note prev/next nav after getStaticPaths centralization
 Mermaid conditional rendering on blog + notes
