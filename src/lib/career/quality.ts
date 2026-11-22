@@ -1,6 +1,6 @@
 import type { CvProfile, ResolvedCv, ResolvedHighlight } from '../cv/types';
 
-export type CvQualityWarningCode =
+type CvQualityWarningCode =
   | 'long-highlight'
   | 'passive-opening'
   | 'vague-phrasing'

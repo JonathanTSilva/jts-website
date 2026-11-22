@@ -2,7 +2,7 @@ import snapshot from '../../data/engineering-snapshot.json';
 
 export const DASHBOARD_URL = 'https://jonathantsilva.github.io/jts-ops/dashboard.json';
 export const HANDBOOK_URL = 'https://github.com/JonathanTSilva/.github/tree/main/handbook';
-export const GITHUB_OWNER = 'JonathanTSilva';
+const GITHUB_OWNER = 'JonathanTSilva';
 const FETCH_TIMEOUT_MS = 10_000;
 
 export interface DashboardRepo {
@@ -14,7 +14,7 @@ export interface DashboardRepo {
   compliant: boolean;
 }
 
-export interface DashboardSummary {
+interface DashboardSummary {
   total: number;
   compliant: number;
   percent: number;
@@ -141,7 +141,7 @@ export function archivedPublicCount(data: Dashboard): number {
   return data.repos.filter((r) => r.visibility === 'public' && r.archived).length;
 }
 
-export interface RepoLinks {
+interface RepoLinks {
   repo: string;
   coverage: string;
   quality: string;

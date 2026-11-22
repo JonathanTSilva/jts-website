@@ -8,7 +8,7 @@
     parseConsentState,
     hasAnalyticsConsent as checkConsentState,
   } from '../../lib/analytics/consent';
-  import { ANALYTICS_EVENT_NAMES } from '../../lib/analytics/events';
+  import { isAnalyticsEventName } from '../../lib/analytics/events';
 
   // Plausible attaches to window — declare the minimal shape we use.
   declare global {
@@ -63,7 +63,7 @@
   };
 
   const trackEvent = (eventName: string, props?: Record<string, unknown>) => {
-    if (!ANALYTICS_EVENT_NAMES.includes(eventName as never) || !hasAnalyticsConsent()) {
+    if (!isAnalyticsEventName(eventName) || !hasAnalyticsConsent()) {
       return;
     }
 

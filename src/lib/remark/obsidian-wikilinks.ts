@@ -11,7 +11,7 @@ import { isPublished } from '../content/publish';
 // Content map — resolves [[wikilinks]] to website URLs
 // ---------------------------------------------------------------------------
 
-export interface ContentEntry {
+interface ContentEntry {
   collection: 'blog' | 'notes';
   slug: string;
   locale: string;

@@ -1,6 +1,6 @@
 export type Theme = 'light' | 'dark';
 
-export const THEME_STORAGE_KEY = 'theme-preference';
+const THEME_STORAGE_KEY = 'theme-preference';
 
 export function getTheme(): Theme {
   if (typeof localStorage !== 'undefined' && localStorage.getItem(THEME_STORAGE_KEY)) {
@@ -12,7 +12,7 @@ export function getTheme(): Theme {
   return 'light';
 }
 
-export function setTheme(theme: Theme) {
+function setTheme(theme: Theme) {
   localStorage.setItem(THEME_STORAGE_KEY, theme);
   document.documentElement.setAttribute('data-theme', theme);
 }

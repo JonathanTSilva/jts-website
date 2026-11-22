@@ -79,8 +79,8 @@ export interface BlogSource {
   base: string;
 }
 
-export const NOTES_SOURCE: NoteSource = { collection: 'notes', base: 'notes' };
-export const BLOG_SOURCE: BlogSource = { collection: 'blog', base: 'blog' };
+const NOTES_SOURCE: NoteSource = { collection: 'notes', base: 'notes' };
+const BLOG_SOURCE: BlogSource = { collection: 'blog', base: 'blog' };
 
 /** E2E fixtures: repo-owned copies of each note type, served under /test-fixtures/. */
 export const FIXTURE_NOTES_SOURCE: NoteSource = { collection: 'fixtureNotes', base: 'test-fixtures/notes' };

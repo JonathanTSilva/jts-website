@@ -2,9 +2,9 @@ import { type Locale, DEFAULT_LOCALE, LOCALES } from '../content/locale';
 import { SITE_URL } from '../site';
 
 export const SITE_NAME = 'Tobias';
-export const OG_SITE_NAME = 'Jonathan Tobias';
+const OG_SITE_NAME = 'Jonathan Tobias';
 // Bump when the share card design changes, so LinkedIn/WhatsApp fetch the new image.
-export const OG_IMAGE_VERSION = '2';
+const OG_IMAGE_VERSION = '2';
 const SITE_DESCRIPTION = 'Senior Embedded Software Engineer & M.Sc. specializing in mission-critical systems and technical leadership.';
 
 export type PageType = 'home' | 'blog-index' | 'notes-index' | 'portfolio' | 'now' | 'article' | 'legal' | 'generic';

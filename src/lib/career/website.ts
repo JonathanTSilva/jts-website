@@ -2,7 +2,7 @@ import type { CareerData, Locale } from '../../content/portfolio/schema';
 import { useTranslations } from '../../i18n/ui';
 
 export interface WebsiteTimelineItem { readonly id: string; readonly kind: 'work' | 'education'; readonly title: string; readonly organization: string; readonly location: string; readonly startDate: string; readonly endDate: string; readonly highlights: readonly string[]; readonly tags: readonly string[]; }
-export interface WebsiteSkill { readonly id: string; readonly name: string; readonly priority: number; }
+interface WebsiteSkill { readonly id: string; readonly name: string; readonly priority: number; }
 export interface WebsiteSkillGroup { readonly id: string; readonly name: string; readonly priority: number; readonly skills: readonly WebsiteSkill[]; }
 export interface WebsiteProject { readonly id: string; readonly title: string; readonly description: string; readonly tags: readonly string[]; readonly featured: boolean; readonly status?: string | undefined; readonly image?: string | undefined; readonly year?: number | undefined; readonly githubUrl?: string | undefined; readonly websiteUrl?: string | undefined; }
 export interface WebsitePublication { readonly id: string; readonly title: string; readonly venue: string; readonly date: string; readonly type: string; readonly url?: string; }
