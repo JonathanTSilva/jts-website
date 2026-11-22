@@ -261,13 +261,26 @@ Triggers on any push to `main` that touches `08-Publish/**`. Sends a `repository
 
 ### jts-website: `.github/workflows/pipeline.yml`
 
-Runs on every push / PR to `main`:
+Runs on push to `main`, nightly (04:17 UTC) and manually (`workflow_dispatch`). Only a run on `main` deploys. Runs are serialized per ref and never cancelled; Pages deployments share one `pages` concurrency group.
 1. `pnpm check` — TypeScript
 2. `pnpm lint:content` — frontmatter validation
 3. `pnpm test:unit`
 4. `pnpm build` — remark plugins convert Obsidian syntax; Astro emits static HTML
-5. `pnpm test:e2e`
-6. Deploy to GitHub Pages (main branch only)
+5. CV checks — `pnpm cv:check:poppler` and `pnpm cv:check:dist`
+6. `pnpm test:e2e` — Chromium desktop and mobile, plus the WebKit mobile smoke run
+7. Removes the E2E fixture pages from `dist/` and fails if any trace of them remains
+8. Internal link check — offline `lychee` run over `dist/`
+9. Deploy to GitHub Pages (`main` only)
+
+### jts-website: `.github/workflows/pr-checks.yml`
+
+Runs on pull requests to `main` only, and adds the checks the shared `ci` workflow does not run:
+1. `pnpm build`
+2. CV PDF checks (`pnpm cv:check:poppler`, `pnpm cv:check:dist`)
+3. Internal link check — offline `lychee` run over `dist/`
+4. WebKit mobile smoke test (`PLAYWRIGHT_WEBKIT=1`)
+
+The shared `ci` workflow covers everything else on a PR (type check, content validation, unit tests, Chromium E2E).
 
 ---
 
