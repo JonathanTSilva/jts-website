@@ -70,15 +70,6 @@ export function validateContent(
   if (collection === 'notes') {
     const noteType = frontmatter.noteType ?? 'note';
 
-    if (noteType === 'book') {
-      if (!frontmatter.author || (Array.isArray(frontmatter.author) && frontmatter.author.length === 0)) {
-        errors.push('Book note missing required field: author');
-      }
-      if (!frontmatter.cover) {
-        errors.push('Book note missing required field: cover');
-      }
-    }
-
     if (noteType === 'mindmap') {
       const hasH1 = /^#\s+\S/m.test(body);
       if (!hasH1) {

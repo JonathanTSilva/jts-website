@@ -29,7 +29,7 @@ export const notesSchema = z.object({
   colorToken: z.string().optional(),
   // --- book only ---
   author: z.array(z.string()).optional(),
-  cover: z.string().url().optional(),
+  cover: z.url().optional(),
   pages: z.number().int().positive().optional(),
   rating: z.string().optional(),
   status: z.array(z.string()).optional(),
@@ -38,6 +38,11 @@ export const notesSchema = z.object({
   relatedTo: z.array(z.string()).optional(),
   previousBook: z.string().optional(),
   nextBook: z.string().optional(),
+}).superRefine((d, ctx) => {
+  if (d.noteType === 'book') {
+    if (!d.author?.length) ctx.addIssue({ code: 'custom', path: ['author'], message: 'Book note missing required field: author' });
+    if (!d.cover) ctx.addIssue({ code: 'custom', path: ['cover'], message: 'Book note missing required field: cover' });
+  }
 });
 
 export const nowSchema = z.object({
