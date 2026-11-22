@@ -24,6 +24,8 @@ const sitemapData = sitemapMeta('src/content', SITE);
 export default defineConfig({
   site: SITE,
   compressHTML: true,
+  // Book covers are https URLs in frontmatter; they are fetched and optimized at build time.
+  image: { remotePatterns: [{ protocol: 'https' }] },
   // Old `<date>-<name>.<lang>` URLs redirect to the clean shared slugs (static meta-refresh pages).
   redirects: legacyRedirects(LEGACY_SLUGS),
   integrations: [
