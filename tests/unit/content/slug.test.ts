@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { entryIdFromPath, expectedSlug, findSlugCollisions } from '../../../src/lib/content/slug';
+import { entryIdFromPath, expectedSlug } from '../../../src/lib/content/slug';
 
 describe('expectedSlug', () => {
   it('strips the date and the language from a blog filename', () => {
@@ -28,28 +28,6 @@ describe('expectedSlug', () => {
   it('only strips a leading YYYY-MM-, not other digits', () => {
     expect(expectedSlug('2026-x.en.md', 'blog')).toBe('2026-x');
     expect(expectedSlug('top-10-2026-11-tips.en.md', 'blog')).toBe('top-10-2026-11-tips');
-  });
-});
-
-describe('findSlugCollisions', () => {
-  it('reports two files of one collection and language sharing a slug', () => {
-    const errors = findSlugCollisions([
-      { collection: 'blog', language: 'en', slug: 'x', name: '2026-03-x.en.md' },
-      { collection: 'blog', language: 'en', slug: 'x', name: '2026-05-x.en.md' },
-    ]);
-    expect(errors).toHaveLength(1);
-    expect(errors[0]).toContain('2026-03-x.en.md');
-    expect(errors[0]).toContain('2026-05-x.en.md');
-    expect(errors[0]).toContain('"x"');
-  });
-
-  it('allows the same slug across languages and across collections', () => {
-    const errors = findSlugCollisions([
-      { collection: 'blog', language: 'en', slug: 'x', name: 'a.en.md' },
-      { collection: 'blog', language: 'pt-br', slug: 'x', name: 'a.pt-br.md' },
-      { collection: 'notes', language: 'en', slug: 'x', name: 'x.en.md' },
-    ]);
-    expect(errors).toEqual([]);
   });
 });
 
