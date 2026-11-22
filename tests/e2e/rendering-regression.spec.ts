@@ -6,7 +6,7 @@ import { readSearchIndex } from './helpers/content';
  * Validates that conditional rendering of MermaidRenderer, self-hosted fonts,
  * and centralized prev/next/related computation work correctly.
  */
-test.describe('Performance regression guards', () => {
+test.describe('Rendering regression guards', () => {
   // Fixture pages deliberately have no prev/next links, so the neighbour navigation is
   // checked on real notes: with two or more live notes in a locale, each has a neighbour.
   const realNotes = (locale: 'en' | 'pt-br') => readSearchIndex(locale).filter((i) => i.type === 'notes');

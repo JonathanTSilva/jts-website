@@ -204,9 +204,7 @@ test.describe('Blog', () => {
       Object.defineProperty(window, 'scrollY', { value: 400, configurable: true });
       window.dispatchEvent(new Event('scroll'));
     });
-    await page.waitForTimeout(300);
-    const hasVisible = await btn.evaluate(el => el.classList.contains('visible'));
-    expect(hasVisible).toBe(true);
+    await expect(btn).toHaveClass(/visible/);
   });
 
   test('PT post back link stays in Portuguese', async ({ page }) => {

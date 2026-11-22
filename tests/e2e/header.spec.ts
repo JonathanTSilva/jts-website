@@ -15,7 +15,7 @@ test.describe('Header', () => {
 
     // Scroll down significantly
     await page.evaluate(() => window.scrollBy(0, 500));
-    await page.waitForTimeout(100); // allow scroll to settle
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
 
     // Header top should still be at (or very near) 0 — it is fixed
     const topAfter = await header.evaluate(el => el.getBoundingClientRect().top);
@@ -79,14 +79,11 @@ test.describe('Header', () => {
     const links = page.locator('.nav-list a');
     const firstLink = links.first();
     await firstLink.hover();
-    await page.waitForTimeout(200); // allow --duration-fast (150ms) transition to complete
 
-    // After hovering, the link should have a visible background color
-    const bgColor = await firstLink.evaluate(el =>
-      window.getComputedStyle(el).backgroundColor
-    );
-    expect(bgColor).not.toBe('rgba(0, 0, 0, 0)');
-    expect(bgColor).not.toBe('transparent');
+    // After hovering, the link should have a visible background color (retries
+    // until the --duration-fast transition has produced a non-transparent value)
+    await expect(firstLink).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await expect(firstLink).not.toHaveCSS('background-color', 'transparent');
       });
 
   test('search field is visible on desktop and opens dialog on click', async ({ page }) => {
