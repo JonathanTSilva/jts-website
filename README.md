@@ -130,6 +130,7 @@ Translation pairs are linked via a shared `translationKey` in frontmatter. If a 
 pnpm test               # Vitest unit tests without the browser-based CV test (what the shared CI job runs)
 pnpm test:unit          # All Vitest unit tests (src/lib, scripts), needs Playwright browsers
 pnpm test:e2e           # Playwright E2E tests (requires built site)
+pnpm test:e2e:webkit    # WebKit (iPhone 14) smoke, header and theme specs, needs `playwright install webkit`
 pnpm test:all           # Unit and E2E tests together
 pnpm test:e2e:install   # Install Playwright browsers (first run)
 pnpm cv:check:poppler   # Independent PDF extraction/geometry check (requires Poppler)

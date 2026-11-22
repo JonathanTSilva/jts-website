@@ -28,6 +28,16 @@ export default defineConfig({
         isMobile: true 
       },
     },
+    // Opt-in: the shared CI e2e job installs only Chromium, pipeline.yml installs all browsers.
+    ...(process.env.PLAYWRIGHT_WEBKIT === '1'
+      ? [
+          {
+            name: 'webkit-mobile',
+            testMatch: ['smoke.spec.ts', 'header.spec.ts', 'theme.spec.ts'],
+            use: { ...devices['iPhone 14'] },
+          },
+        ]
+      : []),
   ],
   webServer: {
     command: 'pnpm preview --port 4321 --host 127.0.0.1',
