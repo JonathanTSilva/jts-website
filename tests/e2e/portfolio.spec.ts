@@ -82,9 +82,7 @@ test('timeline line highlights on scroll', async ({ page }) => {
   // Scroll to the timeline section
   const firstItem = page.locator('.timeline-item').first();
   await firstItem.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(300); // allow IntersectionObserver to fire
-  // At least one item should be active
+  // At least one item should become active once the IntersectionObserver fires
   const activeItems = page.locator('.timeline-item--active');
-  const activeCount = await activeItems.count();
-  expect(activeCount).toBeGreaterThan(0);
+  await expect.poll(() => activeItems.count()).toBeGreaterThan(0);
 });
