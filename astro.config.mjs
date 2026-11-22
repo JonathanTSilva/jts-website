@@ -4,6 +4,7 @@ import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { SITE_URL } from './src/lib/site.ts';
 import { sitemapMeta } from './src/lib/content/sitemapRoutes.ts';
 import { legacyRedirects } from './src/lib/content/legacyRedirects.ts';
 import { LEGACY_SLUGS } from './src/data/legacy-slugs.ts';
@@ -15,7 +16,7 @@ import { remarkNoteBlocks } from './src/lib/remark/note-blocks.ts';
 import { remarkMindmap } from './src/lib/remark/mindmap.ts';
 import { remarkTaskItems } from './src/lib/remark/task-items.ts';
 
-const SITE = 'https://www.jontobias.com';
+const SITE = SITE_URL;
 
 // Fallback pages (missing translation) stay out of the sitemap; articles carry lastmod.
 const sitemapData = sitemapMeta('src/content', SITE);

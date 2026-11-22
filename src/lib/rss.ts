@@ -3,6 +3,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { contentLocalePath, type Locale } from './content/locale';
 import { useTranslations } from '../i18n/ui';
+import { SITE_URL } from './site';
 
 const FEED_LANGUAGE: Record<Locale, string> = {
   en: 'en-us',
@@ -31,7 +32,7 @@ export function makeRssHandler(collection: 'blog' | 'notes', locale: Locale): AP
     return rss({
       title: collection === 'blog' ? t.feeds.blogTitle : t.feeds.notesTitle,
       description: collection === 'blog' ? t.feeds.blogDescription : t.feeds.notesDescription,
-      site: context.site || 'https://www.jontobias.com',
+      site: context.site || SITE_URL,
       items,
       customData: `<language>${FEED_LANGUAGE[locale]}</language>`,
     });

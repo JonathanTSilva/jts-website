@@ -7,6 +7,7 @@ import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '../../lib/content/locale';
 import { contentLocalePath } from '../../lib/content/locale';
 import { useTranslations } from '../../i18n/ui';
+import { formatDate } from '../../lib/format';
 import ShareButtons from '../site/ShareButtons.astro';
 
 interface Props {
@@ -18,7 +19,6 @@ interface Props {
 }
 
 const { note, relatedNotes, prev, next, locale } = Astro.props;
-const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 
 const t = useTranslations(locale);
 
@@ -37,7 +37,7 @@ const url = Astro.url.href;
         {relatedNotes.map((r) => (
           <a href={contentLocalePath(locale, `/notes/${r.data.slug}`)} class="nf-card">
             <span class="nf-card-date">
-              {r.data.publishedAt.toLocaleDateString(dateLocale, { dateStyle: 'medium' })}
+              {formatDate(r.data.publishedAt, locale, { dateStyle: 'medium' })}
             </span>
             <span class="nf-card-title">{r.data.title}</span>
             {r.data.category && (

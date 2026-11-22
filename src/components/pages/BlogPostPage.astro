@@ -1,9 +1,11 @@
 ---
 import { render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
-import { ogImagePath } from '../../lib/content/routes';
+import { contentPath, ogImagePath } from '../../lib/content/routes';
+import { absoluteUrl } from '../../lib/site';
 import { contentLocalePath, type Locale } from '../../lib/content/locale';
 import { format, useTranslations } from '../../i18n/ui';
+import { formatDate } from '../../lib/format';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TableOfContents from '../blog/TableOfContents.astro';
 import PostNav from '../blog/PostNav.astro';
@@ -34,7 +36,9 @@ const { Content, headings } = await render(post);
 const t = useTranslations(locale);
 const readingTime = getReadingTime(post.body);
 const categoryColor = getCategoryColor(post.data.category);
-const postPath = contentLocalePath(locale, `/blog/${post.data.slug}`);
+const postPath = contentPath('blog', locale, post.data.slug);
+const { publishedAt, updatedAt } = post.data;
+const wasUpdated = updatedAt !== undefined && updatedAt.getTime() !== publishedAt.getTime();
 const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
 ---
 
@@ -46,7 +50,7 @@ const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
   ogType="article"
   translations={translations}
   noindex={isTranslationFallback}
-  structuredData={generateArticleSchema({ title: post.data.title, description: post.data.summary, url: `https://www.jontobias.com${postPath}`, publishedAt: post.data.publishedAt, image: `https://www.jontobias.com${ogImage}` })}
+  structuredData={generateArticleSchema({ title: post.data.title, description: post.data.summary, url: absoluteUrl(postPath), publishedAt, ...(updatedAt && { updatedAt }), image: absoluteUrl(ogImage), locale })}
 >
   <div class="post-wrapper" style={`--category-color: ${categoryColor}`}>
     <!-- PREAMBLE: full width -->
@@ -59,8 +63,16 @@ const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
 
       <div class="post-meta">
         <time datetime={post.data.publishedAt.toISOString()}>
-          {format(t.blog.publishedOn, { date: post.data.publishedAt.toLocaleDateString(locale, { dateStyle: 'long' }) })}
+          {format(t.blog.publishedOn, { date: formatDate(post.data.publishedAt, locale) })}
         </time>
+        {wasUpdated && updatedAt && (
+          <>
+            <span class="post-meta-sep">·</span>
+            <time class="post-updated" datetime={updatedAt.toISOString()}>
+              {format(t.blog.updatedOn, { date: formatDate(updatedAt, locale) })}
+            </time>
+          </>
+        )}
         <span class="post-meta-sep">·</span>
         <span class="post-reading-time">{format(t.blog.readingTime, { minutes: readingTime })}</span>
       </div>

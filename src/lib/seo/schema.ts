@@ -1,15 +1,24 @@
 import { SITE_NAME } from './metadata';
 import type { Person } from '../../content/portfolio/schema';
+import { SITE_URL } from '../site';
+import type { Locale } from '../content/locale';
 
-const BASE_URL = 'https://www.jontobias.com';
+const BASE_URL = SITE_URL;
 
-interface ArticleSchemaInput {
+export interface ArticleSchemaInput {
   title: string;
   description: string;
+  /** Canonical absolute URL of the page, trailing slash included. */
   url: string;
   publishedAt: Date;
+  updatedAt?: Date;
+  /** Absolute URL of the share image. */
   image?: string;
+  locale: Locale;
 }
+
+const AUTHOR_NAME = 'Jonathan Tobias';
+const IN_LANGUAGE: Record<Locale, string> = { en: 'en', 'pt-br': 'pt-BR' };
 
 type PersonLink = Person['links'][number];
 type PersonLinkKind = PersonLink['kind'];
@@ -51,17 +60,26 @@ export function generateWebSiteSchema() {
   };
 }
 
-export function generateArticleSchema(input: ArticleSchemaInput) {
+export function generateArticleSchema(input: ArticleSchemaInput): Record<string, unknown> {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: input.title,
     description: input.description,
     url: input.url,
+    mainEntityOfPage: input.url,
+    inLanguage: IN_LANGUAGE[input.locale],
+    author: { '@type': 'Person', name: AUTHOR_NAME, url: SITE_URL },
     datePublished: input.publishedAt.toISOString(),
+    dateModified: (input.updatedAt ?? input.publishedAt).toISOString(),
   };
   if (input.image !== undefined) {
     schema.image = input.image;
   }
   return schema;
+}
+
+/** JSON for an inline ld+json script: `<` is escaped so content can never close the tag. */
+export function serializeJsonLd(data: object): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
 }

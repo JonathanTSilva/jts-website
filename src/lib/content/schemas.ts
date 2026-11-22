@@ -21,6 +21,7 @@ export const notesSchema = z.object({
   language: languageEnum,
   translationKey: z.string().min(1),
   publishedAt: z.coerce.date(),
+  updatedAt: z.coerce.date().optional(),
   noteType: z.enum(["note", "book", "mindmap", "whiteboard"]).default("note"),
   summary: z.string().optional(),
   category: z.string().optional(),

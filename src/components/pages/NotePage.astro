@@ -1,8 +1,10 @@
 ---
 import { render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
-import { ogImagePath } from '../../lib/content/routes';
+import { contentPath, ogImagePath } from '../../lib/content/routes';
 import type { Locale } from '../../lib/content/locale';
+import { absoluteUrl } from '../../lib/site';
+import { generateArticleSchema } from '../../lib/seo/schema';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import DefaultNoteLayout from '../notes/layouts/DefaultNoteLayout.astro';
 import BookNoteLayout from '../notes/layouts/BookNoteLayout.astro';
@@ -30,16 +32,27 @@ const layouts = {
 } as const;
 
 const NoteLayout = layouts[note.data.noteType ?? 'note'];
+const ogImage = ogImagePath('notes', note.data.language, note.data.slug);
+const { publishedAt, updatedAt } = note.data;
 ---
 
 <BaseLayout
   locale={locale}
   title={note.data.title}
   description={note.data.summary ?? undefined}
-  image={ogImagePath('notes', note.data.language, note.data.slug)}
+  image={ogImage}
   ogType="article"
   translations={translations}
   noindex={isTranslationFallback}
+  structuredData={generateArticleSchema({
+    title: note.data.title,
+    description: note.data.summary ?? note.data.title,
+    url: absoluteUrl(contentPath('notes', locale, note.data.slug)),
+    publishedAt,
+    ...(updatedAt && { updatedAt }),
+    image: absoluteUrl(ogImage),
+    locale,
+  })}
 >
   <NoteLayout note={note} Content={Content} locale={locale} prev={prev} next={next} relatedNotes={relatedNotes} />
 </BaseLayout>
