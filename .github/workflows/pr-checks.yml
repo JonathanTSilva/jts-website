@@ -58,8 +58,8 @@ jobs:
         run: pnpm cv:check:dist
 
       # The test fixtures are built into dist/test-fixtures here (the deploy removes them).
-      # /pt-br/404 is excluded: the 404 page's language switcher links to a Portuguese
-      # 404 that does not exist (known issue, tracked separately).
+      # /pt-br/404 is excluded: no such file exists, but GitHub Pages serves 404.html for it
+      # and its script shows Portuguese for /pt-br paths, so the switcher link works.
       - name: Check internal links
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
