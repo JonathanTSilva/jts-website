@@ -2,7 +2,7 @@ name: PR checks
 
 # Checks that only this repo can run and that the shared `ci` workflow does not:
 # the CV PDF checks (need poppler), an offline internal link check of the built
-# site and the WebKit smoke test. Everything else runs in `ci`.
+# site, the WebKit smoke test and the Lighthouse budgets. Everything else runs in `ci`.
 on:
   pull_request:
     branches: [ main ]
@@ -81,3 +81,38 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  # Lighthouse score and Core Web Vitals budgets (lighthouserc.budgets.json): median of
+  # 3 runs per page, for / and /pt-br/. The `lighthouse` job in `ci` only audits and
+  # asserts nothing. The CV PDF step is skipped: it needs Playwright browsers and
+  # the audit does not need the PDF.
+  lighthouse-budgets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build:search && pnpm exec astro build
+
+      - name: Lighthouse budgets
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # 12.6.2
+        with:
+          configPath: ./lighthouserc.budgets.json
+          runs: 3
+          uploadArtifacts: true
+          temporaryPublicStorage: false

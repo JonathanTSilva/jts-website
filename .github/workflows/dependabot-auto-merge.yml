@@ -1,0 +1,76 @@
+name: Dependabot auto-merge
+
+# Turns on auto-merge (squash) for Dependabot PRs that only bump a patch or minor
+# version. Major updates, and grouped PRs that contain one (fetch-metadata reports
+# the highest update type of the group), are left for a person to review.
+#
+# Auto-merge merges only once the checks the repository ruleset REQUIRES pass.
+# Today that is `ci`. This repo's own checks (`unique-checks`, `lighthouse-budgets`
+# in pr-checks.yml, the e2e run in pipeline.yml) gate the merge only if they are
+# added to the ruleset: recommended, at least `unique-checks`.
+#
+# It does nothing until the repository setting "Allow auto-merge" is on (Settings,
+# General, Pull Requests). Until then `gh pr merge --auto` is refused; the step
+# reports that as a warning and a job summary and does not fail, so Dependabot PRs
+# do not show a red X.
+#
+# A merge made with the workflow token does not start pipeline.yml, so an
+# auto-merged update deploys with the next push to main or the nightly build.
+#
+# Safe with pull_request_target: it reads the PR metadata only and never checks
+# out or runs code from the PR.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: dependabot-auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    # The PR author cannot be forged; github.actor (whoever triggered the event) can.
+    # fetch-metadata below also verifies Dependabot's own commit in the PR.
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+
+      - name: Enable auto-merge for patch and minor updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        run: |
+          if output="$(gh pr merge --auto --squash "$PR_URL" 2>&1)"; then
+            echo "Auto-merge enabled for $PR_URL ($UPDATE_TYPE)."
+            echo "Auto-merge enabled ($UPDATE_TYPE). The PR merges when the required checks pass." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::Could not enable auto-merge: $output"
+            {
+              echo "Could not enable auto-merge for $PR_URL."
+              echo
+              echo '```'
+              echo "$output"
+              echo '```'
+              echo
+              echo 'Most likely the repository setting "Allow auto-merge" is off (Settings, General, Pull Requests). Turn it on and re-run this workflow, or merge the PR by hand.'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Note skipped major update
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        env:
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        run: |
+          echo "Left for review: $UPDATE_TYPE updates are not auto-merged." >> "$GITHUB_STEP_SUMMARY"
