@@ -1,4 +1,4 @@
-import { getCollection } from 'astro:content';
+import { getPublished } from './published';
 import type { CollectionEntry } from 'astro:content';
 import type { Locale } from './locale';
 import { buildCategoryMap } from './i18n';
@@ -75,7 +75,7 @@ function toRouteEntry<T extends { data: { slug: string; language: Locale; transl
  */
 export function makeNoteStaticPaths(locale: Locale) {
   return async function getStaticPaths() {
-    const allNotes = await getCollection('notes');
+    const allNotes = await getPublished('notes');
     const routes = planLocalizedRoutes(allNotes.map(toRouteEntry), 'notes', locale);
 
     // Prev/next and related notes only consider notes written in this locale.
@@ -126,7 +126,7 @@ export function makeNoteStaticPaths(locale: Locale) {
  */
 export function makeBlogStaticPaths(locale: Locale) {
   return async function getStaticPaths() {
-    const allPosts = await getCollection('blog');
+    const allPosts = await getPublished('blog');
     const routes = planLocalizedRoutes(allPosts.map(toRouteEntry), 'blog', locale).sort(
       (a, b) => b.entry.publishedAt.getTime() - a.entry.publishedAt.getTime(),
     );

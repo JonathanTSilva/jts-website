@@ -10,7 +10,7 @@ This contract defines the required structure and metadata for short-form notes.
 | `title` | string | Short, direct title. | Yes |
 | `language` | "en" \| "pt-br" | The content language. | Yes |
 | `translationKey` | string | Unique key to link translations of the same note. | Yes |
-| `publishedAt` | date (YYYY-MM-DD) | Date of creation/publication. | Yes |
+| `publishedAt` | date (YYYY-MM-DD) | Date of creation/publication. A future `publishedAt` goes live with the first nightly build on or after that date (04:17 UTC), as long as the sync PR is merged before. | Yes |
 | `category` | string | Primary classification. | No |
 | `tags` | string[] | List of relevant tags. | No (default: []) |
 | `colorToken` | string | Design token for accent color. | No |

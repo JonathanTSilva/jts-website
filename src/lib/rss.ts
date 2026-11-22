@@ -1,6 +1,6 @@
 import rss from '@astrojs/rss';
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import { getPublished } from './content/published';
 import { contentLocalePath, type Locale } from './content/locale';
 import { useTranslations } from '../i18n/ui';
 import { SITE_URL } from './site';
@@ -17,7 +17,7 @@ const FEED_LANGUAGE: Record<Locale, string> = {
 export function makeRssHandler(collection: 'blog' | 'notes', locale: Locale): APIRoute {
   return async (context) => {
     const t = useTranslations(locale);
-    const entries = (await getCollection(collection))
+    const entries = (await getPublished(collection))
       .filter((entry) => entry.data.language === locale)
       .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 

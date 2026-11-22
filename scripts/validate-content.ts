@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { validateContent } from '../src/lib/content/validation';
-import { findSlugCollisions, type SlugOwner } from '../src/lib/content/slug';
+import { validateCorpus, type CorpusFile } from '../src/lib/content/corpus';
 import {
   listRepoFiles,
   listVaultFiles,
@@ -70,22 +70,11 @@ function main() {
 
   let hasErrors = false;
   const report: Record<string, string[]> = {};
-  const owners: SlugOwner[] = [];
+  const corpus: CorpusFile[] = [];
 
   for (const file of files) {
     const { errors, warnings, data } = validateFile(file);
-    if (
-      (file.collection === 'blog' || file.collection === 'notes') &&
-      typeof data.slug === 'string' &&
-      typeof data.language === 'string'
-    ) {
-      owners.push({
-        collection: file.collection,
-        language: data.language,
-        slug: data.slug,
-        name: file.destName,
-      });
-    }
+    corpus.push({ path: file.destName, collection: file.collection, data });
     // Extra files can live outside the report base; show those as given.
     const rel = path.relative(reportBase, file.path);
     const relativePath = rel.startsWith('..') ? file.path : rel;
@@ -98,11 +87,12 @@ function main() {
     }
   }
 
-  // Corpus check: two files of one collection and language must not share a slug.
-  const collisions = findSlugCollisions(owners);
-  if (collisions.length > 0) {
+  // Corpus checks: rules about the set of files.
+  const { errors: corpusErrors, warnings: corpusWarnings } = validateCorpus(corpus);
+  corpusWarnings.forEach((warn) => console.log(`⚠️  (corpus): ${warn}`));
+  if (corpusErrors.length > 0) {
     hasErrors = true;
-    report['(corpus)'] = collisions;
+    report['(corpus)'] = corpusErrors;
   }
 
   if (hasErrors) {

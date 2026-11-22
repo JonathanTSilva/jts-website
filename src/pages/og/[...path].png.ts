@@ -1,16 +1,17 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { getCollection } from 'astro:content';
+import { getPublished } from '../../lib/content/published';
+import type { CollectionEntry } from 'astro:content';
 import { generateOGImage } from '../../lib/ogImage';
 import { buildShareLabel, resolveShareAccent } from '../../lib/og/shareLabel';
 import { ogRouteParam } from '../../lib/content/routes';
 
-type Post = Awaited<ReturnType<typeof getCollection<'blog'>>>[0];
-type Note = Awaited<ReturnType<typeof getCollection<'notes'>>>[0];
+type Post = CollectionEntry<'blog'>;
+type Note = CollectionEntry<'notes'>;
 
 // One image per entry and language (both languages share a slug), mirroring the
 // page URLs: /og/blog/<slug>.png and /og/pt-br/blog/<slug>.png (same for notes).
 export const getStaticPaths: GetStaticPaths = async () => {
-  const [posts, notes] = await Promise.all([getCollection('blog'), getCollection('notes')]);
+  const [posts, notes] = await Promise.all([getPublished('blog'), getPublished('notes')]);
   return [
     ...posts.map(post => ({
       params: { path: ogRouteParam('blog', post.data.language, post.data.slug) },

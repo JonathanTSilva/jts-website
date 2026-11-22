@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPublished } from '../../lib/content/published';
 import { contentLocalePath, type Locale } from '../../lib/content/locale';
 import { format, useTranslations } from '../../i18n/ui';
 import { formatDate } from '../../lib/format';
@@ -14,7 +14,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 
-const allPosts = await getCollection('blog');
+const allPosts = await getPublished('blog');
 
 // Build a map to normalise fallback-locale categories into the current locale
 const categoryMap = buildCategoryMap(allPosts, locale === 'en' ? 'pt-br' : 'en', locale);

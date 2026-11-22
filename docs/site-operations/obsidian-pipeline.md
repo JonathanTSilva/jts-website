@@ -197,6 +197,12 @@ Before the clean slugs, URLs were the filename stem (`/blog/2026-04-welcome.en/`
 
 Blog and Notes files require `slug`, `title`, `language`, `translationKey`, and `publishedAt`. See `docs/content-contracts/` for templates.
 
+### Scheduled publishing
+
+There is no draft flag (drafts live in the vault's `05-Fleeting`). A post or note whose `publishedAt` is in the future is left out of the pages, both RSS feeds, the sitemap, the search index and the Open Graph images, and `[[wikilinks]]` to it render as plain text. A future `publishedAt` goes live with the first nightly build on or after that date (04:17 UTC), as long as the sync PR is merged before. The dev server (`pnpm dev`) shows scheduled posts so they can be previewed.
+
+Legacy redirects (`src/data/legacy-slugs.ts`) are not filtered: if a legacy slug's target were scheduled, its redirect would 404 until the date. No entry is affected today.
+
 ### Links and embeds cheat-sheet
 
 ```markdown

@@ -1,24 +1,26 @@
-import { blogSchema, notesSchema, nowSchema } from "./schemas";
+import { blogSchema, notesSchema, nowSchema, portfolioAboutSchema } from "./schemas";
 import { requireSections } from "./contracts";
 import { expectedSlug } from "./slug";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SafeParseSchema = { safeParse: (data: unknown) => any };
 
-export type CollectionType = "blog" | "notes" | "now";
+export type CollectionType = "blog" | "notes" | "now" | "portfolio";
 
-export const COLLECTIONS: CollectionType[] = ["blog", "notes", "now"];
+export const COLLECTIONS: CollectionType[] = ["blog", "notes", "now", "portfolio"];
 
 const CONTRACTS: Record<CollectionType, string[]> = {
   blog: ["Conclusion|Conclusão"],
   notes: [],
   now: [],
+  portfolio: [],
 };
 
 const SCHEMAS: Record<CollectionType, SafeParseSchema> = {
   blog: blogSchema,
   notes: notesSchema,
   now: nowSchema,
+  portfolio: portfolioAboutSchema,
 };
 
 interface ValidationResult {
@@ -69,15 +71,6 @@ export function validateContent(
   // 3. Type-specific validation
   if (collection === 'notes') {
     const noteType = frontmatter.noteType ?? 'note';
-
-    if (noteType === 'book') {
-      if (!frontmatter.author || (Array.isArray(frontmatter.author) && frontmatter.author.length === 0)) {
-        errors.push('Book note missing required field: author');
-      }
-      if (!frontmatter.cover) {
-        errors.push('Book note missing required field: cover');
-      }
-    }
 
     if (noteType === 'mindmap') {
       const hasH1 = /^#\s+\S/m.test(body);
