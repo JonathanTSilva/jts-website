@@ -1,6 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { CONSENT_STORAGE_KEY } from '../../src/lib/analytics/consent';
 
 test.describe('Visual Regressions', () => {
+  // A decided (rejected) consent keeps the banner from covering the elements under test.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(([key]) => {
+      window.localStorage.setItem(key!, JSON.stringify({ analytics: false, updatedAt: '2026-01-01T00:00:00.000Z' }));
+    }, [CONSENT_STORAGE_KEY]);
+  });
+
   test('fixed header visual', async ({ page }) => {
     await page.goto('/');
     // Scroll to trigger fixed header background/blur
