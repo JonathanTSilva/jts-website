@@ -1,7 +1,7 @@
 ---
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import MermaidRenderer from '../../site/MermaidRenderer.astro';
-import { useTranslations } from '../../../i18n/ui';
+import { format, useTranslations } from '../../../i18n/ui';
 import { formatDate } from '../../../lib/format';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
@@ -12,6 +12,8 @@ const { note, Content, locale, prev, next, relatedNotes } = Astro.props;
 const t = useTranslations(locale);
 
 const isTranslationFallback = note.data.language !== locale;
+const { publishedAt, updatedAt } = note.data;
+const wasUpdated = updatedAt !== undefined && updatedAt.getTime() !== publishedAt.getTime();
 ---
 
 <NoteLayoutWrapper
@@ -37,6 +39,14 @@ const isTranslationFallback = note.data.language !== locale;
     <time class="note-date" datetime={note.data.publishedAt.toISOString()}>
       {formatDate(note.data.publishedAt, locale)}
     </time>
+    {wasUpdated && updatedAt && (
+      <>
+        <span class="note-date-sep" aria-hidden="true"> · </span>
+        <time class="note-date" datetime={updatedAt.toISOString()}>
+          {format(t.notes.updatedOn, { date: formatDate(updatedAt, locale) })}
+        </time>
+      </>
+    )}
   </div>
 
   {note.data.tags && note.data.tags.length > 0 && (
@@ -92,6 +102,10 @@ const isTranslationFallback = note.data.language !== locale;
 
   .note-meta {
     margin-bottom: var(--space-4);
+  }
+
+  .note-date-sep {
+    color: var(--text-muted);
   }
 
   .note-date {

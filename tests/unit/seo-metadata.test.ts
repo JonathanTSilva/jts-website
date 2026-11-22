@@ -272,6 +272,7 @@ describe('schema generation', () => {
       url: 'https://www.jontobias.com/blog/test-article',
       publishedAt,
       image: 'https://www.jontobias.com/og/test.png',
+      locale: 'en' as const,
     };
     const schema = generateArticleSchema(input);
     expect(schema['@context']).toBe('https://schema.org');
@@ -289,6 +290,7 @@ describe('schema generation', () => {
       description: 'Description',
       url: 'https://www.jontobias.com/blog/no-image',
       publishedAt: new Date('2024-01-01T00:00:00Z'),
+      locale: 'en',
     });
     expect(schema['@type']).toBe('BlogPosting');
     expect(schema.image).toBeUndefined();

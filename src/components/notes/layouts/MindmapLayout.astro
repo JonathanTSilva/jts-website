@@ -1,6 +1,6 @@
 ---
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
-import { useTranslations } from '../../../i18n/ui';
+import { format, useTranslations } from '../../../i18n/ui';
 import { formatDate } from '../../../lib/format';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
@@ -11,6 +11,8 @@ const { note, Content, locale, prev, next, relatedNotes } = Astro.props;
 const t = useTranslations(locale);
 
 const isTranslationFallback = note.data.language !== locale;
+const { publishedAt, updatedAt } = note.data;
+const wasUpdated = updatedAt !== undefined && updatedAt.getTime() !== publishedAt.getTime();
 ---
 
 <NoteLayoutWrapper
@@ -30,9 +32,19 @@ const isTranslationFallback = note.data.language !== locale;
     </div>
   )}
 
-  <time class="note-date" datetime={note.data.publishedAt.toISOString()}>
-    {formatDate(note.data.publishedAt, locale)}
-  </time>
+  <div class="note-meta">
+    <time class="note-date" datetime={note.data.publishedAt.toISOString()}>
+      {formatDate(note.data.publishedAt, locale)}
+    </time>
+    {wasUpdated && updatedAt && (
+      <>
+        <span aria-hidden="true"> · </span>
+        <time class="note-date" datetime={updatedAt.toISOString()}>
+          {format(t.notes.updatedOn, { date: formatDate(updatedAt, locale) })}
+        </time>
+      </>
+    )}
+  </div>
 
   <div class="mindmap-wrapper">
     {isTranslationFallback && (
@@ -67,8 +79,7 @@ const isTranslationFallback = note.data.language !== locale;
     color: var(--text-muted);
   }
 
-  .note-date {
-    display: block;
+  .note-meta {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     color: var(--text-muted);
