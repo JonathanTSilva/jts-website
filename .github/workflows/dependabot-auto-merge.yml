@@ -14,6 +14,9 @@ name: Dependabot auto-merge
 # reports that as a warning and a job summary and does not fail, so Dependabot PRs
 # do not show a red X.
 #
+# A merge made with the workflow token does not start pipeline.yml, so an
+# auto-merged update deploys with the next push to main or the nightly build.
+#
 # Safe with pull_request_target: it reads the PR metadata only and never checks
 # out or runs code from the PR.
 on:
