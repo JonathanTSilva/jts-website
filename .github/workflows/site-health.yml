@@ -1,0 +1,174 @@
+name: Site health
+
+# Two scheduled checks of the live site, each tracked by one GitHub issue:
+#
+# - uptime (every 6 hours): the key URLs answer 200 and /.well-known/security.txt
+#   still has more than 30 days before it expires. Fails -> issue
+#   "Site health: uptime check failing", closed again when the check passes.
+# - link-rot (Mondays): every external link of the built site is fetched. Only
+#   certain failures (404, 410, DNS, refused connection, TLS) count; bot blocks,
+#   timeouts and 5xx are listed as unverifiable. Fails -> issue
+#   "Site health: broken external links", closed again when none are left.
+#
+# Run it by hand from the Actions tab: pick the job, and set fail-probe to check
+# a path that 404s, which proves the issue is opened (run again without it to
+# see the issue close).
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Which check to run
+        type: choice
+        options:
+          - both
+          - uptime
+          - link-rot
+        default: both
+      fail-probe:
+        description: Uptime only. Also check a path that 404s, to prove the issue handling.
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-health
+  cancel-in-progress: false
+
+jobs:
+  uptime:
+    if: >-
+      github.event.schedule == '0 */6 * * *' ||
+      (github.event_name == 'workflow_dispatch' && inputs.job != 'link-rot')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check the live site
+        id: check
+        continue-on-error: true
+        env:
+          FAIL_PROBE: ${{ inputs.fail-probe }}
+        run: scripts/uptime-check.sh "$RUNNER_TEMP/uptime-report.md"
+
+      # Skipped when the run was cancelled: a cancelled check says nothing.
+      - name: Open, update or close the issue
+        if: steps.check.outcome == 'success' || steps.check.outcome == 'failure'
+        env:
+          STATUS: ${{ steps.check.outcome == 'success' && 'passed' || 'failed' }}
+        run: |
+          scripts/site-health-issue.sh "$STATUS" "Site health: uptime check failing" uptime "$RUNNER_TEMP/uptime-report.md"
+
+      - name: Fail the job when the check failed
+        if: steps.check.outcome == 'failure'
+        run: exit 1
+
+  link-rot:
+    if: >-
+      github.event.schedule == '0 6 * * 1' ||
+      (github.event_name == 'workflow_dispatch' && inputs.job != 'uptime')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PUBLIC_PLAUSIBLE_DOMAIN: ${{ vars.PUBLIC_PLAUSIBLE_DOMAIN }}
+      PUBLIC_PLAUSIBLE_API_HOST: ${{ vars.PUBLIC_PLAUSIBLE_API_HOST }}
+      PUBLIC_PLAUSIBLE_SCRIPT_SRC: ${{ vars.PUBLIC_PLAUSIBLE_SCRIPT_SRC }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The CV PDF step is skipped: it needs Playwright browsers and has no links to check.
+      - name: Build
+        run: pnpm build:search && pnpm exec astro build
+
+      # The E2E fixtures are built into dist but never deployed; their links are not the site's.
+      - name: Remove test fixtures
+        run: rm -rf dist/test-fixtures dist/pt-br/test-fixtures
+
+      # External links only (the PR gate checks internal ones offline). lychee.toml
+      # adds its own excludes. Extra excludes:
+      # - www.jontobias.com: the site's own canonical, hreflang and share URLs; pages
+      #   not deployed yet would 404 and the uptime check covers the live site.
+      # - linkedin.com: answers every bot with 403 or 999, so no result says anything
+      #   about the link.
+      # Moderate load: 8 requests at a time, 20 s timeout, one retry. 403, 429, 5xx and
+      # timeouts are sorted out by scripts/link-rot-report.ts, so lychee does not fail here.
+      - name: Check external links
+        id: lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --no-progress
+            --scheme http --scheme https
+            --root-dir ${{ github.workspace }}/dist
+            --exclude '^https://www\.jontobias\.com/'
+            --exclude '^https://(www\.)?linkedin\.com/'
+            --max-concurrency 8
+            --timeout 20
+            --max-retries 1
+            --retry-wait-time 5
+            --user-agent 'Mozilla/5.0 (compatible; link-check)'
+            dist
+          format: json
+          output: lychee/report.json
+          checkbox: false
+          jobSummary: false
+          fail: false
+
+      - name: Build the report
+        id: report
+        run: |
+          pnpm exec tsx scripts/link-rot-report.ts lychee/report.json src/content > lychee/report.md
+          cat lychee/report.md
+          cat lychee/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the lychee report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: link-rot-report
+          path: lychee/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Open, update or close the issue
+        if: steps.report.outcome == 'success'
+        env:
+          BROKEN: ${{ steps.report.outputs.broken }}
+        run: |
+          status=passed
+          if [ "$BROKEN" != "0" ]; then status=failed; fi
+          scripts/site-health-issue.sh "$status" "Site health: broken external links" link-rot lychee/report.md
+
+      - name: Fail the job when links are broken
+        if: steps.report.outcome == 'success' && steps.report.outputs.broken != '0'
+        run: exit 1
