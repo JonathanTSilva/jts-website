@@ -17,12 +17,14 @@ const PAGES = [
   '/pt-br/notes',
   '/pt-br/now',
   '/pt-br/engineering',
-  // Posts with callouts (markdown cheatsheet, homelab) come back once callout titles pass contrast (#92).
-  '/blog/welcome',
-  '/pt-br/blog/welcome',
-  '/notes/note-cheatsheet',
-  '/pt-br/notes/note-cheatsheet',
-  '/notes/mindmap-cheatsheet'
+  // Article pages use the repo-owned fixtures, so they do not depend on synced content.
+  // Callout-heavy pages (fixture-markdown and real posts with callouts) come back once
+  // callout titles pass contrast (#92).
+  '/test-fixtures/blog/fixture-en-only',
+  '/pt-br/test-fixtures/blog/fixture-en-only',
+  '/test-fixtures/notes/fixture-note',
+  '/pt-br/test-fixtures/notes/fixture-note',
+  '/test-fixtures/notes/fixture-mindmap'
 ];
 
 // Dark --text-muted value. Contrast failures with any other foreground color in
@@ -80,8 +82,14 @@ test('PT blog, post and portfolio chrome is Portuguese', async ({ page }) => {
   await expect(page.locator('.blog-filter-bar')).toHaveAttribute('aria-label', 'Filtrar por categoria');
   await expect(page.locator('.filter-category-btn[data-category="all"]')).toContainText('Todos');
 
-  await page.goto('/pt-br/blog/welcome');
-  await expect(page.locator('.post-nav')).toHaveAttribute('aria-label', 'Navegação entre posts');
+  // The post navigation only renders when a post has a neighbour, so it is checked on a real post.
+  const entries = page.locator('a.blog-entry');
+  if ((await entries.count()) >= 2) {
+    await entries.first().click();
+    await expect(page.locator('.post-nav')).toHaveAttribute('aria-label', 'Navegação entre posts');
+  }
+
+  await page.goto('/pt-br/test-fixtures/blog/fixture-en-only');
   await expect(page.locator('.share-btn[data-platform="copy"]')).toHaveAttribute('aria-label', 'Copiar link');
   await expect(page.locator('.share-btn[data-platform="linkedin"]')).toHaveAttribute('aria-label', 'Compartilhar no LinkedIn');
 

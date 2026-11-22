@@ -1,18 +1,16 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Markdown rendering tests — driven by the cheatsheet post.
- *
- * These tests visit the canonical markdown cheatsheet blog post and verify
- * that each supported element is rendered correctly in the browser.
- * The cheatsheet post slug is stable and intentionally hardcoded here.
+ * Markdown rendering tests, driven by the repo-owned fixture post
+ * (tests/fixtures/content/blog/*fixture-markdown*), served under /test-fixtures/.
+ * They do not depend on synced vault content.
  */
 
-const EN_SLUG = '/blog/markdown-cheatsheet';
-const PT_SLUG = '/pt-br/blog/markdown-cheatsheet';
+const EN_SLUG = '/test-fixtures/blog/fixture-markdown';
+const PT_SLUG = '/pt-br/test-fixtures/blog/fixture-markdown';
 
-test.describe('Markdown Rendering — Cheatsheet Post', () => {
-  // The cheatsheet is a large page (Shiki highlighting, Mermaid, math).
+test.describe('Markdown Rendering — Fixture Post', () => {
+  // The fixture is a large page (Shiki highlighting, Mermaid, math).
   // Mobile emulation under CI load needs extra navigation headroom.
   test.use({ navigationTimeout: 60_000 });
 
@@ -20,7 +18,7 @@ test.describe('Markdown Rendering — Cheatsheet Post', () => {
     test('post title and meta are visible', async ({ page }) => {
       await page.goto(EN_SLUG);
       await expect(page.locator('.post-title')).toHaveText(
-        'Markdown Cheatsheet — Website Writing Reference'
+        'Markdown Fixture — Website Writing Reference'
       );
       await expect(page.locator('.post-meta')).toContainText(/Published on/);
       await expect(page.locator('.post-meta')).toContainText(/min read/);
@@ -183,7 +181,7 @@ test.describe('Markdown Rendering — Cheatsheet Post', () => {
     test('post title renders in Portuguese', async ({ page }) => {
       await page.goto(PT_SLUG);
       await expect(page.locator('.post-title')).toHaveText(
-        'Cheatsheet de Markdown — Referência para Escrita no Site'
+        'Fixture de Markdown — Referência para Escrita no Site'
       );
     });
 
@@ -220,13 +218,13 @@ test.describe('Markdown Rendering — Cheatsheet Post', () => {
     test('EN post links to PT-BR translation via language switcher', async ({ page }) => {
       await page.goto(EN_SLUG);
       // The footer language switcher has a PT link pointing to the pt-br version
-      const ptLink = page.locator('.footer-row-brand a[href*="pt-br/blog"]');
+      const ptLink = page.locator('.footer-row-brand a[href*="pt-br/test-fixtures/blog"]');
       await expect(ptLink).toBeVisible();
     });
 
     test('PT-BR post links to EN translation via language switcher', async ({ page }) => {
       await page.goto(PT_SLUG);
-      const enLink = page.locator('.footer-row-brand a[href*="/blog/markdown-cheatsheet"]');
+      const enLink = page.locator('.footer-row-brand a[href*="/test-fixtures/blog/fixture-markdown"]');
       await expect(enLink).toBeVisible();
     });
   });

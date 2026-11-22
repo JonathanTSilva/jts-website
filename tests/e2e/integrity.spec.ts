@@ -13,6 +13,7 @@ interface ContentFile {
 /** Reads slug and language from each file's frontmatter, as the site does. */
 function readContent(dir: 'blog' | 'notes'): ContentFile[] {
   const root = path.join(process.cwd(), 'src/content', dir);
+  if (!fs.existsSync(root)) return [];
   return fs
     .readdirSync(root)
     .filter((f) => f.endsWith('.md'))
@@ -40,6 +41,19 @@ test.describe('Indexing surfaces', () => {
   test('sitemap-0.xml returns 200', async ({ request }) => {
     const response = await request.get('/sitemap-0.xml');
     expect(response.status()).toBe(200);
+  });
+
+  test('sitemap leaves out the E2E fixture pages', async ({ request }) => {
+    const xml = await (await request.get('/sitemap-0.xml')).text();
+    expect(xml).not.toContain('test-fixtures');
+  });
+
+  test('search index and RSS feeds leave out the E2E fixtures', async ({ request }) => {
+    const urls = ['/api/en/search-index.json', '/api/pt-br/search-index.json', '/rss.xml', '/pt-br/rss.xml', '/notes/rss.xml', '/pt-br/notes/rss.xml'];
+    for (const url of urls) {
+      const body = await (await request.get(url)).text();
+      expect(body, url).not.toContain('test-fixtures');
+    }
   });
 
   test('sitemap includes bilingual legal pages', async ({ request }) => {
