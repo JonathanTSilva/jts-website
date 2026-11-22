@@ -36,7 +36,7 @@ describe('resolveCover', () => {
     const cover = await resolveCover('https://example.com/dead.jpg');
 
     expect(cover).toBeNull();
-    expect(warn).toHaveBeenCalledWith('cover unavailable: https://example.com/dead.jpg');
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('cover unavailable: https://example.com/dead.jpg'));
   });
 
   it('returns null when the result has no usable dimensions', async () => {

@@ -21,7 +21,8 @@ async function load(url: string): Promise<ResolvedCover | null> {
     return { src: image.src, width, height };
   } catch {
     // A dead or slow cover host must never fail the build: the page shows a placeholder.
-    console.warn(`cover unavailable: ${url}`);
+    // Also the path for a host missing from image.remotePatterns in astro.config.mjs.
+    console.warn(`cover unavailable: ${url} (dead host, or host not in image.remotePatterns)`);
     return null;
   }
 }

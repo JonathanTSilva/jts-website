@@ -3,7 +3,6 @@ import type { CollectionEntry } from 'astro:content';
 import { contentLocalePath, type Locale } from '../../../lib/content/locale';
 import { useTranslations } from '../../../i18n/ui';
 import { getNoteAccentColor } from '../../../lib/notes';
-import { resolveCover } from '../../../lib/content/cover';
 import TranslationStatusTag from '../../site/TranslationStatusTag.astro';
 
 interface Props {
@@ -14,8 +13,6 @@ interface Props {
 const { note, locale } = Astro.props;
 const t = useTranslations(locale);
 
-// null when the remote cover cannot be fetched: a placeholder box is shown instead.
-const cover = note.data.cover ? await resolveCover(note.data.cover) : null;
 const statusKey = note.data.status?.[0] as 'finished' | 'reading' | 'abandoned' | undefined;
 const statusLabel = statusKey ? t.notes.bookStatus[statusKey] : undefined;
 ---
@@ -37,27 +34,11 @@ const statusLabel = statusKey ? t.notes.bookStatus[statusKey] : undefined;
         </svg>
       </span>
     </header>
-    <div class:list={['book-card-main', { 'has-cover': Boolean(note.data.cover) }]}>
-      {cover && (
-        <img
-          src={cover.src}
-          width={cover.width}
-          height={cover.height}
-          alt=""
-          class="book-cover"
-          loading="lazy"
-          decoding="async"
-        />
-      )}
-      {note.data.cover && !cover && <div class="book-cover book-cover-placeholder" aria-hidden="true"></div>}
-      <div class="book-card-text">
-        <h2 class="note-title">{note.data.title}</h2>
-        {note.isTranslationMissing && (
-          <TranslationStatusTag text={t.site.translationMissing} />
-        )}
-        {note.data.summary && <p class="note-summary">{note.data.summary}</p>}
-      </div>
-    </div>
+    <h2 class="note-title">{note.data.title}</h2>
+    {note.isTranslationMissing && (
+      <TranslationStatusTag text={t.site.translationMissing} />
+    )}
+    {note.data.summary && <p class="note-summary">{note.data.summary}</p>}
     {(note.data.author?.length || statusLabel) && (
       <div class="book-meta">
         {note.data.author && note.data.author.length > 0 && (
@@ -113,20 +94,6 @@ const statusLabel = statusKey ? t.notes.bookStatus[statusKey] : undefined;
     color: var(--accent-hover);
   }
   .type-badge { color: var(--text-muted); display: flex; align-items: center; }
-  .book-card-main { display: flex; gap: var(--space-4); align-items: flex-start; }
-  .book-card-text { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
-  .book-cover {
-    flex-shrink: 0;
-    width: 3.5rem;
-    height: auto;
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
-  }
-  .book-cover-placeholder {
-    aspect-ratio: 2 / 3;
-    background: var(--surface-high);
-    border: 1px solid var(--border);
-  }
   .note-title {
     font-size: var(--text-lg);
     margin: 0;
