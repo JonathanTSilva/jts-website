@@ -88,11 +88,14 @@ function describeStatus(status: LycheeStatus | undefined, timedOut: boolean): st
   if (!status) return 'unknown error';
   if (status.code !== undefined) {
     // Results served from lychee's cache lose the reason phrase: "Error (cached)".
-    const text = /^Rejected status code:\s*(.+)$/i.exec(status.text ?? '')?.[1];
-    return text ?? `HTTP ${status.code}`;
+    const prefix = 'rejected status code:';
+    const text = status.text?.toLowerCase().startsWith(prefix) ? status.text.slice(prefix.length).trim() : '';
+    return text || `HTTP ${status.code}`;
   }
   // Drop the "(error sending request for url (...))" tail, the URL is shown anyway.
-  return (status.details ?? status.text ?? 'unknown error').replace(/\s*\(error sending request[^)]*\)+\s*$/i, '');
+  const detail = (status.details ?? status.text ?? 'unknown error').trim();
+  const tail = detail.toLowerCase().lastIndexOf('(error sending request');
+  return tail >= 0 && detail.endsWith(')') ? detail.slice(0, tail).trim() : detail;
 }
 
 /** Collects the external failures of a lychee JSON report, merged per URL. */
@@ -125,7 +128,7 @@ export function collectFindings(report: LycheeReport): Finding[] {
   add(report.timeout_map, true);
 
   return [...byUrl.values()]
-    .map(f => ({ ...f, pages: [...f.pages].sort() }))
+    .map(f => ({ ...f, pages: [...f.pages].sort((a, b) => a.localeCompare(b)) }))
     .sort((a, b) => a.url.localeCompare(b.url));
 }
 

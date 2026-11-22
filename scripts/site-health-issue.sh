@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-if [ "$#" -ne 4 ]; then
+if [[ "$#" -ne 4 ]]; then
   echo "usage: $0 <failed|passed> <title> <label> <body-file>" >&2
   exit 2
 fi
@@ -40,7 +40,7 @@ esac
 max_body_bytes=60000
 
 mutate() {
-  if [ "${DRY_RUN:-}" = "1" ]; then
+  if [[ "${DRY_RUN:-}" = "1" ]]; then
     printf 'DRY_RUN:'
     printf ' %q' "$@"
     printf '\n'
@@ -50,7 +50,7 @@ mutate() {
 }
 
 run_url=""
-if [ -n "${GITHUB_RUN_ID:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+if [[ -n "${GITHUB_RUN_ID:-}" ]] && [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
   run_url="${GITHUB_SERVER_URL:-https://github.com}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 fi
 
@@ -58,7 +58,7 @@ tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 
 # Labels are created when missing (--force also makes a repeat run a no-op).
-if [ "$status" = "failed" ]; then
+if [[ "$status" = "failed" ]]; then
   mutate gh label create site-health --force --color "b60205" \
     --description "Automated site health checks"
   mutate gh label create "$label" --force --color "d93f0b" \
@@ -72,23 +72,23 @@ existing="$(
     | jq -r --arg title "$title" '[.[] | select(.title == $title)][0].number // empty'
 )"
 
-if [ "$status" = "failed" ]; then
-  if [ ! -s "$body_file" ]; then
+if [[ "$status" = "failed" ]]; then
+  if [[ ! -s "$body_file" ]]; then
     echo "body file '$body_file' is missing or empty" >&2
     exit 1
   fi
 
   {
     head -c "$max_body_bytes" "$body_file"
-    if [ "$(wc -c < "$body_file")" -gt "$max_body_bytes" ]; then
+    if [[ "$(wc -c < "$body_file")" -gt "$max_body_bytes" ]]; then
       printf '\n\n_Report truncated. See the run for the full list._\n'
     fi
-    if [ -n "$run_url" ]; then
+    if [[ -n "$run_url" ]]; then
       printf '\n\nRun: %s\n' "$run_url"
     fi
   } > "$tmp"
 
-  if [ -n "$existing" ]; then
+  if [[ -n "$existing" ]]; then
     echo "Commenting on issue #$existing"
     mutate gh issue comment "$existing" --body-file "$tmp"
   else
@@ -97,11 +97,11 @@ if [ "$status" = "failed" ]; then
       --body-file "$tmp"
   fi
 else
-  if [ -n "$existing" ]; then
+  if [[ -n "$existing" ]]; then
     echo "Check passes again, closing issue #$existing"
     {
       printf 'The check passes again.'
-      if [ -n "$run_url" ]; then
+      if [[ -n "$run_url" ]]; then
         printf ' Run: %s' "$run_url"
       fi
       printf '\n'

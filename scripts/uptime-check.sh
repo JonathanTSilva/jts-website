@@ -13,7 +13,7 @@
 
 set -uo pipefail
 
-if [ "$#" -ne 1 ]; then
+if [[ "$#" -ne 1 ]]; then
   echo "usage: $0 <report-file>" >&2
   exit 2
 fi
@@ -30,7 +30,7 @@ paths=(
   "/sitemap-index.xml"
   "/.well-known/security.txt"
 )
-if [ "${FAIL_PROBE:-}" = "true" ]; then
+if [[ "${FAIL_PROBE:-}" = "true" ]]; then
   paths+=("/site-health-probe-does-not-exist/")
 fi
 
@@ -39,7 +39,7 @@ rows=()
 
 record() {
   # record <ok|fail> <check> <detail>
-  if [ "$1" = "ok" ]; then
+  if [[ "$1" = "ok" ]]; then
     rows+=("| ok | $2 | $3 |")
   else
     rows+=("| FAIL | $2 | $3 |")
@@ -66,20 +66,20 @@ for path in "${paths[@]}"; do
     reason="$(tr '\n' ' ' < "$work/body.err" | cut -c1-200)"
     record fail "GET $path" "${code:-no response} ${reason}"
   fi
-  if [ "$path" = "/.well-known/security.txt" ] && [ -s "$work/body" ]; then
+  if [[ "$path" = "/.well-known/security.txt" ]] && [[ -s "$work/body" ]]; then
     cp "$work/body" "$work/security.txt"
   fi
 done
 
 # security.txt must stay valid (RFC 9116): fail while there are still 30 days left.
 expires=""
-if [ -s "$work/security.txt" ]; then
+if [[ -s "$work/security.txt" ]]; then
   expires="$(grep -i -m1 '^Expires:' "$work/security.txt" | cut -d: -f2- | tr -d '\r' | sed 's/^ *//' || true)"
 fi
-if [ -n "$expires" ]; then
+if [[ -n "$expires" ]]; then
   if expires_epoch="$(date -d "$expires" +%s 2> /dev/null)"; then
     days=$(((expires_epoch - $(date +%s)) / 86400))
-    if [ "$days" -gt "$min_days" ]; then
+    if [[ "$days" -gt "$min_days" ]]; then
       record ok "security.txt Expires" "$expires, $days days left"
     else
       record fail "security.txt Expires" "$expires, $days days left (renew at least $min_days days ahead)"
@@ -100,15 +100,15 @@ fi
   echo "|---|---|---|"
   printf '%s\n' "${rows[@]}"
   echo
-  if [ "$failures" -eq 0 ]; then
+  if [[ "$failures" -eq 0 ]]; then
     echo "All checks passed."
   else
     echo "$failures check(s) failed."
   fi
 } > "$report"
 
-if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
   cat "$report" >> "$GITHUB_STEP_SUMMARY"
 fi
 
-[ "$failures" -eq 0 ]
+[[ "$failures" -eq 0 ]]
