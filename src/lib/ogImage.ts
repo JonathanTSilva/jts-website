@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import satori from 'satori';
 import sharp from 'sharp';
 import { lightenHex } from './og/shareLabel';
+import { SITE_DISPLAY_NAME } from './site';
 
 const FONT_DIR = 'src/assets/fonts/geist';
 const loadFont = (file: string) => readFileSync(resolve(FONT_DIR, file));
@@ -34,7 +35,7 @@ interface OGImageOptions {
 
 export const DEFAULT_OG_AUTHOR = 'Jonathan Tobias';
 export const DEFAULT_OG_AUTHOR_ROLE = 'Senior Embedded Software Engineer';
-export const DEFAULT_OG_DOMAIN = 'jontobias.com';
+export const DEFAULT_OG_DOMAIN = SITE_DISPLAY_NAME;
 
 const BG = '#0A0A0F';
 const TEXT = '#E8E8F2';

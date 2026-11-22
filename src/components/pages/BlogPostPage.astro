@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { ogImagePath } from '../../lib/content/routes';
+import { absoluteUrl } from '../../lib/site';
 import { contentLocalePath, type Locale } from '../../lib/content/locale';
 import { format, useTranslations } from '../../i18n/ui';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -46,7 +47,7 @@ const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
   ogType="article"
   translations={translations}
   noindex={isTranslationFallback}
-  structuredData={generateArticleSchema({ title: post.data.title, description: post.data.summary, url: `https://www.jontobias.com${postPath}`, publishedAt: post.data.publishedAt, image: `https://www.jontobias.com${ogImage}` })}
+  structuredData={generateArticleSchema({ title: post.data.title, description: post.data.summary, url: absoluteUrl(postPath), publishedAt: post.data.publishedAt, image: absoluteUrl(ogImage) })}
 >
   <div class="post-wrapper" style={`--category-color: ${categoryColor}`}>
     <!-- PREAMBLE: full width -->

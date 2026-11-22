@@ -1,7 +1,8 @@
 import { SITE_NAME } from './metadata';
 import type { Person } from '../../content/portfolio/schema';
+import { SITE_URL } from '../site';
 
-const BASE_URL = 'https://www.jontobias.com';
+const BASE_URL = SITE_URL;
 
 interface ArticleSchemaInput {
   title: string;

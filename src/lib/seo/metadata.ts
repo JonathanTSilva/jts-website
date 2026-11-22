@@ -1,4 +1,5 @@
 import { type Locale, DEFAULT_LOCALE, LOCALES } from '../content/locale';
+import { SITE_URL } from '../site';
 
 export const SITE_NAME = 'Tobias';
 export const OG_SITE_NAME = 'Jonathan Tobias';
@@ -149,7 +150,7 @@ function buildPathAlternates(pathWithoutLocale: string, baseUrl: string): Altern
 
 export function generateSeo(props: SeoProps) {
   const { title, description, canonical, ogType = 'website', image, locale, currentPath = '/', pageType, translations, noindex } = props;
-  const baseUrl = 'https://www.jontobias.com';
+  const baseUrl = SITE_URL;
 
   // Resolve page-type defaults when no explicit title/description given
   const pageDefaults = pageType ? PAGE_TYPE_DEFAULTS[pageType][locale] : undefined;
