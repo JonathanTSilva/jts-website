@@ -47,6 +47,29 @@ beforeAll(() => {
 
 afterAll(() => rmSync(root, { recursive: true, force: true }));
 
+describe('scheduled posts', () => {
+  it('skips entries whose publishedAt is in the future', () => {
+    const later = mkdtempSync(join(tmpdir(), 'sitemap-scheduled-'));
+    try {
+      mkdirSync(join(later, 'blog'));
+      const write = (file: string, language: string, published: string, slug = 'later') =>
+        writeFileSync(
+          join(later, 'blog', file),
+          `---\nslug: "${slug}"\ntitle: "T"\nlanguage: "${language}"\ntranslationKey: "${slug}"\npublishedAt: ${published}\n---\n\nBody\n`,
+        );
+      write('later.en.md', 'en', '2999-01-01');
+      write('later.pt-br.md', 'pt-br', '2999-01-01');
+      write('live.en.md', 'en', '2020-01-01', 'live');
+      expect(readRouteEntries(later, 'blog').map((e) => e.publishedAt.getUTCFullYear())).toEqual([2020]);
+      const { lastmod } = sitemapMeta(later, SITE);
+      expect(lastmod.has(`${SITE}/blog/later/`)).toBe(false);
+      expect(lastmod.has(`${SITE}/blog/live/`)).toBe(true);
+    } finally {
+      rmSync(later, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('readRouteEntries', () => {
   it('reads frontmatter of md and mdx files only', () => {
     const entries = readRouteEntries(root, 'blog');

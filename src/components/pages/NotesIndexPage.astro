@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPublished } from '../../lib/content/published';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import NotesGrid from '../notes/NotesGrid.astro';
 import NotesFilters from '../notes/NotesFilters.astro';
@@ -19,7 +19,7 @@ const translations = {
   'pt-br': contentLocalePath('pt-br', '/notes'),
 };
 
-const allNotes = await getCollection('notes');
+const allNotes = await getPublished('notes');
 const { notesToShow, categories, tags, categoryCounts, noteTypes, noteTypeCounts } = buildNoteIndex(allNotes, locale);
 ---
 

@@ -10,7 +10,7 @@ This contract defines the required structure and metadata for blog posts.
 | `title` | string | The post title. | Yes |
 | `language` | "en" \| "pt-br" | The content language. | Yes |
 | `translationKey` | string | Unique key to link translations of the same post. | Yes |
-| `publishedAt` | date (YYYY-MM-DD) | Original publication date. | Yes |
+| `publishedAt` | date (YYYY-MM-DD) | Original publication date. A future `publishedAt` goes live with the first nightly build on or after that date (04:17 UTC), as long as the sync PR is merged before. | Yes |
 | `summary` | string | Brief description for indexes and SEO. | Yes |
 | `tags` | string[] | List of relevant tags. | No (default: []) |
 | `updatedAt` | date (YYYY-MM-DD) | Last significant update date. | No |

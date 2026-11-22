@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import matter from 'gray-matter';
 import { LOCALES, type Locale } from './locale';
+import { isPublished } from './publish';
 import { planLocalizedRoutes, type RouteEntry } from './routes';
 
 type Collection = 'blog' | 'notes';
@@ -36,6 +37,8 @@ export function readRouteEntries(contentRoot: string, collection: Collection): R
     ) {
       continue;
     }
+    // A scheduled post has no page yet, so it has no sitemap entry either.
+    if (!isPublished({ publishedAt })) continue;
     entries.push({
       slug: data.slug,
       language,

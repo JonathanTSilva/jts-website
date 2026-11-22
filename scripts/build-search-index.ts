@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { fileURLToPath } from 'url';
+import { isPublished } from '../src/lib/content/publish';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,6 +11,13 @@ const CONTENT_DIR = path.join(__dirname, '../src/content');
 const OUTPUT_DIR = path.join(__dirname, '../public/api');
 
 const LOCALES = ['en', 'pt-br'];
+
+// A post with a future publishedAt is not live yet. Entries without a
+// readable date stay in; `pnpm lint:content` reports those.
+function isLive(data: Record<string, unknown>): boolean {
+  const date = new Date(data.publishedAt as string | Date);
+  return Number.isNaN(date.getTime()) || isPublished({ publishedAt: date });
+}
 
 interface SearchItem {
   title: string;
@@ -34,7 +42,7 @@ async function buildIndex() {
         const content = fs.readFileSync(path.join(blogDir, file), 'utf-8');
         const { data } = matter(content);
         
-        if (data.language === locale) {
+        if (data.language === locale && isLive(data)) {
           index.push({
             title: data.title,
             summary: data.summary || '',
@@ -56,7 +64,7 @@ async function buildIndex() {
         const content = fs.readFileSync(path.join(notesDir, file), 'utf-8');
         const { data } = matter(content);
         
-        if (data.language === locale) {
+        if (data.language === locale && isLive(data)) {
           index.push({
             title: data.title,
             summary: data.summary || '',

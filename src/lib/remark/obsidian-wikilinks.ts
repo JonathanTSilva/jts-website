@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { contentPath } from '../content/routes';
 import { LOCALES, type Locale } from '../content/locale';
+import { isPublished } from '../content/publish';
 
 // ---------------------------------------------------------------------------
 // Content map — resolves [[wikilinks]] to website URLs
@@ -44,6 +45,11 @@ export function buildContentMap(contentDir: string): ContentMap {
       const slugMatch = raw.match(/^slug:\s*["']?([^"'\n]+?)["']?\s*$/m);
       if (!slugMatch?.[1]) continue;
       const slug = slugMatch[1].trim();
+
+      // A scheduled (future-dated) target has no page yet: leave links to it as text.
+      const publishedMatch = raw.match(/^publishedAt:\s*["']?([^"'\n]+?)["']?\s*$/m);
+      const publishedAt = publishedMatch?.[1] ? new Date(publishedMatch[1].trim()) : null;
+      if (publishedAt && !Number.isNaN(publishedAt.getTime()) && !isPublished({ publishedAt })) continue;
 
       // Language: frontmatter first, then the filename suffix ("x.pt-br.md").
       const withoutExt = file.replace(/\.(md|mdx)$/, '');

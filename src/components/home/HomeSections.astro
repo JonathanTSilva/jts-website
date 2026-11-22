@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPublished } from '../../lib/content/published';
 import ProjectCard from '../portfolio/ProjectCard.astro';
 import { career } from '../../content/portfolio/career';
 import { getWebsiteProjects, getWebsitePublications } from '../../lib/career/website';
@@ -15,18 +15,16 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 
 // Fetch latest blog posts
-const blogPosts = await getCollection('blog', ({ data }) => {
-  return data.language === locale;
-});
+const blogPosts = await getPublished('blog');
 const latestBlogPosts = blogPosts
+  .filter((post) => post.data.language === locale)
   .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
   .slice(0, 5);
 
 // Fetch latest notes
-const notes = await getCollection('notes', ({ data }) => {
-  return data.language === locale;
-});
+const notes = await getPublished('notes');
 const latestNotes = notes
+  .filter((note) => note.data.language === locale)
   .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
   .slice(0, 3);
 

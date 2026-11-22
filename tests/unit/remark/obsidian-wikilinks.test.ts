@@ -27,6 +27,28 @@ afterAll(() => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+describe('scheduled targets', () => {
+  it('leaves a link to a future-dated post unresolved', () => {
+    const later = fs.mkdtempSync(path.join(os.tmpdir(), 'wikilinks-scheduled-'));
+    try {
+      const target = path.join(later, 'blog');
+      fs.mkdirSync(target, { recursive: true });
+      const write = (name: string, published: string) =>
+        fs.writeFileSync(
+          path.join(target, name),
+          `---\nslug: "x"\ntitle: "T"\nlanguage: "en"\ntranslationKey: "k"\npublishedAt: ${published}\n---\n\nBody\n`,
+        );
+      write('2999-01-ahead.en.md', '2999-01-01');
+      write('2020-01-past.en.md', '2020-01-01');
+      const map = buildContentMap(later);
+      expect(resolveWikilinkUrl(map, '2999-01-ahead.en', 'en')).toBeNull();
+      expect(resolveWikilinkUrl(map, '2020-01-past.en', 'en')).toBe('/blog/x/');
+    } finally {
+      fs.rmSync(later, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('wikilink resolution with shared clean slugs', () => {
   it('resolves a filename-stem link to the clean URL of that language', () => {
     const map = buildContentMap(dir);
