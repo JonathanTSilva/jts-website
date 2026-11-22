@@ -22,6 +22,27 @@ const notes = defineCollection({
   schema: notesSchema,
 });
 
+// Repo-owned fixtures for the E2E suite. Same schemas and ids as the real
+// collections, but a separate folder so they never depend on (or leak into) the
+// vault-synced content. Served under /test-fixtures/ and removed from the deploy.
+const fixtureBlog = defineCollection({
+  loader: glob({
+    pattern: '**/[^_]*.{md,mdx}',
+    base: "./tests/fixtures/content/blog",
+    generateId: ({ entry }) => entryIdFromPath(entry),
+  }),
+  schema: blogSchema,
+});
+
+const fixtureNotes = defineCollection({
+  loader: glob({
+    pattern: '**/[^_]*.{md,mdx}',
+    base: "./tests/fixtures/content/notes",
+    generateId: ({ entry }) => entryIdFromPath(entry),
+  }),
+  schema: notesSchema,
+});
+
 const now = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/now" }),
   schema: nowSchema,
@@ -35,6 +56,8 @@ const portfolio = defineCollection({
 export const collections = {
   blog,
   notes,
+  fixtureBlog,
+  fixtureNotes,
   now,
   portfolio,
 };

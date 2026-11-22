@@ -37,7 +37,12 @@ vi.mock('astro:content', () => ({
   getCollection: vi.fn(),
 }));
 
-import { makeNoteStaticPaths, makeBlogStaticPaths } from '../../../src/lib/content/staticPaths';
+import {
+  makeNoteStaticPaths,
+  makeBlogStaticPaths,
+  FIXTURE_BLOG_SOURCE,
+  FIXTURE_NOTES_SOURCE,
+} from '../../../src/lib/content/staticPaths';
 import { getCollection } from 'astro:content';
 
 const mockedGetCollection = vi.mocked(getCollection);
@@ -165,6 +170,44 @@ describe('makeBlogStaticPaths', () => {
     const pm = paths.find((p: any) => p.params.slug === 'm.en');
     expect(pm?.props.prev?.slug).toBe('o.en');
     expect(pm?.props.next?.slug).toBe('r.en');
+  });
+});
+
+// ─── fixture sources ──────────────────────────────────────────────────────────
+
+describe('fixture sources', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('blog factory reads the fixture collection and builds fixture paths', async () => {
+    const en = makeNote({ id: 'f.en', language: 'en', translationKey: 'f' });
+    mockedGetCollection.mockResolvedValue([en] as any);
+
+    const paths = await makeBlogStaticPaths('pt-br', FIXTURE_BLOG_SOURCE)();
+    expect(mockedGetCollection.mock.calls[0]?.[0]).toBe('fixtureBlog');
+    expect(paths[0]!.props.isTranslationFallback).toBe(true);
+    expect(paths[0]!.props.translations).toEqual({ en: '/test-fixtures/blog/f.en/' });
+  });
+
+  it('note factory reads the fixture collection and builds fixture paths', async () => {
+    const en = makeNote({ id: 'g.en', language: 'en', translationKey: 'g' });
+    const pt = makeNote({ id: 'g.pt-br', language: 'pt-br', translationKey: 'g' });
+    mockedGetCollection.mockResolvedValue([en, pt] as any);
+
+    const paths = await makeNoteStaticPaths('en', FIXTURE_NOTES_SOURCE)();
+    expect(mockedGetCollection.mock.calls[0]?.[0]).toBe('fixtureNotes');
+    expect(paths[0]!.props.translations).toEqual({
+      en: '/test-fixtures/notes/g.en/',
+      'pt-br': '/pt-br/test-fixtures/notes/g.pt-br/',
+    });
+  });
+
+  it('defaults keep reading the real collections', async () => {
+    mockedGetCollection.mockResolvedValue([] as any);
+    await makeBlogStaticPaths('en')();
+    await makeNoteStaticPaths('en')();
+    expect(mockedGetCollection.mock.calls.map((c) => c[0])).toEqual(['blog', 'notes']);
   });
 });
 

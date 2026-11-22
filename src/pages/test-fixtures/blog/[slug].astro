@@ -1,0 +1,9 @@
+---
+// E2E fixture route: repo-owned posts under /test-fixtures/. Removed from the deploy by pipeline.yml.
+import BlogPostPage from '../../../components/pages/BlogPostPage.astro';
+import { FIXTURE_BLOG_SOURCE, makeBlogStaticPaths } from '../../../lib/content/staticPaths';
+
+export const getStaticPaths = makeBlogStaticPaths('en', FIXTURE_BLOG_SOURCE);
+---
+
+<BlogPostPage locale="en" {...Astro.props} isFixture />

@@ -19,9 +19,11 @@ interface Props {
   prev: CollectionEntry<'notes'> | undefined;
   next: CollectionEntry<'notes'> | undefined;
   relatedNotes: CollectionEntry<'notes'>[];
+  /** E2E fixture: served under /test-fixtures/, always noindex, no OG image generated. */
+  isFixture?: boolean;
 }
 
-const { locale, note, translations, isTranslationFallback, prev, next, relatedNotes } = Astro.props;
+const { locale, note, translations, isTranslationFallback, prev, next, relatedNotes, isFixture = false } = Astro.props;
 const { Content } = await render(note);
 
 const layouts = {
@@ -32,7 +34,9 @@ const layouts = {
 } as const;
 
 const NoteLayout = layouts[note.data.noteType ?? 'note'];
-const ogImage = ogImagePath('notes', note.data.language, note.data.slug);
+// Fixtures have no generated OG image: the layout falls back to the site-wide one.
+const ogImage = isFixture ? undefined : ogImagePath('notes', note.data.language, note.data.slug);
+const notePath = contentPath(isFixture ? 'test-fixtures/notes' : 'notes', locale, note.data.slug);
 const { publishedAt, updatedAt } = note.data;
 ---
 
@@ -43,16 +47,24 @@ const { publishedAt, updatedAt } = note.data;
   image={ogImage}
   ogType="article"
   translations={translations}
-  noindex={isTranslationFallback}
+  noindex={isTranslationFallback || isFixture}
   structuredData={generateArticleSchema({
     title: note.data.title,
     description: note.data.summary ?? note.data.title,
-    url: absoluteUrl(contentPath('notes', locale, note.data.slug)),
+    url: absoluteUrl(notePath),
     publishedAt,
     ...(updatedAt && { updatedAt }),
-    image: absoluteUrl(ogImage),
+    ...(ogImage && { image: absoluteUrl(ogImage) }),
     locale,
   })}
 >
-  <NoteLayout note={note} Content={Content} locale={locale} prev={prev} next={next} relatedNotes={relatedNotes} />
+  {/* Neighbour and related links are built as /notes/<slug>/, which fixtures do not have. */}
+  <NoteLayout
+    note={note}
+    Content={Content}
+    locale={locale}
+    prev={isFixture ? undefined : prev}
+    next={isFixture ? undefined : next}
+    relatedNotes={isFixture ? [] : relatedNotes}
+  />
 </BaseLayout>

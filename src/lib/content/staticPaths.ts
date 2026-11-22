@@ -67,16 +67,36 @@ function toRouteEntry<T extends { data: { slug: string; language: Locale; transl
   };
 }
 
+/** Where a detail page's entries come from and which URL base they are served under. */
+export interface NoteSource {
+  collection: 'notes' | 'fixtureNotes';
+  /** URL base without locale prefix or slashes, e.g. 'notes'. */
+  base: string;
+}
+
+export interface BlogSource {
+  collection: 'blog' | 'fixtureBlog';
+  base: string;
+}
+
+export const NOTES_SOURCE: NoteSource = { collection: 'notes', base: 'notes' };
+export const BLOG_SOURCE: BlogSource = { collection: 'blog', base: 'blog' };
+
+/** E2E fixtures: repo-owned copies of each note type, served under /test-fixtures/. */
+export const FIXTURE_NOTES_SOURCE: NoteSource = { collection: 'fixtureNotes', base: 'test-fixtures/notes' };
+export const FIXTURE_BLOG_SOURCE: BlogSource = { collection: 'fixtureBlog', base: 'test-fixtures/blog' };
+
 /**
  * Returns a `getStaticPaths` function for a note detail page ([slug].astro).
  * Both EN and PT-BR pages use identical logic — the only difference is locale.
  * One page per translation group; a fallback page only when the locale's
  * translation is missing.
  */
-export function makeNoteStaticPaths(locale: Locale) {
+export function makeNoteStaticPaths(locale: Locale, source: NoteSource = NOTES_SOURCE) {
   return async function getStaticPaths() {
-    const allNotes = await getPublished('notes');
-    const routes = planLocalizedRoutes(allNotes.map(toRouteEntry), 'notes', locale);
+    // Fixture entries share the real schema; the cast only drops the collection name.
+    const allNotes = (await getPublished(source.collection)) as CollectionEntry<'notes'>[];
+    const routes = planLocalizedRoutes(allNotes.map(toRouteEntry), source.base, locale);
 
     // Prev/next and related notes only consider notes written in this locale.
     const sameLangNotes = routes
@@ -124,10 +144,10 @@ export function makeNoteStaticPaths(locale: Locale) {
  * One page per translation group; a fallback page only when the locale's
  * translation is missing.
  */
-export function makeBlogStaticPaths(locale: Locale) {
+export function makeBlogStaticPaths(locale: Locale, source: BlogSource = BLOG_SOURCE) {
   return async function getStaticPaths() {
-    const allPosts = await getPublished('blog');
-    const routes = planLocalizedRoutes(allPosts.map(toRouteEntry), 'blog', locale).sort(
+    const allPosts = (await getPublished(source.collection)) as CollectionEntry<'blog'>[];
+    const routes = planLocalizedRoutes(allPosts.map(toRouteEntry), source.base, locale).sort(
       (a, b) => b.entry.publishedAt.getTime() - a.entry.publishedAt.getTime(),
     );
 

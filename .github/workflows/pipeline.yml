@@ -61,7 +61,26 @@ jobs:
 
       - name: E2E Tests
         run: pnpm test:e2e
-        
+
+      # The E2E fixtures (tests/fixtures/content) are built under /test-fixtures/ so the
+      # E2E suite can run against content this repo owns. They must never be published.
+      - name: Remove test fixtures from the deploy
+        run: rm -rf dist/test-fixtures dist/pt-br/test-fixtures
+
+      - name: Fail if test fixtures would be deployed
+        run: |
+          leaks="$(grep -rl "test-fixtures" dist --include=*.html --include=*.xml --include=*.json || true)"
+          if [ -n "$leaks" ] || [ -e dist/test-fixtures ] || [ -e dist/pt-br/test-fixtures ]; then
+            echo "::error::Test fixtures would be deployed. Remove the route or reference below from the build output."
+            if [ -n "$leaks" ]; then
+              echo "Files that mention test-fixtures:"
+              echo "$leaks"
+            fi
+            ls -d dist/test-fixtures dist/pt-br/test-fixtures 2>/dev/null || true
+            exit 1
+          fi
+          echo "No test fixtures in dist."
+
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
