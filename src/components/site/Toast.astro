@@ -137,6 +137,12 @@ const t = useTranslations(locale);
     duration?: number;
   }
 
+  declare global {
+    interface Window {
+      showToast?: (options: ToastOptions) => void;
+    }
+  }
+
   const ICONS: Record<ToastVariant, string> = {
     default: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533ZM8 5.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/></svg>`,
     success: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.354 5.354a.5.5 0 0 0-.708-.708L7 8.293 5.354 6.646a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l4-4Z"/></svg>`,
@@ -214,5 +220,5 @@ const t = useTranslations(locale);
     card.querySelector('.toast-dismiss')?.addEventListener('click', () => clearTimeout(timer), { once: true });
   }
 
-  (window as any).showToast = showToast;
+  window.showToast = showToast;
 </script>

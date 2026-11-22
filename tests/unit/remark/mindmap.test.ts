@@ -11,7 +11,7 @@ async function transform(markdown: string, noteType = 'mindmap'): Promise<string
     .use(remarkHtml, { sanitize: false })
     .process({
       value: markdown,
-      data: { astro: { frontmatter: { noteType } } } as any,
+      data: { astro: { frontmatter: { noteType } } },
     });
   return String(result);
 }

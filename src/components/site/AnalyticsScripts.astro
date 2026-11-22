@@ -8,7 +8,7 @@
     parseConsentState,
     hasAnalyticsConsent as checkConsentState,
   } from '../../lib/analytics/consent';
-  import { ANALYTICS_EVENT_NAMES } from '../../lib/analytics/events';
+  import { isAnalyticsEventName } from '../../lib/analytics/events';
 
   // Plausible attaches to window — declare the minimal shape we use.
   declare global {
@@ -31,6 +31,8 @@
   const bootstrapPlausible = () => {
     if (typeof plausibleWindow.plausible !== 'function') {
       const stub = function () {
+        // Plausible's loader replays the queued `arguments` object, so keep it as is.
+        // eslint-disable-next-line prefer-rest-params -- queue entry format is defined by Plausible's snippet
         (stub.q = stub.q || []).push(arguments);
       } as NonNullable<Window['plausible']>;
       plausibleWindow.plausible = stub;
@@ -61,7 +63,7 @@
   };
 
   const trackEvent = (eventName: string, props?: Record<string, unknown>) => {
-    if (!ANALYTICS_EVENT_NAMES.includes(eventName as never) || !hasAnalyticsConsent()) {
+    if (!isAnalyticsEventName(eventName) || !hasAnalyticsConsent()) {
       return;
     }
 

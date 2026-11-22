@@ -46,7 +46,8 @@ function escapeHtml(str: string): string {
 export function remarkMindmap() {
   return (tree: Root, file: VFile) => {
     // Only transform mindmap notes
-    const frontmatter = (file.data as any)?.astro?.frontmatter;
+    const frontmatter = (file.data as { astro?: { frontmatter?: { noteType?: unknown } } } | undefined)
+      ?.astro?.frontmatter;
     if (frontmatter?.noteType !== 'mindmap') return;
 
     const children = tree.children;

@@ -99,7 +99,7 @@ const typeLabels: Record<string, string> = t.notes.types;
 
     let activeCategory = 'all';
     let activeType = 'all';
-    let activeTags = new Set<string>();
+    const activeTags = new Set<string>();
 
     function updateFilters() {
       let visibleCount = 0;

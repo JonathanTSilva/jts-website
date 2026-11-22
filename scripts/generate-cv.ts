@@ -82,7 +82,7 @@ const resolveRequests = (
   try {
     return { request, output: getCvOutput(request) };
   } catch (error) {
-    throw new Error(`${request.profileId}: ${errorMessage(error)}`);
+    throw new Error(`${request.profileId}: ${errorMessage(error)}`, { cause: error });
   }
 });
 
@@ -102,7 +102,7 @@ const runTransactionalBatch = async (
       existingOutputs.add(output);
     } catch (error) {
       if (error instanceof Error && 'code' in error && error.code === 'ENOENT') continue;
-      throw new Error(`${request.profileId}: ${errorMessage(error)}`);
+      throw new Error(`${request.profileId}: ${errorMessage(error)}`, { cause: error });
     }
   }
   try {
@@ -130,7 +130,7 @@ const runTransactionalBatch = async (
         if (result.output !== output) throw new Error('generator returned an unexpected output path');
         results.push(result);
       } catch (error) {
-        throw new Error(`${request.profileId}: ${errorMessage(error)}`);
+        throw new Error(`${request.profileId}: ${errorMessage(error)}`, { cause: error });
       }
     }
   } catch (error) {
@@ -145,7 +145,7 @@ const runTransactionalBatch = async (
       }
     }
     if (rollbackErrors.length) {
-      throw new Error(`${errorMessage(error)}; rollback failed: ${rollbackErrors.join('; ')}`);
+      throw new Error(`${errorMessage(error)}; rollback failed: ${rollbackErrors.join('; ')}`, { cause: error });
     }
     throw error;
   }
@@ -170,7 +170,7 @@ export const main = async (
         if (result.output !== output) throw new Error('generator returned an unexpected output path');
         return result;
       } catch (error) {
-        throw new Error(`${request.profileId}: ${errorMessage(error)}`);
+        throw new Error(`${request.profileId}: ${errorMessage(error)}`, { cause: error });
       }
     })()];
   for (let index = 0; index < resolved.length; index += 1) {

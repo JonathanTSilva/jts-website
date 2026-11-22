@@ -74,7 +74,7 @@ const isTranslationFallback = note.data.language !== locale;
               if (!blob) { reject(new Error('toBlob returned null')); return; }
               try {
                 await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-                (window as any).showToast?.({ message: copiedLabel, variant: 'accent', duration: 2000 });
+                window.showToast?.({ message: copiedLabel, variant: 'accent', duration: 2000 });
                 resolve();
               } catch (err) {
                 reject(err);
