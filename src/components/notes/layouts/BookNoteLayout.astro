@@ -2,6 +2,7 @@
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import { format, useTranslations } from '../../../i18n/ui';
 import { formatDate } from '../../../lib/format';
+import { resolveCover } from '../../../lib/content/cover';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
 type Props = NoteLayoutProps;
@@ -13,6 +14,8 @@ const t = useTranslations(locale);
 const isTranslationFallback = note.data.language !== locale;
 const statusKey = note.data.status?.[0] as 'finished' | 'reading' | 'abandoned' | undefined;
 const statusLabel = statusKey ? t.notes.bookStatus[statusKey] ?? statusKey : undefined;
+// null when the remote cover cannot be fetched: a placeholder box is shown instead.
+const cover = note.data.cover ? await resolveCover(note.data.cover) : null;
 const dateStr = note.data.dateRead
   ? formatDate(note.data.dateRead, locale, { dateStyle: 'medium' })
   : undefined;
@@ -28,9 +31,18 @@ const dateStr = note.data.dateRead
   articleClass="book-note-page"
 >
   <div class="book-header">
-    {note.data.cover && (
-      <img src={note.data.cover} alt={format(t.notes.bookCoverAlt, { title: note.data.title })} class="book-cover" loading="lazy" />
+    {cover && (
+      <img
+        src={cover.src}
+        width={cover.width}
+        height={cover.height}
+        alt={format(t.notes.bookCoverAlt, { title: note.data.title })}
+        class="book-cover"
+        loading="lazy"
+        decoding="async"
+      />
     )}
+    {note.data.cover && !cover && <div class="book-cover book-cover-placeholder" aria-hidden="true"></div>}
     <div class="book-meta">
       {note.data.category && <span class="note-category-badge">{note.data.category}</span>}
       <h1 class="book-title">{note.data.title}</h1>
@@ -84,9 +96,16 @@ const dateStr = note.data.dateRead
 
   .book-cover {
     width: 8rem;
+    height: auto;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     object-fit: cover;
+  }
+
+  .book-cover-placeholder {
+    aspect-ratio: 2 / 3;
+    background: var(--surface-high);
+    border: 1px solid var(--border);
   }
 
   .note-category-badge {

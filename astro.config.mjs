@@ -24,6 +24,11 @@ const sitemapData = sitemapMeta('src/content', SITE);
 export default defineConfig({
   site: SITE,
   compressHTML: true,
+  // Book covers are https URLs in frontmatter; covers from these hosts are fetched and optimized
+  // at build time. Kept narrow on purpose: every allowed host also turns remote images inside posts
+  // into build-time downloads, and a dead host would then fail the deploy. A cover from another host
+  // shows a placeholder (the build logs "cover unavailable"); add its host here to serve it.
+  image: { remotePatterns: [{ protocol: 'https', hostname: 'covers.openlibrary.org' }] },
   // Old `<date>-<name>.<lang>` URLs redirect to the clean shared slugs (static meta-refresh pages).
   redirects: legacyRedirects(LEGACY_SLUGS),
   integrations: [
