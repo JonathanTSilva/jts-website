@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { readRouteEntries, sitemapMeta } from '../../../src/lib/content/sitemapRoutes';
+import { isTestFixtureUrl, readRouteEntries, sitemapMeta } from '../../../src/lib/content/sitemapRoutes';
 
 const SITE = 'https://www.jontobias.com';
 let root: string;
@@ -46,6 +46,19 @@ beforeAll(() => {
 });
 
 afterAll(() => rmSync(root, { recursive: true, force: true }));
+
+describe('isTestFixtureUrl', () => {
+  it('matches E2E fixture pages in both locales', () => {
+    expect(isTestFixtureUrl(`${SITE}/test-fixtures/blog/fixture-markdown/`)).toBe(true);
+    expect(isTestFixtureUrl(`${SITE}/pt-br/test-fixtures/notes/fixture-note/`)).toBe(true);
+  });
+
+  it('does not match real pages', () => {
+    expect(isTestFixtureUrl(`${SITE}/blog/welcome/`)).toBe(false);
+    expect(isTestFixtureUrl(`${SITE}/pt-br/notes/note-a/`)).toBe(false);
+    expect(isTestFixtureUrl(`${SITE}/`)).toBe(false);
+  });
+});
 
 describe('scheduled posts', () => {
   it('skips entries whose publishedAt is in the future', () => {

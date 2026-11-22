@@ -1,0 +1,9 @@
+---
+// E2E fixture route: repo-owned notes under /test-fixtures/. Removed from the deploy by pipeline.yml.
+import NotePage from '../../../components/pages/NotePage.astro';
+import { FIXTURE_NOTES_SOURCE, makeNoteStaticPaths } from '../../../lib/content/staticPaths';
+
+export const getStaticPaths = makeNoteStaticPaths('en', FIXTURE_NOTES_SOURCE);
+---
+
+<NotePage locale="en" {...Astro.props} isFixture />

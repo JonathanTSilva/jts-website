@@ -7,7 +7,7 @@ import { isPublished } from './publish';
  *
  * Needs astro:content, so scripts/validate-content.ts never imports this file.
  */
-export async function getPublished<C extends 'blog' | 'notes'>(
+export async function getPublished<C extends 'blog' | 'notes' | 'fixtureBlog' | 'fixtureNotes'>(
   collection: C,
 ): Promise<CollectionEntry<C>[]> {
   return getCollection(collection, ({ data }) => import.meta.env.DEV || isPublished(data));

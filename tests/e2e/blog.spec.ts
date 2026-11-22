@@ -1,10 +1,17 @@
 import { test, expect } from '@playwright/test';
+import { readSearchIndex } from './helpers/content';
+
+// These tests read the real blog (never fixtures) and navigate from its index, so they
+// hold for any posts. They need at least one live post to have anything to check.
+const livePosts = readSearchIndex('en').filter((i) => i.type === 'blog');
 
 test.describe('Blog', () => {
+  test.skip(livePosts.length === 0, 'no live English blog post in the build');
+
   test('en: blog index groups posts by year and month', async ({ page }) => {
     await page.goto('/blog');
 
-    await expect(page.getByRole('heading', { name: '2026', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^\d{4}$/, level: 2 }).first()).toBeVisible();
     // At least one month heading should exist
     await expect(page.locator('h3.blog-month').first()).toBeVisible();
     // At least one post entry should exist
@@ -14,7 +21,7 @@ test.describe('Blog', () => {
   test('pt-br: blog index groups posts by year and month', async ({ page }) => {
     await page.goto('/pt-br/blog');
 
-    await expect(page.getByRole('heading', { name: '2026', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^\d{4}$/, level: 2 }).first()).toBeVisible();
     await expect(page.locator('h3.blog-month').first()).toBeVisible();
     await expect(page.locator('a.blog-entry').first()).toBeVisible();
   });
@@ -48,7 +55,9 @@ test.describe('Blog', () => {
     // translation (not a copy of the EN page). Fallback pages (with the notice) exist only
     // for posts missing a translation; they are covered by unit tests.
     await page.goto('/blog');
-    const href = await page.locator('a.blog-entry').first().getAttribute('href'); // e.g. /blog/welcome/
+    const href = await page.locator('a.blog-entry').first().getAttribute('href'); // e.g. /blog/some-post/
+    const hasTranslation = readSearchIndex('pt-br').some((i) => i.url === '/pt-br' + href!.replace(/\/$/, ''));
+    test.skip(!hasTranslation, 'the newest post has no Portuguese translation');
     await page.goto(href!);
     const enPageTitle = await page.title();
 
@@ -206,5 +215,36 @@ test.describe('Blog', () => {
     await firstPost.click();
     await page.waitForURL(/\/pt-br\/blog\/.+/);
     await expect(page.locator('.back-link')).toHaveAttribute('href', '/pt-br/blog');
+  });
+});
+
+test.describe('Fallback page for a missing translation', () => {
+  // fixture-en-only exists only in English (tests/fixtures/content/blog), so its Portuguese
+  // route is a fallback page. Fixtures are always noindex too, which uses the same
+  // "noindex, follow" value as real fallback pages.
+  const EN = '/test-fixtures/blog/fixture-en-only/';
+  const PT = '/pt-br/test-fixtures/blog/fixture-en-only/';
+
+  test('the English post page exists', async ({ page }) => {
+    const response = await page.goto(EN);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.locator('.post-title')).toHaveText('English-Only Fixture Post');
+    await expect(page.locator('.translation-fallback-notice')).toHaveCount(0);
+  });
+
+  test('the Portuguese page shows the fallback notice and is noindex', async ({ page }) => {
+    const response = await page.goto(PT);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pt-br');
+    await expect(page.locator('.translation-fallback-notice')).toBeVisible();
+    // The body is the English original, so the title stays English.
+    await expect(page.locator('.post-title')).toHaveText('English-Only Fixture Post');
+    await expect(page.locator('meta[name="robots"][content="noindex, follow"]')).toHaveCount(1);
+  });
+
+  test('the Portuguese page language switcher points at the English page', async ({ page }) => {
+    await page.goto(PT);
+    await expect(page.locator('a.lang-btn[data-locale="en"]').first()).toHaveAttribute('href', EN);
   });
 });

@@ -29,17 +29,20 @@ interface Props {
   prev?: PostLink | undefined;
   next?: PostLink | undefined;
   translations: Partial<Record<Locale, string>>;
+  /** E2E fixture: served under /test-fixtures/, always noindex, no OG image generated. */
+  isFixture?: boolean;
 }
 
-const { locale, post, isTranslationFallback, prev, next, translations } = Astro.props;
+const { locale, post, isTranslationFallback, prev, next, translations, isFixture = false } = Astro.props;
 const { Content, headings } = await render(post);
 const t = useTranslations(locale);
 const readingTime = getReadingTime(post.body);
 const categoryColor = getCategoryColor(post.data.category);
-const postPath = contentPath('blog', locale, post.data.slug);
+const postPath = contentPath(isFixture ? 'test-fixtures/blog' : 'blog', locale, post.data.slug);
 const { publishedAt, updatedAt } = post.data;
 const wasUpdated = updatedAt !== undefined && updatedAt.getTime() !== publishedAt.getTime();
-const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
+// Fixtures have no generated OG image: the layout falls back to the site-wide one.
+const ogImage = isFixture ? undefined : ogImagePath('blog', post.data.language, post.data.slug);
 ---
 
 <BaseLayout
@@ -49,8 +52,8 @@ const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
   image={ogImage}
   ogType="article"
   translations={translations}
-  noindex={isTranslationFallback}
-  structuredData={generateArticleSchema({ title: post.data.title, description: post.data.summary, url: absoluteUrl(postPath), publishedAt, ...(updatedAt && { updatedAt }), image: absoluteUrl(ogImage), locale })}
+  noindex={isTranslationFallback || isFixture}
+  structuredData={generateArticleSchema({ title: post.data.title, description: post.data.summary, url: absoluteUrl(postPath), publishedAt, ...(updatedAt && { updatedAt }), ...(ogImage && { image: absoluteUrl(ogImage) }), locale })}
 >
   <div class="post-wrapper" style={`--category-color: ${categoryColor}`}>
     <!-- PREAMBLE: full width -->
@@ -114,7 +117,8 @@ const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
     <!-- FULL-WIDTH: divider + share + older/newer navigation -->
     <hr class="post-end-divider" />
     <ShareButtons title={post.data.title} url={Astro.url.href} type="post" locale={locale} />
-    <PostNav locale={locale} prev={prev} next={next} />
+    {/* Neighbour links are built as /blog/<slug>/, which fixtures do not have. */}
+    <PostNav locale={locale} prev={isFixture ? undefined : prev} next={isFixture ? undefined : next} />
   </div>
 
   <BackToTop locale={locale} />

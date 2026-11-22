@@ -8,6 +8,15 @@ import { planLocalizedRoutes, type RouteEntry } from './routes';
 
 type Collection = 'blog' | 'notes';
 
+/**
+ * E2E fixture pages (/test-fixtures/, /pt-br/test-fixtures/) never belong in the
+ * sitemap. `sitemapMeta` only reads the real content folder, so this is what the
+ * sitemap integration's `filter` uses to drop the fixture routes.
+ */
+export function isTestFixtureUrl(url: string): boolean {
+  return url.includes('/test-fixtures/');
+}
+
 function toDate(value: unknown): Date | undefined {
   if (value === undefined || value === null || value === '') return undefined;
   const date = value instanceof Date ? value : new Date(String(value));

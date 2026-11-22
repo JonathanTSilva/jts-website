@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { readSearchIndex } from './helpers/content';
+
+// Real, live content of the build (never fixtures); the home lists are derived from it.
+const liveEn = (type: 'blog' | 'notes') => readSearchIndex('en').filter((i) => i.type === type).length;
 
 test.describe('Homepage', () => {
   test('en: homepage exposes portfolio, blog, notes, and now', async ({ page }) => {
@@ -61,6 +65,7 @@ test('hero does not render a nav element', async ({ page }) => {
   const sectionLabel = page.locator('.section-label').first();
   await expect(sectionLabel).toBeVisible();
   // Blog preview rows should each have a title and a date
+  test.skip(liveEn('blog') === 0, 'no live English blog post in the build');
   const blogRow = page.locator('.blog-preview-row').first();
   await expect(blogRow).toBeVisible();
 });
@@ -161,10 +166,10 @@ test('publications section has "see all" link to portfolio', async ({ page }) =>
 test('blog section shows up to 5 posts with no separator lines', async ({ page }) => {
   await page.goto('/');
   const rows = page.locator('.blog-preview-row');
-  // Up to 5 rows (passes if fewer posts exist than 5)
-  const count = await rows.count();
-  expect(count).toBeGreaterThanOrEqual(1);
-  expect(count).toBeLessThanOrEqual(5);
+  // Latest posts, capped at 5: derived from the build's own search index.
+  const expected = Math.min(5, liveEn('blog'));
+  await expect(rows).toHaveCount(expected);
+  test.skip(expected === 0, 'no live English blog post in the build');
   // Each row has a title and a date
   await expect(rows.first().locator('.blog-preview-title')).toBeVisible();
   await expect(rows.first().locator('.blog-preview-date')).toBeVisible();
@@ -173,6 +178,8 @@ test('blog section shows up to 5 posts with no separator lines', async ({ page }
 test('notes section cards show category badge when category exists', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('.note-preview-card');
+  await expect(cards).toHaveCount(Math.min(3, liveEn('notes')));
+  test.skip(liveEn('notes') === 0, 'no live English note in the build');
   await expect(cards.first()).toBeVisible();
   // Category badges must be inside note cards, and each one must be visible
   const badges = page.locator('.note-preview-card .note-category');

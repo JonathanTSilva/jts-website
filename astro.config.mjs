@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { SITE_URL } from './src/lib/site.ts';
-import { sitemapMeta } from './src/lib/content/sitemapRoutes.ts';
+import { isTestFixtureUrl, sitemapMeta } from './src/lib/content/sitemapRoutes.ts';
 import { legacyRedirects } from './src/lib/content/legacyRedirects.ts';
 import { LEGACY_SLUGS } from './src/data/legacy-slugs.ts';
 import { rehypeCallouts } from './src/lib/rehype/callouts.ts';
@@ -36,7 +36,7 @@ export default defineConfig({
     sitemap({
       // Both languages of a post share a slug, so the alternates map path-for-path.
       i18n: { defaultLocale: 'en', locales: { en: 'en', 'pt-br': 'pt-BR' } },
-      filter: (page) => !sitemapData.exclude.has(page),
+      filter: (page) => !sitemapData.exclude.has(page) && !isTestFixtureUrl(page),
       serialize: (item) => ({ ...item, lastmod: sitemapData.lastmod.get(item.url) ?? item.lastmod }),
     }),
   ],
