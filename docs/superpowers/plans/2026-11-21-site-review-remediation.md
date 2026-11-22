@@ -1020,7 +1020,7 @@ Issues: #73 (WS0) and one per workstream in the workstream map. WS13 reuses #40 
 
 ## Progress
 
-Updated 2026-11-22. Merged workstreams:
+Updated 2026-11-22. Every workstream is merged and deployed. A final pass of 41 spot checks (code and live site) found at least one passing check for each of F01–F30.
 
 | WS | Issue | PR | jts-skills |
 |---|---|---|---|
@@ -1039,5 +1039,10 @@ Updated 2026-11-22. Merged workstreams:
 | WS12 E2E hardening | #85 | #110 | |
 | WS13 Contrast (#92 too) | #40 | #111 | |
 | WS14 ESLint, knip | #34 | #112 | |
+| WS15 Docs cleanup | #86 | #113 | |
+| WS16 CI hygiene | #87 | #114 | |
+| WS17 Site health automation | #88 | #115 | |
 
-Deviations worth knowing: KaTeX stays on 0.16 (`rehype-katex` renders 0.16 markup); TypeScript stays on 5.x (D3); `image.remotePatterns` is limited to `covers.openlibrary.org` so a dead host cannot fail the deploy; the WebKit project is opt-in (`PLAYWRIGHT_WEBKIT=1`, set in `pipeline.yml`) because the shared e2e workflow installs only Chromium; visual tests store a rejected consent before loading.
+Deviations worth knowing: KaTeX stays on 0.16 (`rehype-katex` renders 0.16 markup); TypeScript stays on 5.x (D3); `image.remotePatterns` is limited to `covers.openlibrary.org` so a dead host cannot fail the deploy; the WebKit project is opt-in (`PLAYWRIGHT_WEBKIT=1`, set in `pipeline.yml`) because the shared e2e workflow installs only Chromium; visual tests store a rejected consent before loading. D5 was refined: `pipeline.yml` lost its PR trigger, and `pr-checks.yml` runs the checks only this repo has (CV PDF, WebKit, internal links, Lighthouse budgets).
+
+Not proven when this was written: the `site-health.yml` schedules and issue handling (never run on GitHub), and Dependabot auto-merge (inert until "Allow auto-merge" is on). Open: three dead links the link check found (`forgenv` and `Dimfot` in `src/content/portfolio/projects.ts`, `exemplo.com` in the vault's `note-cheatsheet.pt-br.md`).
