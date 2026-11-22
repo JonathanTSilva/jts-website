@@ -140,7 +140,7 @@ pnpm run check          # Astro + TypeScript type check
 
 ### Deployment
 
-Deployed to [GitHub Pages](https://pages.github.com/) via GitHub Actions on push to `main`. The build pipeline runs content validation, then `pnpm build`, then deploys `dist/` to the `gh-pages` branch.
+Deployed to [GitHub Pages](https://pages.github.com/) via GitHub Actions on push to `main`. The build pipeline (`.github/workflows/pipeline.yml`) runs content validation, unit tests, `pnpm build` and the e2e tests, removes the test fixtures, then uploads `dist/` as a GitHub Pages artifact and deploys it.
 
 ## Docs
 

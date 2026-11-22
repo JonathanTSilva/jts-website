@@ -61,7 +61,7 @@
    1. Run Flash. agy headless cannot run shell commands with the current permissions, so the prompt is edit-only and the orchestrator runs every shell step itself (installs, `git rm`, verification):
 
       ```bash
-      agy -p --model gemini-3.8-flash-medium --mode accept-edits "$(cat <<'EOF'
+      agy --model gemini-3.8-flash-medium --mode accept-edits -p "$(cat <<'EOF'
       You are editing the repository at /home/jonathan/Projects/jts-website.
       Do not run any shell command. Edit only these files: <FILES>.
       Do not create, delete or touch any other file.
@@ -1017,3 +1017,27 @@ Fixture set, copied from today's cheatsheets: a markdown-syntax blog pair `fixtu
 | D9 | Book covers stay https URLs, served through Astro's build-time image pipeline | Task 9.2; no jts-skills change |
 
 Issues: #73 (WS0) and one per workstream in the workstream map. WS13 reuses #40 and WS14 reuses #34.
+
+## Progress
+
+Updated 2026-11-22. Merged workstreams:
+
+| WS | Issue | PR | jts-skills |
+|---|---|---|---|
+| WS0 Review and plan | #73 | #89 | |
+| WS1 Dependency hygiene, vault validator | #74 | #90 | |
+| WS2 Quick wins, Now sync | #75 | #91 | |
+| WS3 Localized routes and SEO | #76 | #93 | |
+| WS4 Clean slugs | #77 | #94 | #13 |
+| WS5 Astro 7 and majors | #78 | #103 | |
+| WS6 One component per page | #79 | #104 | |
+| WS7 Structured data, dates, site URL | #80 | #105 | |
+| WS8 Content validation, scheduling | #81 | #106 | #15 |
+| WS9 Sync images, book covers | #82 | #107 | |
+| WS10 Wikilinks | #83 | #108 | |
+| WS11 E2E fixtures | #84 | #109 | |
+| WS12 E2E hardening | #85 | #110 | |
+| WS13 Contrast (#92 too) | #40 | #111 | |
+| WS14 ESLint, knip | #34 | #112 | |
+
+Deviations worth knowing: KaTeX stays on 0.16 (`rehype-katex` renders 0.16 markup); TypeScript stays on 5.x (D3); `image.remotePatterns` is limited to `covers.openlibrary.org` so a dead host cannot fail the deploy; the WebKit project is opt-in (`PLAYWRIGHT_WEBKIT=1`, set in `pipeline.yml`) because the shared e2e workflow installs only Chromium; visual tests store a rejected consent before loading.
