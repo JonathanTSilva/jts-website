@@ -8,24 +8,26 @@ This document describes the full automated pipeline that keeps `jts-website` in 
 
 ```
 jts-brain (private repo)
-  └─ push to 08-Publish/ or 99-Meta/Attachments/
+  ├─ the homelab server commits and pushes the vault daily at 23:30 (the "checkpoint"),
+  │  or at once with a manual checkpoint
+  └─ push to main that touches 08-Publish/**
        │
        ▼
-  .github/workflows/sync-website.yml  (inside jts-brain)
+  .github/workflows/notify-website.yml  (inside jts-brain)
   └─ repository_dispatch → jts-website (sync_content event)
        │
        ▼
   .github/workflows/sync-content.yml  (inside jts-website)
-  ├─ checkout jts-brain
-  ├─ checkout jts-website
-  └─ pnpm sync:content
+  ├─ checkout jts-website and jts-brain
+  ├─ pnpm sync:content
+  └─ pnpm lint:content
        │
        │  Copies markdown files (mirror)
        │  Extracts image refs from markdown
-       │  Copies only referenced images from 99-Meta/Attachments/
+       │  Copies only referenced images from 99-Meta/Attachments/ (re-encoded, see below)
        │
        ▼
-  Creates a Pull Request: "chore: sync content from vault"
+  Creates or updates the Pull Request "chore: sync content from vault" (branch chore/1-sync-content)
        │
        ▼  (PR merged → triggers pipeline.yml)
   pnpm build
@@ -40,10 +42,10 @@ There are two phases of transformation:
 
 | Phase | What happens | Where |
 |---|---|---|
-| **Sync** | Raw files copied verbatim from vault | `scripts/sync-content.ts` |
+| **Sync** | Markdown copied verbatim from the vault; images re-encoded without metadata | `scripts/sync-content.ts` |
 | **Build** | Obsidian syntax converted to HTML | `src/lib/remark/obsidian-wikilinks.ts` |
 
-The sync script never rewrites your markdown — it only moves files. The remark plugin does all the syntax translation at build time.
+The sync script never rewrites your markdown. The remark plugin does all the syntax translation at build time.
 
 ---
 
@@ -244,18 +246,18 @@ You never need to manually manage an assets folder.
 
 ## CI workflow overview
 
-### jts-brain: `.github/workflows/sync-website.yml`
+### jts-brain: `.github/workflows/notify-website.yml`
 
-Triggers on any push that touches `08-Publish/**`. Sends a `repository_dispatch` event (`sync_content`) to `jts-website`.
+Triggers on any push to `main` that touches `08-Publish/**`. Sends a `repository_dispatch` event (`sync_content`) to `jts-website`.
 
 > **Note:** Obsidian saves image attachments to `99-Meta/Attachments/`. In normal use you always edit the markdown file (in `08-Publish/`) when you embed a new image, so both changes land in the same commit and the single trigger is enough. If you ever commit an attachment without touching a markdown file, no sync fires — but the image will be picked up the next time any markdown file in `08-Publish/` is committed.
 
 ### jts-website: `.github/workflows/sync-content.yml`
 
 1. Checks out both repos
-2. Runs `pnpm sync:content` (mirrors markdown, copies referenced images)
+2. Runs `pnpm sync:content` (mirrors markdown, copies referenced images, fails on a missing image)
 3. Runs `pnpm lint:content` (validates frontmatter schemas)
-4. Creates a PR `sync/content` with all changes
+4. Creates or updates the PR from branch `chore/1-sync-content` with all changes; a human merges it
 
 ### jts-website: `.github/workflows/pipeline.yml`
 
@@ -266,6 +268,23 @@ Runs on every push / PR to `main`:
 4. `pnpm build` — remark plugins convert Obsidian syntax; Astro emits static HTML
 5. `pnpm test:e2e`
 6. Deploy to GitHub Pages (main branch only)
+
+---
+
+## Writing pipeline
+
+Published files are written by the `jts-skills` writing pipeline (`blog` → `blog-draft` → `fact-check` → `humanizer` → `jts-finish` → `blog-publish` → `blog-share`; repo `JonathanTSilva/jts-skills`). Only `blog-publish` writes into `08-Publish/`, after an explicit yes.
+
+| What `blog-publish` and the website agree on | Where it is enforced |
+|---|---|
+| Filename `YYYY-MM-<base>.<lang>.md` (blog) or `<base>.<lang>.md` (notes) | `check_pair.py` |
+| `slug` = filename without `.md`, language suffix and (blog) date; same in both languages | `check_pair.py` and `src/lib/content/slug.ts` |
+| Frontmatter schemas and cross-file rules (duplicate slugs, one file per language per `translationKey`) | `scripts/validate-content.ts` (run by `validate_website.sh --vault`, the sync and CI) |
+| Book notes have `author` and an https `cover` | `src/lib/content/schemas.ts` and `check_pair.py` |
+| Embeds exist in `99-Meta/Attachments/`; wikilinks point at published files | `check_pair.py` and the sync (`Missing images`) |
+| Frontmatter keys the vault accepts | `99-Meta/Schema/schema.yaml`, `publish` rule (vaultprops) |
+
+A change on either side ships its counterpart on the other. `validate-content.ts` and its imports must run under plain `tsx` (no `astro:*`), because `blog-publish` runs it outside Astro.
 
 ---
 
