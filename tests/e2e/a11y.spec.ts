@@ -18,18 +18,17 @@ const PAGES = [
   '/pt-br/now',
   '/pt-br/engineering',
   // Article pages use the repo-owned fixtures, so they do not depend on synced content.
-  // Callout-heavy pages (fixture-markdown and real posts with callouts) come back once
-  // callout titles pass contrast (#92).
+  // fixture-markdown covers every callout type, code block and colour class.
   '/test-fixtures/blog/fixture-en-only',
   '/pt-br/test-fixtures/blog/fixture-en-only',
+  '/test-fixtures/blog/fixture-markdown/',
+  '/pt-br/test-fixtures/blog/fixture-markdown/',
   '/test-fixtures/notes/fixture-note',
   '/pt-br/test-fixtures/notes/fixture-note',
-  '/test-fixtures/notes/fixture-mindmap'
+  '/test-fixtures/notes/fixture-mindmap',
+  '/test-fixtures/notes/fixture-book',
+  '/test-fixtures/notes/fixture-whiteboard'
 ];
-
-// Dark --text-muted value. Contrast failures with any other foreground color in
-// dark mode are pre-existing and tracked in #40; drop the filter below once fixed.
-const DARK_TEXT_MUTED = '#8185a5';
 
 const THEMES = ['light', 'dark'] as const;
 
@@ -44,19 +43,7 @@ for (const theme of THEMES) {
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2aa', 'wcag21aa', 'best-practice'])
         .analyze();
-      const violations = results.violations
-        .map((violation) =>
-          theme === 'dark' && violation.id === 'color-contrast'
-            ? {
-                ...violation,
-                nodes: violation.nodes.filter(
-                  (node) => node.any[0]?.data?.fgColor === DARK_TEXT_MUTED
-                ),
-              }
-            : violation
-        )
-        .filter((violation) => violation.nodes.length > 0);
-      expect(violations).toEqual([]);
+      expect(results.violations).toEqual([]);
     });
   }
 }

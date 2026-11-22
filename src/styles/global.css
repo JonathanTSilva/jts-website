@@ -109,7 +109,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  background: var(--accent);
+  background: var(--accent-fill);
   color: #fff;
   padding: var(--space-2) var(--space-6);
   border-radius: var(--radius-md);
@@ -120,7 +120,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out);
 }
-.btn-primary:hover { background: var(--accent-hover); text-decoration: none; color: #fff; }
+.btn-primary:hover { background: var(--accent-fill-hover); text-decoration: none; color: #fff; }
 
 .btn-secondary {
   display: inline-flex;
@@ -212,7 +212,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   position: absolute;
   top: -100px;
   left: var(--space-4);
-  background: var(--accent);
+  background: var(--accent-fill);
   color: #fff;
   padding: var(--space-2) var(--space-4);
   z-index: 10000;
@@ -414,12 +414,12 @@ mark.blue   { background: color-mix(in srgb, #3b82f6 28%, transparent); }
 /* ── Colored text spans (foreground) ───────────────────── */
 span.gray   { color: #6b7280; }
 span.brown  { color: #a16207; }
-span.orange { color: #ea580c; }
-span.yellow { color: #ca8a04; }
-span.green  { color: #16a34a; }
+span.orange { color: #c2410c; }
+span.yellow { color: #a16207; }
+span.green  { color: #15803d; }
 span.blue   { color: #2563eb; }
 span.purple { color: #7c3aed; }
-span.pink   { color: #db2777; }
+span.pink   { color: #be185d; }
 span.red    { color: #dc2626; }
 
 [data-theme='dark'] span.gray   { color: #9ca3af; }
@@ -517,7 +517,7 @@ span.red-bg    { background: color-mix(in srgb, #dc2626 18%, transparent); borde
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm);
   background: color-mix(in srgb, var(--callout-color) 12%, var(--surface-high));
-  color: var(--callout-color);
+  color: color-mix(in srgb, var(--callout-color) 50%, var(--text));
   border-left: 3px solid var(--callout-color);
   user-select: none;
 }
@@ -555,6 +555,7 @@ details.callout[open] > summary.callout-title::after {
   font-size: 0.9em;
   font-style: normal;
   flex-shrink: 0;
+  color: var(--callout-color); /* decorative glyph, keeps the vivid type colour */
 }
 .callout-icon::before {
   font-weight: var(--weight-bold);
