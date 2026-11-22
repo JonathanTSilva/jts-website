@@ -1,11 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs-extra';
 import path from 'path';
-import { syncContent } from '../../scripts/sync-content.ts';
+import crypto from 'crypto';
+import sharp from 'sharp';
+import {
+  syncContent,
+  copyReferencedImages,
+  pruneOrphanUploads,
+  processImage,
+} from '../../scripts/sync-content.ts';
 
 const TEST_ROOT = path.join(__dirname, 'sync-test-tmp');
 const SOURCE_DIR = path.join(TEST_ROOT, 'source');
 const DEST_DIR = path.join(TEST_ROOT, 'dest');
+const UPLOADS_DIR = path.join(TEST_ROOT, 'uploads');
 
 describe('syncContent script', () => {
   beforeEach(() => {
@@ -31,7 +39,7 @@ describe('syncContent script', () => {
     fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.pt-br.md'), 'Now index PT-BR');
 
     // Run sync
-    await syncContent(SOURCE_DIR, DEST_DIR);
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
 
     // Verify
     expect(fs.existsSync(path.join(DEST_DIR, 'blog/post1.md'))).toBe(true);
@@ -52,7 +60,7 @@ describe('syncContent script', () => {
       fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish', name), body);
     }
 
-    await syncContent(SOURCE_DIR, DEST_DIR);
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
 
     expect(fs.readFileSync(path.join(DEST_DIR, 'now/index.en.md'), 'utf8')).toBe(expected);
   });
@@ -69,7 +77,7 @@ describe('syncContent script', () => {
     fs.writeFileSync(path.join(blogSrc, 'new.md'), 'New content');
 
     // Run sync
-    await syncContent(SOURCE_DIR, DEST_DIR);
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
 
     // Verify
     expect(fs.existsSync(path.join(blogDest, 'new.md'))).toBe(true);
@@ -83,12 +91,12 @@ describe('syncContent script', () => {
     fs.writeFileSync(path.join(blogSrc, 'stable.md'), 'Stable content');
 
     // Run sync twice
-    await syncContent(SOURCE_DIR, DEST_DIR);
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
     
     // We wait a bit to ensure mtime would change if copied again (though copySync overwrites)
     // Actually, fs.copySync overwrites by default.
     
-    await syncContent(SOURCE_DIR, DEST_DIR);
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
     
     expect(fs.existsSync(path.join(DEST_DIR, 'blog/stable.md'))).toBe(true);
     expect(fs.readFileSync(path.join(DEST_DIR, 'blog/stable.md'), 'utf8')).toBe('Stable content');
@@ -96,10 +104,141 @@ describe('syncContent script', () => {
 
   it('should handle missing source directories gracefully', async () => {
     // Run sync with empty source
-    await syncContent(SOURCE_DIR, DEST_DIR);
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
     
     // Should not crash and should not create empty destination directories if they don't exist in source
     // Actually our script does skip mappings if srcPath doesn't exist.
     expect(fs.readdirSync(DEST_DIR).length).toBe(0);
+  });
+});
+
+const sha = (file: string) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+
+async function makeJpeg(file: string, width: number, height: number, withExif = true) {
+  let img = sharp({
+    create: { width, height, channels: 3, background: { r: 200, g: 40, b: 40 } },
+  }).jpeg();
+  if (withExif) img = img.withMetadata({ exif: { IFD0: { Copyright: 'x' } } });
+  await img.toFile(file);
+}
+
+describe('image sync', () => {
+  const ATTACH = path.join(SOURCE_DIR, '99-Meta/Attachments');
+
+  beforeEach(() => {
+    fs.ensureDirSync(ATTACH);
+    fs.ensureDirSync(UPLOADS_DIR);
+  });
+
+  afterEach(() => {
+    fs.removeSync(TEST_ROOT);
+  });
+
+  it('fails the sync when a referenced image is missing', async () => {
+    const blog = path.join(SOURCE_DIR, '08-Publish/Blog');
+    fs.ensureDirSync(blog);
+    fs.writeFileSync(path.join(blog, 'p.en.md'), '![[gone.png]] ![[also-gone.jpg|300]]');
+
+    await expect(syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR)).rejects.toThrow(
+      /Missing images referenced in content: .*gone\.png/,
+    );
+  });
+
+  it('never prunes uploads when the sync fails on a missing image', async () => {
+    const blog = path.join(SOURCE_DIR, '08-Publish/Blog');
+    fs.ensureDirSync(blog);
+    fs.writeFileSync(path.join(blog, 'p.en.md'), '![[gone.png]]');
+    fs.writeFileSync(path.join(UPLOADS_DIR, 'old.png'), 'x');
+
+    await expect(syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR)).rejects.toThrow();
+    expect(fs.existsSync(path.join(UPLOADS_DIR, 'old.png'))).toBe(true);
+  });
+
+  it('copyReferencedImages reports copied and missing files', async () => {
+    await makeJpeg(path.join(ATTACH, 'a.jpg'), 100, 50);
+    const result = await copyReferencedImages(ATTACH, new Set(['a.jpg', 'b.png']), UPLOADS_DIR);
+    expect(result).toEqual({ copied: ['a.jpg'], missing: ['b.png'] });
+    expect(fs.existsSync(path.join(UPLOADS_DIR, 'a.jpg'))).toBe(true);
+  });
+
+  it('prunes uploads that are not referenced and keeps referenced ones', async () => {
+    fs.writeFileSync(path.join(UPLOADS_DIR, 'keep.png'), 'x');
+    fs.writeFileSync(path.join(UPLOADS_DIR, 'drop.png'), 'x');
+    fs.ensureDirSync(path.join(UPLOADS_DIR, 'sub'));
+    fs.writeFileSync(path.join(UPLOADS_DIR, 'sub', 'nested.png'), 'x');
+
+    const removed = await pruneOrphanUploads(UPLOADS_DIR, new Set(['keep.png']));
+
+    expect(removed).toEqual(['drop.png']);
+    expect(fs.existsSync(path.join(UPLOADS_DIR, 'keep.png'))).toBe(true);
+    expect(fs.existsSync(path.join(UPLOADS_DIR, 'drop.png'))).toBe(false);
+    expect(fs.existsSync(path.join(UPLOADS_DIR, 'sub', 'nested.png'))).toBe(true);
+  });
+
+  it('keeps an image referenced only from the Now page and removes true orphans', async () => {
+    fs.ensureDirSync(path.join(SOURCE_DIR, '08-Publish'));
+    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.en.md'), '![[now.png]]');
+    await sharp({ create: { width: 10, height: 10, channels: 3, background: '#fff' } })
+      .png()
+      .toFile(path.join(ATTACH, 'now.png'));
+    fs.writeFileSync(path.join(UPLOADS_DIR, 'orphan.png'), 'x');
+
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
+
+    expect(fs.existsSync(path.join(UPLOADS_DIR, 'now.png'))).toBe(true);
+    expect(fs.existsSync(path.join(UPLOADS_DIR, 'orphan.png'))).toBe(false);
+  });
+
+  it('downsizes large JPEGs, strips EXIF and leaves the vault file untouched', async () => {
+    const src = path.join(ATTACH, 'big.jpg');
+    await makeJpeg(src, 3000, 1000);
+    expect((await sharp(src).metadata()).exif).toBeDefined();
+    const before = sha(src);
+
+    const blog = path.join(SOURCE_DIR, '08-Publish/Blog');
+    fs.ensureDirSync(blog);
+    fs.writeFileSync(path.join(blog, 'p.en.md'), '![[big.jpg]]');
+
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
+
+    const meta = await sharp(path.join(UPLOADS_DIR, 'big.jpg')).metadata();
+    expect(meta.format).toBe('jpeg');
+    expect(meta.width).toBeLessThanOrEqual(2000);
+    expect(meta.exif).toBeUndefined();
+    expect(sha(src)).toBe(before);
+  });
+
+  it('processImage does not enlarge small images and keeps the format', async () => {
+    const src = path.join(ATTACH, 'small.png');
+    await sharp({ create: { width: 300, height: 200, channels: 3, background: '#0a0' } })
+      .png()
+      .toFile(src);
+    const out = path.join(UPLOADS_DIR, 'small.png');
+    await processImage(src, out);
+    const meta = await sharp(out).metadata();
+    expect(meta.format).toBe('png');
+    expect(meta.width).toBe(300);
+  });
+
+  it('processImage applies the EXIF orientation to the pixels', async () => {
+    const src = path.join(ATTACH, 'rot.jpg');
+    await sharp({ create: { width: 400, height: 100, channels: 3, background: '#00f' } })
+      .jpeg()
+      .withMetadata({ orientation: 6 })
+      .toFile(src);
+    const out = path.join(UPLOADS_DIR, 'rot.jpg');
+    await processImage(src, out);
+    const meta = await sharp(out).metadata();
+    expect(meta.width).toBe(100);
+    expect(meta.height).toBe(400);
+    expect(meta.orientation).toBeUndefined();
+  });
+
+  it('processImage copies other types as-is', async () => {
+    const src = path.join(ATTACH, 'a.svg');
+    fs.writeFileSync(src, '<svg xmlns="http://www.w3.org/2000/svg"/>');
+    const out = path.join(UPLOADS_DIR, 'a.svg');
+    await processImage(src, out);
+    expect(sha(out)).toBe(sha(src));
   });
 });

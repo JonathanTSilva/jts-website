@@ -91,9 +91,15 @@ The script scans every `.md` / `.mdx` file under `08-Publish/` and collects all 
 
 **Step 3 — Copy referenced images**
 
-For each referenced filename, the script looks in `99-Meta/Attachments/` and copies it to `public/assets/uploads/`. Only files that are actually referenced in published content are ever copied — the rest of the attachments folder is ignored.
+For each referenced filename, the script looks in `99-Meta/Attachments/` and writes it to `public/assets/uploads/`. Only files that are actually referenced in published content (Blog, Notes and the Now pages) are ever copied — the rest of the attachments folder is ignored.
 
-If a referenced filename is not found in `99-Meta/Attachments/`, a warning is printed. That image will produce a broken `<img>` tag on the website until the vault is corrected and a new sync runs.
+`.jpg`, `.jpeg`, `.png` and `.webp` files are re-encoded in the same format: rotated according to their EXIF orientation, shrunk to at most 2000 px wide (never enlarged) and written **without any metadata**, so GPS position and camera data never reach the public site. `.svg`, `.gif`, `.avif` and `.bmp` are copied unchanged. The vault's own files are never modified.
+
+If a referenced filename is not found in `99-Meta/Attachments/`, the sync **fails** with `Missing images referenced in content: a.png, b.jpg`, so a broken `<img>` never reaches the site.
+
+**Step 4 — Prune orphan uploads**
+
+After a successful run, files directly inside `public/assets/uploads/` that no published markdown references any more are deleted (subfolders are left alone). A failed run never deletes anything.
 
 ### Running locally
 
@@ -272,6 +278,9 @@ The target was not found in the content map. Check that the file has been synced
 The file was not copied to `public/assets/uploads/`. Check the sync output for the `[images]` line — it shows how many refs were found vs. copied. Possible causes:
 - The image exists in `99-Meta/Attachments/` but the embed in the markdown uses a different filename (typo, or path prefix instead of bare filename).
 - The attachment and the markdown edit were committed separately and only the attachment commit was pushed (no `08-Publish/` path change → no sync trigger).
+
+**Sync Content failed with `Missing images referenced in content: …`**
+The listed filenames are embedded (`![[name.png]]`) in a file under `08-Publish/` but are not in `99-Meta/Attachments/`. Fix the filename in the markdown (typo, or a path prefix instead of the bare name), or add the file to the attachments folder, then push again. Nothing was written to `public/assets/uploads/` beyond the images processed before the failure, and no uploads were pruned.
 
 **Build error about missing slug**
 The markdown file is missing required frontmatter. See `docs/content-contracts/` for the required fields per content type.
