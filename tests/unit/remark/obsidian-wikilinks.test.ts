@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import type { Paragraph, Root } from 'mdast';
 import {
   buildContentMap,
   resolveWikilinkUrl,
@@ -96,19 +97,30 @@ describe('wikilink resolution with shared clean slugs', () => {
 
 const FIXTURES = path.join(__dirname, 'fixtures', 'wikilinks');
 
+/** Loose view of the mdast phrasing nodes the plugin emits, so assertions can read any field. */
+interface LooseNode {
+  type: string;
+  value?: string;
+  url?: string;
+  alt?: string;
+  title?: string | null;
+  data?: { hProperties?: Record<string, unknown> };
+  children?: LooseNode[];
+}
+
 /** Runs the plugin over one text node and returns the resulting paragraph children. */
 function run(
   text: string,
   filePath: string,
   options: { contentDir?: string; onUnresolved?: (target: string, file?: string) => void } = {},
-): any[] {
-  const tree: any = {
+): LooseNode[] {
+  const tree: Root = {
     type: 'root',
     children: [{ type: 'paragraph', children: [{ type: 'text', value: text }] }],
   };
   const transform = remarkObsidianWikilinks({ contentDir: FIXTURES, ...options });
   transform(tree, { path: filePath, history: [filePath] });
-  return tree.children[0].children;
+  return (tree.children[0] as Paragraph).children as LooseNode[];
 }
 
 const EN_PAGE = '/vault/blog/2026-12-chinese-cameras.en.md';
@@ -159,7 +171,7 @@ describe('buildContentMap with gray-matter', () => {
 });
 
 describe('remarkObsidianWikilinks resolution', () => {
-  const link = (nodes: any[]) => nodes.find((n) => n.type === 'link');
+  const link = (nodes: LooseNode[]) => nodes.find((n) => n.type === 'link');
 
   it.each([
     ['base name', '[[2026-11-low-cost-homelab-setup]]', '/blog/low-cost-homelab-setup/'],
@@ -202,7 +214,7 @@ describe('remarkObsidianWikilinks resolution', () => {
   it('resolves the .pt-br stem to the PT page', () => {
     const nodes = run('[[2026-11-low-cost-homelab-setup.pt-br|post sobre meu homelab]]', PT_PAGE);
     expect(link(nodes)?.url).toBe('/pt-br/blog/low-cost-homelab-setup/');
-    expect(link(nodes)?.children[0].value).toBe('post sobre meu homelab');
+    expect(link(nodes)?.children?.[0]?.value).toBe('post sobre meu homelab');
   });
 
   it('keeps a heading anchor, lowercased with dashes for spaces', () => {
@@ -213,12 +225,12 @@ describe('remarkObsidianWikilinks resolution', () => {
 
   it('combines anchor and label', () => {
     const l = link(run('[[low-cost-homelab-setup#Part Two|see part two]]', EN_PAGE));
-    expect(l.url).toBe('/blog/low-cost-homelab-setup/#part-two');
-    expect(l.children[0].value).toBe('see part two');
+    expect(l?.url).toBe('/blog/low-cost-homelab-setup/#part-two');
+    expect(l?.children?.[0]?.value).toBe('see part two');
   });
 
   it('uses the target as the label when none is given', () => {
-    expect(link(run('[[low-cost-homelab-setup]]', EN_PAGE))?.children[0].value).toBe('low-cost-homelab-setup');
+    expect(link(run('[[low-cost-homelab-setup]]', EN_PAGE))?.children?.[0]?.value).toBe('low-cost-homelab-setup');
   });
 
   it('resolves notes', () => {
@@ -228,8 +240,8 @@ describe('remarkObsidianWikilinks resolution', () => {
   it('keeps surrounding text', () => {
     const nodes = run('see [[low-cost-homelab-setup]] now', EN_PAGE);
     expect(nodes.map((n) => n.type)).toEqual(['text', 'link', 'text']);
-    expect(nodes[0].value).toBe('see ');
-    expect(nodes[2].value).toBe(' now');
+    expect(nodes[0]?.value).toBe('see ');
+    expect(nodes[2]?.value).toBe(' now');
   });
 
   it('leaves an unresolved wikilink as plain text', () => {
@@ -259,7 +271,7 @@ describe('unresolved wikilink reporting', () => {
   });
 
   it('falls back to file.history[0] when file.path is missing', () => {
-    const tree: any = {
+    const tree: Root = {
       type: 'root',
       children: [{ type: 'paragraph', children: [{ type: 'text', value: '[[nope]]' }] }],
     };
@@ -299,7 +311,7 @@ describe('content map cache', () => {
     const tmp = copyFixtures();
     try {
       const first = run('[[2027-01-new-post.en]]', EN_PAGE, { contentDir: tmp, onUnresolved: () => {} });
-      expect(first[0].type).toBe('text');
+      expect(first[0]?.type).toBe('text');
 
       const file = path.join(tmp, 'blog', '2027-01-new-post.en.md');
       fs.writeFileSync(
@@ -311,8 +323,8 @@ describe('content map cache', () => {
       fs.utimesSync(file, later, later);
 
       const second = run('[[2027-01-new-post.en]]', EN_PAGE, { contentDir: tmp, onUnresolved: () => {} });
-      expect(second[0].type).toBe('link');
-      expect(second[0].url).toBe('/blog/new-post/');
+      expect(second[0]?.type).toBe('link');
+      expect(second[0]?.url).toBe('/blog/new-post/');
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }
@@ -327,7 +339,7 @@ describe('content map cache', () => {
       const later = new Date(Date.now() + 5000);
       fs.utimesSync(file, later, later);
       const nodes = run('[[renamed-note]]', EN_PAGE, { contentDir: tmp });
-      expect(nodes[0].url).toBe('/notes/renamed-note/');
+      expect(nodes[0]?.url).toBe('/notes/renamed-note/');
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }
@@ -337,8 +349,8 @@ describe('content map cache', () => {
     const tmp = copyFixtures();
     try {
       fs.rmSync(path.join(tmp, 'notes'), { recursive: true });
-      expect(run('[[book-cheatsheet]]', EN_PAGE, { contentDir: tmp, onUnresolved: () => {} })[0].type).toBe('text');
-      expect(run('[[book-cheatsheet]]', EN_PAGE)[0].type).toBe('link');
+      expect(run('[[book-cheatsheet]]', EN_PAGE, { contentDir: tmp, onUnresolved: () => {} })[0]?.type).toBe('text');
+      expect(run('[[book-cheatsheet]]', EN_PAGE)[0]?.type).toBe('link');
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }
@@ -351,14 +363,14 @@ describe('content map cache', () => {
       // A whole-millisecond mtime survives a Date round trip exactly.
       const fixed = new Date('2026-06-01T00:00:00.000Z');
       fs.utimesSync(file, fixed, fixed);
-      expect(run('[[english-only]]', EN_PAGE, { contentDir: tmp })[0].url).toBe('/notes/english-only/');
+      expect(run('[[english-only]]', EN_PAGE, { contentDir: tmp })[0]?.url).toBe('/notes/english-only/');
 
       // Change the content but restore the mtime: a cache hit must not notice.
       fs.writeFileSync(file, fs.readFileSync(file, 'utf-8').replace('english-only', 'sneaky'));
       fs.utimesSync(file, fixed, fixed);
 
       const nodes = run('[[english-only]]', EN_PAGE, { contentDir: tmp, onUnresolved: () => {} });
-      expect(nodes[0].url).toBe('/notes/english-only/');
+      expect(nodes[0]?.url).toBe('/notes/english-only/');
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }

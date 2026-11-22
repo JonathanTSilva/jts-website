@@ -1,3 +1,4 @@
+import type { Image, Parent, PhrasingContent, Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
 import matter from 'gray-matter';
 import * as fs from 'node:fs';
@@ -156,12 +157,17 @@ function isImageFile(name: string): boolean {
  *   300x200    → width 300, height 200 px
  *   alt text   → custom alt text
  */
-function buildImageNode(target: string, modifier: string): any {
+function buildImageNode(target: string, modifier: string): Image {
   const filename = target.split(/[/\\]/).pop() ?? target;
   const url = `${UPLOADS_PATH}/${filename}`;
   const defaultAlt = path.basename(filename, path.extname(filename));
 
-  const node: any = { type: 'image', url, alt: defaultAlt, title: null };
+  const node: Image & { data?: { hProperties?: Record<string, unknown> } } = {
+    type: 'image',
+    url,
+    alt: defaultAlt,
+    title: null,
+  };
 
   if (modifier) {
     const dim = modifier.match(/^(\d+)(?:x(\d+))?$/);
@@ -213,8 +219,8 @@ function splitOnObsidianSyntax(
   locale: string,
   resolve: (target: string, preferLocale: string) => string | null,
   onUnresolved: (target: string) => void,
-): any[] {
-  const nodes: any[] = [];
+): PhrasingContent[] {
+  const nodes: PhrasingContent[] = [];
   let lastIndex = 0;
 
   for (const match of text.matchAll(OBSIDIAN_SYNTAX)) {
@@ -313,7 +319,7 @@ function defaultOnUnresolved(target: string, file?: string): void {
 export function remarkObsidianWikilinks(options: WikilinkOptions = {}) {
   const contentDir = options.contentDir ?? path.resolve(process.cwd(), 'src/content');
 
-  return (tree: any, file: any) => {
+  return (tree: Root, file?: { path?: string; history?: string[] }) => {
     const filePath: string | undefined = file?.path ?? file?.history?.[0] ?? undefined;
     const locale = extractLocale(filePath ?? '');
     const resolve = (target: string, preferLocale: string) =>
@@ -322,15 +328,16 @@ export function remarkObsidianWikilinks(options: WikilinkOptions = {}) {
       (options.onUnresolved ?? defaultOnUnresolved)(target, filePath);
 
     // Collect replacements first — avoids mutating the tree while walking it.
-    const replacements: Array<{ parent: any; index: number; nodes: any[] }> = [];
+    const replacements: Array<{ parent: Parent; index: number; nodes: PhrasingContent[] }> = [];
 
-    visit(tree, 'text', (node: any, index, parent) => {
+    visit(tree, 'text', (node, index, parent) => {
       if (typeof index !== 'number' || !parent) return;
-      if (!(node.value as string).includes('[[')) return;
+      if (!node.value.includes('[[')) return;
 
-      const nodes = splitOnObsidianSyntax(node.value as string, locale, resolve, onUnresolved);
+      const nodes = splitOnObsidianSyntax(node.value, locale, resolve, onUnresolved);
       // Skip if nothing actually changed.
-      if (nodes.length === 1 && nodes[0].type === 'text' && nodes[0].value === node.value) return;
+      const only = nodes[0];
+      if (nodes.length === 1 && only?.type === 'text' && only.value === node.value) return;
 
       replacements.push({ parent, index, nodes });
     });
@@ -339,7 +346,7 @@ export function remarkObsidianWikilinks(options: WikilinkOptions = {}) {
     for (let i = replacements.length - 1; i >= 0; i--) {
       const r = replacements[i];
       if (!r) continue;
-      r.parent.children.splice(r.index, 1, ...r.nodes);
+      (r.parent.children as RootContent[]).splice(r.index, 1, ...r.nodes);
     }
   };
 }

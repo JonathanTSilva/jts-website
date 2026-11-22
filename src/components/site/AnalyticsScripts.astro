@@ -31,6 +31,8 @@
   const bootstrapPlausible = () => {
     if (typeof plausibleWindow.plausible !== 'function') {
       const stub = function () {
+        // Plausible's loader replays the queued `arguments` object, so keep it as is.
+        // eslint-disable-next-line prefer-rest-params -- queue entry format is defined by Plausible's snippet
         (stub.q = stub.q || []).push(arguments);
       } as NonNullable<Window['plausible']>;
       plausibleWindow.plausible = stub;

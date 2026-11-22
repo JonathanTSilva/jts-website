@@ -1,3 +1,4 @@
+import type { Code, Html, Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
 
 const NOTE_COLORS = new Set([
@@ -27,8 +28,8 @@ function escapeHtml(str: string): string {
  * making data-language selectors unreliable).
  */
 export function remarkNoteBlocks() {
-  return (tree: any) => {
-    visit(tree, 'code', (node: any, index: number | undefined, parent: any) => {
+  return (tree: Root) => {
+    visit(tree, 'code', (node: Code, index, parent) => {
       if (index == null || !parent) return;
       const lang: string = node.lang ?? '';
 
@@ -52,10 +53,11 @@ export function remarkNoteBlocks() {
         .map((line: string) => escapeHtml(line))
         .join('\n');
 
-      parent.children[index] = {
+      const replacement: Html = {
         type: 'html',
         value: `<div class="${classes}">${content}</div>`,
       };
+      (parent.children as RootContent[])[index] = replacement;
     });
   };
 }

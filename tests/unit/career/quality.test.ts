@@ -20,6 +20,15 @@ const view = (): ResolvedCv => ({
   sections: [],
 });
 
+type DeepMutable<T> = T extends readonly (infer U)[]
+  ? DeepMutable<U>[]
+  : T extends object
+    ? { -readonly [K in keyof T]: DeepMutable<T[K]> }
+    : T;
+
+/** A deep copy of the fixture whose fields tests may reassign. */
+const mutableView = (): DeepMutable<ResolvedCv> => structuredClone(view()) as DeepMutable<ResolvedCv>;
+
 describe('getCvQualityWarnings', () => {
   it('reports every advisory quality class with stable profile/entity identifiers', () => {
     const warnings = getCvQualityWarnings(view(), cvProfiles.devops);
@@ -32,7 +41,7 @@ describe('getCvQualityWarnings', () => {
   });
 
   it('is deterministic, de-duplicates warnings, and never changes the supplied content', () => {
-    const input = structuredClone(view()) as any;
+    const input = mutableView();
     const before = structuredClone(input);
     const first = getCvQualityWarnings(input, cvProfiles.devops);
     expect(getCvQualityWarnings(input, cvProfiles.devops)).toEqual(first);
@@ -47,7 +56,7 @@ describe('getCvQualityWarnings', () => {
   });
 
   it('separates observable outcomes from measurable impact with positive and negative controls', () => {
-    const input = structuredClone(view()) as any;
+    const input = mutableView();
     input.experience[0]!.highlights = [
       { id: 'measured', text: 'Reduced build time by 40%.' },
       { id: 'observable', text: 'Improved system reliability for production users.' },
@@ -65,7 +74,7 @@ describe('getCvQualityWarnings', () => {
   });
 
   it('recognizes contextual measurable impact without accepting incidental numbers', () => {
-    const input = structuredClone(view()) as any;
+    const input = mutableView();
     input.experience[0]!.highlights = [
       { id: 'percent', text: 'Reduced build time by 40%.' },
       { id: 'before-after', text: 'Reduced defects from 10 to 2.' },
@@ -89,7 +98,7 @@ describe('getCvQualityWarnings', () => {
   });
 
   it('uses token boundaries and simple morphology for theme relevance', () => {
-    const input = structuredClone(view()) as any;
+    const input = mutableView();
     input.projects = [
       { id: 'relevant', title: 'Deployment automation', description: 'Automated pipelines and testing workflows.', links: [], highlights: [] },
       { id: 'substring-only', title: 'Contest entry', description: 'A watercolor delivery truck.', links: [], highlights: [] },
@@ -100,8 +109,8 @@ describe('getCvQualityWarnings', () => {
   });
 
   it('accepts only explicit theme word-family variants', () => {
-    const warningsForProjects = (projects: ResolvedCv['projects'], profile = cvProfiles.devops) => {
-      const input = structuredClone(view()) as any;
+    const warningsForProjects = (projects: DeepMutable<ResolvedCv>['projects'], profile = cvProfiles.devops) => {
+      const input = mutableView();
       input.profileId = profile.id;
       input.projects = projects;
       return getCvQualityWarnings(input, profile).filter(warning => warning.code === 'weak-theme-relevance');
@@ -121,7 +130,7 @@ describe('getCvQualityWarnings', () => {
   });
 
   it('keeps parent-qualified highlight identities and warns instead of throwing on profile mismatch', () => {
-    const input = structuredClone(view()) as any;
+    const input = mutableView();
     input.experience.push({
       ...input.experience[0]!, id: 'other-role',
       highlights: [{ id: 'passive', text: 'Was responsible for another task.' }],

@@ -1,3 +1,4 @@
+import type { Html, Root, RootContent, Text } from 'mdast';
 import { visit } from 'unist-util-visit';
 
 const HIGHLIGHT_RE = /==([^=\n]+)==/g;
@@ -7,13 +8,13 @@ const HIGHLIGHT_RE = /==([^=\n]+)==/g;
  * Preserves surrounding text nodes.
  */
 export function remarkHighlights() {
-  return (tree: any) => {
-    visit(tree, 'text', (node: any, index: number | undefined, parent: any) => {
+  return (tree: Root) => {
+    visit(tree, 'text', (node: Text, index, parent) => {
       if (index == null || !parent) return;
       if (!node.value.includes('==')) return;
 
       const text: string = node.value;
-      const newNodes: any[] = [];
+      const newNodes: (Text | Html)[] = [];
       let lastIndex = 0;
       let match: RegExpExecArray | null;
       HIGHLIGHT_RE.lastIndex = 0;
@@ -31,7 +32,7 @@ export function remarkHighlights() {
         newNodes.push({ type: 'text', value: text.slice(lastIndex) });
       }
 
-      parent.children.splice(index, 1, ...newNodes);
+      (parent.children as RootContent[]).splice(index, 1, ...newNodes);
     });
   };
 }

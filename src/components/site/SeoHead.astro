@@ -1,7 +1,7 @@
 ---
 import { generateSeo, type SeoProps } from '../../lib/seo/metadata';
 
-interface Props extends SeoProps {}
+type Props = SeoProps;
 
 const seo = generateSeo(Astro.props);
 ---

@@ -31,7 +31,7 @@ interface ValidationResult {
 
 export function validateContent(
   collection: CollectionType,
-  frontmatter: Record<string, any>,
+  frontmatter: Record<string, unknown>,
   body: string,
   filename?: string
 ): ValidationResult {

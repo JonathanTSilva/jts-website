@@ -1,4 +1,8 @@
+import type { Root } from 'mdast';
 import { visit } from 'unist-util-visit';
+
+/** `data.hProperties` is read by mdast-util-to-hast to set attributes on the rendered element. */
+type HProperties = { hProperties?: Record<string, unknown> };
 
 const MARKER_MAP: Record<string, string> = {
   '>': 'scheduled',
@@ -18,13 +22,13 @@ const MARKER_MAP: Record<string, string> = {
  * marker from the text and add data-task so CSS renders the custom icon.
  */
 export function remarkTaskItems() {
-  return (tree: any) => {
-    visit(tree, 'listItem', (node: any) => {
+  return (tree: Root) => {
+    visit(tree, 'listItem', (node) => {
       // Standard GFM task items (checked set by remark-gfm)
       if (node.checked === true || node.checked === false) {
-        node.data = node.data ?? {};
-        node.data.hProperties = {
-          ...node.data.hProperties,
+        const data = (node.data ??= {}) as HProperties;
+        data.hProperties = {
+          ...data.hProperties,
           'data-task': node.checked ? 'checked' : 'unchecked',
         };
         return;
@@ -45,9 +49,9 @@ export function remarkTaskItems() {
       // Remove marker from text content
       firstText.value = firstText.value.slice(match[0].length);
 
-      node.data = node.data ?? {};
-      node.data.hProperties = {
-        ...node.data.hProperties,
+      const data = (node.data ??= {}) as HProperties;
+      data.hProperties = {
+        ...data.hProperties,
         'data-task': taskType,
       };
     });

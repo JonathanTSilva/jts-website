@@ -1,5 +1,21 @@
 import { visit } from 'unist-util-visit';
 
+/**
+ * Minimal structural view of the hast nodes this plugin reads and writes.
+ * (`@types/hast` is not a direct dependency, so the shape is declared locally.)
+ */
+interface HastNode {
+  type: string;
+  tagName?: string;
+  value?: string;
+  properties?: Record<string, unknown>;
+  children?: HastNode[];
+}
+
+interface HastParent extends HastNode {
+  children: HastNode[];
+}
+
 const TYPE_MAP: Record<string, string> = {
   note: 'note', seealso: 'note',
   abstract: 'abstract', summary: 'abstract', tldr: 'abstract',
@@ -16,21 +32,21 @@ const TYPE_MAP: Record<string, string> = {
 };
 
 export function rehypeCallouts() {
-  return (tree: any) => {
-    visit(tree, 'element', (node: any, index: number | undefined, parent: any) => {
+  return (tree: HastParent) => {
+    visit(tree, 'element', (node: HastParent, index: number | undefined, parent: HastParent | undefined) => {
       if (node.tagName !== 'blockquote' || index == null || !parent) return;
 
-      const elChildren: any[] = node.children.filter(
-        (c: any) => c.type === 'element'
+      const elChildren: HastNode[] = node.children.filter(
+        (c) => c.type === 'element'
       );
-      if (!elChildren.length || elChildren[0].tagName !== 'p') return;
-
-      const firstP = elChildren[0];
+      const firstP = elChildren[0] as HastParent | undefined;
+      if (!firstP || firstP.tagName !== 'p') return;
       const firstChild = firstP.children?.[0];
       if (!firstChild || firstChild.type !== 'text') return;
+      const firstValue = firstChild.value ?? '';
 
       // Match [!type], [!type]+, [!type]- at start of first text node
-      const match = /^\[!(\w+)\]([+-]?)\s*(.*)/.exec(firstChild.value);
+      const match = /^\[!(\w+)\]([+-]?)\s*(.*)/.exec(firstValue);
       if (!match) return;
 
       const [, rawType = '', foldable = '', titleLine = ''] = match;
@@ -42,12 +58,12 @@ export function rehypeCallouts() {
       const isOpen = foldable !== '-';
 
       // Build content: everything in firstP after the header text, plus remaining siblings
-      const newlineIdx = firstChild.value.indexOf('\n');
-      const contentNodes: any[] = [];
+      const newlineIdx = firstValue.indexOf('\n');
+      const contentNodes: HastNode[] = [];
 
       if (newlineIdx !== -1) {
         // Content continues on next line within the same paragraph text node
-        const restText = firstChild.value.slice(newlineIdx + 1).trimStart();
+        const restText = firstValue.slice(newlineIdx + 1).trimStart();
         if (restText || firstP.children.length > 1) {
           contentNodes.push({
             type: 'element',
@@ -56,7 +72,7 @@ export function rehypeCallouts() {
             children: [
               { ...firstChild, value: restText },
               ...firstP.children.slice(1),
-            ].filter((c: any) => !(c.type === 'text' && c.value === '')),
+            ].filter((c) => !(c.type === 'text' && c.value === '')),
           });
         }
       }

@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import type { CollectionEntry, render } from 'astro:content';
 import { contentLocalePath, type Locale } from '../../../lib/content/locale';
 import { useTranslations } from '../../../i18n/ui';
 import BackToTop from '../../site/BackToTop.astro';
@@ -12,7 +12,7 @@ import NoteFooter from '../NoteFooter.astro';
  */
 export interface NoteLayoutProps {
   note: CollectionEntry<'notes'>;
-  Content: any;
+  Content: Awaited<ReturnType<typeof render>>['Content'];
   locale: Locale;
   prev: CollectionEntry<'notes'> | undefined;
   next: CollectionEntry<'notes'> | undefined;

@@ -52,7 +52,7 @@ const t = useTranslations(locale).search;
     
     if (!searchIndex) {
       try {
-        const response = await fetch(`/api/${locale}\/search-index.json`);
+        const response = await fetch(`/api/${locale}/search-index.json`);
         searchIndex = await response.json();
         // Re-run search if user typed while the index was loading
         if (input.value) performSearch(input.value);

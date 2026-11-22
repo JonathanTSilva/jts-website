@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { CollectionEntry } from 'astro:content';
 import { buildNoteIndex } from '../../../src/lib/content/staticPaths';
 
 // Minimal note factory — only the fields used by buildNoteIndex / makeNoteStaticPaths
@@ -25,7 +26,7 @@ function makeNote(overrides: {
       summary: undefined,
       colorToken: undefined,
     },
-  } as any;
+  } as unknown as CollectionEntry<'notes'>;
 }
 
 // ─── makeNoteStaticPaths — prev/next guard ────────────────────────────────────
@@ -57,12 +58,12 @@ describe('makeNoteStaticPaths', () => {
     const enNote = makeNote({ id: 'alpha.en', language: 'en', translationKey: 'alpha', publishedAt: new Date('2024-06-01') });
     const ptNote = makeNote({ id: 'beta.pt-br', language: 'pt-br', translationKey: 'beta', publishedAt: new Date('2024-07-01') });
 
-    mockedGetCollection.mockResolvedValue([enNote, ptNote] as any);
+    mockedGetCollection.mockResolvedValue([enNote, ptNote]);
 
     const paths = await makeNoteStaticPaths('en')();
 
     // Find the path generated for the PT-BR note (which exists on the EN page as a cross-locale route)
-    const ptPath = paths.find((p: any) => p.params.slug === 'beta.pt-br');
+    const ptPath = paths.find((p) => p.params.slug === 'beta.pt-br');
     expect(ptPath).toBeDefined();
     expect(ptPath?.props.isTranslationFallback).toBe(true);
     // A fallback note must NOT get next = the first EN note
@@ -75,19 +76,19 @@ describe('makeNoteStaticPaths', () => {
     const n2 = makeNote({ id: 'n2.en', language: 'en', translationKey: 'k2', publishedAt: new Date('2024-02-01') });
     const n3 = makeNote({ id: 'n3.en', language: 'en', translationKey: 'k3', publishedAt: new Date('2024-03-01') });
 
-    mockedGetCollection.mockResolvedValue([n1, n2, n3] as any);
+    mockedGetCollection.mockResolvedValue([n1, n2, n3]);
 
     const paths = await makeNoteStaticPaths('en')();
 
-    const p2 = paths.find((p: any) => p.params.slug === 'n2.en');
+    const p2 = paths.find((p) => p.params.slug === 'n2.en');
     expect(p2?.props.prev?.id).toBe('n1.en'); // older
     expect(p2?.props.next?.id).toBe('n3.en'); // newer
 
-    const p1 = paths.find((p: any) => p.params.slug === 'n1.en');
+    const p1 = paths.find((p) => p.params.slug === 'n1.en');
     expect(p1?.props.prev).toBeUndefined(); // oldest — no prev
     expect(p1?.props.next?.id).toBe('n2.en');
 
-    const p3 = paths.find((p: any) => p.params.slug === 'n3.en');
+    const p3 = paths.find((p) => p.params.slug === 'n3.en');
     expect(p3?.props.next).toBeUndefined(); // newest — no next
     expect(p3?.props.prev?.id).toBe('n2.en');
   });
@@ -96,10 +97,10 @@ describe('makeNoteStaticPaths', () => {
     const enNote = makeNote({ id: 'about.en', language: 'en', translationKey: 'about' });
     const ptNote = makeNote({ id: 'about.pt-br', language: 'pt-br', translationKey: 'about' });
 
-    mockedGetCollection.mockResolvedValue([enNote, ptNote] as any);
+    mockedGetCollection.mockResolvedValue([enNote, ptNote]);
 
     const paths = await makeNoteStaticPaths('en')();
-    const enPath = paths.find((p: any) => p.params.slug === 'about.en');
+    const enPath = paths.find((p) => p.params.slug === 'about.en');
 
     expect(enPath?.props.translations).toMatchObject({
       en: '/notes/about.en/',
@@ -112,10 +113,10 @@ describe('makeNoteStaticPaths', () => {
     const enNote = makeNote({ id: 'about.en', language: 'en', translationKey: 'about' });
     const ptNote = makeNote({ id: 'about.pt-br', language: 'pt-br', translationKey: 'about' });
 
-    mockedGetCollection.mockResolvedValue([enNote, ptNote] as any);
+    mockedGetCollection.mockResolvedValue([enNote, ptNote]);
 
-    expect((await makeNoteStaticPaths('en')()).map((p: any) => p.params.slug)).toEqual(['about.en']);
-    expect((await makeNoteStaticPaths('pt-br')()).map((p: any) => p.params.slug)).toEqual(['about.pt-br']);
+    expect((await makeNoteStaticPaths('en')()).map((p) => p.params.slug)).toEqual(['about.en']);
+    expect((await makeNoteStaticPaths('pt-br')()).map((p) => p.params.slug)).toEqual(['about.pt-br']);
   });
 
   it('relatedNotes only include same-locale notes', async () => {
@@ -123,11 +124,11 @@ describe('makeNoteStaticPaths', () => {
     const b = makeNote({ id: 'b.en', language: 'en', translationKey: 'b', tags: ['x'] });
     const c = makeNote({ id: 'c.pt-br', language: 'pt-br', translationKey: 'c', tags: ['x'] });
 
-    mockedGetCollection.mockResolvedValue([a, b, c] as any);
+    mockedGetCollection.mockResolvedValue([a, b, c]);
 
     const paths = await makeNoteStaticPaths('en')();
-    const pa = paths.find((p: any) => p.params.slug === 'a.en');
-    expect(pa?.props.relatedNotes.map((n: any) => n.id)).toEqual(['b.en']);
+    const pa = paths.find((p) => p.params.slug === 'a.en');
+    expect(pa?.props.relatedNotes.map((n) => n.id)).toEqual(['b.en']);
   });
 });
 
@@ -137,10 +138,10 @@ describe('makeBlogStaticPaths', () => {
   it('EN blog paths contain no PT entry when its EN translation exists', async () => {
     const en = makeNote({ id: 'a.en', language: 'en', translationKey: 'a' });
     const pt = makeNote({ id: 'a.pt-br', language: 'pt-br', translationKey: 'a' });
-    mockedGetCollection.mockResolvedValue([en, pt] as any);
+    mockedGetCollection.mockResolvedValue([en, pt]);
 
     const paths = await makeBlogStaticPaths('en')();
-    expect(paths.map((p: any) => p.params.slug)).toEqual(['a.en']);
+    expect(paths.map((p) => p.params.slug)).toEqual(['a.en']);
     expect(paths[0]!.props.isTranslationFallback).toBe(false);
     expect(paths[0]!.props.translations).toEqual({
       en: '/blog/a.en/',
@@ -150,7 +151,7 @@ describe('makeBlogStaticPaths', () => {
 
   it('PT blog path for an EN-only post is a fallback pointing back at the original', async () => {
     const en = makeNote({ id: 'b.en', language: 'en', translationKey: 'b' });
-    mockedGetCollection.mockResolvedValue([en] as any);
+    mockedGetCollection.mockResolvedValue([en]);
 
     const paths = await makeBlogStaticPaths('pt-br')();
     expect(paths).toHaveLength(1);
@@ -164,10 +165,10 @@ describe('makeBlogStaticPaths', () => {
     const mid = makeNote({ id: 'm.en', language: 'en', translationKey: 'm', publishedAt: new Date('2024-02-01') });
     const mid2 = makeNote({ id: 'm.pt-br', language: 'pt-br', translationKey: 'm', publishedAt: new Date('2024-02-01') });
     const recent = makeNote({ id: 'r.en', language: 'en', translationKey: 'r', publishedAt: new Date('2024-03-01') });
-    mockedGetCollection.mockResolvedValue([old, mid, mid2, recent] as any);
+    mockedGetCollection.mockResolvedValue([old, mid, mid2, recent]);
 
     const paths = await makeBlogStaticPaths('en')();
-    const pm = paths.find((p: any) => p.params.slug === 'm.en');
+    const pm = paths.find((p) => p.params.slug === 'm.en');
     expect(pm?.props.prev?.slug).toBe('o.en');
     expect(pm?.props.next?.slug).toBe('r.en');
   });
@@ -182,7 +183,7 @@ describe('fixture sources', () => {
 
   it('blog factory reads the fixture collection and builds fixture paths', async () => {
     const en = makeNote({ id: 'f.en', language: 'en', translationKey: 'f' });
-    mockedGetCollection.mockResolvedValue([en] as any);
+    mockedGetCollection.mockResolvedValue([en]);
 
     const paths = await makeBlogStaticPaths('pt-br', FIXTURE_BLOG_SOURCE)();
     expect(mockedGetCollection.mock.calls[0]?.[0]).toBe('fixtureBlog');
@@ -193,7 +194,7 @@ describe('fixture sources', () => {
   it('note factory reads the fixture collection and builds fixture paths', async () => {
     const en = makeNote({ id: 'g.en', language: 'en', translationKey: 'g' });
     const pt = makeNote({ id: 'g.pt-br', language: 'pt-br', translationKey: 'g' });
-    mockedGetCollection.mockResolvedValue([en, pt] as any);
+    mockedGetCollection.mockResolvedValue([en, pt]);
 
     const paths = await makeNoteStaticPaths('en', FIXTURE_NOTES_SOURCE)();
     expect(mockedGetCollection.mock.calls[0]?.[0]).toBe('fixtureNotes');
@@ -204,7 +205,7 @@ describe('fixture sources', () => {
   });
 
   it('defaults keep reading the real collections', async () => {
-    mockedGetCollection.mockResolvedValue([] as any);
+    mockedGetCollection.mockResolvedValue([]);
     await makeBlogStaticPaths('en')();
     await makeNoteStaticPaths('en')();
     expect(mockedGetCollection.mock.calls.map((c) => c[0])).toEqual(['blog', 'notes']);
@@ -221,7 +222,7 @@ describe('buildNoteIndex', () => {
       makeNote({ id: 'b.en', language: 'en', translationKey: 'b', publishedAt: new Date('2024-02-01') }),
     ];
 
-    const { notesToShow } = buildNoteIndex(notes as any, 'en');
+    const { notesToShow } = buildNoteIndex(notes, 'en');
     expect(notesToShow).toHaveLength(2);
   });
 
@@ -229,7 +230,7 @@ describe('buildNoteIndex', () => {
     const enNote = makeNote({ id: 'a.en', language: 'en', translationKey: 'a', category: 'Systems' });
     const ptNote = makeNote({ id: 'a.pt-br', language: 'pt-br', translationKey: 'a', category: 'Sistemas' });
 
-    const { notesToShow } = buildNoteIndex([enNote, ptNote] as any, 'en');
+    const { notesToShow } = buildNoteIndex([enNote, ptNote], 'en');
     expect(notesToShow[0]!.data.category).toBe('Systems');
     expect(notesToShow[0]!.isTranslationMissing).toBe(false);
   });
@@ -237,7 +238,7 @@ describe('buildNoteIndex', () => {
   it('falls back to EN note when PT-BR locale has no match, marks isTranslationMissing', () => {
     const enNote = makeNote({ id: 'only.en', language: 'en', translationKey: 'only', category: 'Systems' });
 
-    const { notesToShow } = buildNoteIndex([enNote] as any, 'pt-br');
+    const { notesToShow } = buildNoteIndex([enNote], 'pt-br');
     expect(notesToShow).toHaveLength(1);
     expect(notesToShow[0]!.isTranslationMissing).toBe(true);
   });
@@ -247,8 +248,8 @@ describe('buildNoteIndex', () => {
     const n2 = makeNote({ id: 'n2.en', language: 'en', translationKey: 'k2', publishedAt: new Date('2024-03-01') });
     const n3 = makeNote({ id: 'n3.en', language: 'en', translationKey: 'k3', publishedAt: new Date('2024-02-01') });
 
-    const { notesToShow } = buildNoteIndex([n1, n2, n3] as any, 'en');
-    expect(notesToShow.map((n: any) => n.id)).toEqual(['n2.en', 'n3.en', 'n1.en']);
+    const { notesToShow } = buildNoteIndex([n1, n2, n3], 'en');
+    expect(notesToShow.map((n) => n.id)).toEqual(['n2.en', 'n3.en', 'n1.en']);
   });
 
   it('computes categoryCounts matching actual note counts', () => {
@@ -258,13 +259,13 @@ describe('buildNoteIndex', () => {
       makeNote({ id: 'c.en', language: 'en', translationKey: 'c', category: 'Linux' }),
     ];
 
-    const { categoryCounts, notesToShow } = buildNoteIndex(notes as any, 'en');
+    const { categoryCounts, notesToShow } = buildNoteIndex(notes, 'en');
     expect(categoryCounts['Firmware']).toBe(2);
     expect(categoryCounts['Linux']).toBe(1);
 
     // Verify counts actually match the visible notes
     for (const [cat, count] of Object.entries(categoryCounts)) {
-      const actual = notesToShow.filter((n: any) => n.data.category === cat).length;
+      const actual = notesToShow.filter((n) => n.data.category === cat).length;
       expect(actual).toBe(count);
     }
   });
@@ -276,7 +277,7 @@ describe('buildNoteIndex', () => {
       makeNote({ id: 'c.en', language: 'en', translationKey: 'c', noteType: 'book' }),
     ];
 
-    const { noteTypeCounts } = buildNoteIndex(notes as any, 'en');
+    const { noteTypeCounts } = buildNoteIndex(notes, 'en');
     expect(noteTypeCounts['note']).toBe(1);
     expect(noteTypeCounts['book']).toBe(2);
   });
