@@ -1,4 +1,5 @@
 import { visit } from 'unist-util-visit';
+import matter from 'gray-matter';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { contentPath } from '../content/routes';
@@ -39,25 +40,24 @@ export function buildContentMap(contentDir: string): ContentMap {
 
     const files = fs.readdirSync(dir).filter(f => /\.(md|mdx)$/.test(f)).sort();
     for (const file of files) {
-      const raw = fs.readFileSync(path.join(dir, file), 'utf-8');
+      const { data } = matter(fs.readFileSync(path.join(dir, file), 'utf-8'));
 
-      // Extract the frontmatter slug field.
-      const slugMatch = raw.match(/^slug:\s*["']?([^"'\n]+?)["']?\s*$/m);
-      if (!slugMatch?.[1]) continue;
-      const slug = slugMatch[1].trim();
+      const slug = typeof data.slug === 'string' ? data.slug.trim() : '';
+      if (!slug) continue;
 
       // A scheduled (future-dated) target has no page yet: leave links to it as text.
-      const publishedMatch = raw.match(/^publishedAt:\s*["']?([^"'\n]+?)["']?\s*$/m);
-      const publishedAt = publishedMatch?.[1] ? new Date(publishedMatch[1].trim()) : null;
-      if (publishedAt && !Number.isNaN(publishedAt.getTime()) && !isPublished({ publishedAt })) continue;
+      // YAML parses a bare date to a Date and leaves a quoted one as a string.
+      if (data.publishedAt != null) {
+        const publishedAt = data.publishedAt instanceof Date ? data.publishedAt : new Date(String(data.publishedAt));
+        if (!Number.isNaN(publishedAt.getTime()) && !isPublished({ publishedAt })) continue;
+      }
 
       // Language: frontmatter first, then the filename suffix ("x.pt-br.md").
       const withoutExt = file.replace(/\.(md|mdx)$/, '');
       const lastDot = withoutExt.lastIndexOf('.');
       const fileLocale = lastDot !== -1 ? withoutExt.slice(lastDot + 1) : 'en';
       const baseName = lastDot !== -1 ? withoutExt.slice(0, lastDot) : withoutExt;
-      const langMatch = raw.match(/^language:\s*["']?([^"'\n]+?)["']?\s*$/m);
-      const locale = (langMatch?.[1] ?? fileLocale).trim();
+      const locale = (typeof data.language === 'string' ? data.language : fileLocale).trim();
 
       const entry: ContentEntry = { collection, slug, locale };
 
@@ -76,12 +76,45 @@ export function buildContentMap(contentDir: string): ContentMap {
   return map;
 }
 
-// Built once per process; safe since content files don't change during a build.
-let mapCache: ContentMap | null = null;
+// One map per content directory, rebuilt whenever a content file or folder changes.
+const mapCache = new Map<string, { stamp: string; map: ContentMap }>();
 
-function getContentMap(): ContentMap {
-  mapCache ??= buildContentMap(path.resolve(process.cwd(), 'src/content'));
-  return mapCache;
+/**
+ * Cheap change detector: the newest mtime and the number of entries under `dir`
+ * (recursive, stat only, no file reads). Adding, editing or deleting a content
+ * file changes it, so `pnpm dev` picks up new content without a restart.
+ */
+function contentStamp(dir: string): string {
+  let newest = 0;
+  let count = 0;
+  const walk = (current: string) => {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(current, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    newest = Math.max(newest, fs.statSync(current).mtimeMs);
+    for (const entry of entries) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (/\.(md|mdx)$/.test(entry.name)) {
+        count++;
+        newest = Math.max(newest, fs.statSync(full).mtimeMs);
+      }
+    }
+  };
+  walk(dir);
+  return `${newest}:${count}`;
+}
+
+function getContentMap(contentDir: string): ContentMap {
+  const stamp = contentStamp(contentDir);
+  const cached = mapCache.get(contentDir);
+  if (cached?.stamp === stamp) return cached.map;
+  const map = buildContentMap(contentDir);
+  mapCache.set(contentDir, { stamp, map });
+  return map;
 }
 
 /** Resolves a wikilink target to the page URL built from the entry's slug + language. */
@@ -100,10 +133,6 @@ export function resolveWikilinkUrl(map: ContentMap, target: string, preferLocale
   if (!best) return null;
   const locale: Locale = (LOCALES as readonly string[]).includes(best.locale) ? (best.locale as Locale) : 'en';
   return contentPath(best.collection, locale, best.slug);
-}
-
-function resolveUrl(target: string, preferLocale: string): string | null {
-  return resolveWikilinkUrl(getContentMap(), target, preferLocale);
 }
 
 // ---------------------------------------------------------------------------
@@ -179,7 +208,12 @@ function extractLocale(filePath: string): string {
  */
 const OBSIDIAN_SYNTAX = /(!?)\[\[([^\]]+)\]\]/g;
 
-function splitOnObsidianSyntax(text: string, locale: string): any[] {
+function splitOnObsidianSyntax(
+  text: string,
+  locale: string,
+  resolve: (target: string, preferLocale: string) => string | null,
+  onUnresolved: (target: string) => void,
+): any[] {
   const nodes: any[] = [];
   let lastIndex = 0;
 
@@ -225,7 +259,7 @@ function splitOnObsidianSyntax(text: string, locale: string): any[] {
 
       if (!display) display = target;
 
-      const url = resolveUrl(target, locale);
+      const url = resolve(target, locale);
 
       if (url) {
         nodes.push({
@@ -235,7 +269,8 @@ function splitOnObsidianSyntax(text: string, locale: string): any[] {
           children: [{ type: 'text', value: display }],
         });
       } else {
-        // Unresolved wikilink — keep raw text so nothing is silently lost.
+        // Unresolved wikilink — keep raw text so nothing is silently lost, and say so.
+        onUnresolved(target);
         nodes.push({ type: 'text', value: match[0] });
       }
     }
@@ -255,6 +290,17 @@ function splitOnObsidianSyntax(text: string, locale: string): any[] {
 // Remark plugin
 // ---------------------------------------------------------------------------
 
+export interface WikilinkOptions {
+  /** Folder holding the `blog/` and `notes/` collections. Defaults to `src/content`. */
+  contentDir?: string;
+  /** Called for each wikilink that points at nothing. Defaults to a `console.warn`. */
+  onUnresolved?: (target: string, file?: string) => void;
+}
+
+function defaultOnUnresolved(target: string, file?: string): void {
+  console.warn(`unresolved wikilink [[${target}]] in ${file ?? 'unknown file'}`);
+}
+
 /**
  * Remark plugin that converts Obsidian-specific syntax to standard MDAST nodes.
  *
@@ -264,9 +310,16 @@ function splitOnObsidianSyntax(text: string, locale: string): any[] {
  * Run `pnpm sync:content` to copy vault assets into public/assets/uploads/
  * before building so the image URLs resolve correctly.
  */
-export function remarkObsidianWikilinks() {
+export function remarkObsidianWikilinks(options: WikilinkOptions = {}) {
+  const contentDir = options.contentDir ?? path.resolve(process.cwd(), 'src/content');
+
   return (tree: any, file: any) => {
-    const locale = extractLocale((file?.path ?? file?.history?.[0] ?? '') as string);
+    const filePath: string | undefined = file?.path ?? file?.history?.[0] ?? undefined;
+    const locale = extractLocale(filePath ?? '');
+    const resolve = (target: string, preferLocale: string) =>
+      resolveWikilinkUrl(getContentMap(contentDir), target, preferLocale);
+    const onUnresolved = (target: string) =>
+      (options.onUnresolved ?? defaultOnUnresolved)(target, filePath);
 
     // Collect replacements first — avoids mutating the tree while walking it.
     const replacements: Array<{ parent: any; index: number; nodes: any[] }> = [];
@@ -275,7 +328,7 @@ export function remarkObsidianWikilinks() {
       if (typeof index !== 'number' || !parent) return;
       if (!(node.value as string).includes('[[')) return;
 
-      const nodes = splitOnObsidianSyntax(node.value as string, locale);
+      const nodes = splitOnObsidianSyntax(node.value as string, locale, resolve, onUnresolved);
       // Skip if nothing actually changed.
       if (nodes.length === 1 && nodes[0].type === 'text' && nodes[0].value === node.value) return;
 
