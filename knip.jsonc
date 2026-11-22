@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  // Astro, Vitest and Playwright plugins are auto-detected: astro.config.mjs,
+  // src/content.config.ts, src/pages/**, vitest.config.ts, playwright.config.ts
+  // and the test files are entries without being listed here.
+  "entry": [
+    // CLI scripts run through package.json scripts (tsx) and CI, never imported.
+    "scripts/*.ts"
+  ],
+  "project": ["src/**/*.{ts,astro,mjs,mdx}", "scripts/**/*.ts", "tests/**/*.ts", "*.config.*"],
+  // Synced vault content is data, not code.
+  "ignore": ["src/content/**"],
+  "ignoreDependencies": [
+    // Loaded by CSS (`@import '@fontsource/outfit/600.css'` in src/styles/global.css),
+    // which knip does not follow.
+    "@fontsource/outfit"
+  ]
+}
