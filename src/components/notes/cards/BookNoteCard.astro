@@ -127,14 +127,10 @@ const statusLabel = statusKey ? t.notes.bookStatus[statusKey] : undefined;
     font-family: var(--font-mono);
     white-space: nowrap;
   }
-  /* Light mode: dark text on pastel bg — meets WCAG AA 4.5:1 */
-  .book-status[data-status="finished"] { background: color-mix(in srgb, #22c55e 15%, var(--surface)); color: #166534; }
-  .book-status[data-status="reading"]  { background: color-mix(in srgb, #f59e0b 15%, var(--surface)); color: #92400e; }
-  .book-status[data-status="abandoned"]{ background: color-mix(in srgb, #ef4444 15%, var(--surface)); color: #991b1b; }
-  /* Dark mode: surface is dark, so use light text */
-  [data-theme='dark'] .book-status[data-status="finished"] { color: #86efac; }
-  [data-theme='dark'] .book-status[data-status="reading"]  { color: #fcd34d; }
-  [data-theme='dark'] .book-status[data-status="abandoned"]{ color: #fca5a5; }
+  /* Status colour mixed toward --text keeps AA contrast in both themes */
+  .book-status[data-status="finished"] { background: color-mix(in srgb, #22c55e 15%, var(--surface)); color: color-mix(in srgb, #22c55e 50%, var(--text)); }
+  .book-status[data-status="reading"]  { background: color-mix(in srgb, #f59e0b 15%, var(--surface)); color: color-mix(in srgb, #f59e0b 50%, var(--text)); }
+  .book-status[data-status="abandoned"]{ background: color-mix(in srgb, #ef4444 15%, var(--surface)); color: color-mix(in srgb, #ef4444 50%, var(--text)); }
   .note-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: auto; }
   .tag {
     font-size: var(--text-xs);

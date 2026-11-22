@@ -80,8 +80,8 @@ export default defineConfig({
       // dark values stored as --shiki-dark-* CSS variables.
       // CSS in global.css switches to dark values via [data-theme='dark'].
       themes: {
-        light: 'github-light',
-        dark:  'one-dark-pro',
+        light: 'github-light-default',
+        dark:  'github-dark-default',
       },
     },
   },
