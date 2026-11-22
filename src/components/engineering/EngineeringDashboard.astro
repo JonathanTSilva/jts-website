@@ -9,6 +9,7 @@ import {
 } from '../../lib/engineering/dashboard';
 import type { Locale } from '../../lib/content/locale';
 import { format, useTranslations } from '../../i18n/ui';
+import { formatDate } from '../../lib/format';
 
 interface Props {
   locale: Locale;
@@ -29,7 +30,7 @@ const archivedNote = format(
 );
 
 const dateText = generated
-  ? generated.toLocaleDateString(locale, { dateStyle: 'long', timeZone: 'UTC' })
+  ? formatDate(generated, locale)
   : '';
 ---
 

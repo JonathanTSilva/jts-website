@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { contentLocalePath, type Locale } from '../../../lib/content/locale';
 import { useTranslations } from '../../../i18n/ui';
+import { formatDate } from '../../../lib/format';
 import { getNoteAccentColor } from '../../../lib/notes';
 import TranslationStatusTag from '../../site/TranslationStatusTag.astro';
 
@@ -27,7 +28,7 @@ const t = useTranslations(locale);
         <span class="note-category">{note.data.category}</span>
       )}
       <time datetime={note.data.publishedAt.toISOString()} class="note-date">
-        {note.data.publishedAt.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: '2-digit' })}
+        {formatDate(note.data.publishedAt, locale, { year: 'numeric', month: 'short', day: '2-digit' })}
       </time>
     </header>
     <h2 class="note-title">{note.data.title}</h2>

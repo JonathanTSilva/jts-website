@@ -5,6 +5,7 @@ import { career } from '../../content/portfolio/career';
 import { getWebsiteProjects, getWebsitePublications } from '../../lib/career/website';
 import { contentLocalePath, type Locale } from '../../lib/content/locale';
 import { useTranslations } from '../../i18n/ui';
+import { formatDate } from '../../lib/format';
 
 interface Props {
   locale: Locale;
@@ -94,7 +95,7 @@ const publications = getWebsitePublications(career, locale);
       >
         <span class="blog-preview-title">{post.data.title}</span>
         <span class="blog-preview-date">
-          {new Date(post.data.publishedAt).toLocaleDateString(locale)}
+          {formatDate(new Date(post.data.publishedAt), locale, {})}
         </span>
       </a>
     ))}
@@ -114,7 +115,7 @@ const publications = getWebsitePublications(career, locale);
         class="note-preview-card"
       >
         <span class="note-preview-date">
-          {new Date(note.data.publishedAt).toLocaleDateString(locale)}
+          {formatDate(new Date(note.data.publishedAt), locale, {})}
         </span>
         <span class="note-preview-title">{note.data.title}</span>
         {note.data.category && (

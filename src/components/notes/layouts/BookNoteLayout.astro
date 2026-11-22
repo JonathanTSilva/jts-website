@@ -1,6 +1,7 @@
 ---
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import { format, useTranslations } from '../../../i18n/ui';
+import { formatDate } from '../../../lib/format';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
 type Props = NoteLayoutProps;
@@ -12,9 +13,8 @@ const t = useTranslations(locale);
 const isTranslationFallback = note.data.language !== locale;
 const statusKey = note.data.status?.[0] as 'finished' | 'reading' | 'abandoned' | undefined;
 const statusLabel = statusKey ? t.notes.bookStatus[statusKey] ?? statusKey : undefined;
-const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 const dateStr = note.data.dateRead
-  ? note.data.dateRead.toLocaleDateString(dateLocale, { dateStyle: 'medium' })
+  ? formatDate(note.data.dateRead, locale, { dateStyle: 'medium' })
   : undefined;
 ---
 

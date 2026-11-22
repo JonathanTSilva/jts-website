@@ -5,6 +5,7 @@ import { ogImagePath } from '../../lib/content/routes';
 import { absoluteUrl } from '../../lib/site';
 import { contentLocalePath, type Locale } from '../../lib/content/locale';
 import { format, useTranslations } from '../../i18n/ui';
+import { formatDate } from '../../lib/format';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TableOfContents from '../blog/TableOfContents.astro';
 import PostNav from '../blog/PostNav.astro';
@@ -60,7 +61,7 @@ const ogImage = ogImagePath('blog', post.data.language, post.data.slug);
 
       <div class="post-meta">
         <time datetime={post.data.publishedAt.toISOString()}>
-          {format(t.blog.publishedOn, { date: post.data.publishedAt.toLocaleDateString(locale, { dateStyle: 'long' }) })}
+          {format(t.blog.publishedOn, { date: formatDate(post.data.publishedAt, locale) })}
         </time>
         <span class="post-meta-sep">·</span>
         <span class="post-reading-time">{format(t.blog.readingTime, { minutes: readingTime })}</span>

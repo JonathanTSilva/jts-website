@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TranslationFallbackNotice from '../site/TranslationFallbackNotice.astro';
 import { contentLocalePath, type Locale } from '../../lib/content/locale';
 import { useTranslations } from '../../i18n/ui';
+import { formatDate } from '../../lib/format';
 
 interface Props {
   locale: Locale;
@@ -47,7 +48,7 @@ const translations = {
       {entry.data.updatedAt && (
         <p class="now-updated">
           {t.now.lastUpdated} <time datetime={entry.data.updatedAt.toISOString()}>
-            {entry.data.updatedAt.toLocaleDateString(locale, { dateStyle: 'long' })}
+            {formatDate(entry.data.updatedAt, locale)}
           </time>
         </p>
       )}

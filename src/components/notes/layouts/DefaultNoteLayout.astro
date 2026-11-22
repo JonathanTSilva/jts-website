@@ -2,6 +2,7 @@
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import MermaidRenderer from '../../site/MermaidRenderer.astro';
 import { useTranslations } from '../../../i18n/ui';
+import { formatDate } from '../../../lib/format';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
 type Props = NoteLayoutProps;
@@ -11,7 +12,6 @@ const { note, Content, locale, prev, next, relatedNotes } = Astro.props;
 const t = useTranslations(locale);
 
 const isTranslationFallback = note.data.language !== locale;
-const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 ---
 
 <NoteLayoutWrapper
@@ -35,7 +35,7 @@ const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 
   <div class="note-meta">
     <time class="note-date" datetime={note.data.publishedAt.toISOString()}>
-      {note.data.publishedAt.toLocaleDateString(dateLocale, { dateStyle: 'long' })}
+      {formatDate(note.data.publishedAt, locale)}
     </time>
   </div>
 

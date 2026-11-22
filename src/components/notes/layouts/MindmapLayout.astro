@@ -1,6 +1,7 @@
 ---
 import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
 import { useTranslations } from '../../../i18n/ui';
+import { formatDate } from '../../../lib/format';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
 type Props = NoteLayoutProps;
@@ -30,7 +31,7 @@ const isTranslationFallback = note.data.language !== locale;
   )}
 
   <time class="note-date" datetime={note.data.publishedAt.toISOString()}>
-    {note.data.publishedAt.toLocaleDateString(locale === 'en' ? 'en-US' : 'pt-BR', { dateStyle: 'long' })}
+    {formatDate(note.data.publishedAt, locale)}
   </time>
 
   <div class="mindmap-wrapper">
