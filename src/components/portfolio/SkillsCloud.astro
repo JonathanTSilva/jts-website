@@ -1,6 +1,7 @@
 ---
 import type { WebsiteSkillGroup } from '../../lib/career/website';
 import { type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 
 interface Props {
   locale: Locale;
@@ -10,10 +11,7 @@ interface Props {
 
 const { locale, skillsLabel, groups } = Astro.props;
 
-const labels = {
-  en: { all: 'All', filter: 'Filter skills by category' },
-  'pt-br': { all: 'Tudo', filter: 'Filtrar habilidades por categoria' },
-}[locale];
+const t = useTranslations(locale);
 
 // One cloud ordered by priority; category filters only hide pills, so each
 // group keeps its own priority order and the "All" view reads most-relevant first.
@@ -26,9 +24,9 @@ const tier = (priority: number) => priority >= 95 ? 'skill-pill--top' : priority
 
 <section class="portfolio-section">
   <h2>{skillsLabel}</h2>
-  <div class="skills-filters" role="group" aria-label={labels.filter}>
+  <div class="skills-filters" role="group" aria-label={t.portfolio.filterSkills}>
     <span class="skills-filter-indicator" aria-hidden="true"></span>
-    <button type="button" class="skills-filter active" data-group="all" aria-pressed="true">{labels.all}</button>
+    <button type="button" class="skills-filter active" data-group="all" aria-pressed="true">{t.common.all}</button>
     {groups.map(group => (
       <button type="button" class="skills-filter" data-group={group.id} aria-pressed="false">{group.name}</button>
     ))}

@@ -1,4 +1,5 @@
 import { contentLocalePath, type Locale } from './content/locale';
+import { useTranslations } from '../i18n/ui';
 
 interface NavLink {
   href: string;
@@ -6,28 +7,13 @@ interface NavLink {
 }
 
 export const getNavigation = (locale: Locale): NavLink[] => {
-  const t = {
-    en: {
-      home: 'Home',
-      portfolio: 'Portfolio',
-      blog: 'Blog',
-      notes: 'Notes',
-      now: 'Now',
-    },
-    'pt-br': {
-      home: 'Início',
-      portfolio: 'Portfólio',
-      blog: 'Blog',
-      notes: 'Notas',
-      now: 'Agora',
-    },
-  }[locale];
+  const { nav } = useTranslations(locale);
 
   return [
-    { href: contentLocalePath(locale, '/'), label: t.home },
-    { href: contentLocalePath(locale, '/portfolio'), label: t.portfolio },
-    { href: contentLocalePath(locale, '/blog'), label: t.blog },
-    { href: contentLocalePath(locale, '/notes'), label: t.notes },
-    { href: contentLocalePath(locale, '/now'), label: t.now },
+    { href: contentLocalePath(locale, '/'), label: nav.home },
+    { href: contentLocalePath(locale, '/portfolio'), label: nav.portfolio },
+    { href: contentLocalePath(locale, '/blog'), label: nav.blog },
+    { href: contentLocalePath(locale, '/notes'), label: nav.notes },
+    { href: contentLocalePath(locale, '/now'), label: nav.now },
   ];
 };

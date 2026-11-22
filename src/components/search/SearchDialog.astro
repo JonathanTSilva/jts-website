@@ -1,5 +1,6 @@
 ---
 import { type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 
 interface Props {
   locale: Locale;
@@ -7,20 +8,7 @@ interface Props {
 
 const { locale } = Astro.props;
 
-const t = {
-  en: {
-    placeholder: 'Search blog and notes...',
-    noResults: 'No results found.',
-    close: 'Close (Esc)',
-    shortcut: 'Press / to search',
-  },
-  'pt-br': {
-    placeholder: 'Buscar blog e notas...',
-    noResults: 'Nenhum resultado encontrado.',
-    close: 'Fechar (Esc)',
-    shortcut: 'Pressione / para buscar',
-  }
-}[locale];
+const t = useTranslations(locale).search;
 ---
 
 <div id="search-dialog" class="search-dialog" role="dialog" aria-labelledby="search-label" aria-modal="true" style="display: none;">

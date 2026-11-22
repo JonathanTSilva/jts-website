@@ -1,9 +1,18 @@
 ---
 // Toast.astro — global toast notification system
 // API: window.showToast({ message, variant?, title?, duration? })
+import type { Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
 ---
 
-<div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+<div id="toast-container" aria-live="polite" aria-atomic="false" data-dismiss-label={t.site.dismiss}></div>
 
 <style>
   #toast-container {
@@ -182,7 +191,7 @@
 
       const dismissBtn = document.createElement('button');
       dismissBtn.className = 'toast-dismiss';
-      dismissBtn.setAttribute('aria-label', 'Dismiss');
+      dismissBtn.setAttribute('aria-label', container.dataset.dismissLabel ?? '');
       dismissBtn.textContent = '×';
 
       card.appendChild(iconSpan);

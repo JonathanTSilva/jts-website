@@ -10,7 +10,8 @@ import AnalyticsScripts from '../components/site/AnalyticsScripts.astro';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import 'katex/dist/katex.min.css';
-import { type Locale } from '../lib/content/locale';
+import { contentLocalePath, type Locale } from '../lib/content/locale';
+import { useTranslations } from '../i18n/ui';
 import { type PageType } from '../lib/seo/metadata';
 import StructuredData from '../components/site/StructuredData.astro';
 
@@ -27,6 +28,7 @@ interface Props {
 }
 
 const { title, description, image, ogType, locale = 'en', translations, structuredData, pageType, noindex } = Astro.props;
+const t = useTranslations(locale);
 ---
 
 <!doctype html>
@@ -52,31 +54,22 @@ const { title, description, image, ogType, locale = 'en', translations, structur
       translations={ogType === 'article' ? translations : undefined}
       noindex={noindex}
     />
-    {locale === 'en' ? (
-      <>
-        <link rel="alternate" type="application/rss+xml" title="Jonathan's Blog" href="/rss.xml" />
-        <link rel="alternate" type="application/rss+xml" title="Jonathan's Notes" href="/notes/rss.xml" />
-      </>
-    ) : (
-      <>
-        <link rel="alternate" type="application/rss+xml" title="Blog do Jonathan" href="/pt-br/rss.xml" />
-        <link rel="alternate" type="application/rss+xml" title="Notas do Jonathan" href="/pt-br/notes/rss.xml" />
-      </>
-    )}
+    <link rel="alternate" type="application/rss+xml" title={t.feeds.blogTitle} href={contentLocalePath(locale, '/rss.xml')} />
+    <link rel="alternate" type="application/rss+xml" title={t.feeds.notesTitle} href={contentLocalePath(locale, '/notes/rss.xml')} />
     <slot name="head" />
     {structuredData && (Array.isArray(structuredData) ? structuredData : [structuredData]).map(d => (
       <StructuredData data={d} />
     ))}
   </head>
   <body class="site-wrapper">
-    <a href="#main-content" class="skip-link">{locale === 'pt-br' ? 'Pular para o conteúdo' : 'Skip to content'}</a>
+    <a href="#main-content" class="skip-link">{t.site.skipToContent}</a>
     <Header locale={locale} translations={translations} />
     <main id="main-content">
       <slot />
     </main>
     <Footer locale={locale} currentPath={Astro.url.pathname} translations={translations} />
     <SearchDialog locale={locale} />
-    <Toast />
+    <Toast locale={locale} />
     <ConsentBanner locale={locale} />
     <AnalyticsScripts />
   </body>

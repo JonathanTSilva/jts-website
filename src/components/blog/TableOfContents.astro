@@ -1,15 +1,20 @@
 ---
+import type { Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
+
 interface Props {
+  locale: Locale;
   headings: { depth: number; slug: string; text: string }[];
 }
 
-const { headings } = Astro.props;
+const { locale, headings } = Astro.props;
+const t = useTranslations(locale);
 const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
 ---
 
 {tocHeadings.length > 0 && (
-  <nav class="toc" aria-label="Table of contents">
-    <p class="toc-title">Contents</p>
+  <nav class="toc" aria-label={t.blog.tocLabel}>
+    <p class="toc-title">{t.blog.tocTitle}</p>
     <ol class="toc-list">
       {tocHeadings.map(h => (
         <li class:list={['toc-item', h.depth === 3 ? 'toc-item--sub' : '']}>

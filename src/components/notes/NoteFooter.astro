@@ -6,6 +6,7 @@
 import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '../../lib/content/locale';
 import { contentLocalePath } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 import ShareButtons from '../site/ShareButtons.astro';
 
 interface Props {
@@ -19,17 +20,7 @@ interface Props {
 const { note, relatedNotes, prev, next, locale } = Astro.props;
 const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 
-const t = locale === 'en' ? {
-  related: 'Related Notes',
-  prev: '← Previous',
-  next: 'Next →',
-  navLabel: 'Note navigation',
-} : {
-  related: 'Notas Relacionadas',
-  prev: '← Anterior',
-  next: 'Próximo →',
-  navLabel: 'Navegação de notas',
-};
+const t = useTranslations(locale);
 
 const url = Astro.url.href;
 ---
@@ -41,7 +32,7 @@ const url = Astro.url.href;
   <!-- ─── Related notes ─── -->
   {relatedNotes.length > 0 && (
     <div class="nf-related">
-      <h2 class="nf-heading">{t.related}</h2>
+      <h2 class="nf-heading">{t.notes.relatedNotes}</h2>
       <div class="nf-related-grid">
         {relatedNotes.map((r) => (
           <a href={contentLocalePath(locale, `/notes/${r.data.slug}`)} class="nf-card">
@@ -60,11 +51,11 @@ const url = Astro.url.href;
 
   <!-- ─── Prev / Next ─── -->
   {(prev || next) && (
-    <nav class="nf-nav" aria-label={t.navLabel}>
+    <nav class="nf-nav" aria-label={t.notes.navLabel}>
       <div class="nf-nav-side">
         {prev ? (
           <a href={contentLocalePath(locale, `/notes/${prev.data.slug}`)} class="nf-nav-link">
-            <span class="nf-nav-dir">{t.prev}</span>
+            <span class="nf-nav-dir">{t.notes.previous}</span>
             <span class="nf-nav-title">{prev.data.title}</span>
           </a>
         ) : <span />}
@@ -72,7 +63,7 @@ const url = Astro.url.href;
       <div class="nf-nav-side nf-nav-side--right">
         {next ? (
           <a href={contentLocalePath(locale, `/notes/${next.data.slug}`)} class="nf-nav-link nf-nav-link--right">
-            <span class="nf-nav-dir">{t.next}</span>
+            <span class="nf-nav-dir">{t.notes.next}</span>
             <span class="nf-nav-title">{next.data.title}</span>
           </a>
         ) : <span />}

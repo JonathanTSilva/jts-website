@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EngineeringDashboard from '../engineering/EngineeringDashboard.astro';
+import type { Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const translations = {
+  en: '/engineering',
+  'pt-br': '/pt-br/engineering',
+};
+---
+
+<BaseLayout
+  locale={locale}
+  title={t.engineering.title}
+  description={t.engineering.metaDescription}
+  translations={translations}
+>
+  <EngineeringDashboard locale={locale} />
+</BaseLayout>

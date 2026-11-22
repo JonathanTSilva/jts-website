@@ -1,5 +1,6 @@
 ---
 import type { Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 
 interface Props {
   categories: string[];
@@ -12,47 +13,22 @@ interface Props {
 
 const { categories, categoryCounts, tags, noteTypes, noteTypeCounts, locale } = Astro.props;
 
-const typeLabels: Record<string, string> = {
-  note: locale === 'en' ? 'Note' : 'Nota',
-  book: locale === 'en' ? 'Book' : 'Livro',
-  mindmap: locale === 'en' ? 'Mind Map' : 'Mapa Mental',
-  whiteboard: locale === 'en' ? 'Whiteboard' : 'Quadro',
-};
-
-const labels = {
-  en: {
-    all: 'All',
-    categories: 'Categories',
-    tags: 'Tags',
-    types: 'Types',
-    clear: 'Clear filters',
-    collapse: 'Collapse',
-    expand: 'Expand',
-  },
-  'pt-br': {
-    all: 'Tudo',
-    categories: 'Categorias',
-    tags: 'Tags',
-    types: 'Tipos',
-    clear: 'Limpar filtros',
-    collapse: 'Recolher',
-    expand: 'Expandir',
-  }
-}[locale];
+const t = useTranslations(locale);
+const typeLabels: Record<string, string> = t.notes.types;
 ---
 
-<nav class="notes-filters" id="notes-filters" aria-label="Filter notes">
+<nav class="notes-filters" id="notes-filters" aria-label={t.notes.filtersLabel}>
 
   <details class="filter-section" open>
     <summary class="filter-section-header">
-      <span class="filter-section-title">{labels.categories}</span>
+      <span class="filter-section-title">{t.notes.filterCategories}</span>
       <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
         <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </summary>
     <div class="filter-items">
       <button class="filter-item active" data-filter="category" data-value="all">
-        <span class="item-label">{labels.all}</span>
+        <span class="item-label">{t.common.all}</span>
       </button>
       {categories.map(category => (
         <button class="filter-item" data-filter="category" data-value={category}>
@@ -68,20 +44,20 @@ const labels = {
   {noteTypes.length > 1 && (
     <details class="filter-section">
       <summary class="filter-section-header">
-        <span class="filter-section-title">{labels.types}</span>
+        <span class="filter-section-title">{t.notes.filterTypes}</span>
         <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
           <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </summary>
       <div class="filter-items">
         <button class="filter-item active" data-filter="type" data-value="all">
-          <span class="item-label">{labels.all}</span>
+          <span class="item-label">{t.common.all}</span>
         </button>
-        {noteTypes.map(t => (
-          <button class="filter-item" data-filter="type" data-value={t}>
-            <span class="item-label">{typeLabels[t] ?? t}</span>
-            {noteTypeCounts[t] && (
-              <span class="item-count">{noteTypeCounts[t]}</span>
+        {noteTypes.map(noteType => (
+          <button class="filter-item" data-filter="type" data-value={noteType}>
+            <span class="item-label">{typeLabels[noteType] ?? noteType}</span>
+            {noteTypeCounts[noteType] && (
+              <span class="item-count">{noteTypeCounts[noteType]}</span>
             )}
           </button>
         ))}
@@ -92,7 +68,7 @@ const labels = {
   {tags.length > 0 && (
     <details class="filter-section">
       <summary class="filter-section-header">
-        <span class="filter-section-title">{labels.tags}</span>
+        <span class="filter-section-title">{t.notes.filterTags}</span>
         <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
           <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -108,7 +84,7 @@ const labels = {
     </details>
   )}
 
-  <button id="clear-filters" class="clear-filters" style="display: none;">{labels.clear}</button>
+  <button id="clear-filters" class="clear-filters" style="display: none;">{t.notes.clearFilters}</button>
 </nav>
 
 <script>

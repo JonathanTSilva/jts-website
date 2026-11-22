@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../home/Hero.astro';
+import HomeSections from '../home/HomeSections.astro';
+import { generateWebSiteSchema, generatePersonSchema } from '../../lib/seo/schema';
+import { career } from '../../content/portfolio/career';
+import type { Locale } from '../../lib/content/locale';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const translations = {
+  en: '/',
+  'pt-br': '/pt-br',
+};
+---
+
+<BaseLayout locale={locale} pageType="home" translations={translations} structuredData={[generateWebSiteSchema(), generatePersonSchema(career.person)]}>
+  <Hero locale={locale} />
+  <HomeSections locale={locale} />
+</BaseLayout>

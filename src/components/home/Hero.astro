@@ -1,5 +1,6 @@
 ---
-import type { Locale } from '../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 import { getHeroPositioning } from '../../lib/content/positioning';
 import { career } from '../../content/portfolio/career';
 import { getPersonLink } from '../../lib/seo/schema';
@@ -13,10 +14,11 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getHeroPositioning(locale);
+const ui = useTranslations(locale);
 
-const portfolioHref = locale === 'en' ? '/portfolio' : '/pt-br/portfolio';
-const blogHref      = locale === 'en' ? '/blog'      : '/pt-br/blog';
-const notesHref     = locale === 'en' ? '/notes'     : '/pt-br/notes';
+const portfolioHref = contentLocalePath(locale, '/portfolio');
+const blogHref = contentLocalePath(locale, '/blog');
+const notesHref = contentLocalePath(locale, '/notes');
 
 const { typewriterPrefix, typewriterPhrases, achievements } = t;
 const emailLink = getPersonLink(career.person, 'email');
@@ -24,7 +26,7 @@ const linkedInLink = getPersonLink(career.person, 'linkedin');
 const githubLink = getPersonLink(career.person, 'github');
 ---
 
-<section class="hero" aria-label="Introduction">
+<section class="hero" aria-label={ui.home.heroLabel}>
   <HeroBackground />
 
   <div class="hero-grid">

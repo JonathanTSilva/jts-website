@@ -1,11 +1,20 @@
 ---
+import type { Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
 ---
 <button
   class="theme-toggle"
   data-theme-toggle
   role="switch"
   aria-checked="false"
-  aria-label="Toggle theme"
+  aria-label={t.site.toggleTheme}
   type="button"
 >
   <span class="toggle-thumb" aria-hidden="true">

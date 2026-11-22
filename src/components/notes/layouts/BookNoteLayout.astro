@@ -1,27 +1,17 @@
 ---
+import TranslationFallbackNotice from '../../site/TranslationFallbackNotice.astro';
+import { format, useTranslations } from '../../../i18n/ui';
 import NoteLayoutWrapper, { type NoteLayoutProps } from './NoteLayoutWrapper.astro';
 
 type Props = NoteLayoutProps;
 
 const { note, Content, locale, prev, next, relatedNotes } = Astro.props;
 
-const t = locale === 'en' ? {
-  by: 'by',
-  pages: 'pages',
-  readOn: 'Read on',
-  status: { finished: 'Finished', reading: 'Reading', abandoned: 'Abandoned' },
-  fallbackNotice: 'This note is not available in English. Showing the original version.',
-} : {
-  by: 'por',
-  pages: 'páginas',
-  readOn: 'Lido em',
-  status: { finished: 'Concluído', reading: 'Lendo', abandoned: 'Abandonado' },
-  fallbackNotice: 'Esta nota não está disponível em Português. Mostrando a versão original.',
-};
+const t = useTranslations(locale);
 
 const isTranslationFallback = note.data.language !== locale;
 const statusKey = note.data.status?.[0] as 'finished' | 'reading' | 'abandoned' | undefined;
-const statusLabel = statusKey ? t.status[statusKey] ?? statusKey : undefined;
+const statusLabel = statusKey ? t.notes.bookStatus[statusKey] ?? statusKey : undefined;
 const dateLocale = locale === 'en' ? 'en-US' : 'pt-BR';
 const dateStr = note.data.dateRead
   ? note.data.dateRead.toLocaleDateString(dateLocale, { dateStyle: 'medium' })
@@ -39,19 +29,19 @@ const dateStr = note.data.dateRead
 >
   <div class="book-header">
     {note.data.cover && (
-      <img src={note.data.cover} alt={`Cover of ${note.data.title}`} class="book-cover" loading="lazy" />
+      <img src={note.data.cover} alt={format(t.notes.bookCoverAlt, { title: note.data.title })} class="book-cover" loading="lazy" />
     )}
     <div class="book-meta">
       {note.data.category && <span class="note-category-badge">{note.data.category}</span>}
       <h1 class="book-title">{note.data.title}</h1>
       {note.data.author && note.data.author.length > 0 && (
-        <p class="book-author">{t.by} {note.data.author.join(', ')}</p>
+        <p class="book-author">{format(t.notes.bookBy, { authors: note.data.author.join(', ') })}</p>
       )}
       <div class="book-details">
         {note.data.rating && <span class="book-rating">{note.data.rating}</span>}
-        {note.data.pages && <span class="book-pages">{note.data.pages} {t.pages}</span>}
+        {note.data.pages && <span class="book-pages">{format(t.notes.bookPages, { count: note.data.pages })}</span>}
         {statusLabel && <span class="book-status" data-status={statusKey}>{statusLabel}</span>}
-        {dateStr && <span class="book-date-read">{t.readOn} {dateStr}</span>}
+        {dateStr && <span class="book-date-read">{format(t.notes.bookReadOn, { date: dateStr })}</span>}
       </div>
       {note.data.tags && note.data.tags.length > 0 && (
         <div class="note-tags">
@@ -64,7 +54,7 @@ const dateStr = note.data.dateRead
   <hr class="preamble-divider" />
 
   {isTranslationFallback && (
-    <div class="fallback-notice"><p>{t.fallbackNotice}</p></div>
+    <TranslationFallbackNotice message={t.notes.fallbackNotice} />
   )}
 
   <div class="note-content prose">
@@ -162,14 +152,6 @@ const dateStr = note.data.dateRead
     border-top: 1px solid var(--note-accent);
     margin: var(--space-6) 0;
     opacity: 0.5;
-  }
-
-  .fallback-notice {
-    background-color: color-mix(in srgb, #f59e0b 12%, var(--surface));
-    border-left: 4px solid #f59e0b;
-    padding: var(--space-4);
-    margin-bottom: var(--space-8);
-    color: var(--text);
   }
 
   .note-content { margin-bottom: var(--space-10); }

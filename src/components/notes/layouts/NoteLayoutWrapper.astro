@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import type { Locale } from '../../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../../lib/content/locale';
+import { useTranslations } from '../../../i18n/ui';
 import BackToTop from '../../site/BackToTop.astro';
 import { getNoteAccentColor } from '../../../lib/notes';
 import NoteFooter from '../NoteFooter.astro';
@@ -26,17 +27,16 @@ interface Props extends NoteLayoutProps {
 const { note, locale, prev, next, relatedNotes, articleClass } = Astro.props;
 
 const accent = getNoteAccentColor(note.data.colorToken, note.data.category);
-const backHref = locale === 'en' ? '/notes' : '/pt-br/notes';
-const backLabel = locale === 'en' ? '← Back to notes' : '← Voltar para notas';
+const t = useTranslations(locale);
 ---
 
 <article class={articleClass} style={`--note-accent: ${accent}`}>
-  <a href={backHref} class="back-link">{backLabel}</a>
+  <a href={contentLocalePath(locale, '/notes')} class="back-link">{t.notes.backToNotes}</a>
   <slot />
   <NoteFooter note={note} relatedNotes={relatedNotes} prev={prev} next={next} locale={locale} />
 </article>
 
-<BackToTop />
+<BackToTop locale={locale} />
 
 <slot name="after" />
 

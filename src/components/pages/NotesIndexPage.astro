@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NotesGrid from '../notes/NotesGrid.astro';
+import NotesFilters from '../notes/NotesFilters.astro';
+import { buildNoteIndex } from '../../lib/content/staticPaths';
+import { contentLocalePath, type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const translations = {
+  en: contentLocalePath('en', '/notes'),
+  'pt-br': contentLocalePath('pt-br', '/notes'),
+};
+
+const allNotes = await getCollection('notes');
+const { notesToShow, categories, tags, categoryCounts, noteTypes, noteTypeCounts } = buildNoteIndex(allNotes, locale);
+---
+
+<BaseLayout locale={locale} pageType="notes-index" translations={translations}>
+  <header class="page-header">
+    <h1 class="page-title">{t.notes.title}</h1>
+    <p class="page-description">{t.notes.description}</p>
+  </header>
+
+  <div class="notes-layout">
+    <aside class="notes-sidebar">
+      <NotesFilters categories={categories} categoryCounts={categoryCounts} tags={tags} noteTypes={noteTypes} noteTypeCounts={noteTypeCounts} locale={locale} />
+    </aside>
+    <div class="notes-content">
+      <NotesGrid notes={notesToShow} locale={locale} />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding-block-start: var(--space-8);
+    margin-bottom: var(--space-12);
+  }
+
+  .page-title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-4);
+  }
+
+  .page-description {
+    font-size: var(--text-lg);
+    color: var(--text-muted);
+  }
+
+  .notes-layout {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .notes-sidebar {
+    position: sticky;
+    top: var(--space-8);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+
+  @media (max-width: 48rem) {
+    .notes-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .notes-sidebar {
+      position: static;
+    }
+  }
+</style>

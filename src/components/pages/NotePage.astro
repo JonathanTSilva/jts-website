@@ -1,0 +1,45 @@
+---
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import { ogImagePath } from '../../lib/content/routes';
+import type { Locale } from '../../lib/content/locale';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DefaultNoteLayout from '../notes/layouts/DefaultNoteLayout.astro';
+import BookNoteLayout from '../notes/layouts/BookNoteLayout.astro';
+import MindmapLayout from '../notes/layouts/MindmapLayout.astro';
+import WhiteboardLayout from '../notes/layouts/WhiteboardLayout.astro';
+
+interface Props {
+  locale: Locale;
+  note: CollectionEntry<'notes'>;
+  translations: Partial<Record<Locale, string>>;
+  isTranslationFallback: boolean;
+  prev: CollectionEntry<'notes'> | undefined;
+  next: CollectionEntry<'notes'> | undefined;
+  relatedNotes: CollectionEntry<'notes'>[];
+}
+
+const { locale, note, translations, isTranslationFallback, prev, next, relatedNotes } = Astro.props;
+const { Content } = await render(note);
+
+const layouts = {
+  note:       DefaultNoteLayout,
+  book:       BookNoteLayout,
+  mindmap:    MindmapLayout,
+  whiteboard: WhiteboardLayout,
+} as const;
+
+const NoteLayout = layouts[note.data.noteType ?? 'note'];
+---
+
+<BaseLayout
+  locale={locale}
+  title={note.data.title}
+  description={note.data.summary ?? undefined}
+  image={ogImagePath('notes', note.data.language, note.data.slug)}
+  ogType="article"
+  translations={translations}
+  noindex={isTranslationFallback}
+>
+  <NoteLayout note={note} Content={Content} locale={locale} prev={prev} next={next} relatedNotes={relatedNotes} />
+</BaseLayout>

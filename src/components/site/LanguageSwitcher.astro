@@ -1,5 +1,6 @@
 ---
 import { type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 
 interface Props {
   currentLocale: Locale;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const { currentLocale, currentPath, translations } = Astro.props;
+const t = useTranslations(currentLocale);
 
 // Compute target URL for each locale
 const enHref = translations?.en || (currentPath.startsWith('/pt-br')
@@ -19,7 +21,7 @@ const ptHref = translations?.['pt-br'] || (currentLocale === 'en'
   : currentPath);
 ---
 
-<div class="lang-pill" role="group" aria-label="Language switcher">
+<div class="lang-pill" role="group" aria-label={t.site.languageSwitcher}>
   {currentLocale === 'en' ? (
     <span class="lang-btn lang-btn--active" aria-current="true" data-locale="en">EN</span>
   ) : (

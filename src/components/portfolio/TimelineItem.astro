@@ -1,11 +1,15 @@
 ---
 import type { WebsiteTimelineItem } from '../../lib/career/website';
+import type { Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 
 interface Props {
   entry: WebsiteTimelineItem;
+  locale: Locale;
 }
 
-const { entry } = Astro.props;
+const { entry, locale } = Astro.props;
+const t = useTranslations(locale);
 const dateRange = `${entry.startDate} – ${entry.endDate}`;
 ---
 
@@ -15,7 +19,7 @@ const dateRange = `${entry.startDate} – ${entry.endDate}`;
   <div class="timeline-content">
     <div class="timeline-header">
       <span class:list={['timeline-badge', entry.kind === 'work' ? 'badge-work' : 'badge-edu']}>
-        {entry.kind === 'work' ? 'WORK' : 'EDUCATION'}
+        {entry.kind === 'work' ? t.portfolio.timelineWork : t.portfolio.timelineEducation}
       </span>
       <span class="timeline-company">{entry.organization}</span>
       <span class="timeline-date">{dateRange}</span>

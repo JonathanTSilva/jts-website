@@ -3,25 +3,15 @@ import { getCollection } from 'astro:content';
 import ProjectCard from '../portfolio/ProjectCard.astro';
 import { career } from '../../content/portfolio/career';
 import { getWebsiteProjects, getWebsitePublications } from '../../lib/career/website';
-import { contentLocalePath } from '../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 
 interface Props {
-  locale: 'en' | 'pt-br';
-  t: {
-    projects: string;
-    publications: string;
-    blog: string;
-    notes: string;
-    seeAllPortfolio: string;
-    downloadCv: string;
-    viewAllBlog: string;
-    viewAllNotes: string;
-    at: string;
-    viewAllPublications: string;
-  };
+  locale: Locale;
 }
 
-const { locale, t } = Astro.props;
+const { locale } = Astro.props;
+const t = useTranslations(locale);
 
 // Fetch latest blog posts
 const blogPosts = await getCollection('blog', ({ data }) => {
@@ -41,33 +31,28 @@ const latestNotes = notes
 
 const selectedProjects = getWebsiteProjects(career, locale, { home: true });
 const publications = getWebsitePublications(career, locale);
-
-const projectsLabel = locale === 'pt-br' ? '// portfólio' : '// portfolio';
-const publicationsLabel = locale === 'pt-br' ? '// portfólio' : '// portfolio';
-const blogLabel = locale === 'pt-br' ? '// blog' : '// blog';
-const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
 ---
 
 <section class="home-section">
   <header class="section-header">
-    <p class="section-label">{projectsLabel}</p>
-    <h2 class="section-heading">{t.projects}</h2>
+    <p class="section-label">{t.home.eyebrow.projects}</p>
+    <h2 class="section-heading">{t.portfolio.projects}</h2>
   </header>
   <div class="grid">
     {selectedProjects.map((project) => (
-      <ProjectCard project={project} />
+      <ProjectCard project={project} locale={locale} />
     ))}
   </div>
   <div class="cta">
-    <a href={contentLocalePath(locale, '/portfolio')} class="btn-primary">{t.seeAllPortfolio}</a>
-    <a href="/assets/cv/jonathan-cv.pdf" download class="btn-secondary">{t.downloadCv}</a>
+    <a href={contentLocalePath(locale, '/portfolio')} class="btn-primary">{t.home.seeFullPortfolio}</a>
+    <a href="/assets/cv/jonathan-cv.pdf" download class="btn-secondary">{t.portfolio.downloadCv}</a>
   </div>
 </section>
 
 <section class="home-section">
   <header class="section-header">
-    <p class="section-label">{publicationsLabel}</p>
-    <h2 class="section-heading">{t.publications}</h2>
+    <p class="section-label">{t.home.eyebrow.publications}</p>
+    <h2 class="section-heading">{t.portfolio.publications}</h2>
   </header>
   <div class="pub-card-row">
     {publications.map((pub) => (
@@ -85,21 +70,21 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
         <div class="pub-card-footer">
           <span class="pub-card-publisher">{pub.venue}</span>
           {pub.url && (
-            <a href={pub.url} class="pub-card-arrow" target="_blank" rel="noopener noreferrer" aria-label="Open publication">→</a>
+            <a href={pub.url} class="pub-card-arrow" target="_blank" rel="noopener noreferrer" aria-label={t.home.openPublication}>→</a>
           )}
         </div>
       </div>
     ))}
   </div>
   <a href={contentLocalePath(locale, '/portfolio')} class="pub-viewall section-viewall">
-    {t.viewAllPublications} →
+    {t.home.viewAllPublications} →
   </a>
 </section>
 
 <section class="home-section">
   <header class="section-header">
-    <p class="section-label">{blogLabel}</p>
-    <h2 class="section-heading">{t.blog}</h2>
+    <p class="section-label">{t.home.eyebrow.blog}</p>
+    <h2 class="section-heading">{t.home.latestPosts}</h2>
   </header>
   <div class="blog-list">
     {latestBlogPosts.map((post) => (
@@ -114,13 +99,13 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
       </a>
     ))}
   </div>
-  <a href={contentLocalePath(locale, '/blog')} class="section-viewall">{t.viewAllBlog} →</a>
+  <a href={contentLocalePath(locale, '/blog')} class="section-viewall">{t.home.viewAllPosts} →</a>
 </section>
 
 <section class="home-section">
   <header class="section-header">
-    <p class="section-label">{notesLabel}</p>
-    <h2 class="section-heading">{t.notes}</h2>
+    <p class="section-label">{t.home.eyebrow.notes}</p>
+    <h2 class="section-heading">{t.home.latestNotes}</h2>
   </header>
   <div class="notes-grid">
     {latestNotes.map((note) => (
@@ -138,7 +123,7 @@ const notesLabel = locale === 'pt-br' ? '// notas' : '// notes';
       </a>
     ))}
   </div>
-  <a href={contentLocalePath(locale, '/notes')} class="section-viewall">{t.viewAllNotes} →</a>
+  <a href={contentLocalePath(locale, '/notes')} class="section-viewall">{t.home.viewAllNotes} →</a>
 </section>
 
 <style>

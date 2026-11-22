@@ -63,3 +63,35 @@ test('PT skip link is Portuguese', async ({ page }) => {
   await page.goto('/pt-br/');
   await expect(page.locator('.skip-link')).toHaveText('Pular para o conteúdo');
 });
+
+test('PT site chrome is Portuguese', async ({ page }) => {
+  await page.goto('/pt-br/');
+  await expect(page.locator('.logo-img')).toHaveAttribute('alt', 'Logo da JTS');
+  await expect(page.locator('.search-field')).toHaveAttribute('aria-label', 'Abrir busca');
+  await expect(page.locator('.search-field input')).toHaveAttribute('placeholder', 'Buscar...');
+  await expect(page.locator('.theme-toggle').first()).toHaveAttribute('aria-label', 'Alternar tema');
+  await expect(page.locator('.lang-pill').first()).toHaveAttribute('aria-label', 'Seletor de idioma');
+  await expect(page.locator('.hero')).toHaveAttribute('aria-label', 'Introdução');
+  await expect(page.locator('.footer-social-link[aria-label="Feed RSS"]')).toHaveAttribute('href', '/pt-br/rss.xml');
+});
+
+test('PT blog, post and portfolio chrome is Portuguese', async ({ page }) => {
+  await page.goto('/pt-br/blog');
+  await expect(page.locator('.blog-filter-bar')).toHaveAttribute('aria-label', 'Filtrar por categoria');
+  await expect(page.locator('.filter-category-btn[data-category="all"]')).toContainText('Todos');
+
+  await page.goto('/pt-br/blog/welcome');
+  await expect(page.locator('.post-nav')).toHaveAttribute('aria-label', 'Navegação entre posts');
+  await expect(page.locator('.share-btn[data-platform="copy"]')).toHaveAttribute('aria-label', 'Copiar link');
+  await expect(page.locator('.share-btn[data-platform="linkedin"]')).toHaveAttribute('aria-label', 'Compartilhar no LinkedIn');
+
+  await page.goto('/pt-br/portfolio');
+  await expect(page.locator('.badge-work').first()).toHaveText('TRABALHO');
+  await expect(page.locator('.badge-edu').first()).toHaveText('FORMAÇÃO');
+  await expect(page.locator('.card-status[data-status="Active"]').first()).toHaveText('Ativo');
+});
+
+test('EN footer RSS link points at the English feed', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.footer-social-link[aria-label="RSS feed"]')).toHaveAttribute('href', '/rss.xml');
+});

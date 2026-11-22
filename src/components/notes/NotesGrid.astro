@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import type { Locale } from '../../lib/content/locale';
-import { contentLocalePath } from '../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 import DefaultNoteCard from './cards/DefaultNoteCard.astro';
 import BookNoteCard from './cards/BookNoteCard.astro';
 import MindmapCard from './cards/MindmapCard.astro';
@@ -14,15 +14,13 @@ interface Props {
 
 const { notes, locale } = Astro.props;
 
-const translationMissingLabel = locale === 'en'
-  ? 'Available in Portuguese only'
-  : 'Disponível apenas em Inglês';
+const t = useTranslations(locale);
 ---
 
 <div class="notes-grid" id="notes-grid">
   {notes.map(note => {
     const type = note.data.noteType ?? 'note';
-    const cardProps = { note, locale, translationMissingLabel };
+    const cardProps = { note, locale };
     return type === 'book'       ? <BookNoteCard {...cardProps} />
          : type === 'mindmap'    ? <MindmapCard {...cardProps} />
          : type === 'whiteboard' ? <WhiteboardCard {...cardProps} />
@@ -30,13 +28,13 @@ const translationMissingLabel = locale === 'en'
   })}
 
   <div id="no-notes-message" class="no-notes-message" style="display: none;">
-    <p>{locale === 'en' ? 'No notes found matching the selected filters.' : 'Nenhuma nota encontrada com os filtros selecionados.'}</p>
+    <p>{t.notes.noResults}</p>
   </div>
 </div>
 
 <div class="cross-section-link">
   <a href={contentLocalePath(locale, '/blog')} class="cross-section-nav">
-    {locale === 'pt-br' ? 'Ler o blog →' : 'Read the Blog →'}
+    {t.notes.readTheBlog}
   </a>
 </div>
 

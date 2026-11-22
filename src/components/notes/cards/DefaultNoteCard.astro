@@ -1,17 +1,17 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import type { Locale } from '../../../lib/content/locale';
-import { contentLocalePath } from '../../../lib/content/locale';
+import { contentLocalePath, type Locale } from '../../../lib/content/locale';
+import { useTranslations } from '../../../i18n/ui';
 import { getNoteAccentColor } from '../../../lib/notes';
 import TranslationStatusTag from '../../site/TranslationStatusTag.astro';
 
 interface Props {
   note: CollectionEntry<'notes'> & { isTranslationMissing?: boolean };
   locale: Locale;
-  translationMissingLabel: string;
 }
 
-const { note, locale, translationMissingLabel } = Astro.props;
+const { note, locale } = Astro.props;
+const t = useTranslations(locale);
 ---
 
 <article
@@ -32,7 +32,7 @@ const { note, locale, translationMissingLabel } = Astro.props;
     </header>
     <h2 class="note-title">{note.data.title}</h2>
     {note.isTranslationMissing && (
-      <TranslationStatusTag text={translationMissingLabel} />
+      <TranslationStatusTag text={t.site.translationMissing} />
     )}
     {note.data.summary && <p class="note-summary">{note.data.summary}</p>}
     {note.data.tags && note.data.tags.length > 0 && (

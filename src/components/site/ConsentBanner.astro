@@ -1,6 +1,7 @@
 ---
 import { CONSENT_STORAGE_KEY } from '../../lib/analytics/consent';
 import type { Locale } from '../../lib/content/locale';
+import { useTranslations } from '../../i18n/ui';
 
 interface Props {
   locale: Locale;
@@ -8,20 +9,7 @@ interface Props {
 
 const { locale } = Astro.props;
 
-const t = {
-  en: {
-    title: 'Privacy choices',
-    body: 'I use analytics to understand traffic and which contact links matter most.',
-    accept: 'Accept analytics',
-    reject: 'Reject',
-  },
-  'pt-br': {
-    title: 'Escolhas de privacidade',
-    body: 'Eu uso analytics para entender o tráfego e quais links de contato geram mais interesse.',
-    accept: 'Aceitar analytics',
-    reject: 'Recusar',
-  },
-}[locale];
+const t = useTranslations(locale).consent;
 ---
 
 <section class="consent-banner" data-testid="consent-banner" aria-label={t.title}>
