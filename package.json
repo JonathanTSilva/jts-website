@@ -47,7 +47,7 @@
     "astro": "^7.4.13",
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
-    "katex": "^0.16.44",
+    "katex": "^0.19.1",
     "mermaid": "^12.3.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
@@ -84,7 +84,7 @@
   "pnpm": {
     "overrides": {
       "fflate@>=0.7.0 <0.7.5": "0.7.5",
-      "katex": "0.16.44"
+      "katex": "0.19.1"
     }
   }
 }
