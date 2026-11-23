@@ -26,6 +26,15 @@ test.describe('Engineering page', () => {
     }
   });
 
+  test('publishes the data stamp the build used', async ({ request }) => {
+    const res = await request.get('/engineering/data.json');
+    expect(res.ok()).toBe(true);
+    const stamp = await res.json();
+    expect(Object.keys(stamp).sort()).toEqual(['generated_at', 'source']);
+    expect(stamp.generated_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+    expect(['live', 'snapshot']).toContain(stamp.source);
+  });
+
   test('pt-br: renders the translated page', async ({ page }) => {
     await page.goto('/pt-br/engineering');
     await expect(page.getByRole('heading', { name: 'Engenharia', level: 1, exact: true })).toBeVisible();

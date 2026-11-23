@@ -1,0 +1,85 @@
+name: Engineering Refresh
+
+# /engineering is built from the jts-ops dashboard. Rather than wait for the nightly
+# pipeline run (04:17 UTC), check every hour whether the live data is newer than what the
+# deployed site was built with, and start the pipeline if so. jts-ops cannot dispatch to this
+# repo (its audit uses only GITHUB_TOKEN), so this side does the polling.
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+# One check at a time; a late run is simply skipped in favour of the next.
+concurrency:
+  group: engineering-refresh
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # actions: write starts the pipeline run; it also covers listing runs. No checkout, no other scope.
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      LIVE_URL: https://jonathantsilva.github.io/jts-ops/dashboard.json
+      DEPLOYED_URL: https://www.jontobias.com/engineering/data.json
+      # Pages caches for up to 10 minutes, and a snapshot build is retried at most this often.
+      SETTLE_MINUTES: '30'
+      SNAPSHOT_RETRY_MINUTES: '360'
+    steps:
+      - name: Rebuild when the live data is newer than the deployed data
+        shell: bash
+        run: |
+          set -euo pipefail
+          stamp_re='^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$'
+
+          live="$(curl -fsS --max-time 20 "$LIVE_URL" | jq -er '.generated_at')" || live=''
+          if [[ ! "$live" =~ $stamp_re ]]; then
+            echo "::warning::Could not read generated_at from the live dashboard; nothing to compare."
+            exit 0
+          fi
+
+          # A missing file (first deploy, outage) counts as "needs a build".
+          deployed_at=''
+          deployed_source=''
+          if body="$(curl -fsS --max-time 20 "$DEPLOYED_URL")"; then
+            deployed_at="$(jq -er '.generated_at' <<<"$body")" || deployed_at=''
+            deployed_source="$(jq -er '.source' <<<"$body")" || deployed_source=''
+          fi
+          echo "live=$live deployed=${deployed_at:-missing} source=${deployed_source:-missing}"
+
+          now="$(date +%s)"
+          runs="$(gh run list --workflow pipeline.yml --branch main --limit 20 --json status,updatedAt)"
+
+          if [[ "$(jq '[.[] | select(.status != "completed")] | length' <<<"$runs")" -gt 0 ]]; then
+            echo "A pipeline run is queued or in progress; it will pick up the latest data."
+            exit 0
+          fi
+          last_run="$(jq -r 'map(.updatedAt) | max // empty' <<<"$runs")"
+          age_min=999999
+          [[ -n "$last_run" ]] && age_min=$(( (now - $(date -d "$last_run" +%s)) / 60 ))
+
+          if [[ "$age_min" -lt "$SETTLE_MINUTES" ]]; then
+            echo "The last pipeline run finished $age_min min ago; the deployed file may still be cached."
+            exit 0
+          fi
+
+          if [[ "$deployed_source" != "live" || ! "$deployed_at" =~ $stamp_re ]]; then
+            # The last build used the snapshot (or the file is missing). Retry, but not every hour.
+            if [[ "$age_min" -lt "$SNAPSHOT_RETRY_MINUTES" ]]; then
+              echo "The deployed build is not on live data, but the last run was $age_min min ago; retrying later."
+              exit 0
+            fi
+            reason="deployed build is not on live data"
+          elif [[ "$live" > "$deployed_at" ]]; then
+            reason="live data ($live) is newer than the deployed data ($deployed_at)"
+          else
+            echo "The deployed site is up to date."
+            exit 0
+          fi
+
+          echo "Starting pipeline.yml: $reason"
+          gh workflow run pipeline.yml --ref main

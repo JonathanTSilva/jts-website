@@ -274,6 +274,8 @@ The PR title states the counts, for example `chore: sync content from vault (1 a
 ### jts-website: `.github/workflows/pipeline.yml`
 
 Runs on push to `main`, nightly (04:17 UTC) and manually (`workflow_dispatch`). Only a run on `main` deploys. Runs are serialized per ref and never cancelled; Pages deployments share one `pages` concurrency group.
+
+The nightly run is also the backstop for `/engineering`, which is built from the jts-ops audit data (audit at 03:17 UTC). Each build publishes the data it used as `/engineering/data.json` (`generated_at` and `source`, `live` or `snapshot`). `engineering-refresh.yml` runs hourly (minute 23) and manually, compares the live dashboard's `generated_at` with the deployed file, and starts `pipeline.yml` on `main` when the live data is newer or the deployed build used the snapshot. It does nothing while a pipeline run is queued or in progress, within 30 minutes of the last run, and retries a snapshot build at most every 6 hours. It needs only `actions: write` and the default `GITHUB_TOKEN`.
 1. `pnpm check` — TypeScript
 2. `pnpm lint:content` — frontmatter validation
 3. `pnpm test:unit`
