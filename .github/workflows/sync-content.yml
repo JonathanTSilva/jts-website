@@ -10,6 +10,8 @@ on:
   repository_dispatch:
     types: [ sync_content ]
 
+permissions: {}
+
 jobs:
   sync:
     runs-on: ubuntu-latest

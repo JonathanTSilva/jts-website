@@ -8,6 +8,8 @@ on:
         required: false
         default: ''
 
+permissions: {}
+
 jobs:
   update-snapshots:
     runs-on: ubuntu-24.04
