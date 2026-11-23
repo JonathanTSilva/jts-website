@@ -15,6 +15,8 @@
     interface Window {
       plausible?: ((eventName: string, opts?: { props?: Record<string, unknown> }) => void) & {
         q?: IArguments[];
+        o?: Record<string, unknown>;
+        init?: (options?: Record<string, unknown>) => void;
       };
     }
   }
@@ -37,6 +39,14 @@
       } as NonNullable<Window['plausible']>;
       plausibleWindow.plausible = stub;
     }
+
+    const plausible = plausibleWindow.plausible;
+    if (plausible && typeof plausible.init !== 'function') {
+      // Same as Plausible's official snippet: the real script reads `plausible.o` when it loads.
+      plausible.init = (options) => {
+        plausible.o = options || {};
+      };
+    }
   };
 
   const loadAnalytics = () => {
@@ -50,6 +60,12 @@
 
     bootstrapPlausible();
 
+    // The per-site script (/js/pa-*.js) has the dashboard URL baked in as its endpoint,
+    // which has no public DNS; point it at the public collection host instead.
+    if (analyticsConfig.scriptSrc.includes('/js/pa-')) {
+      plausibleWindow.plausible?.init?.({ endpoint: `${analyticsConfig.apiHost}/api/event` });
+    }
+
     const script = document.createElement('script');
     script.id = analyticsScriptId;
     script.defer = true;
@@ -60,6 +76,11 @@
     }
     script.src = analyticsConfig.scriptSrc;
     document.head.appendChild(script);
+
+    // Plausible's 404 goal: the script does not detect error pages by itself.
+    if (document.querySelector('[data-analytics-404]')) {
+      plausibleWindow.plausible?.('404', { props: { path: document.location.pathname } });
+    }
   };
 
   const trackEvent = (eventName: string, props?: Record<string, unknown>) => {

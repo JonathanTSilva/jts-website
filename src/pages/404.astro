@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ErrorHero from '../components/site/ErrorHero.astro';
 ---
 <BaseLayout title="404: Signal Lost" locale="en">
-  <div class="error-container">
+  <div class="error-container" data-analytics-404>
     <ErrorHero>
       <span slot="title" data-en="Signal Lost" data-pt="Sinal Perdido">Signal Lost</span>
       <span slot="text" data-en="The requested memory address is invalid or has been reallocated." data-pt="O endereço de memória solicitado é inválido ou foi realocado.">
