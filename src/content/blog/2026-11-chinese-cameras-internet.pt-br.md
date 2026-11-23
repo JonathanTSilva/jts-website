@@ -9,8 +9,6 @@ tags: ["home-assistant", "homelab", "iot", "openwrt", "privacidade"]
 category: "Homelab"
 ---
 
-# 2026-11-chinese-cameras-internet.pt-br
-
 No [[2026-11-low-cost-homelab-setup.pt-br|post sobre o meu homelab]] eu disse que a rede IoT não sai mais pra internet, com uma exceção: as câmeras podem abrir HTTPS pro Google. Prometi explicar essa exceção num post separado, e é o que faço aqui.
 
 Tenho duas câmeras Wi-Fi da **Jooan** em casa, uma W3-U e uma W5-U, usadas pelo app cam720 no celular. A página de login das câmeras aponta pra `policy.qacloud.com.cn`, então a nuvem por trás do app parece ser a "qacloud". Eu desconfiava que elas mandavam imagens pra nuvem do fabricante sem eu pedir.

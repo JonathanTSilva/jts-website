@@ -5,7 +5,7 @@ language: "en"
 translationKey: "chinese-cameras-internet"
 publishedAt: "2026-11-20"
 summary: "I measured what two Jooan Wi-Fi cameras try to reach on the internet, what happens when the IoT network loses its way out, and how they ended up working on the local network alone, with one narrow exception to Google."
-tags: ["homelab", "iot", "openwrt", "home-assistant", "privacy"]
+tags: ["home-assistant", "homelab", "iot", "openwrt", "privacy"]
 category: "Homelab"
 ---
 
@@ -14,7 +14,7 @@ In the [[2026-11-low-cost-homelab-setup.en|post about my homelab]] I said the Io
 I have two **Jooan** Wi-Fi cameras at home, a W3-U and a W5-U, used through the cam720 app on my phone. The cameras' login page points to `policy.qacloud.com.cn`, so the cloud behind the app seems to be "qacloud". I suspected they were sending images to the vendor's cloud without my asking.
 
 | ![[att-20261120105307089.png]] | ![[att-20261120104934624.png]] |
-| :---: | :---: |
+|:---: |:---: |
 | W5-U | W3-U |
 
 *The two Jooan cameras. Each has two lenses, one that moves (PTZ) and one fixed.*
