@@ -43,6 +43,7 @@ CI runs the same checks through the shared workflows in [`.github`](https://gith
 - Commits and PR titles: Conventional Commits. Squash-merge only.
 - Names: lowercase kebab-case. See [naming](https://github.com/JonathanTSilva/.github/blob/main/handbook/naming.md).
 - Layout of this repo: [repo anatomy](https://github.com/JonathanTSilva/.github/blob/main/handbook/repo-anatomy.md).
+- Releases: release-please opens a release PR from Conventional Commits on `main`. Nobody edits the changelog or tags by hand. See [releases](https://github.com/JonathanTSilva/.github/blob/main/handbook/releases.md).
 - Labels and issues: [labels and issues](https://github.com/JonathanTSilva/.github/blob/main/handbook/labels-and-issues.md).
 - Security: [security](https://github.com/JonathanTSilva/.github/blob/main/handbook/security.md). Pin third-party actions by full commit SHA with a version comment.
 - AI assistance is disclosed in the PR template: [AI assistance](https://github.com/JonathanTSilva/.github/blob/main/handbook/ai.md).

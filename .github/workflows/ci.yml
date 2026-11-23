@@ -13,12 +13,12 @@ jobs:
     if: github.event_name == 'pull_request'
     permissions:
       pull-requests: read
-    uses: JonathanTSilva/.github/.github/workflows/pr-hygiene.yml@v1
+    uses: JonathanTSilva/.github/.github/workflows/pr-hygiene.yml@41e78aaeff1979651002c8d5ea6ca3843670afe7 # v1.2.4
 
   docs:
     permissions:
       contents: read
-    uses: JonathanTSilva/.github/.github/workflows/lint-docs.yml@v1
+    uses: JonathanTSilva/.github/.github/workflows/lint-docs.yml@41e78aaeff1979651002c8d5ea6ca3843670afe7 # v1.2.4
 
   security:
     # GitHub checks caller permissions statically, so all of them are granted
@@ -29,14 +29,14 @@ jobs:
       actions: read
       id-token: write
       security-events: write
-    uses: JonathanTSilva/.github/.github/workflows/security.yml@v1
+    uses: JonathanTSilva/.github/.github/workflows/security.yml@41e78aaeff1979651002c8d5ea6ca3843670afe7 # v1.2.4
     with:
       public: true
 
   node:
     permissions:
       contents: read
-    uses: JonathanTSilva/.github/.github/workflows/node.yml@v1
+    uses: JonathanTSilva/.github/.github/workflows/node.yml@41e78aaeff1979651002c8d5ea6ca3843670afe7 # v1.2.4
     with:
       coverage: true
 
@@ -47,7 +47,7 @@ jobs:
       actions: read
       contents: read
       id-token: write
-    uses: JonathanTSilva/.github/.github/workflows/coverage.yml@v1
+    uses: JonathanTSilva/.github/.github/workflows/coverage.yml@41e78aaeff1979651002c8d5ea6ca3843670afe7 # v1.2.4
     with:
       artifact: node-coverage
       flags: node
@@ -56,7 +56,7 @@ jobs:
   e2e:
     permissions:
       contents: read
-    uses: JonathanTSilva/.github/.github/workflows/e2e.yml@v1
+    uses: JonathanTSilva/.github/.github/workflows/e2e.yml@41e78aaeff1979651002c8d5ea6ca3843670afe7 # v1.2.4
     with:
       command: pnpm build && pnpm exec playwright test
 
@@ -65,10 +65,22 @@ jobs:
   lighthouse:
     permissions:
       contents: read
-    uses: JonathanTSilva/.github/.github/workflows/lighthouse.yml@v1
+    uses: JonathanTSilva/.github/.github/workflows/lighthouse.yml@41e78aaeff1979651002c8d5ea6ca3843670afe7 # v1.2.4
     with:
       build-command: pnpm build:search && pnpm exec astro build
       static-dist-dir: dist
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+      attestations: write
+    uses: JonathanTSilva/.github/.github/workflows/release.yml@41e78aaeff1979651002c8d5ea6ca3843670afe7 # v1.2.4
+    secrets:
+      token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
   # The one check the repository ruleset requires. Skipped jobs are fine.
   ci:
@@ -82,6 +94,7 @@ jobs:
       - coverage
       - e2e
       - lighthouse
+      - release
     runs-on: ubuntu-latest
     permissions: {}
     steps:
