@@ -294,6 +294,10 @@ Runs on pull requests to `main` only, and adds the checks the shared `ci` workfl
 
 The shared `ci` workflow covers everything else on a PR (type check, content validation, unit tests, Chromium E2E).
 
+### jts-website: `.github/workflows/refresh-engineering-snapshot.yml`
+
+`/engineering` reads the live jts-ops dashboard at build time and falls back to `src/data/engineering-snapshot.json` when the fetch fails. A fallback prints a warning in the build log (a `::warning::` annotation in GitHub Actions) with the reason. This workflow keeps the snapshot fresh: weekly (Monday 05:41 UTC) and manually, it runs `pnpm refresh:engineering` and, only if the file changed, opens or updates the PR from branch `chore/143-refresh-engineering-snapshot`. It uses the same `OBSIDIAN_SYNC_TOKEN` as the sync, so the PR gets the `ci` check. The script refuses data that does not parse or that lists a non-public repo.
+
 ---
 
 ## Writing pipeline

@@ -90,24 +90,43 @@ export function parseDashboard(input: unknown): Dashboard | null {
   };
 }
 
+/** Makes a fallback visible: a `::warning::` annotation in GitHub Actions, a console warning elsewhere. */
+function warnFallback(reason: string, snapshotDate: string): void {
+  const message = `/engineering is built from the committed snapshot (${snapshotDate || 'no date'}), not live data: ${reason}`.replace(
+    /\s+/g,
+    ' ',
+  );
+  if (process.env.GITHUB_ACTIONS === 'true') {
+    console.log(`::warning title=Engineering dashboard fallback::${message}`);
+  } else {
+    console.warn(`[engineering] ${message}`);
+  }
+}
+
 /**
  * Fetches the live dashboard and falls back to the committed snapshot on any
- * failure (network, timeout, HTTP error, bad JSON, bad shape). Never throws.
+ * failure (network, timeout, HTTP error, bad JSON, bad shape), with a build
+ * warning that names the reason. Never throws.
  */
 export async function loadDashboard(
   fetchImpl: typeof fetch = fetch,
   url: string = DASHBOARD_URL,
 ): Promise<LoadedDashboard> {
+  let reason: string;
   try {
     const res = await fetchImpl(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (res.ok) {
       const live = parseDashboard(await res.json());
       if (live) return { data: live, source: 'live' };
+      reason = 'unexpected data shape';
+    } else {
+      reason = `HTTP ${res.status}`;
     }
-  } catch {
-    // fall through to the snapshot
+  } catch (err) {
+    reason = err instanceof Error ? `${err.name}: ${err.message}` : 'unknown error';
   }
   const fallback = parseDashboard(snapshot);
+  warnFallback(reason, fallback?.generated_at ?? '');
   if (!fallback) {
     // The committed snapshot is part of the repo and tested; this is a last resort.
     return {
