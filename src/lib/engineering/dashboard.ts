@@ -18,7 +18,7 @@ export interface DashboardRepo {
   badges: BadgeFlags;
 }
 
-export interface BadgeFlags {
+interface BadgeFlags {
   coverage: boolean;
   quality: boolean;
   release: boolean;
