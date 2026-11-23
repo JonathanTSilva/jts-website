@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { formatSyncPrTitle, formatSyncPrBody } from '../../scripts/sync-pr-message.ts';
-import type { SyncSummary } from '../../scripts/sync-content.ts';
+import { readTitle, type SyncSummary } from '../../scripts/sync-content.ts';
 
 const empty = (): SyncSummary => ({
   added: [], changed: [], removed: [], images: { added: [], updated: [], removed: [] },
@@ -53,5 +53,18 @@ describe('sync PR body', () => {
     const s = empty();
     s.added.push({ file: 'blog/a.en.md' });
     expect(formatSyncPrBody(s)).not.toContain('WARNING');
+  });
+});
+
+describe('readTitle', () => {
+  it.each([
+    ['---\ntitle: "Quoted"\n---\n', 'Quoted'],
+    ["---\ntitle: 'Single'\n---\n", 'Single'],
+    ['---\r\ntitle: Plain  \r\n---\r\n', 'Plain'],
+    ['---\nslug: x\n---\ntitle: not frontmatter\n', undefined],
+    ['no frontmatter', undefined],
+    ['---\ntitle:\n---\n', undefined],
+  ])('reads %j', (md, expected) => {
+    expect(readTitle(md)).toBe(expected);
   });
 });
