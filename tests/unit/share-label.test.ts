@@ -83,3 +83,9 @@ describe('lightenHex', () => {
     expect(lightenHex('#fff')).toBe('rgb(255,255,255)');
   });
 });
+
+describe('lightenHex without a leading hash', () => {
+  it('accepts a bare three-digit color', () => {
+    expect(lightenHex('000', 0.5)).toBe('rgb(128,128,128)');
+  });
+});

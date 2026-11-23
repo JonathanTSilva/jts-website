@@ -196,3 +196,46 @@ describe('resolveCv', () => {
     expect(devops.sections.map(section => section.kind)).toEqual(cvProfiles.devops.sectionOrder);
   });
 });
+
+describe('resolveCv optional fields and failures', () => {
+  it('rejects a verified position whose employer is unknown', () => {
+    const input = fixture();
+    input.positions[0]!.employerId = 'ghost';
+    expect(() => resolveCv(input, cvProfiles.generic)).toThrow(/Unknown employer: ghost/);
+  });
+
+  it('carries locations, roles, dates and publication URLs only when present', () => {
+    const input = fixture();
+    input.positions[0]!.location = { en: 'Remote', 'pt-br': 'Remoto' };
+    input.projects[1]!.role = { en: 'Lead', 'pt-br': 'Lider' };
+    input.projects[1]!.dates = { start: { value: '2022-05', precision: 'month' }, end: { value: '2023-02', precision: 'month' } };
+    input.projects[0]!.dates = { start: { value: '2021', precision: 'year' }, end: { value: '2022', precision: 'year' } };
+    input.education = [
+      {
+        id: 'school-a', institution: 'A', credential: { en: 'MSc', 'pt-br': 'Mestre' }, location: { en: 'City', 'pt-br': 'Cidade' },
+        dates: { start: { value: '2015', precision: 'year' }, end: { value: '2017-06', precision: 'month' } },
+        highlights: [], tags: [],
+      },
+      {
+        id: 'school-b', institution: 'B', credential: { en: 'BSc', 'pt-br': 'Bach' },
+        dates: { start: { value: '2011', precision: 'year' }, end: { value: '2015', precision: 'year' } },
+        highlights: [], tags: [],
+      },
+    ] as unknown as CareerData['education'];
+    input.publications = [
+      { id: 'with-url', title: { en: 'T1', 'pt-br': 'T1' }, authors: ['A'], venue: 'V', date: { value: '2020-01', precision: 'month' }, type: 'paper', url: 'https://example.com/p', themes: ['research'], priority: 5 },
+      { id: 'without-url', title: { en: 'T2', 'pt-br': 'T2' }, authors: ['B'], venue: 'V', date: { value: '2019', precision: 'year' }, type: 'paper', themes: ['research'], priority: 4 },
+    ] as unknown as CareerData['publications'];
+
+    const resolved = resolveCv(input, cvProfiles.generic);
+    expect(resolved.experience.find(({ id }) => id === 'older')).toMatchObject({ location: 'Remote' });
+    expect(resolved.experience.find(({ id }) => id === 'newer')).not.toHaveProperty('location');
+    expect(resolved.projects[0]).toMatchObject({ role: 'Lead' });
+    expect(resolved.projects[1]).not.toHaveProperty('role');
+    expect(resolved.education.map(({ id }) => id)).toEqual(['school-a', 'school-b']);
+    expect(resolved.education[0]).toMatchObject({ location: 'City' });
+    expect(resolved.education[1]).not.toHaveProperty('location');
+    expect(resolved.publications.find(({ id }) => id === 'with-url')).toMatchObject({ url: 'https://example.com/p' });
+    expect(resolved.publications.find(({ id }) => id === 'without-url')).not.toHaveProperty('url');
+  });
+});

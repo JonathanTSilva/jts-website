@@ -114,3 +114,42 @@ describe('rehypeCallouts', () => {
     expect(output).toContain('callout-content');
   });
 });
+
+describe('rehypeCallouts edge cases', () => {
+  it('leaves blockquotes that are not callouts untouched', async () => {
+    for (const html of [
+      '<blockquote></blockquote>',
+      '<blockquote><div>[!note] not a paragraph</div></blockquote>',
+      '<blockquote><p></p></blockquote>',
+      '<blockquote><p><em>[!note]</em></p></blockquote>',
+      '<blockquote><p>just a quote</p></blockquote>',
+    ]) {
+      expect(await transform(html)).not.toContain('callout');
+    }
+  });
+
+  it('moves text after the first line, and inline siblings, into the callout body', async () => {
+    const withBody = await transform('<blockquote><p>[!tip] Title\nbody text <b>bold</b></p></blockquote>');
+    expect(withBody).toContain('<p>body text <b>bold</b></p>');
+
+    const inlineOnly = await transform('<blockquote><p>[!tip]\n<b>bold only</b></p></blockquote>');
+    expect(inlineOnly).toContain('<b>bold only</b>');
+    expect(inlineOnly).toContain('Tip');
+  });
+
+  it('adds no body paragraph when nothing follows the header line', async () => {
+    const output = await transform('<blockquote><p>[!tip] Title\n</p></blockquote>');
+    expect(output).toContain('callout-title-text');
+    expect(output).not.toContain('<p></p>');
+  });
+
+  it('supports foldable callouts and unknown types', async () => {
+    const closed = await transform('<blockquote><p>[!faq]- Closed</p></blockquote>');
+    expect(closed).toContain('<summary');
+    expect(closed).toContain('callout-question');
+    const open = await transform('<blockquote><p>[!whatever]+</p></blockquote>');
+    expect(open).toContain('open');
+    expect(open).toContain('callout-note');
+    expect(open).toContain('Whatever');
+  });
+});

@@ -162,3 +162,27 @@ describe('CV print CSS', () => {
     expect(cvPrintStyles).not.toMatch(/font-size:\s*(?:[0-8](?:\.\d+)?|9(?:\.[0-6]\d*)?)pt/i);
   });
 });
+
+describe('renderCvHtml edge cases', () => {
+  it('renders without a link when the URL cannot be parsed and shows an experience location', () => {
+    const html = renderCvHtml({
+      ...view,
+      links: [{ kind: 'website', label: 'Broken', url: 'not a url' } as never],
+      experience: [{ ...view.experience[0]!, location: 'Remote <b>' }],
+    });
+    expect(html).toContain('Broken');
+    expect(html).not.toContain('href="not a url"');
+    expect(html).toContain('| Remote &lt;b&gt;');
+  });
+
+  it('rejects publications without authors', () => {
+    expect(() => renderCvHtml({ ...view, publications: [{ ...view.publications[0]!, authors: [] }] })).toThrow(
+      /authors must not be empty/,
+    );
+  });
+
+  it('rejects unsupported section kinds while checking content and while rendering', () => {
+    const bogus = { ...view, sections: [{ kind: 'bogus' }] } as unknown as ResolvedCv;
+    expect(() => renderCvHtml(bogus)).toThrow(/Unsupported CV section kind: bogus/);
+  });
+});

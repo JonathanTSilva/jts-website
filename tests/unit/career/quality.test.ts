@@ -145,3 +145,44 @@ describe('getCvQualityWarnings', () => {
     }));
   });
 });
+
+describe('getCvQualityWarnings edge cases', () => {
+  it('treats highlights without comparable words as dissimilar and warns once per identity', () => {
+    const input = mutableView();
+    input.experience[0]!.highlights = [
+      { id: 'symbols', text: '!!! ???' },
+      { id: 'stopwords', text: 'the a an' },
+      { id: 'same-id', text: 'Was responsible for the first task.' },
+      { id: 'same-id', text: 'Was responsible for the second task.' },
+    ];
+    input.projects = [];
+    const warnings = getCvQualityWarnings(input, cvProfiles.devops);
+    expect(warnings.some(({ code }) => code === 'near-duplicate')).toBe(false);
+    expect(warnings.filter(({ code }) => code === 'passive-opening')).toHaveLength(1);
+  });
+
+  it('reads project and education highlights and project roles for theme relevance', () => {
+    const input = mutableView();
+    input.experience = [];
+    input.projects = [{
+      id: 'p', title: 'Painting', description: 'Art', role: 'Lead', links: [],
+      highlights: [{ id: 'h', text: 'Was responsible for the pipeline.' }],
+    }];
+    input.education = [{
+      id: 'e', institution: 'School', credential: 'MSc', dates: { start: { value: '2020', precision: 'year' } },
+      highlights: [{ id: 'eh', text: 'Was responsible for something.' }],
+    }];
+    const warnings = getCvQualityWarnings(input, cvProfiles.devops);
+    expect(warnings).toContainEqual(expect.objectContaining({ code: 'passive-opening', entityId: 'devops:education:e:eh' }));
+    expect(warnings).toContainEqual(expect.objectContaining({ code: 'passive-opening', entityId: 'devops:project:p:h' }));
+  });
+
+  it('falls back to the general theme when the profile orders no themes', () => {
+    const input = mutableView();
+    input.projects = [{ id: 'unfocused', title: 'Painting', description: 'Watercolor art', links: [], highlights: [] }];
+    const profile = { ...cvProfiles.devops, themeOrder: [] } as unknown as typeof cvProfiles.devops;
+    const warnings = getCvQualityWarnings(input, profile);
+    expect(warnings).toContainEqual(expect.objectContaining({ code: 'weak-theme-relevance' }));
+    expect(warnings.find(({ code }) => code === 'weak-theme-relevance')!.message).toContain('general');
+  });
+});

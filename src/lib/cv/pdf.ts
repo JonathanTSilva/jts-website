@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { chromium } from '@playwright/test';
+import { chromium, type Browser } from '@playwright/test';
 import { PDFDocument, PDFName, PDFString } from 'pdf-lib';
 import type { ResolvedCv } from './types';
 
@@ -17,8 +17,11 @@ export const prepareCvPdfHtml = async (html: string): Promise<string> => {
   return html.replace('<style>', `<style>${fonts}`);
 };
 
-export const renderPdfBytes = async (html: string): Promise<Uint8Array> => {
-  const browser = await chromium.launch({ headless: true });
+type LaunchBrowser = () => Promise<Pick<Browser, 'newPage' | 'close'>>;
+const launchChromium: LaunchBrowser = () => chromium.launch({ headless: true });
+
+export const renderPdfBytes = async (html: string, launchBrowser: LaunchBrowser = launchChromium): Promise<Uint8Array> => {
+  const browser = await launchBrowser();
   try {
     const page = await browser.newPage();
     const sourceHtml = await prepareCvPdfHtml(html);
