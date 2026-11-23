@@ -19,15 +19,20 @@ async function main(): Promise<void> {
   if (parsed.repos.some((r) => r.visibility !== 'public')) {
     throw new Error('the dashboard lists a non-public repo; refusing to commit it');
   }
+  // Remote text reaches the Actions log below: accept only a plain UTC timestamp.
+  const stamp = parsed.generated_at;
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(stamp)) {
+    throw new Error('the dashboard generated_at is not a UTC timestamp');
+  }
 
   const next = `${JSON.stringify(raw, null, 2)}\n`;
   const current = fs.existsSync(SNAPSHOT_PATH) ? fs.readFileSync(SNAPSHOT_PATH, 'utf8') : '';
   if (next === current) {
-    console.log(`Snapshot already up to date (${parsed.generated_at}).`);
+    console.log(`Snapshot already up to date (${stamp}).`);
     return;
   }
   fs.writeFileSync(SNAPSHOT_PATH, next);
-  console.log(`Snapshot refreshed to ${parsed.generated_at} (${parsed.repos.length} repos).`);
+  console.log(`Snapshot refreshed to ${stamp} (${parsed.repos.length} repos).`);
 }
 
 main().catch((err: unknown) => {
