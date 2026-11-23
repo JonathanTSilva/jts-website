@@ -101,14 +101,21 @@ export interface DirPlan {
 }
 
 const isMarkdown = (f: string) => f.endsWith('.md') || f.endsWith('.mdx');
+const byName = (a: string, b: string) => a.localeCompare(b);
 
 /** Reads the frontmatter `title` of a markdown file, or undefined. */
 export function readTitle(markdown: string): string | undefined {
-  const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(markdown);
-  if (!fm) return undefined;
-  const line = /^title:\s*(.+?)\s*$/m.exec(fm[1] ?? '');
-  if (!line?.[1]) return undefined;
-  return line[1].replace(/^(["'])(.*)\1$/, '$2');
+  const lines = markdown.split('\n').map(l => l.trimEnd());
+  if (lines[0] !== '---') return undefined;
+  for (const line of lines.slice(1)) {
+    if (line === '---') return undefined; // end of frontmatter, no title
+    if (!line.startsWith('title:')) continue;
+    const value = line.slice('title:'.length).trim();
+    const quote = value[0];
+    const quoted = value.length > 1 && (quote === '"' || quote === "'") && value.endsWith(quote);
+    return (quoted ? value.slice(1, -1) : value) || undefined;
+  }
+  return undefined;
 }
 
 /**
@@ -123,9 +130,9 @@ export async function planDirMirror(
 ): Promise<DirPlan | null> {
   if (!fs.existsSync(srcPath)) return null;
 
-  const srcFiles = (await fs.readdir(srcPath)).filter(isMarkdown).sort();
+  const srcFiles = (await fs.readdir(srcPath)).filter(isMarkdown).sort(byName);
   const destFiles = fs.existsSync(destPath)
-    ? (await fs.readdir(destPath)).filter(isMarkdown).sort()
+    ? (await fs.readdir(destPath)).filter(isMarkdown).sort(byName)
     : [];
   const destSet = new Set(destFiles);
   const srcSet = new Set(srcFiles);
@@ -346,7 +353,7 @@ export async function copyReferencedImages(
     for (const f of missing) console.error(`    - ${f}`);
   }
 
-  return { copied, missing, added: added.sort(), updated: updated.sort() };
+  return { copied, missing, added: added.sort(byName), updated: updated.sort(byName) };
 }
 
 // ---------------------------------------------------------------------------
@@ -459,7 +466,7 @@ export async function syncContent(
   if (fs.existsSync(publishDir)) {
     const removed = await pruneOrphanUploads(uploadsDest, refs);
     if (removed.length > 0) console.log(`[images] pruned ${removed.length} unreferenced upload(s)`);
-    summary.images.removed = removed.sort();
+    summary.images.removed = removed.sort(byName);
   }
 
   console.log('\n── Done ──────────────────────────────────────\n');

@@ -18,6 +18,9 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-24.04
+    # A normal run takes 4-5 minutes. Without a limit a hung step (a stalled browser
+    # download, for example) holds this run and every queued deploy for 6 hours.
+    timeout-minutes: 20
     permissions:
       contents: read
     env:
@@ -112,6 +115,7 @@ jobs:
     needs: validate
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # One Pages deployment at a time, never cancelled (GitHub's recommended setup).
     concurrency:
       group: pages
