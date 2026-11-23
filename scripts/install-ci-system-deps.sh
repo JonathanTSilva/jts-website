@@ -32,17 +32,17 @@ fallback_mirrors=(http://azure.archive.ubuntu.com/ubuntu/ http://archive.ubuntu.
 apt_opts=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
 
 sudo=()
-[ "$(id -u)" -eq 0 ] || sudo=(sudo)
+[[ "$(id -u)" -eq 0 ]] || sudo=(sudo)
 
 original_mirrors=""
-if [ -f "$mirror_file" ]; then
+if [[ -f "$mirror_file" ]]; then
   original_mirrors=$(cat "$mirror_file")
   echo "Runner mirror list ($mirror_file):"
   echo "$original_mirrors"
 fi
 
 restore_mirrors() {
-  if [ -n "$original_mirrors" ]; then
+  if [[ -n "$original_mirrors" ]]; then
     printf '%s\n' "$original_mirrors" | "${sudo[@]}" tee "$mirror_file" >/dev/null
   fi
 }
@@ -51,10 +51,10 @@ trap restore_mirrors EXIT
 # Attempt N >= 2 uses the (N-1)th fallback mirror that is not the runner's own.
 use_fallback_mirror() {
   local n=$1 current candidates=() m
-  [ -n "$original_mirrors" ] || { echo "No $mirror_file; retrying the same sources."; return; }
+  [[ -n "$original_mirrors" ]] || { echo "No $mirror_file; retrying the same sources."; return; }
   current=$(printf '%s\n' "$original_mirrors" | head -n1 | cut -f1)
   for m in "${fallback_mirrors[@]}"; do
-    [ "$m" = "$current" ] || candidates+=("$m")
+    [[ "$m" = "$current" ]] || candidates+=("$m")
   done
   m=${candidates[$(( (n - 2) % ${#candidates[@]} ))]}
   echo "Switching apt mirror to $m"
@@ -76,7 +76,7 @@ resolve_playwright_packages() {
     return
   fi
   mapfile -t playwright_packages < <(sed -n 's/^  \([a-z0-9][a-z0-9.+:-]*\)$/\1/p' <<<"$out")
-  if [ "${#playwright_packages[@]}" -eq 0 ]; then
+  if [[ "${#playwright_packages[@]}" -eq 0 ]]; then
     echo "::error title=Playwright deps::Could not read the package list from 'playwright install-deps --dry-run'. Output:"
     echo "$out"
     exit 1
@@ -87,7 +87,7 @@ playwright_packages=()
 resolved=false
 start=$SECONDS
 for ((i = 1; i <= attempts; i++)); do
-  [ "$i" -eq 1 ] || use_fallback_mirror "$i"
+  [[ "$i" -eq 1 ]] || use_fallback_mirror "$i"
   echo "::group::apt attempt $i/$attempts (limit ${attempt_seconds}s per command)"
   t=$SECONDS
   if ! limited apt-get "${apt_opts[@]}" update; then
@@ -95,7 +95,7 @@ for ((i = 1; i <= attempts; i++)); do
     echo "::warning title=apt update::Attempt $i/$attempts: apt-get update failed or passed ${attempt_seconds}s ($((SECONDS - t))s)."
     continue
   fi
-  if [ "$resolved" = false ]; then
+  if [[ "$resolved" = false ]]; then
     resolve_playwright_packages
     resolved=true
     echo "Playwright packages for '$browsers': ${#playwright_packages[@]}; extras: ${extras[*]:-none}"
@@ -110,7 +110,7 @@ for ((i = 1; i <= attempts; i++)); do
   echo "::warning title=apt download::Attempt $i/$attempts: download failed or passed ${attempt_seconds}s ($((SECONDS - t))s). Downloaded files are kept for the next attempt."
 done
 
-if [ "$i" -gt "$attempts" ]; then
+if [[ "$i" -gt "$attempts" ]]; then
   echo "::error title=apt mirrors too slow::Could not download the Playwright OS packages and '${extras[*]:-}' in $attempts attempts of ${attempt_seconds}s ($((SECONDS - start))s in total). The Ubuntu mirrors were slow or unreachable; re-run the job."
   exit 1
 fi
