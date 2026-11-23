@@ -100,21 +100,25 @@ const dateText = generated
                 )}
               </td>
               <td>
-                {hasCi ? (
+                {!hasCi ? (
+                  <span class="na" aria-label={t.engineering.notApplicable}>&mdash;</span>
+                ) : !repo.badges.coverage ? (
+                  <span class="na-badge" title={t.engineering.badgeNotApplicable}>{t.engineering.na}</span>
+                ) : (
                   <a href={b.coverage} rel="noopener noreferrer" target="_blank">
                     <img src={b.coverageImg} alt={`${t.engineering.badgeAlt.coverage} ${repo.name}`} height="20" loading="lazy" decoding="async" />
                   </a>
-                ) : (
-                  <span class="na" aria-label={t.engineering.notApplicable}>&mdash;</span>
                 )}
               </td>
               <td>
-                {hasCi ? (
+                {!hasCi ? (
+                  <span class="na" aria-label={t.engineering.notApplicable}>&mdash;</span>
+                ) : !repo.badges.quality ? (
+                  <span class="na-badge" title={t.engineering.badgeNotApplicable}>{t.engineering.na}</span>
+                ) : (
                   <a href={b.quality} rel="noopener noreferrer" target="_blank">
                     <img src={b.qualityImg} alt={`${t.engineering.badgeAlt.quality} ${repo.name}`} height="20" loading="lazy" decoding="async" />
                   </a>
-                ) : (
-                  <span class="na" aria-label={t.engineering.notApplicable}>&mdash;</span>
                 )}
               </td>
               <td>
@@ -127,9 +131,13 @@ const dateText = generated
                 )}
               </td>
               <td>
-                <a href={b.release} rel="noopener noreferrer" target="_blank">
-                  <img src={b.releaseImg} alt={`${t.engineering.badgeAlt.release} ${repo.name}`} height="20" loading="lazy" decoding="async" />
-                </a>
+                {repo.badges.release ? (
+                  <a href={b.release} rel="noopener noreferrer" target="_blank">
+                    <img src={b.releaseImg} alt={`${t.engineering.badgeAlt.release} ${repo.name}`} height="20" loading="lazy" decoding="async" />
+                  </a>
+                ) : (
+                  <span class="na-badge" title={t.engineering.badgeNotApplicable}>{t.engineering.na}</span>
+                )}
               </td>
             </tr>
           );
@@ -273,5 +281,12 @@ const dateText = generated
   }
   .na {
     color: var(--text);
+  }
+  .na-badge {
+    color: var(--text);
+    opacity: 0.7;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    cursor: help;
   }
 </style>

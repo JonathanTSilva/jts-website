@@ -121,6 +121,30 @@ describe('parseDashboard profile', () => {
   });
 });
 
+describe('parseDashboard badges', () => {
+  const all = { coverage: true, quality: true, release: true };
+  const withBadges = (badges: unknown) => ({ ...sample, repos: [{ ...sample.repos[0], badges }] });
+
+  it('defaults every flag to true when badges is absent, as in today\'s live data', () => {
+    for (const repo of parseDashboard(sample)!.repos) expect(repo.badges).toEqual(all);
+  });
+
+  it('defaults to true when badges is null or not an object', () => {
+    expect(parseDashboard(withBadges(null))!.repos[0]!.badges).toEqual(all);
+    expect(parseDashboard(withBadges('no'))!.repos[0]!.badges).toEqual(all);
+  });
+
+  it('keeps explicit false flags and defaults the missing ones to true', () => {
+    const parsed = parseDashboard(withBadges({ coverage: false, release: false }))!;
+    expect(parsed.repos[0]!.badges).toEqual({ coverage: false, quality: true, release: false });
+  });
+
+  it('treats a non-boolean flag as true', () => {
+    const parsed = parseDashboard(withBadges({ coverage: 'false', quality: 0 }))!;
+    expect(parsed.repos[0]!.badges).toEqual(all);
+  });
+});
+
 describe('listedRepos', () => {
   it('keeps public, non-archived repos sorted by name', () => {
     const data = parseDashboard(sample) as Dashboard;

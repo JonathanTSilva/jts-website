@@ -203,6 +203,8 @@ const en = {
     passing: "Passing",
     notPassing: "Not passing",
     notApplicable: "Not applicable",
+    na: "n/a",
+    badgeNotApplicable: "Not applicable for this repository",
     badgeAlt: {
       coverage: "Code coverage for",
       quality: "SonarQube Cloud quality gate for",
@@ -437,6 +439,8 @@ const ptBr = {
     passing: "Passando",
     notPassing: "Falhando",
     notApplicable: "Não se aplica",
+    na: "n/a",
+    badgeNotApplicable: "Não se aplica a este repositório",
     badgeAlt: {
       coverage: "Cobertura de código de",
       quality: "Quality gate do SonarQube Cloud de",
