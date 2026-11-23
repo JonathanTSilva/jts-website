@@ -9,6 +9,7 @@ import { isTestFixtureUrl, sitemapMeta } from './src/lib/content/sitemapRoutes.t
 import { legacyRedirects } from './src/lib/content/legacyRedirects.ts';
 import { LEGACY_SLUGS } from './src/data/legacy-slugs.ts';
 import { rehypeCallouts } from './src/lib/rehype/callouts.ts';
+import { rehypeTableScroll } from './src/lib/rehype/table-scroll.ts';
 import { remarkHighlights } from './src/lib/remark/highlights.ts';
 import { remarkObsidianImages } from './src/lib/remark/obsidian-images.ts';
 import { remarkObsidianWikilinks } from './src/lib/remark/obsidian-wikilinks.ts';
@@ -72,6 +73,7 @@ export default defineConfig({
       ],
       rehypePlugins: [
         rehypeCallouts,
+        rehypeTableScroll,
         [rehypeKatex, { strict: false }],
       ],
     }),
