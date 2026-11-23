@@ -72,6 +72,38 @@ describe('generateSeo — translation-aware alternates', () => {
   });
 });
 
+describe('generateSeo — og:locale:alternate', () => {
+  it('lists the other language of a translated post', () => {
+    const result = generateSeo({
+      locale: 'en',
+      currentPath: '/blog/a/',
+      translations: { en: '/blog/a/', 'pt-br': '/pt-br/blog/a/' },
+    });
+    expect(result.og.locale).toBe('en_US');
+    expect(result.og.localeAlternates).toEqual(['pt_BR']);
+  });
+
+  it('lists the other language of a static page', () => {
+    const result = generateSeo({ locale: 'pt-br', currentPath: '/pt-br/now/' });
+    expect(result.og.localeAlternates).toEqual(['en_US']);
+  });
+
+  it('is empty for an untranslated post', () => {
+    const result = generateSeo({ locale: 'en', currentPath: '/blog/b/', translations: { en: '/blog/b/' } });
+    expect(result.og.localeAlternates).toEqual([]);
+  });
+
+  it('is empty for a translation fallback page', () => {
+    const result = generateSeo({
+      locale: 'pt-br',
+      currentPath: '/pt-br/blog/b/',
+      translations: { en: '/blog/b/' },
+      noindex: true,
+    });
+    expect(result.og.localeAlternates).toEqual([]);
+  });
+});
+
 describe('generateSeo — alternate locale generation', () => {
   it('EN path /blog generates en and pt-br alternates', () => {
     const result = generateSeo({ locale: 'en', currentPath: '/blog' });
