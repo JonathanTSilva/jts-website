@@ -17,6 +17,7 @@ const sample = {
     { name: 'a-repo', visibility: 'public', archived: false, status: 'wip', ci: null, compliant: false },
     { name: 'old', visibility: 'public', archived: true, status: 'archived', ci: null, compliant: true },
     { name: 'secret', visibility: 'private', archived: false, status: 'active', ci: 'success', compliant: true },
+    { name: 'org-defaults', visibility: 'public', archived: false, status: 'active', ci: null, compliant: true, profile: 'special' },
   ],
 };
 
@@ -28,6 +29,14 @@ describe('engineering snapshot', () => {
     const parsed = parseDashboard(snapshot);
     expect(parsed).not.toBeNull();
     expect(parsed!.repos.every((r) => r.visibility === 'public')).toBe(true);
+  });
+
+  it('hides the special repos from the listing', () => {
+    const parsed = parseDashboard(snapshot)!;
+    const special = parsed.repos.filter((r) => r.profile === 'special').map((r) => r.name);
+    expect(special.length).toBeGreaterThan(0);
+    const listed = listedRepos(parsed).map((r) => r.name);
+    for (const name of special) expect(listed).not.toContain(name);
   });
 });
 
@@ -97,11 +106,32 @@ describe('loadDashboard', () => {
   });
 });
 
+describe('parseDashboard profile', () => {
+  it('keeps the profile string and defaults a missing or null profile to null', () => {
+    const repos = parseDashboard(sample)!.repos;
+    expect(repos.find((r) => r.name === 'org-defaults')!.profile).toBe('special');
+    expect(repos.find((r) => r.name === 'a-repo')!.profile).toBeNull();
+    const withNull = { ...sample, repos: [{ ...sample.repos[0], profile: null }] };
+    expect(parseDashboard(withNull)!.repos[0]!.profile).toBeNull();
+  });
+
+  it('rejects a profile that is neither a string nor null', () => {
+    const bad = { ...sample, repos: [{ ...sample.repos[0], profile: 3 }] };
+    expect(parseDashboard(bad)).toBeNull();
+  });
+});
+
 describe('listedRepos', () => {
   it('keeps public, non-archived repos sorted by name', () => {
     const data = parseDashboard(sample) as Dashboard;
     expect(listedRepos(data).map((r) => r.name)).toEqual(['a-repo', 'b-repo']);
     expect(archivedPublicCount(data)).toBe(1);
+  });
+
+  it('skips special repos and leaves the summary numbers alone', () => {
+    const data = parseDashboard(sample) as Dashboard;
+    expect(listedRepos(data).map((r) => r.name)).not.toContain('org-defaults');
+    expect(data.summary.total).toBe(3);
   });
 });
 
