@@ -250,6 +250,22 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
    ============================================================ */
 
 /* ── Tables ─────────────────────────────────────────────── */
+/* rehypeTableScroll wraps every Markdown table in .table-scroll: a table wider than the
+   column scrolls inside it instead of widening the page. The frame moves to the wrapper. */
+.prose .table-scroll {
+  overflow-x: auto;
+  margin-block: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.prose .table-scroll > table {
+  margin-block: 0;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+/* Wide tables scroll instead of squeezing a column down to a word per line. */
+.prose .table-scroll :is(th, td) { min-width: 6rem; }
 .prose table {
   width: 100%;
   border-collapse: collapse;
