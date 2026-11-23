@@ -26,7 +26,7 @@
     "test:e2e:webkit": "PLAYWRIGHT_WEBKIT=1 playwright test --project=webkit-mobile",
     "test:e2e:install": "playwright install --with-deps chromium webkit",
     "test": "vitest run --exclude tests/integration/cv-generation.test.ts",
-    "coverage": "vitest run --exclude tests/integration/cv-generation.test.ts --coverage --coverage.provider=v8 --coverage.reporter=lcov --coverage.include=src/**",
+    "coverage": "vitest run --exclude tests/integration/cv-generation.test.ts --coverage --coverage.provider=v8 --coverage.reporter=lcov",
     "test:all": "pnpm test:unit && pnpm test:e2e",
     "lint": "eslint .",
     "deadcode": "knip",
