@@ -13,13 +13,14 @@
 #
 # Usage: scripts/install-ci-system-deps.sh [extra-apt-package ...]
 # Env:   PLAYWRIGHT_BROWSERS  browsers whose OS deps to install (default: "chromium webkit")
-#        APT_ATTEMPT_SECONDS  time limit for each update/download attempt (default: 180)
+#        APT_ATTEMPT_SECONDS  time limit for each update/download attempt (default: 90;
+#                             a normal download takes 10-40 s)
 #        APT_ATTEMPTS         number of attempts (default: 3)
 #        APT_MIRROR_FILE      mirror list to rewrite on retry (default: /etc/apt/apt-mirrors.txt; for tests)
 set -euo pipefail
 
 browsers=${PLAYWRIGHT_BROWSERS:-chromium webkit}
-attempt_seconds=${APT_ATTEMPT_SECONDS:-180}
+attempt_seconds=${APT_ATTEMPT_SECONDS:-90}
 attempts=${APT_ATTEMPTS:-3}
 extras=("$@")
 
