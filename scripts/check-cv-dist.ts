@@ -59,11 +59,13 @@ const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(proc
 if (isMain) {
   const distPath = process.argv[2];
   if (!distPath) throw new Error('Usage: check-cv-dist.ts <dist-directory>');
-  // Only audit a directory inside the working tree, never an arbitrary path.
-  const fromCwd = relative(process.cwd(), resolve(distPath));
-  if (fromCwd.startsWith('..') || isAbsolute(fromCwd)) {
-    throw new Error(`CV deploy boundary check requires a directory inside the working tree: ${distPath}`);
+  // Only audit a directory inside the repository, never an arbitrary path.
+  const repoRoot = resolve(import.meta.dirname, '..');
+  const resolvedDist = resolve(distPath);
+  const fromRoot = relative(repoRoot, resolvedDist);
+  if (fromRoot === '..' || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot)) {
+    throw new Error(`CV deploy boundary check requires a directory inside the repository: ${distPath}`);
   }
-  await validateCvDist(distPath);
+  await validateCvDist(resolvedDist);
   console.log(`CV deploy boundary check passed: ${distPath}`);
 }

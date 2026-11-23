@@ -1,7 +1,7 @@
 import { PDFDocument, PDFName, PDFString, StandardFonts } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
 import type { ResolvedCv } from '../../../src/lib/cv/types';
-import { assertValidExtractedCvText, matchOrderedTextFields, verifyCvPdf } from '../../../src/lib/cv/verify';
+import { assertValidExtractedCvText, hasMustacheTag, matchOrderedTextFields, verifyCvPdf } from '../../../src/lib/cv/verify';
 
 const view = {
   profileId: 'generic', fullName: 'Jonathan Tobias da Silva', headline: 'Engineer', summary: 'Reliable systems.',
@@ -85,6 +85,30 @@ describe('CV PDF verifier', () => {
   it('rejects anchors in the wrong order', async () => { await expect(verifyCvPdf(await fixture({ text: 'Experience Acme 2020 – Present Engineer Skills TypeScript Jonathan Tobias da Silva Engineer Brazil Email Reliable systems.' }), view)).rejects.toThrow(/ordered anchor/i); });
   it('rejects leaked template syntax', async () => { await expect(verifyCvPdf(await fixture({ text: 'Jonathan Tobias da Silva Engineer Brazil Email Reliable systems. Skills Tools TypeScript Experience Engineer Acme 2020 – Present \\csuse' }), view)).rejects.toThrow(/template syntax/i); });
   it('rejects replacement glyphs', () => { expect(() => assertValidExtractedCvText('Jonathan � Silva')).toThrow(/replacement glyph/i); });
+  it('rejects mustache and ERB-style leaks in extracted text', () => {
+    expect(() => assertValidExtractedCvText('Name {{ fullName }} Engineer')).toThrow(/template syntax/i);
+    expect(() => assertValidExtractedCvText('Name <%= fullName %>')).toThrow(/template syntax/i);
+    expect(() => assertValidExtractedCvText('Name <%- fullName %>')).toThrow(/template syntax/i);
+    expect(() => assertValidExtractedCvText('Name <% if %>')).toThrow(/template syntax/i);
+  });
+  it('accepts clean text and lone braces', () => {
+    expect(() => assertValidExtractedCvText('Jonathan { a } {b} {{}} }} {{ unterminated')).not.toThrow();
+  });
+  it('detects a mustache tag that contains a single brace, as the old regex did', () => {
+    expect(hasMustacheTag('x {{a{b}} y')).toBe(true);
+    expect(hasMustacheTag('{{{x}}')).toBe(true);
+    expect(hasMustacheTag('{{}}')).toBe(false);
+    expect(hasMustacheTag('{{ a }')).toBe(false);
+    expect(hasMustacheTag('{{ a } }}')).toBe(false);
+    expect(hasMustacheTag('{{ a } {{ b }}')).toBe(true);
+  });
+  it('scans a 10k-character adversarial run of opening braces in under 100 ms', () => {
+    const text = '{{'.repeat(5000);
+    const start = performance.now();
+    expect(hasMustacheTag(text)).toBe(false);
+    expect(() => assertValidExtractedCvText(text)).not.toThrow();
+    expect(performance.now() - start).toBeLessThan(100);
+  });
   it('rejects an invalid link annotation', async () => { await expect(verifyCvPdf(await fixture({ urls: ['javascript:alert(1)'] }), view)).rejects.toThrow(/invalid link annotation/i); });
   it('rejects missing identity content', async () => { await expect(verifyCvPdf(await fixture({ text: 'Engineer Brazil Email Reliable systems. Skills Tools TypeScript Experience Engineer Acme 2020 – Present' }), view)).rejects.toThrow(/Jonathan Tobias/i); });
   it('rejects a missing section heading', async () => { await expect(verifyCvPdf(await fixture({ text: 'Jonathan Tobias da Silva Engineer Brazil Email Reliable systems. Tools TypeScript Experience Engineer Acme 2020 – Present' }), view)).rejects.toThrow(/Skills/i); });

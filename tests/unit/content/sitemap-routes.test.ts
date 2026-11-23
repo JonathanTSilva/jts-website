@@ -123,4 +123,15 @@ describe('sitemapMeta', () => {
     expect(lastmod.get(`${SITE}/pt-br/blog/a.pt-br/`)).toBe('2026-03-02T00:00:00.000Z');
     expect(lastmod.get(`${SITE}/pt-br/notes/n.pt-br/`)).toBe('2026-04-05T00:00:00.000Z');
   });
+
+  it('ignores any number of trailing slashes on the site URL', () => {
+    expect(sitemapMeta(root, `${SITE}/`).lastmod.has(`${SITE}/blog/a.en/`)).toBe(true);
+    expect(sitemapMeta(root, `${SITE}///`).lastmod.has(`${SITE}/blog/a.en/`)).toBe(true);
+  });
+
+  it('trims a long run of slashes quickly', () => {
+    const start = performance.now();
+    sitemapMeta(root, `${SITE}${'/'.repeat(10_000)}x${'/'.repeat(10_000)}`);
+    expect(performance.now() - start).toBeLessThan(100);
+  });
 });

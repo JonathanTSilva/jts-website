@@ -1,6 +1,8 @@
-import { mkdtemp, mkdir, symlink, writeFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { promisify } from 'node:util';
 import { describe, expect, test } from 'vitest';
 
 import { popplerExpectations, validatePopplerOutput as validateWithExpectations } from '../../../scripts/check-cv-poppler';
@@ -117,4 +119,34 @@ describe('deploy CV boundary', () => {
     await symlink(path.endsWith('.pdf') ? resolve(root, 'real.bin') : resolve(root, 'outside'), join(root, path), path === 'linked-directory' ? 'dir' : 'file');
     await expect(validateCvDist(root)).rejects.toThrow(new RegExp(message, 'i'));
   });
+});
+
+describe('check-cv-dist CLI argument', () => {
+  const repoRoot = resolve(import.meta.dirname, '../../..');
+  const runCli = (arg?: string) =>
+    promisify(execFile)(resolve(repoRoot, 'node_modules/.bin/tsx'), [resolve(repoRoot, 'scripts/check-cv-dist.ts'), ...(arg ? [arg] : [])], { cwd: repoRoot })
+      .then(() => ({ ok: true, stderr: '' }), (error: { stderr: string }) => ({ ok: false, stderr: error.stderr }));
+
+  test('requires a directory argument', async () => {
+    const result = await runCli();
+    expect(result.ok).toBe(false);
+    expect(result.stderr).toMatch(/Usage/);
+  });
+
+  test.each([tmpdir(), '..', '../outside', '/'])('rejects %s outside the repository', async (arg) => {
+    const result = await runCli(arg);
+    expect(result.ok).toBe(false);
+    expect(result.stderr).toMatch(/inside the repository/);
+  });
+
+  test('accepts a directory inside the repository', async () => {
+    const directory = await mkdtemp(join(repoRoot, '.cv-dist-cli-'));
+    try {
+      await mkdir(join(directory, 'assets/cv'), { recursive: true });
+      await writeFile(join(directory, 'assets/cv/jonathan-cv.pdf'), 'safe');
+      expect((await runCli(directory)).ok).toBe(true);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  }, 30_000);
 });

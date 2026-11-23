@@ -212,7 +212,9 @@ function extractLocale(filePath: string): string {
  *
  * Non-image embeds (![[note]]) are left as plain text (can't render inline).
  */
-const OBSIDIAN_SYNTAX = /(!?)\[\[([^\]]+)\]\]/g;
+// The target excludes `[` as well as `]` so a run of `[[[[` cannot make the engine rescan to the end
+// of the text from every opening bracket (quadratic backtracking).
+const OBSIDIAN_SYNTAX = /(!?)\[\[([^\][]+)\]\]/g;
 
 function splitOnObsidianSyntax(
   text: string,
