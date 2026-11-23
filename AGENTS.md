@@ -35,7 +35,7 @@ Or open the repository in a dev container or GitHub Codespaces, which runs the s
 | Type check | `pnpm run typecheck` (same as `pnpm check`) |
 | Content validation | `pnpm lint:content` |
 
-CI runs the same checks through the shared workflows in [`.github`](https://github.com/JonathanTSilva/.github). The single required check is `ci`. The site itself is built, tested end to end and deployed by `pipeline.yml`, which stays as it is, together with `sync-content.yml` and `update-snapshots.yml`.
+CI runs the same checks through the shared workflows in [`.github`](https://github.com/JonathanTSilva/.github); their single result is the `ci` check. Pull requests are also gated by `pr-checks.yml` (CV PDF checks, WebKit smoke test, internal link check, Lighthouse budgets), whose `unique-checks` and `lighthouse-budgets` jobs the `main` ruleset requires too. `pipeline.yml` builds, tests and deploys the site from `main` (also nightly and by hand), next to `sync-content.yml`, `update-snapshots.yml`, `site-health.yml` and `dependabot-auto-merge.yml`. See `docs/site-operations/obsidian-pipeline.md`.
 
 ## Conventions
 
