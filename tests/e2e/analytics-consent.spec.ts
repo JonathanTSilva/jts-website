@@ -54,6 +54,22 @@ test.describe('Consent Banner', () => {
     await expect(page.locator('[data-testid="consent-banner"]')).toBeHidden();
   });
 
+  for (const { path, locale } of [
+    { path: '/', locale: 'en' },
+    { path: '/pt-br/', locale: 'pt-br' },
+  ]) {
+    test(`hero contact links send the page locale on ${path}`, async ({ page }) => {
+      await page.goto(path);
+
+      const heroLinks = page.locator('.hero-social a[data-analytics-event]');
+      await expect(heroLinks).toHaveCount(3);
+      for (const link of await heroLinks.all()) {
+        const props = JSON.parse((await link.getAttribute('data-analytics-props')) ?? '{}');
+        expect(props).toEqual({ surface: 'hero', locale });
+      }
+    });
+  }
+
   test('lead contact surfaces expose only the approved analytics event names', async ({ page }) => {
     await page.goto('/');
 
