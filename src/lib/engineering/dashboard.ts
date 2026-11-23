@@ -14,6 +14,14 @@ export interface DashboardRepo {
   compliant: boolean;
   /** Inventory profile; `special` repos (org defaults, profile README) are not listed. */
   profile: string | null;
+  /** Which badges apply to the repo. Absent in older dashboard data, which means all of them. */
+  badges: BadgeFlags;
+}
+
+export interface BadgeFlags {
+  coverage: boolean;
+  quality: boolean;
+  release: boolean;
 }
 
 interface DashboardSummary {
@@ -39,6 +47,18 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
 const isNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+
+const ALL_BADGES: BadgeFlags = { coverage: true, quality: true, release: true };
+
+/** Missing or non-boolean flags count as true, so data without `badges` renders as before. */
+function parseBadges(v: unknown): BadgeFlags {
+  if (!isRecord(v)) return { ...ALL_BADGES };
+  return {
+    coverage: v.coverage !== false,
+    quality: v.quality !== false,
+    release: v.release !== false,
+  };
+}
 
 /** Keeps only what the page reads. Returns null when the shape is not usable. */
 export function parseDashboard(input: unknown): Dashboard | null {
@@ -78,6 +98,7 @@ export function parseDashboard(input: unknown): Dashboard | null {
       ci: r.ci,
       compliant: r.compliant,
       profile: r.profile ?? null,
+      badges: parseBadges(r.badges),
     });
   }
 
