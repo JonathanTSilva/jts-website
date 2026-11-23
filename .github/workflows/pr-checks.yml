@@ -39,14 +39,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Same install as pipeline.yml (issue #154): OS packages with a time limit
+      # and mirror fallback per apt attempt, then the browsers.
+      - name: Install system packages (Playwright deps, Poppler)
+        timeout-minutes: 12
+        run: scripts/install-ci-system-deps.sh poppler-utils
+
       # Chromium renders the CV PDF during the build; WebKit runs the smoke test.
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium webkit
-
-      - name: Install Poppler
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y poppler-utils
+        timeout-minutes: 5
+        run: pnpm exec playwright install chromium webkit
 
       - name: Build
         run: pnpm build
