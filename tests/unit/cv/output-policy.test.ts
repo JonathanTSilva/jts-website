@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { getCvOutput } from '../../../src/lib/cv/output-policy';
 
 describe('getCvOutput', () => {
@@ -100,5 +100,58 @@ describe('getCvOutput', () => {
 
     expect(() => getCvOutput({ profileId: 'generic', mode: 'public', extra: true } as never))
       .toThrow(/unsupported.*extra/i);
+  });
+});
+
+describe('getCvOutput request and path validation', () => {
+  const tmp = () => mkdtempSync(join(realpathSync(tmpdir()), 'cv-policy-edge-'));
+
+  it('rejects non-enumerable and accessor options', () => {
+    const hidden = { profileId: 'generic', mode: 'public' };
+    Object.defineProperty(hidden, 'extra', { value: 1, enumerable: false });
+    expect(() => getCvOutput(hidden as never)).toThrow(/non-enumerable/i);
+
+    const accessor = { profileId: 'generic', mode: 'public' };
+    Object.defineProperty(accessor, 'extra', { get: () => 1, enumerable: true });
+    expect(() => getCvOutput(accessor as never)).toThrow(/data property/i);
+  });
+
+  it('requires the test root option to be present, a string and non-empty', () => {
+    expect(() => getCvOutput({ profileId: 'generic', mode: 'test' } as never)).toThrow(/Missing required CV output option: testRoot/);
+    expect(() => getCvOutput({ profileId: 'generic', mode: 'test', testRoot: 5 } as never)).toThrow(/explicit system temp root string/);
+    expect(() => getCvOutput({ profileId: 'generic', mode: 'test', testRoot: '' })).toThrow(/explicit system temp root/);
+  });
+
+  it('refuses the system temp directory itself as a test root', () => {
+    expect(() => getCvOutput({ profileId: 'generic', mode: 'test', testRoot: realpathSync(tmpdir()) })).toThrow(/dedicated directory/);
+  });
+
+  it('propagates filesystem errors other than a missing path while looking for symlinks', () => {
+    const root = tmp();
+    const file = join(root, 'a-file');
+    writeFileSync(file, 'x');
+    expect(() => getCvOutput({ profileId: 'generic', mode: 'test', testRoot: join(file, 'below') })).toThrow(/ENOTDIR/);
+  });
+
+  describe('production directories', () => {
+    const original = process.cwd();
+    afterEach(() => process.chdir(original));
+
+    it('rejects a production output directory that is a symlink', () => {
+      const cwd = tmp();
+      mkdirSync(join(cwd, 'elsewhere'));
+      mkdirSync(join(cwd, 'public/assets'), { recursive: true });
+      symlinkSync(join(cwd, 'elsewhere'), join(cwd, 'public/assets/cv'));
+      process.chdir(cwd);
+      expect(() => getCvOutput({ profileId: 'generic', mode: 'public' })).toThrow(/must not contain a symlink/);
+    });
+
+    it('rejects a production output file that is a symlink', () => {
+      const cwd = tmp();
+      mkdirSync(join(cwd, '.cv-output'));
+      symlinkSync(join(cwd, 'target.pdf'), join(cwd, '.cv-output/jonathan-tobias-cv-devops.pdf'));
+      process.chdir(cwd);
+      expect(() => getCvOutput({ profileId: 'devops', mode: 'private' })).toThrow(/filename must not be a symlink/);
+    });
   });
 });

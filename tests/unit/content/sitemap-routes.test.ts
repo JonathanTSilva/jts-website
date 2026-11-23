@@ -135,3 +135,33 @@ describe('sitemapMeta', () => {
     expect(performance.now() - start).toBeLessThan(100);
   });
 });
+
+describe('readRouteEntries date and frontmatter edge cases', () => {
+  it('ignores empty or invalid updatedAt values, skips scheduled and incomplete entries, and keeps real ones', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'sitemap-edges-'));
+    try {
+      mkdirSync(join(dir, 'blog'), { recursive: true });
+      const write = (file: string, body: string) => writeFileSync(join(dir, 'blog', file), `---\n${body}\n---\nBody\n`);
+      const base = 'slug: "s"\nlanguage: "en"\ntranslationKey: "k"\npublishedAt: 2020-01-01';
+      write('empty-updated.en.md', `${base}\nupdatedAt: ""`);
+      write('invalid-updated.en.md', `${base}\nupdatedAt: "not a date"`);
+      write('date-updated.en.md', `${base}\nupdatedAt: 2021-02-03`);
+      write('future.en.md', 'slug: "f"\nlanguage: "en"\ntranslationKey: "f"\npublishedAt: 2999-01-01');
+      write('no-slug.en.md', 'language: "en"\ntranslationKey: "n"\npublishedAt: 2020-01-01');
+      write('no-key.en.md', 'slug: "n"\nlanguage: "en"\npublishedAt: 2020-01-01');
+      write('bad-language.en.md', 'slug: "b"\nlanguage: "fr"\ntranslationKey: "b"\npublishedAt: 2020-01-01');
+      write('no-date.en.md', 'slug: "d"\nlanguage: "en"\ntranslationKey: "d"');
+      write('bad-date.en.md', 'slug: "x"\nlanguage: "en"\ntranslationKey: "x"\npublishedAt: "nope"');
+      writeFileSync(join(dir, 'blog', 'notes.txt'), 'not markdown');
+
+      const entries = readRouteEntries(dir, 'blog');
+      expect(entries).toHaveLength(3);
+      const byUpdated = entries.map((entry) => entry.updatedAt?.toISOString().slice(0, 10));
+      expect(byUpdated).toContain('2021-02-03');
+      expect(byUpdated.filter((value) => value === undefined)).toHaveLength(2);
+      expect(readRouteEntries(dir, 'notes')).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

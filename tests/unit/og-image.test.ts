@@ -33,4 +33,10 @@ describe('generateOGImage', () => {
     expect(meta.height).toBe(630);
     expect(meta.format).toBe('png');
   });
+
+  it.each([50, 80, 110])('renders a 1200x630 png for a %i-character title', { timeout: 20000 }, async (length) => {
+    const buf = await generateOGImage({ title: 'x'.repeat(length), label: 'BLOG' });
+    const meta = await sharp(buf).metadata();
+    expect([meta.width, meta.height]).toEqual([1200, 630]);
+  });
 });

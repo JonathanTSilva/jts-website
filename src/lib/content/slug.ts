@@ -23,3 +23,6 @@ export function expectedSlug(filename: string, collection: SlugCollection): stri
 export function entryIdFromPath(entry: string): string {
   return entry.replace(/\.(md|mdx)$/, '');
 }
+
+/** `generateId` for Astro's glob loader: it passes an options object, not the bare path. */
+export const globEntryId = ({ entry }: { entry: string }): string => entryIdFromPath(entry);

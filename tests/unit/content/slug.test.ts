@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { entryIdFromPath, expectedSlug } from '../../../src/lib/content/slug';
+import { entryIdFromPath, expectedSlug, globEntryId } from '../../../src/lib/content/slug';
 
 describe('expectedSlug', () => {
   it('strips the date and the language from a blog filename', () => {
@@ -35,5 +35,11 @@ describe('entryIdFromPath', () => {
   it('uses the filename stem, so both languages of a post keep distinct ids', () => {
     expect(entryIdFromPath('2026-11-low-cost-homelab-setup.en.md')).toBe('2026-11-low-cost-homelab-setup.en');
     expect(entryIdFromPath('2026-11-low-cost-homelab-setup.pt-br.mdx')).toBe('2026-11-low-cost-homelab-setup.pt-br');
+  });
+});
+
+describe('globEntryId', () => {
+  it('adapts entryIdFromPath to the glob loader options object', () => {
+    expect(globEntryId({ entry: '2026-11-low-cost-homelab-setup.pt-br.md' })).toBe('2026-11-low-cost-homelab-setup.pt-br');
   });
 });

@@ -361,3 +361,10 @@ describe('generateSeo — share image version', () => {
     expect(result.og.image).toBe('https://www.jontobias.com/og/blog/x.png?foo=1&v=2');
   });
 });
+
+describe('generateSeo — locale root path', () => {
+  it('treats /pt-br as the Portuguese home page', () => {
+    const result = generateSeo({ locale: 'pt-br', currentPath: '/pt-br' });
+    expect(result.canonical).toBe(`${BASE_URL}/pt-br`);
+  });
+});

@@ -21,7 +21,7 @@ const twoLinkView = { ...view, links: [
   { kind: 'github', label: 'Link Two', url: 'https://example.com/two' },
 ] } satisfies ResolvedCv;
 
-async function fixture(options: { pages?: number; size?: [number, number]; text?: string; metadata?: boolean; structure?: boolean; link?: boolean; splitWord?: boolean; urls?: string[]; labelsForRects?: string[]; zeroArea?: boolean; rectScale?: number } = {}) {
+async function fixture(options: { pages?: number; size?: [number, number]; text?: string; metadata?: boolean; structure?: boolean; link?: boolean; splitWord?: boolean; urls?: string[]; extraAnnotation?: boolean; labelsForRects?: string[]; zeroArea?: boolean; rectScale?: number } = {}) {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   for (let index = 0; index < (options.pages ?? 1); index += 1) {
@@ -39,6 +39,9 @@ async function fixture(options: { pages?: number; size?: [number, number]; text?
         const rect = options.zeroArea ? [x, 800, x, 800] : [x, 798, x + width * (options.rectScale ?? 1), 805];
         return pdf.context.register(pdf.context.obj({ Type: 'Annot', Subtype: 'Link', Rect: rect, Border: [0, 0, 0], A: { Type: 'Action', S: 'URI', URI: PDFString.of(url) } }));
       });
+      if (options.extraAnnotation) {
+        annotations.unshift(pdf.context.register(pdf.context.obj({ Type: 'Annot', Subtype: 'Text', Rect: [10, 10, 20, 20], Contents: PDFString.of('note') })));
+      }
       page.node.set(PDFName.of('Annots'), pdf.context.obj(annotations));
     }
   }
@@ -141,5 +144,48 @@ describe('CV PDF verifier', () => {
   });
   it('rejects zero-area link annotations', async () => {
     await expect(verifyCvPdf(await fixture({ zeroArea: true }), view)).rejects.toThrow(/nonzero area/i);
+  });
+  it('ignores non-link annotations', async () => {
+    await expect(verifyCvPdf(await fixture({ extraAnnotation: true }), view)).resolves.toMatchObject({ pageCount: 1 });
+  });
+  it('rejects a link annotation whose URL cannot be parsed', async () => {
+    await expect(verifyCvPdf(await fixture({ urls: ['not a url'] }), view)).rejects.toThrow(/invalid link annotation/i);
+  });
+  it('rejects a CV model that carries an unsafe link URL', async () => {
+    const unsafe = { ...view, links: [{ kind: 'website', label: 'Email', url: 'javascript:alert(1)' }] } satisfies ResolvedCv;
+    await expect(verifyCvPdf(await fixture(), unsafe)).rejects.toThrow(/invalid link URL/i);
+  });
+  it('builds ordered anchors from every optional field of every section kind', async () => {
+    const rich = {
+      ...view,
+      experience: [{
+        id: 'role', employer: 'Acme', title: 'Engineer', location: 'Remote', verification: 'verified',
+        dates: { start: { value: '2020-03', precision: 'month' }, end: { value: '2022', precision: 'year' } },
+        highlights: [{ id: 'h1', text: 'Shipped it.' }],
+      }],
+      projects: [{
+        id: 'p', title: 'Project', role: 'Lead', description: 'Summary.', links: [], highlights: [{ id: 'ph', text: 'Won.' }],
+        dates: { start: { value: '2019', precision: 'year' } },
+      }, { id: 'q', title: 'Bare', description: 'Plain.', links: [], highlights: [] }],
+      education: [{
+        id: 'e', institution: 'School', credential: 'MSc', location: 'Brazil',
+        dates: { start: { value: '2015-02', precision: 'month' }, end: { value: '2017-12', precision: 'month' } },
+        highlights: [{ id: 'eh', text: 'Graduated.' }],
+      }, {
+        id: 'e2', institution: 'College', credential: 'BSc', dates: { start: { value: '2011', precision: 'year' } }, highlights: [],
+      }],
+      publications: [{ id: 'pub', title: 'Paper', authors: ['Ada'], venue: 'J', date: { value: '2024-06', precision: 'month' }, type: 'paper' }],
+      sections: [{ kind: 'skills' }, { kind: 'experience' }, { kind: 'projects' }, { kind: 'education' }, { kind: 'publications' }],
+    } satisfies ResolvedCv;
+    await expect(verifyCvPdf(await fixture(), rich)).rejects.toThrow(/missing required content/i);
+    const bare = {
+      ...view,
+      experience: [{ ...view.experience[0]!, dates: { start: { value: '2020', precision: 'year' }, end: { value: '2021', precision: 'year' } } }],
+      sections: [{ kind: 'bogus' }, { kind: 'experience' }] as unknown as ResolvedCv['sections'],
+    } satisfies ResolvedCv;
+    await expect(verifyCvPdf(await fixture(), bare)).rejects.toThrow();
+  });
+  it('requires every expected field to contain tokens', () => {
+    expect(() => matchOrderedTextFields([{ page: 1, text: 'x', rect: [0, 0, 10, 10] as const }], [''])).toThrow(/must contain tokens/);
   });
 });

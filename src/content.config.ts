@@ -1,6 +1,6 @@
 import { defineCollection } from "astro:content";
 import { glob } from 'astro/loaders';
-import { entryIdFromPath } from "./lib/content/slug";
+import { globEntryId } from "./lib/content/slug";
 import { blogSchema, notesSchema, nowSchema, portfolioAboutSchema } from "./lib/content/schemas";
 
 // Entry ids are filename stems: the frontmatter slug is shared by both languages.
@@ -8,7 +8,7 @@ const blog = defineCollection({
   loader: glob({
     pattern: '**/[^_]*.{md,mdx}',
     base: "./src/content/blog",
-    generateId: ({ entry }) => entryIdFromPath(entry),
+    generateId: globEntryId,
   }),
   schema: blogSchema,
 });
@@ -17,7 +17,7 @@ const notes = defineCollection({
   loader: glob({
     pattern: '**/[^_]*.{md,mdx}',
     base: "./src/content/notes",
-    generateId: ({ entry }) => entryIdFromPath(entry),
+    generateId: globEntryId,
   }),
   schema: notesSchema,
 });
@@ -29,7 +29,7 @@ const fixtureBlog = defineCollection({
   loader: glob({
     pattern: '**/[^_]*.{md,mdx}',
     base: "./tests/fixtures/content/blog",
-    generateId: ({ entry }) => entryIdFromPath(entry),
+    generateId: globEntryId,
   }),
   schema: blogSchema,
 });
@@ -38,7 +38,7 @@ const fixtureNotes = defineCollection({
   loader: glob({
     pattern: '**/[^_]*.{md,mdx}',
     base: "./tests/fixtures/content/notes",
-    generateId: ({ entry }) => entryIdFromPath(entry),
+    generateId: globEntryId,
   }),
   schema: notesSchema,
 });
