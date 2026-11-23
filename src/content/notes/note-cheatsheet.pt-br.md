@@ -88,7 +88,7 @@ Este é o conteúdo após o divisor.
 
 ## Links
 
-[Link externo](https://exemplo.com) — abre na mesma aba por padrão.
+[Link externo](https://example.com) — abre na mesma aba por padrão.
 
 [Link interno](/notes) — use caminhos relativos à raiz para navegação interna.
 
