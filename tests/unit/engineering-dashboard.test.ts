@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import snapshot from '../../src/data/engineering-snapshot.json';
 import {
   loadDashboard,
@@ -41,10 +41,50 @@ describe('engineering snapshot', () => {
 });
 
 describe('loadDashboard', () => {
+  let warn: ReturnType<typeof vi.spyOn>;
+  let log: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    // CI sets GITHUB_ACTIONS=true, which routes the warning to console.log; tests that
+    // want the Actions branch stub it back on.
+    vi.stubEnv('GITHUB_ACTIONS', '');
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+  });
+
   it('uses the live data when the fetch succeeds', async () => {
     const result = await loadDashboard(vi.fn().mockResolvedValue(response(sample)));
     expect(result.source).toBe('live');
     expect(result.data.summary.percent).toBe(67);
+    expect(warn).not.toHaveBeenCalled();
+    expect(log).not.toHaveBeenCalled();
+  });
+
+  it('warns with the reason when it falls back (local build)', async () => {
+    vi.stubEnv('GITHUB_ACTIONS', '');
+    await loadDashboard(vi.fn().mockResolvedValue({ ok: false, status: 503 } as Response));
+    expect(warn).toHaveBeenCalledTimes(1);
+    const text = String(warn.mock.calls[0]![0]);
+    expect(text).toContain('committed snapshot');
+    expect(text).toContain('HTTP 503');
+    expect(text).not.toContain('::warning');
+  });
+
+  it('prints a GitHub Actions annotation when it falls back in CI', async () => {
+    vi.stubEnv('GITHUB_ACTIONS', 'true');
+    await loadDashboard(vi.fn().mockRejectedValue(new DOMException('timed out', 'TimeoutError')));
+    expect(warn).not.toHaveBeenCalled();
+    expect(String(log.mock.calls[0]![0])).toMatch(/^::warning title=[^:]+::.*TimeoutError/);
+  });
+
+  it('names a bad shape as the reason', async () => {
+    await loadDashboard(vi.fn().mockResolvedValue(response({ repos: 'nope' })));
+    expect(String(warn.mock.calls[0]![0])).toContain('unexpected data shape');
   });
 
   it('falls back to the snapshot when the fetch rejects', async () => {
