@@ -44,6 +44,8 @@ jobs:
       - name: Install system packages (Playwright deps, Poppler)
         timeout-minutes: 12
         run: scripts/install-ci-system-deps.sh poppler-utils
+        env:
+          APT_ATTEMPT_SECONDS: '20'  # TEMPORARY: force the retry path, reverted next commit
 
       # Chromium renders the CV PDF during the build; WebKit runs the smoke test.
       - name: Install Playwright browsers
