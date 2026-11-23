@@ -33,6 +33,32 @@ test.describe('Deep Search & Behavioral Tests', () => {
     await expect(page).toHaveURL(/\/(blog|notes)\//);
   });
 
+  test('result titles and summaries render as text, not markup', async ({ page }) => {
+    // The index is fetched when the dialog first opens, so this route is in place in time.
+    await page.route('**/api/en/search-index.json', (route) =>
+      route.fulfill({
+        json: [
+          {
+            title: 'Markup <b>bold</b> & more',
+            summary: 'Uses <details> & <img src=x>',
+            url: '/blog/markup-test/',
+            type: 'blog',
+            tags: [],
+          },
+        ],
+      }),
+    );
+
+    await page.keyboard.press('/');
+    await page.locator('#search-input').fill('markup');
+
+    const result = page.locator('#search-results .search-result-item').first();
+    await expect(result.locator('.result-title')).toHaveText('Markup <b>bold</b> & more');
+    await expect(result.locator('.result-summary')).toHaveText('Uses <details> & <img src=x>');
+    await expect(result.locator('b, details, img')).toHaveCount(0);
+    await expect(result).toHaveAttribute('href', '/blog/markup-test/');
+  });
+
   test('no results found UI', async ({ page }) => {
     await page.keyboard.press('/');
     const input = page.locator('#search-input');

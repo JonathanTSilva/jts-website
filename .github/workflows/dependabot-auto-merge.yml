@@ -4,15 +4,13 @@ name: Dependabot auto-merge
 # version. Major updates, and grouped PRs that contain one (fetch-metadata reports
 # the highest update type of the group), are left for a person to review.
 #
-# Auto-merge merges only once the checks the repository ruleset REQUIRES pass.
-# Today that is `ci`. This repo's own checks (`unique-checks`, `lighthouse-budgets`
-# in pr-checks.yml, the e2e run in pipeline.yml) gate the merge only if they are
-# added to the ruleset: recommended, at least `unique-checks`.
+# Auto-merge merges only once the checks the `main` ruleset requires pass: `ci`,
+# plus `unique-checks` and `lighthouse-budgets` from pr-checks.yml.
 #
-# It does nothing until the repository setting "Allow auto-merge" is on (Settings,
-# General, Pull Requests). Until then `gh pr merge --auto` is refused; the step
-# reports that as a warning and a job summary and does not fail, so Dependabot PRs
-# do not show a red X.
+# It relies on the repository setting "Allow auto-merge" (Settings, General, Pull
+# Requests), which is on. If it is ever turned off, `gh pr merge --auto` is refused;
+# the step reports that as a warning and a job summary and does not fail, so
+# Dependabot PRs do not show a red X.
 #
 # A merge made with the workflow token does not start pipeline.yml, so an
 # auto-merged update deploys with the next push to main or the nightly build.

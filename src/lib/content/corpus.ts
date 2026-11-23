@@ -73,6 +73,20 @@ export function validateCorpus(files: CorpusFile[]): { errors: string[]; warning
     errors.push(`Duplicate slug "${first.slug}" in ${first.collection} (${first.language}): ${names(group)}`);
   }
 
+  // Both languages of a post share its slug, so a slug must belong to one
+  // translationKey. Otherwise an EN-only and an unrelated PT-only post would build
+  // the same URLs (one real page, one fallback). Same-language clashes are already
+  // reported above as a duplicate slug.
+  for (const group of groupBy(withSlug, (e) => `${e.collection}\0${e.slug}`)) {
+    const keys = new Set(group.map((e) => e.translationKey));
+    if (keys.size < 2) continue;
+    const languages = group.map((e) => e.language);
+    if (new Set(languages).size < languages.length) continue;
+    const first = group[0]!;
+    const list = group.map((e) => `${e.name} (${e.translationKey})`).join(', ');
+    errors.push(`Slug "${first.slug}" in ${first.collection} belongs to more than one translationKey: ${list}`);
+  }
+
   // A translationKey names one file per language.
   for (const group of groupBy(entries, (e) => `${e.collection}\0${e.translationKey}\0${e.language}`)) {
     if (group.length < 2) continue;

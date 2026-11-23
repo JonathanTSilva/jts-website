@@ -31,6 +31,18 @@ describe('validateCorpus', () => {
     expect(errors).toEqual(['Duplicate slug "x" in blog (en): a.en.md, b.en.md']);
   });
 
+  it('flags one slug shared by two translationKeys in different languages', () => {
+    // An EN-only post and an unrelated PT-only post would both build /blog/x/ and
+    // /pt-br/blog/x/ (one real page, one fallback), so one URL would hold two posts.
+    const { errors } = validateCorpus([
+      post('2026-01-x.en.md', 'en', 'x', 'k1'),
+      post('2026-02-x.pt-br.md', 'pt-br', 'x', 'k2'),
+    ]);
+    expect(errors).toEqual([
+      'Slug "x" in blog belongs to more than one translationKey: 2026-01-x.en.md (k1), 2026-02-x.pt-br.md (k2)',
+    ]);
+  });
+
   it('allows the same slug in different collections', () => {
     const { errors } = validateCorpus([
       post('a.en.md', 'en', 'x', 'k1'),

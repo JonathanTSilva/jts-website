@@ -15,7 +15,7 @@ interface HastParent extends HastNode {
   children: HastNode[];
 }
 
-export const TABLE_SCROLL_CLASS = 'table-scroll';
+const TABLE_SCROLL_CLASS = 'table-scroll';
 
 function isScrollWrapper(node: HastNode | undefined): boolean {
   const className = node?.properties?.className;

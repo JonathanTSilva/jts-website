@@ -112,6 +112,12 @@ export interface SeoProps {
   noindex?: boolean | undefined;
 }
 
+/** Open Graph locale codes (language_TERRITORY). */
+const OG_LOCALE: Record<Locale, string> = {
+  en: 'en_US',
+  'pt-br': 'pt_BR',
+};
+
 interface Alternate {
   locale: string;
   href: string;
@@ -200,7 +206,12 @@ export function generateSeo(props: SeoProps) {
       url: fullCanonical,
       image: shareImage,
       site_name: OG_SITE_NAME,
-      locale: locale === 'pt-br' ? 'pt_BR' : 'en_US',
+      locale: OG_LOCALE[locale],
+      // Other languages this page really exists in; same source as hreflang, so a
+      // fallback page or an untranslated post advertises none.
+      localeAlternates: alternateLocales
+        .filter((alt): alt is Alternate & { locale: Locale } => alt.locale !== locale && alt.locale in OG_LOCALE)
+        .map((alt) => OG_LOCALE[alt.locale]),
     },
     twitter: {
       card: 'summary_large_image',

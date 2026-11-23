@@ -1046,3 +1046,24 @@ Updated 2026-11-22. Every workstream is merged and deployed. A final pass of 41 
 Deviations worth knowing: KaTeX stays on 0.16 (`rehype-katex` renders 0.16 markup); TypeScript stays on 5.x (D3); `image.remotePatterns` is limited to `covers.openlibrary.org` so a dead host cannot fail the deploy; the WebKit project is opt-in (`PLAYWRIGHT_WEBKIT=1`, set in `pipeline.yml`) because the shared e2e workflow installs only Chromium; visual tests store a rejected consent before loading. D5 was refined: `pipeline.yml` lost its PR trigger, and `pr-checks.yml` runs the checks only this repo has (CV PDF, WebKit, internal links, Lighthouse budgets).
 
 Not proven when this was written: the `site-health.yml` schedules and issue handling (never run on GitHub), and Dependabot auto-merge (inert until "Allow auto-merge" is on). Open: three dead links the link check found (`forgenv` and `Dimfot` in `src/content/portfolio/projects.ts`, `exemplo.com` in the vault's `note-cheatsheet.pt-br.md`).
+
+### Final review, 2026-11-23
+
+A full review of `main` at `db4f1fe` (after #127) checked every finding against the code, the built site and the live site.
+
+| Check | Result |
+|---|---|
+| `pnpm run typecheck`, `pnpm lint`, `pnpm deadcode` | 0 errors, 0 warnings, 0 hints |
+| `pnpm test:unit` | 49 files, 525 tests, all pass |
+| `pnpm lint:content`, and with `--vault ~/Projects/jts-brain` | pass |
+| `pnpm build` | 45 pages |
+| `pnpm audit --prod` | 1 low (KaTeX, held on 0.16) |
+| `pnpm outdated` | TypeScript 7 (D3) and KaTeX 0.19 held back; knip patch |
+| E2E | not run locally; the last `main` pipeline run passed the full suite including WebKit |
+| Live site | clean URLs, old-URL redirects, OG images, `security.txt`, manifest and CV answer 200; `/test-fixtures/` answers 404 |
+
+- F01–F30 are fixed, except one item of F19 the plan never scheduled (`og:locale:alternate`).
+- The open points above are closed: `site-health.yml` has run on its schedule and opened and closed an issue (#118); "Allow auto-merge" is on and the `main` ruleset requires `ci`, `unique-checks` and `lighthouse-budgets` (the first Dependabot PR to use auto-merge is still to come); the portfolio links were fixed in #120 and the link-rot job passes.
+- The vault follow-ups from WS15 are done: the `publish` rule lists the book keys, and both vault workflows pin actions by SHA.
+
+New, fixed for issue #132 (`pnpm deadcode` also failed on an export added with the table-scroll fix, #131): one slug shared by two `translationKey`s in different languages built two posts on the same URLs without a validation error; search results were built with `innerHTML`, so a title with `<` or `&` rendered as markup; the comment in `dependabot-auto-merge.yml` described the old ruleset and setting; and the missing `og:locale:alternate`. The leftover `chore-hook` worktree was pruned.

@@ -85,17 +85,32 @@ const t = useTranslations(locale).search;
     ).slice(0, 10);
 
     if (results.length === 0) {
-      resultsContainer.innerHTML = `<p class="no-results">${t.noResults}</p>`;
+      const empty = document.createElement('p');
+      empty.className = 'no-results';
+      empty.textContent = t.noResults;
+      resultsContainer.replaceChildren(empty);
       return;
     }
 
-    resultsContainer.innerHTML = results.map(item => `
-      <a href="${item.url}" class="search-result-item">
-        <span class="result-type">${item.type}</span>
-        <h4 class="result-title">${item.title}</h4>
-        <p class="result-summary">${item.summary}</p>
-      </a>
-    `).join('');
+    // Built with textContent, not innerHTML: a title or summary containing `<` or `&`
+    // must show as text, never be parsed as markup.
+    const el = (tag, className, text) => {
+      const node = document.createElement(tag);
+      node.className = className;
+      node.textContent = text;
+      return node;
+    };
+    resultsContainer.replaceChildren(...results.map(item => {
+      const link = document.createElement('a');
+      link.href = item.url;
+      link.className = 'search-result-item';
+      link.append(
+        el('span', 'result-type', item.type),
+        el('h4', 'result-title', item.title),
+        el('p', 'result-summary', item.summary),
+      );
+      return link;
+    }));
   }
 
   function updateActiveResult() {
