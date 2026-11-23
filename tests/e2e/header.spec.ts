@@ -204,5 +204,24 @@ test.describe('Header', () => {
       if (!ind || !link) return false;
       return ind.style.opacity === '1' && ind.style.left === link.offsetLeft + 'px';
     });
+
+    // Exactly one link is active and it is the PT-BR home link.
+    const activeLink = page.locator('.nav-list a.active');
+    await expect(activeLink).toHaveCount(1);
+    await expect(activeLink).toHaveAttribute('href', /^\/pt-br\/?$/);
+
+    // The indicator sits on that link: same left edge and width.
+    const geometry = await page.evaluate(() => {
+      const ind = document.querySelector('.nav-indicator') as HTMLElement;
+      const link = document.querySelector('.nav-list a.active') as HTMLElement;
+      return {
+        indicatorLeft: ind.style.left,
+        indicatorWidth: ind.style.width,
+        linkLeft: link.offsetLeft + 'px',
+        linkWidth: link.offsetWidth + 'px',
+      };
+    });
+    expect(geometry.indicatorLeft).toBe(geometry.linkLeft);
+    expect(geometry.indicatorWidth).toBe(geometry.linkWidth);
   });
 });

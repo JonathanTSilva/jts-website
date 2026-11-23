@@ -79,6 +79,15 @@ describe('lightenHex', () => {
     expect(lightenHex('#000000', 0.5)).toBe('rgb(128,128,128)');
   });
 
+  it('parses each channel of a 6-digit hex with and without the leading hash', () => {
+    expect(lightenHex('#102030', 0)).toBe('rgb(16,32,48)');
+    expect(lightenHex('ff8000', 0)).toBe('rgb(255,128,0)');
+  });
+
+  it('expands a 3-digit hex per channel', () => {
+    expect(lightenHex('#1a2', 0)).toBe('rgb(17,170,34)');
+  });
+
   it('lightens 3-digit white hex with default amount', () => {
     expect(lightenHex('#fff')).toBe('rgb(255,255,255)');
   });

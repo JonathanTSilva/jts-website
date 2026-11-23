@@ -68,7 +68,9 @@ export function sitemapMeta(
   contentRoot: string,
   siteUrl: string,
 ): { exclude: Set<string>; lastmod: Map<string, string> } {
-  const origin = siteUrl.replace(/\/+$/, '');
+  let origin = siteUrl;
+  // Trim trailing slashes without a backtracking regex.
+  while (origin.endsWith('/')) origin = origin.slice(0, -1);
   const exclude = new Set<string>();
   const lastmod = new Map<string, string>();
 

@@ -23,6 +23,10 @@ describe('formatDate', () => {
     expect(formatDate(new Date('2026-11-19'), 'pt-br')).toBe('19 de novembro de 2026');
   });
 
+  it('defaults to the long style when options are omitted or undefined', () => {
+    expect(formatDate(new Date('2026-11-19'), 'en', undefined)).toBe('November 19, 2026');
+  });
+
   it('accepts custom options and still formats in UTC', () => {
     expect(formatDate(new Date('2026-11-19'), 'en', { dateStyle: 'medium' })).toBe('Nov 19, 2026');
     expect(formatDate(new Date('2026-11-19'), 'en', { month: 'short', day: '2-digit' })).toBe('Nov 19');

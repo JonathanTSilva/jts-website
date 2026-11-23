@@ -255,6 +255,39 @@ describe('remarkObsidianWikilinks resolution', () => {
   });
 });
 
+describe('wikilink syntax matching', () => {
+  it('matches an image embed with a size modifier', () => {
+    const nodes = run('![[pic.png|300x200]]', EN_PAGE);
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0]?.type).toBe('image');
+  });
+
+  it('keeps a non-image embed verbatim', () => {
+    expect(run('![[some-note]]', EN_PAGE)).toEqual([{ type: 'text', value: '![[some-note]]' }]);
+  });
+
+  it('matches several tokens in one text node', () => {
+    const nodes = run('[[low-cost-homelab-setup]] and [[book-cheatsheet]]', EN_PAGE);
+    expect(nodes.map((n) => n.type)).toEqual(['link', 'text', 'link']);
+  });
+
+  it('leaves unterminated brackets as plain text', () => {
+    expect(run('a [[ b', EN_PAGE)).toEqual([{ type: 'text', value: 'a [[ b' }]);
+  });
+
+  it('scans a 10k-character run of opening brackets in under 100 ms', () => {
+    const text = '[['.repeat(5000) + 'x';
+    const start = performance.now();
+    run(text, EN_PAGE);
+    expect(performance.now() - start).toBeLessThan(100);
+  });
+
+  it('still finds a wikilink after a run of stray opening brackets', () => {
+    const nodes = run('[[[[ [[low-cost-homelab-setup]]', EN_PAGE);
+    expect(nodes.map((n) => n.type)).toEqual(['text', 'link']);
+  });
+});
+
 describe('unresolved wikilink reporting', () => {
   it('calls onUnresolved with the target and the file path', () => {
     const calls: Array<[string, string | undefined]> = [];

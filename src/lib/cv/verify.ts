@@ -79,9 +79,20 @@ const expectedLinks = (view: ResolvedCv): ReadonlyArray<Readonly<{ label: string
   ...view.links, ...view.projects.flatMap(project => project.links),
   ...view.publications.flatMap(item => item.url ? [{ label: publicationCitation(item), url: item.url }] : []),
 ];
+// `{{ ... }}` with a non-empty body free of `}`. A scan with a forward-only close pointer keeps this
+// linear; the equivalent regex backtracks quadratically on a long run of `{{`.
+export const hasMustacheTag = (text: string): boolean => {
+  let close = text.indexOf('}');
+  for (let open = text.indexOf('{{'); open !== -1; open = text.indexOf('{{', open + 1)) {
+    if (close !== -1 && close < open + 2) close = text.indexOf('}', open + 2);
+    if (close === -1) return false;
+    if (close > open + 2 && text[close + 1] === '}') return true;
+  }
+  return false;
+};
 export const assertValidExtractedCvText = (text: string): void => {
   assert(text.trim().length > 0, 'PDF must contain selectable text');
-  assert(!/\\csuse|\{\{[^}]+\}\}|<%[=-]?|�/.test(text), 'PDF contains leaked template syntax or replacement glyphs');
+  assert(!/\\csuse|<%[=-]?|�/.test(text) && !hasMustacheTag(text), 'PDF contains leaked template syntax or replacement glyphs');
 };
 
 export const verifyCvPdf = async (bytes: Uint8Array, view: ResolvedCv): Promise<CvPdfVerification> => {

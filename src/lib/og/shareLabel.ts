@@ -44,9 +44,9 @@ export function lightenHex(hex: string, amount = 0.55): string {
       .map((c) => c + c)
       .join('');
   }
-  const r = parseInt(clean.slice(0, 2), 16);
-  const g = parseInt(clean.slice(2, 4), 16);
-  const b = parseInt(clean.slice(4, 6), 16);
+  const r = Number.parseInt(clean.slice(0, 2), 16);
+  const g = Number.parseInt(clean.slice(2, 4), 16);
+  const b = Number.parseInt(clean.slice(4, 6), 16);
 
   const lightenChannel = (v: number) => Math.round(v + (255 - v) * amount);
   return `rgb(${lightenChannel(r)},${lightenChannel(g)},${lightenChannel(b)})`;

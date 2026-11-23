@@ -14,7 +14,9 @@ const INTL_LOCALES: Record<Locale, string> = {
 export function formatDate(
   date: Date,
   locale: Locale,
-  options: Intl.DateTimeFormatOptions = { dateStyle: 'long' },
+  options?: Intl.DateTimeFormatOptions,
 ): string {
-  return new Intl.DateTimeFormat(INTL_LOCALES[locale], { ...options, timeZone: 'UTC' }).format(date);
+  // `undefined` means the long style; an explicit `{}` is kept as the numeric default.
+  const resolved = options ?? { dateStyle: 'long' };
+  return new Intl.DateTimeFormat(INTL_LOCALES[locale], { ...resolved, timeZone: 'UTC' }).format(date);
 }
