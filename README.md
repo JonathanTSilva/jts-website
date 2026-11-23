@@ -9,6 +9,7 @@
 [![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)](https://www.repostatus.org/#active)
 [![CI](https://img.shields.io/github/actions/workflow/status/JonathanTSilva/jts-website/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/JonathanTSilva/jts-website/actions/workflows/ci.yml)
 [![Coverage](https://codecov.io/gh/JonathanTSilva/jts-website/graph/badge.svg)](https://codecov.io/gh/JonathanTSilva/jts-website)
+[![Release](https://img.shields.io/github/v/release/JonathanTSilva/jts-website?style=flat-square)](https://github.com/JonathanTSilva/jts-website/releases)
 [![Quality](https://sonarcloud.io/api/project_badges/measure?project=JonathanTSilva_jts-website&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JonathanTSilva_jts-website)
 [![Scorecard](https://img.shields.io/ossf-scorecard/github.com/JonathanTSilva/jts-website?style=flat-square&label=scorecard)](https://scorecard.dev/viewer/?uri=github.com/JonathanTSilva/jts-website)
 [![License](https://img.shields.io/badge/license-MIT_and_CC_BY_4.0-blue?style=flat-square)](LICENSE)
