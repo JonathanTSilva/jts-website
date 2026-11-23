@@ -1,0 +1,54 @@
+name: Refresh Engineering Snapshot
+
+# /engineering falls back to src/data/engineering-snapshot.json when the live jts-ops
+# dashboard cannot be fetched at build time. This keeps that fallback from going stale.
+on:
+  schedule:
+    - cron: '41 5 * * 1'
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Refresh the snapshot
+        run: pnpm refresh:engineering
+
+      # Opens a PR only when the file changed, and updates the same PR on later runs.
+      # Same token as sync-content.yml: a PR opened with GITHUB_TOKEN would not start the
+      # `ci` check that the main ruleset requires.
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
+        with:
+          token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}
+          add-paths: src/data/engineering-snapshot.json
+          commit-message: "chore: refresh engineering snapshot"
+          title: "chore: refresh engineering snapshot"
+          body: |
+            Refreshes `src/data/engineering-snapshot.json`, the fallback `/engineering` uses when the live jts-ops dashboard cannot be fetched at build time.
+
+            Opened by `.github/workflows/refresh-engineering-snapshot.yml` (weekly).
+          # Fixed and issue-shaped (<type>/<n>-<slug>) so the shared branch-name check passes
+          # and every run updates the same PR.
+          branch: "chore/143-refresh-engineering-snapshot"
+          delete-branch: true

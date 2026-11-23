@@ -32,6 +32,7 @@
     "deadcode": "knip",
     "lint:content": "tsx scripts/validate-content.ts",
     "sync:content": "tsx scripts/sync-content.ts",
+    "refresh:engineering": "tsx scripts/refresh-engineering-snapshot.ts",
     "check": "astro check",
     "typecheck": "astro check"
   },
