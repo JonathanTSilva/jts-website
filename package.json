@@ -65,6 +65,7 @@
     "@vitest/coverage-v8": "5.1.1",
     "eslint": "^10.15.0",
     "eslint-plugin-astro": "^3.2.1",
+    "fast-check": "4.11.0",
     "fs-extra": "^11.4.1",
     "globals": "^17.14.0",
     "knip": "^6.47.0",
