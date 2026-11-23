@@ -34,9 +34,10 @@ export const projects: Project[] = [
     },
     // icon: "🧪",
     tags: ["Python", "Automation", "QEMU", "TUI"],
-    links: [], highlights: [], themes: ['general', 'embedded', 'devops'], priority: 60,
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/qemulab' }],
+    highlights: [], themes: ['general', 'embedded', 'devops'], priority: 60,
     featured: false,
-    status: "Private",
+    status: "Active",
   },
   {
     id: 'project-dlr-supervisor-simulator',
@@ -133,7 +134,7 @@ export const projects: Project[] = [
     tags: ["Python", "Qt"],
     links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/sentminer' }],
     highlights: [], themes: ['general'], priority: 60,
-    status: "In Progress",
+    status: "Archived",
   },
   {
     id: 'project-cloudcavitation',
@@ -183,7 +184,7 @@ export const projects: Project[] = [
     tags: ["LaTeX"],
     links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/JonathanTSilva/template-latex-ifsp' }],
     highlights: [], themes: ['general', 'research'], priority: 60,
-    status: "Active",
+    status: "Archived",
   },
   {
     id: 'project-dimfot',
