@@ -12,6 +12,8 @@ export interface DashboardRepo {
   status: string;
   ci: string | null;
   compliant: boolean;
+  /** Inventory profile; `special` repos (org defaults, profile README) are not listed. */
+  profile: string | null;
 }
 
 interface DashboardSummary {
@@ -63,7 +65,8 @@ export function parseDashboard(input: unknown): Dashboard | null {
       typeof r.archived !== 'boolean' ||
       typeof r.status !== 'string' ||
       typeof r.compliant !== 'boolean' ||
-      !(r.ci === null || typeof r.ci === 'string')
+      !(r.ci === null || typeof r.ci === 'string') ||
+      !(r.profile === undefined || r.profile === null || typeof r.profile === 'string')
     ) {
       return null;
     }
@@ -74,6 +77,7 @@ export function parseDashboard(input: unknown): Dashboard | null {
       status: r.status,
       ci: r.ci,
       compliant: r.compliant,
+      profile: r.profile ?? null,
     });
   }
 
@@ -130,10 +134,10 @@ export function getDashboard(): Promise<LoadedDashboard> {
   return cached;
 }
 
-/** Public, non-archived repos: the only ones that get a row and badges. */
+/** Public, non-archived, non-special repos: the only ones that get a row and badges. */
 export function listedRepos(data: Dashboard): DashboardRepo[] {
   return data.repos
-    .filter((r) => r.visibility === 'public' && !r.archived)
+    .filter((r) => r.visibility === 'public' && !r.archived && r.profile !== 'special')
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
