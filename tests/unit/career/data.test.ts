@@ -75,14 +75,22 @@ describe('canonical career data', () => {
 
   it('preserves project count and important links and facts', () => {
     expect(career.projects).toHaveLength(13);
-    expect(career.projects.find(project => project.title.en === 'Forgenv')?.links.find(link => link.kind === 'github')?.url)
-      .toBe('https://github.com/JonathanTSilva/forgenv');
+    expect(career.projects.find(project => project.title.en === 'Dimfot')?.links.find(link => link.kind === 'github')?.url)
+      .toBe('https://github.com/JonathanTSilva/course-dimfot-android');
     const sizer = career.projects.find(project => project.title.en === 'Sizer');
     expect(sizer).toMatchObject({ image: '/assets/images/projects/sizer.png', status: 'Archived' });
     expect(sizer?.legacyLinks).toBeUndefined();
     expect(career.projects.find(project => project.title.en === 'Forgenv')).toMatchObject({
-      featured: true, status: 'In Progress',
+      featured: true, status: 'Private', links: [],
     });
+  });
+
+  it('gives private projects no GitHub link, since visitors would get a 404', () => {
+    const privateProjects = career.projects.filter(project => project.status === 'Private');
+    expect(privateProjects.length).toBeGreaterThan(0);
+    for (const project of privateProjects) {
+      expect(project.links.filter(link => link.kind === 'github'), project.title.en).toEqual([]);
+    }
   });
 
   it('preserves publication count, titles, and links', () => {
