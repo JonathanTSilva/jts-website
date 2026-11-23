@@ -84,7 +84,7 @@
   "pnpm": {
     "overrides": {
       "fflate@>=0.7.0 <0.7.5": "0.7.5",
-      "katex": "0.19.1"
+      "katex": "$katex"
     }
   }
 }
