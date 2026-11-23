@@ -38,6 +38,9 @@ describe('loadDashboard', () => {
   beforeEach(() => {
     warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    // CI sets GITHUB_ACTIONS=true, which routes the warning to console.log; tests that
+    // want the Actions branch stub it back on.
+    vi.stubEnv('GITHUB_ACTIONS', '');
   });
 
   afterEach(() => {
