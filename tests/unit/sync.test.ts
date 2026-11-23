@@ -112,6 +112,124 @@ describe('syncContent script', () => {
   });
 });
 
+describe('mass deletion guard', () => {
+  const blogSrc = path.join(SOURCE_DIR, '08-Publish/Blog');
+  const blogDest = path.join(DEST_DIR, 'blog');
+  const post = (title: string) => `---\ntitle: "${title}"\n---\n\nBody of ${title}\n`;
+
+  /** Puts `count` posts in both the vault and the site, so the run starts in sync. */
+  function seed(count: number) {
+    fs.ensureDirSync(blogSrc);
+    fs.ensureDirSync(blogDest);
+    for (let i = 1; i <= count; i++) {
+      fs.writeFileSync(path.join(blogSrc, `p${i}.md`), post(`Post ${i}`));
+      fs.writeFileSync(path.join(blogDest, `p${i}.md`), post(`Post ${i}`));
+    }
+  }
+  const removeFromVault = (...names: string[]) =>
+    names.forEach(n => fs.removeSync(path.join(blogSrc, n)));
+
+  beforeEach(() => fs.ensureDirSync(SOURCE_DIR));
+  afterEach(() => fs.removeSync(TEST_ROOT));
+
+  it('applies a small deletion (one post in both languages)', async () => {
+    seed(8);
+    removeFromVault('p1.md', 'p2.md');
+    const summary = await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
+    expect(fs.existsSync(path.join(blogDest, 'p1.md'))).toBe(false);
+    expect(summary.removed.map(r => r.file)).toEqual(['blog/p1.md', 'blog/p2.md']);
+    expect(summary.removed[0]?.title).toBe('Post 1');
+  });
+
+  it('blocks more than MAX_DELETIONS files and changes nothing', async () => {
+    seed(20);
+    removeFromVault('p1.md', 'p2.md', 'p3.md', 'p4.md');
+    fs.writeFileSync(path.join(blogSrc, 'p5.md'), post('Edited')); // must not be applied either
+    await expect(syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR)).rejects.toThrow(/Mass deletion blocked/);
+    expect(fs.readdirSync(blogDest)).toHaveLength(20);
+    expect(fs.readFileSync(path.join(blogDest, 'p5.md'), 'utf8')).toBe(post('Post 5'));
+  });
+
+  it('blocks an emptied folder', async () => {
+    seed(8);
+    removeFromVault(...fs.readdirSync(blogSrc));
+    await expect(syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR)).rejects.toThrow(/8 files would be removed/);
+    expect(fs.readdirSync(blogDest)).toHaveLength(8);
+  });
+
+  it('blocks more than MAX_DELETION_RATIO of a folder', async () => {
+    seed(8);
+    removeFromVault('p1.md', 'p2.md', 'p3.md'); // 3 of 8 = 37.5%, under the count limit
+    await expect(syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR)).rejects.toThrow(/blog: 3 of 8 files/);
+  });
+
+  it('lets a small folder lose its only post', async () => {
+    seed(2);
+    removeFromVault('p1.md', 'p2.md');
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
+    expect(fs.readdirSync(blogDest)).toHaveLength(0);
+  });
+
+  it('applies a mass deletion when allowMassDelete is set', async () => {
+    seed(8);
+    removeFromVault(...fs.readdirSync(blogSrc));
+    await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR, { allowMassDelete: true });
+    expect(fs.readdirSync(blogDest)).toHaveLength(0);
+  });
+
+  it('never deletes anything when the vault folder is missing', async () => {
+    seed(8);
+    fs.removeSync(blogSrc);
+    const summary = await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
+    expect(fs.readdirSync(blogDest)).toHaveLength(8);
+    expect(summary.removed).toEqual([]);
+  });
+});
+
+describe('sync summary', () => {
+  afterEach(() => fs.removeSync(TEST_ROOT));
+
+  it('classifies added, changed and unchanged files and reads titles', async () => {
+    const blogSrc = path.join(SOURCE_DIR, '08-Publish/Blog');
+    const blogDest = path.join(DEST_DIR, 'blog');
+    fs.ensureDirSync(blogSrc);
+    fs.ensureDirSync(blogDest);
+    fs.writeFileSync(path.join(blogSrc, 'same.md'), 'same');
+    fs.writeFileSync(path.join(blogDest, 'same.md'), 'same');
+    fs.writeFileSync(path.join(blogSrc, 'edit.md'), '---\ntitle: Edited one\n---\nnew');
+    fs.writeFileSync(path.join(blogDest, 'edit.md'), '---\ntitle: Edited one\n---\nold');
+    fs.writeFileSync(path.join(blogSrc, 'new.md'), "---\ntitle: 'Brand new'\n---\n");
+    fs.writeFileSync(path.join(SOURCE_DIR, '08-Publish/Now.pt-br.md'), 'agora');
+
+    const summary = await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
+    expect(summary.added).toEqual([
+      { file: 'blog/new.md', title: 'Brand new' },
+      { file: 'now/index.pt-br.md', title: undefined },
+    ]);
+    expect(summary.changed).toEqual([{ file: 'blog/edit.md', title: 'Edited one' }]);
+    expect(summary.removed).toEqual([]);
+
+    const again = await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
+    expect([...again.added, ...again.changed, ...again.removed]).toEqual([]);
+  });
+
+  it('reports images added, updated and pruned', async () => {
+    const att = path.join(SOURCE_DIR, '99-Meta/Attachments');
+    const blogSrc = path.join(SOURCE_DIR, '08-Publish/Blog');
+    fs.ensureDirSync(att);
+    fs.ensureDirSync(blogSrc);
+    fs.ensureDirSync(UPLOADS_DIR);
+    fs.writeFileSync(path.join(att, 'new.svg'), '<svg/>');
+    fs.writeFileSync(path.join(att, 'old.svg'), '<svg id="v2"/>');
+    fs.writeFileSync(path.join(UPLOADS_DIR, 'old.svg'), '<svg id="v1"/>');
+    fs.writeFileSync(path.join(UPLOADS_DIR, 'gone.svg'), '<svg/>');
+    fs.writeFileSync(path.join(blogSrc, 'p.md'), '![[new.svg]] ![[old.svg]]');
+
+    const summary = await syncContent(SOURCE_DIR, DEST_DIR, UPLOADS_DIR);
+    expect(summary.images).toEqual({ added: ['new.svg'], updated: ['old.svg'], removed: ['gone.svg'] });
+  });
+});
+
 const sha = (file: string) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 
 async function makeJpeg(file: string, width: number, height: number, withExif = true) {
@@ -157,7 +275,7 @@ describe('image sync', () => {
   it('copyReferencedImages reports copied and missing files', async () => {
     await makeJpeg(path.join(ATTACH, 'a.jpg'), 100, 50);
     const result = await copyReferencedImages(ATTACH, new Set(['a.jpg', 'b.png']), UPLOADS_DIR);
-    expect(result).toEqual({ copied: ['a.jpg'], missing: ['b.png'] });
+    expect(result).toEqual({ copied: ['a.jpg'], missing: ['b.png'], added: ['a.jpg'], updated: [] });
     expect(fs.existsSync(path.join(UPLOADS_DIR, 'a.jpg'))).toBe(true);
   });
 

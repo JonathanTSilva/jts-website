@@ -2,6 +2,11 @@ name: Sync Content
 
 on:
   workflow_dispatch:
+    inputs:
+      allow_mass_delete:
+        description: "Allow this run to remove more than 3 files, or more than 25% of a folder (use only for an intended mass deletion)"
+        type: boolean
+        default: false
   repository_dispatch:
     types: [ sync_content ]
 
@@ -43,11 +48,25 @@ jobs:
         working-directory: website-repo
         env:
           SYNC_SOURCE_DIR: ${{ github.workspace }}/content-repo
+          # Outside the website checkout, so the summary never lands in the PR.
+          SYNC_SUMMARY_PATH: ${{ runner.temp }}/sync-summary.json
+          # Only a manual run can set this; repository_dispatch runs always keep the guard.
+          SYNC_ALLOW_MASS_DELETE: ${{ github.event_name == 'workflow_dispatch' && inputs.allow_mass_delete }}
         run: pnpm sync:content
 
       - name: Validate Content
         working-directory: website-repo
         run: pnpm lint:content
+
+      - name: Describe the sync PR
+        id: message
+        working-directory: website-repo
+        env:
+          SYNC_SUMMARY_PATH: ${{ runner.temp }}/sync-summary.json
+          VAULT_REPO: JonathanTSilva/jts-brain
+          SYNC_TRIGGER: ${{ github.event_name }}
+        run: |
+          VAULT_SHA="$(git -C ../content-repo rev-parse HEAD)" pnpm exec tsx scripts/sync-pr-message.ts
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
@@ -55,8 +74,8 @@ jobs:
           path: website-repo
           token: ${{ secrets.OBSIDIAN_SYNC_TOKEN }}
           commit-message: "chore: sync content from vault"
-          title: "chore: sync content from vault"
-          body: "This PR was automatically created to sync content from the private vault."
+          title: ${{ steps.message.outputs.title }}
+          body: ${{ steps.message.outputs.body }}
           # Fixed and issue-shaped (<type>/<n>-<slug>) so the shared branch-name check passes
           # and every run updates the same PR.
           branch: "chore/1-sync-content"

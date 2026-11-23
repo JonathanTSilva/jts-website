@@ -27,7 +27,7 @@ jts-brain (private repo)
        │  Copies only referenced images from 99-Meta/Attachments/ (re-encoded, see below)
        │
        ▼
-  Creates or updates the Pull Request "chore: sync content from vault" (branch chore/1-sync-content)
+  Creates or updates the Pull Request "chore: sync content from vault (…)" (branch chore/1-sync-content)
        │
        ▼  (PR merged → triggers pipeline.yml)
   pnpm build
@@ -86,6 +86,15 @@ Only `08-Publish/` and the referenced files from `99-Meta/Attachments/` are ever
 | `08-Publish/Now.pt-br.md` | `src/content/now/index.pt-br.md` |
 
 Files are overwritten on every sync. Files that exist in the destination but were removed from the vault are deleted — it is a true mirror.
+
+**Mass deletion guard.** The script works out every addition, change and removal before it touches a file. It fails, changing nothing, when one run would remove:
+
+- more than **3** markdown files in total (one post in both languages is 2), or
+- more than **25%** of the files in one folder. Removing up to 2 files from a folder is always allowed, so a small folder can still lose its one post.
+
+The error and the run summary list every file that would have been removed. If the deletion is intended, run **Sync Content** by hand (Actions → Sync Content → Run workflow) with **allow_mass_delete** checked, or locally `SYNC_ALLOW_MASS_DELETE=true pnpm sync:content`. Only a manual run can set the override; a sync started by the vault always keeps the guard. A vault folder that is missing entirely (`08-Publish/Blog` deleted, not emptied) is skipped and nothing in it is removed.
+
+The limits are `MAX_DELETIONS`, `MAX_DELETION_RATIO` and `ALWAYS_ALLOWED_DELETIONS` in `scripts/sync-content.ts`.
 
 **Step 2 — Find referenced images**
 
@@ -255,9 +264,12 @@ Triggers on any push to `main` that touches `08-Publish/**`. Sends a `repository
 ### jts-website: `.github/workflows/sync-content.yml`
 
 1. Checks out both repos
-2. Runs `pnpm sync:content` (mirrors markdown, copies referenced images, fails on a missing image)
+2. Runs `pnpm sync:content` (mirrors markdown, copies referenced images, fails on a missing image or a mass deletion) and writes a summary of what changed
 3. Runs `pnpm lint:content` (validates frontmatter schemas)
-4. Creates or updates the PR from branch `chore/1-sync-content` with all changes; a human merges it
+4. Runs `scripts/sync-pr-message.ts`, which turns the summary into the PR title and body
+5. Creates or updates the PR from branch `chore/1-sync-content` with all changes; a human merges it
+
+The PR title states the counts, for example `chore: sync content from vault (1 added, 2 changed, 1 removed)`. The body links the vault commit, lists the removed, added and changed files with their titles, lists the images added, updated and pruned, and opens with a warning block whenever the PR removes content. Each sync rebuilds the branch from `main`, so the lists always describe the whole PR.
 
 ### jts-website: `.github/workflows/pipeline.yml`
 
@@ -313,6 +325,9 @@ The file was not copied to `public/assets/uploads/`. Check the sync output for t
 
 **Sync Content failed with `Missing images referenced in content: …`**
 The listed filenames are embedded (`![[name.png]]`) in a file under `08-Publish/` but are not in `99-Meta/Attachments/`. Fix the filename in the markdown (typo, or a path prefix instead of the bare name), or add the file to the attachments folder, then push again. Nothing was written to `public/assets/uploads/` beyond the images processed before the failure, and no uploads were pruned.
+
+**Sync Content failed with `Mass deletion blocked, nothing was changed.`**
+The vault now has far fewer files in `08-Publish/Blog` or `Notes` than the site (see the guard above). The run summary lists the files. If the deletion was an accident, restore the files in the vault (Obsidian's `.trash`, the vault's git history, or the CT 103 backups) and let the next checkpoint sync again. If it was intended, run Sync Content by hand with **allow_mass_delete** checked.
 
 **Build error about missing slug**
 The markdown file is missing required frontmatter. See `docs/content-contracts/` for the required fields per content type.
