@@ -6,6 +6,8 @@
     const getVar = (name: string) => styles.getPropertyValue(name).trim();
 
     return {
+      // Mermaid derives colors it is not given; tell it which theme those derivations target.
+      darkMode: root.dataset.theme === 'dark',
       background: getVar('--bg'),
       primaryColor: getVar('--surface-high'),
       primaryTextColor: getVar('--text'),
@@ -18,6 +20,10 @@
       clusterBkg: getVar('--surface-high'),
       clusterBorder: getVar('--border'),
       defaultLinkColor: getVar('--text-muted'),
+      // Zebra rows of ER diagram attributes. Left unset, the base theme derives a near-white rowOdd
+      // even in the dark theme, which makes the white attribute text unreadable.
+      rowOdd: getVar('--surface'),
+      rowEven: getVar('--surface-high'),
       fontFamily: getVar('--font-sans') || 'sans-serif',
     };
   }
