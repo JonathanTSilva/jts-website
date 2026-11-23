@@ -42,13 +42,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
-      - name: Install Playwright Browsers
-        run: pnpm test:e2e:install
+      # OS packages for Chromium and WebKit plus Poppler, in one apt run. Each apt
+      # attempt has its own time limit and a retry moves to another Ubuntu mirror,
+      # so a slow mirror fails this step instead of the whole job (issue #154).
+      - name: Install system packages (Playwright deps, Poppler)
+        timeout-minutes: 12
+        run: scripts/install-ci-system-deps.sh poppler-utils
 
-      - name: Install Poppler
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y poppler-utils
+      # Only the browsers the Playwright projects use (no Firefox).
+      - name: Install Playwright browsers
+        timeout-minutes: 5
+        run: pnpm exec playwright install chromium webkit
         
       - name: Check Astro
         run: pnpm check

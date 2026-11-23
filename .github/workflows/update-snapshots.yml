@@ -31,8 +31,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Browsers
-        run: pnpm test:e2e:install
+      # Same install as pipeline.yml (issue #154), without Poppler.
+      - name: Install system packages (Playwright deps)
+        timeout-minutes: 12
+        run: scripts/install-ci-system-deps.sh
+
+      - name: Install Playwright browsers
+        timeout-minutes: 5
+        run: pnpm exec playwright install chromium webkit
 
       - name: Build
         run: pnpm build
