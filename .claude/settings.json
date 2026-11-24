@@ -1,22 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git status)",
-      "Bash(git diff)",
-      "Bash(git diff --stat)",
-      "Bash(git diff --staged)",
-      "Bash(git log --oneline -20)",
-      "Bash(pnpm install*)",
+      "Bash(pnpm install --frozen-lockfile)",
       "Bash(pnpm test*)",
       "Bash(pnpm run test*)",
       "Bash(pnpm lint*)",
       "Bash(pnpm run lint*)",
       "Bash(pnpm typecheck*)",
       "Bash(pnpm run typecheck*)",
-      "Bash(pre-commit run --all-files)"
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git diff --stat)",
+      "Bash(git diff --staged)",
+      "Bash(git log --oneline -20)"
     ],
     "deny": [
       "Read(./.env*)",
+      "Edit(/.git/**)",
       "Bash(git push --force*)",
       "Bash(git push -f*)",
       "Bash(git diff*--output*)",
