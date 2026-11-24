@@ -35,6 +35,8 @@ Or open the repository in a dev container or GitHub Codespaces, which runs the s
 | Type check | `pnpm run typecheck` (same as `pnpm check`) |
 | Content validation | `pnpm lint:content` |
 
+Run `pre-commit run --all-files` before you commit. In Claude Code it always asks for approval, because hooks run any command `.pre-commit-config.yaml` lists. For the same reason, never change `.pre-commit-config.yaml` without saying so in the pull request.
+
 CI runs the same checks through the shared workflows in [`.github`](https://github.com/JonathanTSilva/.github); their single result is the `ci` check. Pull requests are also gated by `pr-checks.yml` (CV PDF checks, WebKit smoke test, internal link check, Lighthouse budgets), whose `unique-checks` and `lighthouse-budgets` jobs the `main` ruleset requires too. `pipeline.yml` builds, tests and deploys the site from `main` (also nightly and by hand), next to `sync-content.yml`, `update-snapshots.yml`, `site-health.yml` and `dependabot-auto-merge.yml`. See `docs/site-operations/obsidian-pipeline.md`.
 
 ## Conventions
