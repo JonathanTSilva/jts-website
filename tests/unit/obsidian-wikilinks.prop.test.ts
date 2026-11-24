@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -52,7 +52,7 @@ describe('remarkObsidianWikilinks properties', () => {
   it('never throws on arbitrary text', () => {
     fc.assert(
       fc.property(anyText, text => {
-        run(text);
+        expect(() => run(text)).not.toThrow();
       }),
     );
   });
@@ -61,7 +61,7 @@ describe('remarkObsidianWikilinks properties', () => {
     fc.assert(
       fc.property(anyText, text => {
         const produced = run(text).filter(n => n.type === 'link' || n.type === 'image').length;
-        return produced <= countOpeners(text);
+        expect(produced).toBeLessThanOrEqual(countOpeners(text));
       }),
     );
   });
@@ -72,7 +72,8 @@ describe('remarkObsidianWikilinks properties', () => {
         anyText.filter(text => !text.includes('[[')),
         text => {
           const nodes: RootContent[] = run(text);
-          return nodes.length === 1 && nodes[0]?.type === 'text' && (nodes[0] as { value: string }).value === text;
+          expect(nodes).toHaveLength(1);
+          expect(nodes[0]).toMatchObject({ type: 'text', value: text });
         },
       ),
     );
