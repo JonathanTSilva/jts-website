@@ -284,8 +284,9 @@ describe('schema generation', () => {
     expect(schema.sameAs).toContain(
       career.person.links.find((link) => link.kind === 'linkedin')?.url,
     );
-    expect(schema.sameAs.some((u: string) => u.includes('linkedin.com'))).toBe(true);
-    expect(schema.sameAs.some((u: string) => u.includes('github.com'))).toBe(true);
+    const hosts = schema.sameAs.map((u: string) => new URL(u).hostname.replace(/^www\./, ''));
+    expect(hosts).toContain('linkedin.com');
+    expect(hosts).toContain('github.com');
   });
 
   it('generateWebSiteSchema returns a valid WebSite JSON-LD object', () => {
