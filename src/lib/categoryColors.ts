@@ -6,6 +6,7 @@ export const categoryColors: Record<string, string> = {
   'Life': '#1e3a8a',
   'Engineering': '#064e3b',
   'Real-Time Systems': '#78350f',
+  'Linux': '#1793d1',
   'default': '#1e3a8a'
 };
 

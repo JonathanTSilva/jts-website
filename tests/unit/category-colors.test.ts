@@ -22,6 +22,10 @@ describe('getCategoryColor', () => {
     expect(getCategoryColor('Engineering')).toBe('#064e3b');
   });
 
+  it('returns mapped color for Linux', () => {
+    expect(getCategoryColor('Linux')).toBe('#1793d1');
+  });
+
   it('returns default color for unknown category', () => {
     expect(getCategoryColor('Nonexistent Category')).toBe(categoryColors.default);
   });
