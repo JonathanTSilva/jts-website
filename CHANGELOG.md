@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/JonathanTSilva/jts-website/compare/v1.1.0...v1.2.0) (2026-11-25)
+
+
+### Features
+
+* add a color for the Linux category ([#180](https://github.com/JonathanTSilva/jts-website/issues/180)) ([ae096b3](https://github.com/JonathanTSilva/jts-website/commit/ae096b3b278dd5d0bf372f8f56ba158c93277218)), closes [#179](https://github.com/JonathanTSilva/jts-website/issues/179)
+
+
+### Bug Fixes
+
+* **ci:** use [[ ]] tests in install-ci-system-deps.sh ([#167](https://github.com/JonathanTSilva/jts-website/issues/167)) ([f99dbcd](https://github.com/JonathanTSilva/jts-website/commit/f99dbcdde73899ebc4df296f14b683a5c60c8012)), closes [#166](https://github.com/JonathanTSilva/jts-website/issues/166)
+
 ## [1.1.0](https://github.com/JonathanTSilva/jts-website/compare/v1.0.0...v1.1.0) (2026-11-23)
 
 
