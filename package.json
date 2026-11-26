@@ -52,7 +52,7 @@
     "mermaid": "^12.3.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "unist-util-visit": "^5.2.0",
     "zod": "^4.6.7"
   },
