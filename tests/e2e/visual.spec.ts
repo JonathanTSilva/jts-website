@@ -21,7 +21,9 @@ test.describe('Visual Regressions', () => {
   });
 
   test('footer branding visual', async ({ page }) => {
-    await page.goto('/');
+    // A static page: on the homepage the recent-posts list shifts the footer's
+    // sub-pixel position with every content sync, changing its height by 1px.
+    await page.goto('/privacy');
     // Scroll to bottom to ensure footer is in view
     const footer = page.locator('.site-footer');
     await footer.scrollIntoViewIfNeeded();
