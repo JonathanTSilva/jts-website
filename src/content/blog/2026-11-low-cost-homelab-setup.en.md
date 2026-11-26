@@ -45,7 +45,7 @@ flowchart TB
 Each machine has one main role. Home Assistant is designed not to depend on Proxmox or the NAS. Jellyfin, on the Dell, depends on the NAS to read the courses. I manage everything from my workstation or my phone.
 
 >[!note] About my workstation
->On the workstation I use [Omarchy](https://omarchy.org/), an Arch Linux setup built on Hyprland. I will soon write a post about my relationship with Linux and the operating systems I have used.
+>On the workstation I use [Omarchy](https://omarchy.org/), a distribution based on Arch Linux with Hyprland. I wrote about how I got there in [[2026-11-linux-desktop-journey.en|From Windows to Omarchy: my history with Linux on the desktop]].
 
 ## What runs on each machine
 
