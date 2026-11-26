@@ -45,7 +45,7 @@ flowchart TB
 Cada máquina tem uma função principal. O Home Assistant foi pensado pra não depender do Proxmox nem do NAS. O Jellyfin, no Dell, depende do NAS pra ler os cursos. Eu administro tudo do meu PC/smartphone.
 
 >[!note] Sobre o meu PC
->No PC eu uso o [Omarchy](https://omarchy.org/), uma configuração do Arch Linux com Hyprland. Em breve escrevo um post contando mais sobre a minha relação com o Linux e com os sistemas operacionais que já usei.
+>No PC eu uso o [Omarchy](https://omarchy.org/), uma distribuição baseada no Arch Linux com Hyprland. Contei como cheguei nele em [[2026-11-linux-desktop-journey.pt-br|Do Windows ao Omarchy: minha relação com o Linux no desktop]].
 
 ## O que roda em cada máquina
 
