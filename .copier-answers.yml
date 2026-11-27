@@ -2,7 +2,7 @@
 _commit: v1.6.0
 _src_path: gh:JonathanTSilva/template-repo
 bench: false
-bestpractices_id: 0
+bestpractices_id: 17178
 description: 🧠 Personal bilingual website built with Astro and deployed to GitHub
     Pages
 e2e: true
